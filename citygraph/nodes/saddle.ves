@@ -1,0 +1,32 @@
+import "blueprint.node" for Node
+import "blueprint.node_function" for NodeFunction
+
+var CODE = "
+
+vec4 saddle(vec2 st, vec2 pos)
+{
+	float dx = st.x - pos.x;
+	float dy = st.y - pos.y;
+	float r = pow(dx * dx + dy * dy, 1.5);
+
+	vec4 tensor;
+	tensor.x = dx * dx - dy * dy;
+	tensor.y = -2 * dx * dy;
+	tensor.z = tensor.y;
+	tensor.w = -tensor.x;
+
+	return tensor / r;
+}
+
+"
+class Saddle is Node
+{
+	init() 
+	{
+		super.init()
+	
+		this.layout()
+
+		this.node_func = NodeFunction(this, "compute", CODE, "glsl", "saddle", [])
+	}
+}

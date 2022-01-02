@@ -1,0 +1,28 @@
+import "blueprint.node" for Node
+import "blueprint.node_function" for NodeFunction
+
+var CODE = "
+
+vec4 wedge(vec2 uv, vec2 pos)
+{
+	float dx = uv.x - pos.x;
+	float dy = uv.y - pos.y;
+	float r = dx * dx + dy * dy; 
+
+	vec4 tensor = vec4(dx, dy, dy, -dx);
+
+	return tensor / r;
+}
+
+"
+class Wedge is Node
+{
+	init() 
+	{
+		super.init()
+	
+		this.layout()
+
+		this.node_func = NodeFunction(this, "compute", CODE, "glsl", "wedge", [])
+	}
+}

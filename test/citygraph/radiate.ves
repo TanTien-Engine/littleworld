@@ -1,0 +1,53 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -451.85657114738, 275.70897989861)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/gen_tensor_field.ves")
+
+_editor.add_node(node1, -102.24823175604, 243.26904391315)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "../../../tantien/assets/blueprints/rendergraph/draw_tex_quad.ves")
+
+_editor.add_node(node2, 469.25582379854, 264.01901204206)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../assets/blueprints/tensor_transform.ves")
+
+_editor.add_node(node3, 175.78515877211, 254.07717921875)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.init_texture("../../assets/textures/ibfv/grid_big.png")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -59.770947084543, 58.884514051812)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.init_texture("../../assets/textures/ibfv/WhiteNoiseDithering.png")
+node5.set_sampler("nearest_repeat")
+
+_editor.add_node(node5, -272.13834111664, 57.456940301756)
+
+var node6 = ::blueprint::nodes::number2::Number2()
+
+node6.value.set(0.19791598618031, 0.5)
+
+_editor.add_node(node6, -448.81244245411, 207.4624539783)
+
+var node7 = ::citygraph::nodes::radiate::Radiate()
+
+_editor.add_node(node7, -304.85363391215, 250.01653018668)
+
+Blueprint.connect(node0, "uv", node7, "st")
+Blueprint.connect(node6, "v2", node7, "pos")
+Blueprint.connect(node7, "ret", node1, "tensor")
+Blueprint.connect(node1, "next", node3, "prev")
+Blueprint.connect(node5, "tex", node3, "base_texture")
+Blueprint.connect(node1, "tensor_field", node3, "tensor_field")
+Blueprint.connect(node3, "next", node2, "prev")
+Blueprint.connect(node3, "tex", node2, "texture1")

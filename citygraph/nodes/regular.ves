@@ -1,0 +1,36 @@
+import "blueprint.node" for Node
+import "blueprint.node_function" for NodeFunction
+
+var CODE = "
+
+vec4 regular(vec2 st, vec2 pos, float angle)
+{
+	float dx = st.x - pos.x;
+	float dy = st.y - pos.y;
+	float r = dx * dx + dy * dy;
+	r = r * sqrt(r);
+
+	float c = cos(angle * 2);
+	float s = sin(angle * 2);
+
+	vec4 tensor;
+	tensor.x = c;
+	tensor.y = s;
+	tensor.z = s;
+	tensor.w = -c;
+
+	return tensor / r;
+}
+
+"
+class Regular is Node
+{
+	init() 
+	{
+		super.init()
+	
+		this.layout()
+
+		this.node_func = NodeFunction(this, "compute", CODE, "glsl", "regular", [])
+	}
+}

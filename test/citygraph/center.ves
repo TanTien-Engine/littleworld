@@ -1,0 +1,71 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -577.25101141785, 223.94339011649)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/gen_tensor_field.ves")
+
+_editor.add_node(node1, -102.24823175604, 243.26904391315)
+
+var node2 = ::citygraph::nodes::center::Center()
+
+_editor.add_node(node2, -430.8020641638, 276.53433753366)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../tantien/assets/blueprints/rendergraph/draw_tex_quad.ves")
+
+_editor.add_node(node3, 469.25582379854, 264.01901204206)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../assets/blueprints/tensor_transform.ves")
+
+_editor.add_node(node4, 175.78515877211, 254.07717921875)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.init_texture("../../assets/textures/ibfv/grid_big.png")
+node5.set_sampler("linear_repeat")
+
+_editor.add_node(node5, -59.770947084543, 58.884514051812)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "u_tex"
+node6.gamma_correction = false
+node6.init_texture("../../assets/textures/ibfv/WhiteNoiseDithering.png")
+node6.set_sampler("nearest_repeat")
+
+_editor.add_node(node6, -272.13834111664, 57.456940301756)
+
+var node7 = ::blueprint::nodes::number2::Number2()
+
+node7.value.set(0.29345974326134, 0.49991998076439)
+
+_editor.add_node(node7, -580.89358445261, 297.99588748694)
+
+var node8 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node8, -291.2398988708, 244.37940764624)
+
+var node9 = ::citygraph::nodes::center::Center()
+
+_editor.add_node(node9, -434.91337821338, 204.5306846411)
+
+var node10 = ::blueprint::nodes::number2::Number2()
+
+node10.value.set(0.92880111932755, 0.49923297762871)
+
+_editor.add_node(node10, -577.24498941129, 154.0914081481)
+
+Blueprint.connect(node0, "uv", node9, "st")
+Blueprint.connect(node10, "v2", node9, "pos")
+Blueprint.connect(node0, "uv", node2, "st")
+Blueprint.connect(node7, "v2", node2, "pos")
+Blueprint.connect(node2, "ret", node8, "a")
+Blueprint.connect(node9, "ret", node8, "b")
+Blueprint.connect(node8, "v", node1, "tensor")
+Blueprint.connect(node1, "next", node4, "prev")
+Blueprint.connect(node6, "tex", node4, "base_texture")
+Blueprint.connect(node1, "tensor_field", node4, "tensor_field")
+Blueprint.connect(node4, "next", node3, "prev")
+Blueprint.connect(node4, "tex", node3, "texture1")
