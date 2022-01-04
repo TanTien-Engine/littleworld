@@ -1,0 +1,179 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant
+import "blueprint.input_proxy" for InputProxy
+import "rendergraph.variant" for VAR_TYPE_TEXTURE, VarTexture
+import "rendergraph.nodes.shader" for Shader
+import "rendergraph.nodes.compute" for Compute
+import "rendergraph.drawlist" for Drawlist
+import "image" for ImageData
+import "render" for Texture2D, Render, ComputeBuffer
+import "random" for Random
+
+var TENSOR_FIELD_SIZE = 1024
+
+var DARWLIST = nil
+var SHADER   = nil
+var COMPUTE  = nil
+
+var CS = "
+#version 430
+
+layout(std430, binding=0) coherent buffer HeightfieldDataFloat { float heights[]; };
+layout(std430, binding=1) buffer RandomIndicesInt { int random_indices[]; };
+
+uniform sampler2D tf_tex;
+
+#define LOCAL_SIZE 16
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = 1, local_size_z = 1) in;
+
+vec2 calc_dir(vec2 pos)
+{
+	vec4 t = texture(tf_tex, pos);
+    float theta = atan(t.y, t.x) / 2;
+    return vec2(cos(theta), sin(theta));
+}
+
+void main()
+{
+	int map_size = 1024;
+
+    int index = random_indices[gl_GlobalInvocationID.x];
+    float pos_x = float(index \% map_size);
+    float pos_y = float(index / map_size);
+
+    int node_x = int(pos_x);
+    int node_y = int(pos_y);
+    int droplet_index = node_y * map_size + node_x;
+
+    vec2 uv = vec2(pos_x / map_size, pos_y / map_size);
+	vec2 pos = uv;
+	for (int i = 0; i < 1024 * 2; ++i)
+	{
+		int x = int(pos.x * map_size);
+		int y = int(pos.y * map_size);
+		heights[y * map_size + x] = 65535;
+
+		vec2 dir = calc_dir(pos);
+		pos += dir / map_size;
+	}
+}
+"
+
+class Streamlines is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "tf", VAR_TYPE_TEXTURE)
+		]
+		this.exports = [
+			Pin(this, "out", VAR_TYPE_TEXTURE)
+		]
+
+		this.layout()
+
+		this.iter = 1024
+
+		this.streamlines_buf = nil
+		this.streamlines_tex = nil
+
+		this.random = Random.init(12345)
+	}
+
+	calc_value(idx)
+	{
+		var ret = VarTexture()
+		ret.tex = this.streamlines_tex
+		return Variant(VAR_TYPE_TEXTURE, ret)
+	}
+
+	render_gen()
+	{
+		this.need_rebuild = true
+
+		if (SHADER) {
+			SHADER.render_gen()
+		}
+		if (COMPUTE) {
+			COMPUTE.render_gen()
+		}
+	}
+	
+	render_run()
+	{
+		if (!DARWLIST) 
+		{
+			var shader = Shader()
+			shader.cs = CS
+			shader.render_gen()
+
+			var compute = Compute()
+			Blueprint.connect(shader, "out", compute, "shader")
+
+			DARWLIST = Drawlist([compute])
+
+			SHADER = shader
+			COMPUTE = compute
+		}
+
+		if (this.need_rebuild) 
+		{
+			COMPUTE.num_groups = [ this.iter / 16, 1, 1 ]
+
+			COMPUTE.need_rebuild = true
+
+			this.setup_buffers()
+			this.bind(SHADER)
+			DARWLIST.run()
+			this.get_result()
+
+			this.need_rebuild = false
+		}
+	}
+
+	bind(shader)
+	{
+		var tf_tex = InputProxy(this, 0)
+		Blueprint.connect(tf_tex, 0, shader, "tf_tex")
+	}
+
+	setup_buffers()
+	{
+		var tf = Blueprint.calc_input_value(this, 0)
+		if (!tf or !tf.value or !tf.value.tex) {
+			return
+		}
+
+		this.bind(SHADER)
+
+		this.streamlines_tex = Texture2D.init(TENSOR_FIELD_SIZE, TENSOR_FIELD_SIZE, "rgba8")
+
+		var streamlines = List.filled(TENSOR_FIELD_SIZE * TENSOR_FIELD_SIZE, 0)
+		this.streamlines_buf = ComputeBuffer.init("float", streamlines, 0)
+
+		var random_indices = []
+		for (var i in 0..this.iter) {
+			var x = this.random.int(TENSOR_FIELD_SIZE)
+			var y = this.random.int(TENSOR_FIELD_SIZE)
+			random_indices.add(y * TENSOR_FIELD_SIZE + x)
+		}
+		this.random_indices_buf = ComputeBuffer.init("int", random_indices, 1)
+	}
+
+	get_result()
+	{
+		if (!this.streamlines_buf) {
+			return
+		}
+
+		this.bind(SHADER)
+
+		var streamlines = this.streamlines_buf.download("float", TENSOR_FIELD_SIZE * TENSOR_FIELD_SIZE)
+		this.streamlines_tex.upload(streamlines, 0, 0, TENSOR_FIELD_SIZE, TENSOR_FIELD_SIZE)
+	}
+}

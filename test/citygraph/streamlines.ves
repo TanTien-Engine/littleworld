@@ -1,0 +1,88 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -636.86557114738, 315.63897989861)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/gen_tensor_field.ves")
+
+_editor.add_node(node1, -102.24823175604, 243.26904391315)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "../../../tantien/assets/blueprints/rendergraph/draw_tex_quad.ves")
+
+_editor.add_node(node2, 565.56072100502, 262.65298513133)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../assets/blueprints/tensor_transform.ves")
+
+_editor.add_node(node3, 175.78515877211, 254.07717921875)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.init_texture("../../assets/textures/ibfv/grid_big.png")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -59.770947084543, 58.884514051812)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.init_texture("../../assets/textures/ibfv/WhiteNoiseDithering.png")
+node5.set_sampler("nearest_repeat")
+
+_editor.add_node(node5, -272.13834111664, 57.456940301756)
+
+var node6 = ::blueprint::nodes::number2::Number2()
+
+node6.value.set(0.5271281003952, 0.51601696014404)
+
+_editor.add_node(node6, -609.4415333632, 159.5464539783)
+
+var node7 = ::citygraph::nodes::saddle::Saddle()
+
+_editor.add_node(node7, -304.85363391215, 250.01653018668)
+
+var node8 = ::citygraph::nodes::streamlines::Streamlines()
+
+_editor.add_node(node8, 366.35119190899, 179.40551495604)
+
+var node9 = ::citygraph::nodes::center::Center()
+
+_editor.add_node(node9, -307.16721456291, 379.45709251652)
+
+var node10 = ::citygraph::nodes::radiate::Radiate()
+
+_editor.add_node(node10, -435.90936279297, 458.44842529297)
+
+var node11 = ::citygraph::nodes::radiate::Radiate()
+
+_editor.add_node(node11, -445.36636279297, 143.27442529297)
+
+var node12 = ::blueprint::nodes::number2::Number2()
+
+node12.value.set(0.730109333992, 0.16344265639782)
+
+_editor.add_node(node12, -623.70981445313, 2.7244430541992)
+
+var node13 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node13, -185.17284545898, 408.06342163086)
+
+Blueprint.connect(node0, "uv", node11, "st")
+Blueprint.connect(node12, "v2", node11, "pos")
+Blueprint.connect(node0, "uv", node10, "st")
+Blueprint.connect(node6, "v2", node10, "pos")
+Blueprint.connect(node10, "ret", node13, "a")
+Blueprint.connect(node11, "ret", node13, "b")
+Blueprint.connect(node13, "v", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node8, "tf")
+Blueprint.connect(node1, "next", node3, "prev")
+Blueprint.connect(node5, "tex", node3, "base_texture")
+Blueprint.connect(node1, "tensor_field", node3, "tensor_field")
+Blueprint.connect(node3, "next", node2, "prev")
+Blueprint.connect(node8, "out", node2, "texture1")
+Blueprint.connect(node0, "uv", node9, "st")
+Blueprint.connect(node6, "v2", node9, "pos")
+Blueprint.connect(node0, "uv", node7, "st")
+Blueprint.connect(node6, "v2", node7, "pos")

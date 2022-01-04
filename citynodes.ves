@@ -3,4 +3,6 @@ import "citygraph.nodes.*"
 var CITY_NODES = [ 
 // tensor field elements
 Regular, Wedge, Trisector, Radiate, Center, Saddle,
+// tools
+Streamlines,
 ]
