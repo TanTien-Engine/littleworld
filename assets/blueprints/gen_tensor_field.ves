@@ -2,7 +2,7 @@ var node0 = ::rendergraph::nodes::texture::Texture()
 node0.query_param("unif_name").value = "u_tex"
 node0.gamma_correction = false
 node0.init_texture(1024, 1024, "rgba16f")
-node0.set_sampler("null")
+node0.set_sampler("nearest_repeat")
 
 _editor.add_node(node0, -340.69297739744, 380.75057753971)
 
