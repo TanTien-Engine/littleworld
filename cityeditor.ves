@@ -22,10 +22,20 @@ class Cityeditor is Editor
 		for (var node in SHADER_NODES) {
 			super.add_popup_node(node)
 		}
+
+		import "editor.imagenodes" for IMAGE_NODES
+		for (var node in IMAGE_NODES) {
+			super.add_popup_node(node)
+		}
+
+		import "editor.geonodes" for GEO_NODES
+		for (var node in GEO_NODES) {
+			super.add_popup_node(node)
+		}
 				
 		import "citynodes" for CITY_NODES
 		for (var node in CITY_NODES) {
 			super.add_popup_node(node)
-		}		
+		}
 	}
 }

@@ -1,0 +1,93 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant
+import "rendergraph.variant" for VAR_TYPE_TEXTURE
+import "citygraph.variant" for VAR_TYPE_NETWORK
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "citygen" for Network as city_Network
+import "geometry" for Polyline as tt_Polyline
+import "graphics" for Graphics
+import "maths.vector" for Vector3
+
+class Network is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "tf", VAR_TYPE_TEXTURE)
+		]
+		this.exports = [
+			Pin(this, "nw", VAR_TYPE_NETWORK),
+			Pin(this, "geo", VAR_TYPE_GEO),			
+		]
+
+		this.layout()
+
+		this.nw = nil
+	}
+
+	on_node_dirty()
+	{
+		this.nw = nil
+	}
+
+	calc_value(idx)
+	{
+		var v_tex = Blueprint.calc_input_value(this, 0)
+		if (!v_tex or !v_tex.value) {
+			return nil
+		}
+
+		if (!this.nw) 
+		{
+			this.nw = city_Network.init(v_tex.value.tex)
+			this.nw.build_streamlines(2)
+		}
+
+		if (idx == 0)
+		{
+			return Variant(VAR_TYPE_NETWORK, this.nw)
+		}
+		else if (idx == 1)
+		{
+			var major = this.nw.get_major_paths()
+			var v_major = this.build_geo_paths(major, Vector3(1.0, 0.0, 0.0))
+
+			var minor = this.nw.get_minor_paths()
+			var v_minor = this.build_geo_paths(minor, Vector3(0.0, 1.0, 0.0))
+
+			return Variant([ v_major, v_minor ])
+		}
+
+		return nil
+	}
+
+	build_geo_paths(paths, color)
+	{
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		var geos = []
+
+		for (var path in paths)
+		{
+			var pts = []
+			for (var i in 0 .. path.count/2) 
+			{
+				pts.add((path[i * 2] - 0.5) * w)
+				pts.add((path[i * 2 + 1] - 0.5) * h)
+			}
+
+			var geo = VarGeo()
+			geo.shape = tt_Polyline.init()
+			geo.shape.set_vertices(pts)
+			geo.render_style["color"] = color
+			geos.add(Variant(VAR_TYPE_GEO, geo))
+		}
+
+		return Variant(geos)
+	}
+}

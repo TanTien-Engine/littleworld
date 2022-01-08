@@ -3,15 +3,18 @@ import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
 import "blueprint.input_proxy" for InputProxy
+import "blueprint.variant_proxy" for VariantProxy
+import "blueprint.node_param" for NodeParam
 import "rendergraph.variant" for VAR_TYPE_TEXTURE, VarTexture
 import "rendergraph.nodes.shader" for Shader
 import "rendergraph.nodes.compute" for Compute
 import "rendergraph.drawlist" for Drawlist
 import "image" for ImageData
 import "render" for Texture2D, Render, ComputeBuffer
-import "random" for Random
 
 var TENSOR_FIELD_SIZE = 1024
+var LOCAL_SIZE = 4
+var SAMPLE_SCALE = 1
 
 var DARWLIST = nil
 var SHADER   = nil
@@ -20,45 +23,125 @@ var COMPUTE  = nil
 var CS = "
 #version 430
 
-layout(std430, binding=0) coherent buffer HeightfieldDataFloat { float heights[]; };
-layout(std430, binding=1) buffer RandomIndicesInt { int random_indices[]; };
+layout(std430, binding=0) coherent buffer OutColorFloat { float out_color[]; };
+layout(std430, binding=1) buffer PosIndicesInt { int pos_indices[]; };
+
+layout(std140) uniform UBO
+{
+	int map_size;
+};
 
 uniform sampler2D tf_tex;
 
-#define LOCAL_SIZE 16
+#define LOCAL_SIZE 4
+
+int RED   = 255 * 256 * 256 * 256 + 255;
+int GREEN = 255 * 256 * 256 * 256 + 255 * 256;
 
 layout(local_size_x = LOCAL_SIZE, local_size_y = 1, local_size_z = 1) in;
 
-vec2 calc_dir(vec2 pos)
+#define SAMPLE_SCALE 1
+
+int get_map_size()
 {
-	vec4 t = texture(tf_tex, pos);
-    float theta = atan(t.y, t.x) / 2;
-    return vec2(cos(theta), sin(theta));
+	// fixme
+	// return map_size;
+
+	return 1024 / SAMPLE_SCALE;
+}
+
+vec2 calc_eigenvector(vec4 tensor)
+{
+	float a = 1.0;
+	float b = -(tensor.x + tensor.w);
+	float c = tensor.x * tensor.w - tensor.y * tensor.z;
+	float delta = b * b - 4 * a * c;
+
+	float x1 = 0, x2 = 0;
+	if (delta >= 0) {
+		x1 = (-b + sqrt(delta)) / (2 * a);
+		x2 = (-b - sqrt(delta)) / (2 * a);
+	} else {
+		x1 = -b * 0.5;
+		x2 = x1;
+	}
+
+	return vec2(x1, x2);
+}
+
+vec2 calc_dir(vec2 pos, bool major)
+{
+	int map_size = get_map_size();
+	if (pos.x < 0 || pos.x > map_size || pos.y < 0 || pos.y > map_size) {
+		return vec2(0.0);
+	}
+
+	vec4 t = texelFetch(tf_tex, ivec2(pos * SAMPLE_SCALE), 0);
+	if (abs(t.x) < 0.00001) {
+		return vec2(0.0);
+	}
+
+	float theta = atan(t.y, t.x) / 2;
+	if (!major) {
+		theta += 1.57;
+	}
+    return normalize(vec2(cos(theta), sin(theta)));
+}
+
+void travel(ivec2 pos, bool forward, bool major, int color)
+{
+	vec2 f_pos = pos;
+
+	int map_size = get_map_size();
+
+    vec2 prev_dir = vec2(0.0);
+
+    int max_steps = map_size * 2;
+	for (int i = 0; i < max_steps; ++i)
+	{
+		int x = int(f_pos.x);
+		int y = int(f_pos.y);
+		out_color[y * map_size + x] = color;
+
+		vec2 dir = calc_dir(f_pos, major);
+		if (!forward) {
+			dir = -dir;
+		}
+
+		if (prev_dir != vec2(0.0) && dot(prev_dir, dir) < 0) {
+			dir = -dir;
+		}
+		prev_dir = dir;
+
+
+		if (dir.x == 0 && dir.y == 0) {
+			out_color[y * map_size + x] = 255;
+			break;
+		}
+		f_pos += dir;
+	}
+}
+
+void travel_major(ivec2 pos)
+{
+    travel(pos, true, true, RED);
+    travel(pos, false, true, RED);
+}
+
+void travel_minor(ivec2 pos)
+{
+    travel(pos, true, false, GREEN);
+    travel(pos, false, false, GREEN);
 }
 
 void main()
 {
-	int map_size = 1024;
+	int map_size = get_map_size();
 
-    int index = random_indices[gl_GlobalInvocationID.x];
-    float pos_x = float(index \% map_size);
-    float pos_y = float(index / map_size);
-
-    int node_x = int(pos_x);
-    int node_y = int(pos_y);
-    int droplet_index = node_y * map_size + node_x;
-
-    vec2 uv = vec2(pos_x / map_size, pos_y / map_size);
-	vec2 pos = uv;
-	for (int i = 0; i < 1024 * 2; ++i)
-	{
-		int x = int(pos.x * map_size);
-		int y = int(pos.y * map_size);
-		heights[y * map_size + x] = 65535;
-
-		vec2 dir = calc_dir(pos);
-		pos += dir / map_size;
-	}
+    int index = pos_indices[gl_GlobalInvocationID.x];
+    ivec2 pos = ivec2(int(index \% map_size), int(index / map_size));
+    travel_major(pos);
+    travel_minor(pos);
 }
 "
 
@@ -72,17 +155,17 @@ class Streamlines is Node
 			Pin(this, "tf", VAR_TYPE_TEXTURE)
 		]
 		this.exports = [
-			Pin(this, "out", VAR_TYPE_TEXTURE)
+			Pin(this, "tex", VAR_TYPE_TEXTURE)
 		]
 
-		this.layout()
+		this.params.add(NodeParam("num", 2, {  "integer" : true, "region" : 10 }))
 
-		this.iter = 1024
+		this.layout()
 
 		this.streamlines_buf = nil
 		this.streamlines_tex = nil
 
-		this.random = Random.init(12345)
+		this.pos_num = 0
 	}
 
 	calc_value(idx)
@@ -123,12 +206,12 @@ class Streamlines is Node
 
 		if (this.need_rebuild) 
 		{
-			COMPUTE.num_groups = [ this.iter / 16, 1, 1 ]
+			this.setup_buffers()
+
+			COMPUTE.num_groups = [ this.pos_num / LOCAL_SIZE, 1, 1 ]
 
 			COMPUTE.need_rebuild = true
 
-			this.setup_buffers()
-			this.bind(SHADER)
 			DARWLIST.run()
 			this.get_result()
 
@@ -138,8 +221,8 @@ class Streamlines is Node
 
 	bind(shader)
 	{
-		var tf_tex = InputProxy(this, 0)
-		Blueprint.connect(tf_tex, 0, shader, "tf_tex")
+		Blueprint.connect(InputProxy(this, 0), 0, shader, "tf_tex")
+		Blueprint.connect(VariantProxy(Variant(this.get_map_size())), 0, shader, "map_size")
 	}
 
 	setup_buffers()
@@ -151,18 +234,28 @@ class Streamlines is Node
 
 		this.bind(SHADER)
 
-		this.streamlines_tex = Texture2D.init(TENSOR_FIELD_SIZE, TENSOR_FIELD_SIZE, "rgba8")
+		var map_size = this.get_map_size()
 
-		var streamlines = List.filled(TENSOR_FIELD_SIZE * TENSOR_FIELD_SIZE, 0)
+		this.streamlines_tex = Texture2D.init(map_size, map_size, "rgba8")
+
+		var BLACK = 255 * 256 * 256 * 256
+		var streamlines = List.filled(map_size * map_size, BLACK)
 		this.streamlines_buf = ComputeBuffer.init("float", streamlines, 0)
 
-		var random_indices = []
-		for (var i in 0..this.iter) {
-			var x = this.random.int(TENSOR_FIELD_SIZE)
-			var y = this.random.int(TENSOR_FIELD_SIZE)
-			random_indices.add(y * TENSOR_FIELD_SIZE + x)
+		var pos_indices = []
+
+		var num = this.query_param("num").value
+		for (var i in 0..num) 
+		{
+			var y = (i + 0.5) / num * map_size
+			for (var j in 0..num) 
+			{
+				var x = (j + 0.5) / num * map_size
+				pos_indices.add(y * map_size + x)				
+			}
 		}
-		this.random_indices_buf = ComputeBuffer.init("int", random_indices, 1)
+		this.pos_num = pos_indices.count
+		this.pos_indices_buf = ComputeBuffer.init("int", pos_indices, 1)
 	}
 
 	get_result()
@@ -171,9 +264,13 @@ class Streamlines is Node
 			return
 		}
 
-		this.bind(SHADER)
+		var map_size = this.get_map_size()
+		var streamlines = this.streamlines_buf.download("float", map_size * map_size)
+		this.streamlines_tex.upload(streamlines, 0, 0, map_size, map_size)
+	}
 
-		var streamlines = this.streamlines_buf.download("float", TENSOR_FIELD_SIZE * TENSOR_FIELD_SIZE)
-		this.streamlines_tex.upload(streamlines, 0, 0, TENSOR_FIELD_SIZE, TENSOR_FIELD_SIZE)
+	get_map_size()
+	{
+		return TENSOR_FIELD_SIZE / SAMPLE_SCALE
 	}
 }
