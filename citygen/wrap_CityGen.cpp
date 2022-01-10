@@ -34,6 +34,12 @@ void w_Network_build_streamlines()
     nw->BuildStreamlines(num);
 }
 
+void w_Network_build_topology()
+{
+    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    nw->BuildTopology();
+}
+
 void return_paths(const std::vector<std::shared_ptr<citygen::Network::Path>>& paths)
 {
     if (paths.empty()) {
@@ -79,6 +85,29 @@ void w_Network_get_minor_paths()
     return_paths(minor_paths);
 }
 
+void w_Network_get_vertices()
+{
+    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    auto vertices = nw->GetVertices();
+
+    ves_pop(1);
+
+    if (vertices.empty()) {
+        ves_pushnil();
+        return;
+    }
+
+    ves_newlist(int(vertices.size() * 2));
+
+    for (int i = 0, n = (int)(vertices.size()); i < n; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            ves_pushnumber(vertices[i].xy[j]);
+            ves_seti(-2, i * 2 + j);
+            ves_pop(1);
+        }
+    }
+}
+
 }
 
 namespace citygen
@@ -87,8 +116,10 @@ namespace citygen
 VesselForeignMethodFn CityGenBindMethod(const char* signature)
 {
     if (strcmp(signature, "Network.build_streamlines(_)") == 0) return w_Network_build_streamlines;
+    if (strcmp(signature, "Network.build_topology()") == 0) return w_Network_build_topology;
     if (strcmp(signature, "Network.get_major_paths()") == 0) return w_Network_get_major_paths;
     if (strcmp(signature, "Network.get_minor_paths()") == 0) return w_Network_get_minor_paths;
+    if (strcmp(signature, "Network.get_vertices()") == 0) return w_Network_get_vertices;
 
 	return nullptr;
 }

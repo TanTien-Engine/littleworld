@@ -2,8 +2,10 @@
 #include "TensorField.h"
 
 #include <sm/SM_DouglasPeucker.h>
+#include <SM_Calc.h>
 
 #include <iterator>
+#include <map>
 
 namespace citygen
 {
@@ -15,15 +17,26 @@ Network::Network(const std::shared_ptr<TensorField>& tf)
 
 void Network::BuildStreamlines(int num)
 {
+	m_border = std::make_shared<Path>();
+	float min = 0.0f;
+	float max = 1.0f;
+	m_border->points = {
+		{ min, min },
+		{ max, min },
+		{ max, max },
+		{ min, max },
+		{ min, min },
+	};
+
 	auto w = m_tf->GetWidth();
 	auto h = m_tf->GetHeight();
 	
-	for (int iy = 0; iy < num; ++iy) 
+	for (size_t iy = 0; iy < num; ++iy) 
 	{
-		int y = h / num * (0.5 + iy);
-		for (int ix = 0; ix < num; ++ix) 
+		int y = static_cast<int>(h / num * (0.5f + iy));
+		for (size_t ix = 0; ix < num; ++ix) 
 		{
-			int x = w / num * (0.5 + ix);
+			int x = static_cast<int>(w / num * (0.5f + ix));
 			
 			m_major_paths.push_back(BuildPath(sm::ivec2(x, y), true));
 			m_minor_paths.push_back(BuildPath(sm::ivec2(x, y), false));
@@ -33,7 +46,42 @@ void Network::BuildStreamlines(int num)
 
 void Network::BuildTopology()
 {
+	IntersectPaths();
+	BuildGraph();
+}
 
+std::vector<sm::vec2> Network::GetVertices() const
+{
+	if (m_blocks.empty()) {
+		return std::vector<sm::vec2>();
+	}
+
+//	return m_blocks[0];
+
+	static int tick = 0;
+	++tick;
+	if (tick > 20) 
+	{
+		tick = 0;
+
+		++block_idx;
+		if (block_idx > m_blocks.size()) {
+			block_idx = 0;
+		}
+	}
+	return m_blocks[block_idx];
+
+	//if (!m_blocks.empty()) {
+	//	return m_blocks[10];
+	//} else {
+	//	return std::vector<sm::vec2>();
+	//}
+
+	std::vector<sm::vec2> ret;
+	for (auto& v : m_graph->vertices) {
+		ret.push_back(v->pos);
+	}
+	return ret;
 }
 
 std::shared_ptr<Network::Path> 
@@ -64,11 +112,11 @@ std::vector<sm::vec2> Network::Travel(const sm::ivec2& p, bool major, bool forwa
 {
 	std::vector<sm::vec2> points;
 
-	sm::vec2 fp(p.x, p.y);
+	sm::vec2 fp((float)p.x, (float)p.y);
 	sm::vec2 prev_dir = sm::vec2(0, 0);
 
 	const int max_steps = m_tf->GetWidth() * 2;
-	for (int i = 0; i < max_steps; ++i)
+	for (size_t i = 0; i < max_steps; ++i)
 	{
 		points.push_back(fp);
 
@@ -112,6 +160,302 @@ sm::vec2 Network::CalcDir(const sm::ivec2& p, bool major) const
 		theta += 1.57f;
 	}
 	return sm::vec2(cosf(theta), sinf(theta));
+}
+
+void Network::IntersectPaths()
+{
+	for (size_t i = 0; i < m_major_paths.size(); ++i) {
+		IntersectPaths(*m_border, *m_major_paths[i]);
+	}
+	for (size_t i = 0; i < m_minor_paths.size(); ++i) {
+		IntersectPaths(*m_border, *m_minor_paths[i]);
+	}
+
+	for (size_t i = 0; i < m_major_paths.size(); ++i) {
+		for (size_t j = 0; j < m_minor_paths.size(); ++j) {
+			IntersectPaths(*m_major_paths[i], *m_minor_paths[j]);
+		}
+	}
+}
+
+void Network::IntersectPaths(Path& p0, Path& p1)
+{
+	p0.points = PathCutBy(p0, p1);
+	p1.points = PathCutBy(p1, p0);
+}
+
+std::vector<sm::vec2> Network::PathCutBy(const Path& base, const Path& cut)
+{
+	if (base.points.empty()) {
+		return std::vector<sm::vec2>();
+	}
+
+	std::map<float, sm::vec2> new_pts;
+
+	// points
+	for (size_t i = 0, n = base.points.size() - 1; i < n; ++i)
+	{
+		for (size_t j = 0, m = cut.points.size(); j < m; ++j)
+		{
+			if (sm::is_point_in_segment(cut.points[j], base.points[i], base.points[i + 1])) 
+			{
+				float dist = sm::dis_pos_to_pos(cut.points[j], base.points[i]);
+
+				float tot = sm::dis_pos_to_pos(base.points[i], base.points[i + 1]);
+				sm::vec2 new_p = base.points[i] + (base.points[i + 1] - base.points[i]) / tot * dist;
+
+				new_pts.insert({ i + dist, new_p });
+			}
+		}
+	}
+
+	// cross
+	for (size_t i = 0, n = base.points.size() - 1; i < n; ++i)
+	{
+		for (size_t j = 0, m = cut.points.size() - 1; j < m; ++j)
+		{
+			sm::vec2 new_p;
+			if (sm::intersect_segment_segment(base.points[i], base.points[i + 1], cut.points[j], cut.points[j + 1], &new_p)) 
+			{
+				float d = sm::dis_pos_to_pos(new_p, base.points[i]) / sm::dis_pos_to_pos(base.points[i], base.points[i + 1]);
+				new_pts.insert({ i + d, new_p });
+			}
+		}
+	}
+
+	auto itr = new_pts.begin();
+
+	std::vector<sm::vec2> ret;
+	for (size_t i = 0, n = base.points.size(); i < n; ++i)
+	{
+		ret.push_back(base.points[i]);
+
+		while (itr != new_pts.end() && itr->first < i + 1)
+		{
+			ret.push_back(itr->second);
+			itr++;
+		}
+	}
+
+	return ret;
+}
+
+void Network::BuildGraph()
+{
+	auto g = std::make_shared<Graph>();
+
+	for (size_t i = 0, n = m_border->points.size() - 1; i < n; ++i) {
+		g->AddEdge(m_border->points[i], m_border->points[i + 1]);
+	}
+
+	for (auto& path : m_major_paths) {
+		for (size_t i = 0, n = path->points.size() - 1; i < n; ++i) {
+			g->AddEdge(path->points[i], path->points[i + 1]);
+		}
+	}
+	for (auto& path : m_minor_paths) {
+		for (size_t i = 0, n = path->points.size() - 1; i < n; ++i) {
+			g->AddEdge(path->points[i], path->points[i + 1]);
+		}
+	}
+
+	std::vector<int> num(10, 0);
+	for (auto itr = g->vertices.begin(); itr != g->vertices.end(); ++itr) {
+		++num[(*itr)->edges.size()];
+	}
+
+	//g->RemoveDegTwoVert();
+	g->BuildHalfedge();
+
+	// blocks
+
+	int i_vert = 0;
+
+	for (auto vert : g->vertices)
+	{
+		for (auto& edge : vert->edges)
+		{
+			if (edge.visited) {
+				continue;
+			}
+
+			std::vector<sm::vec2> block;
+
+			const Edge* first = &edge;
+			const Edge* curr = first;
+			do
+			{
+				curr->visited = true;
+
+				block.push_back(curr->f->pos);
+
+				curr = curr->next;
+			} while (curr != first);
+
+			m_blocks.push_back(block);
+		}
+
+		++i_vert;
+	}
+	
+	m_graph = g;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// class Network::VertexComp
+//////////////////////////////////////////////////////////////////////////
+
+bool Network::VertexComp::operator () (const Vertex* lhs, const Vertex* rhs) const
+{
+	if (lhs->pos.y == rhs->pos.y) {
+		return lhs->pos.x < rhs->pos.x;
+	} else {
+		return lhs->pos.y < rhs->pos.y;
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// class Network::EdgeComp
+//////////////////////////////////////////////////////////////////////////
+
+bool Network::EdgeComp::operator () (const Edge& lhs, const Edge& rhs) const
+{
+	float ang0 = sm::get_line_angle(lhs.f->pos, lhs.t->pos);
+	float ang1 = sm::get_line_angle(rhs.f->pos, rhs.t->pos);
+	return ang0 < ang1;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// class Network::Graph
+//////////////////////////////////////////////////////////////////////////
+
+Network::Graph::~Graph()
+{
+	for (auto v : vertices) {
+		delete v;
+	}
+}
+
+Network::Vertex* Network::Graph::AddVertex(const sm::vec2& pos)
+{
+	for (auto& vert : vertices) {
+		if (sm::dis_pos_to_pos(vert->pos, pos) < SM_LARGE_EPSILON) {
+			return vert;
+		}
+	}
+
+	Vertex* vert = new Vertex(pos);
+	vertices.insert(vert);
+
+	return vert;
+}
+
+void Network::Graph::AddEdge(const sm::vec2& p0, const sm::vec2& p1)
+{
+	auto v0 = AddVertex(p0);
+	auto v1 = AddVertex(p1);
+	v0->edges.insert(Edge(v0, v1));
+	v1->edges.insert(Edge(v1, v0));
+}
+
+void Network::Graph::RemoveDegTwoVert()
+{
+	for (auto itr = vertices.begin(); itr != vertices.end(); )
+	{
+		Vertex* vert = *itr;
+		if (vert->edges.size() == 2) 
+		{
+			auto e0 = *vert->edges.begin();
+			auto e1 = *(++vert->edges.begin());
+
+			auto v0 = e0.t;
+			auto v1 = e1.t;
+
+			for (auto e : v0->edges) {
+				if (e.t == vert) {
+					e.t = v1;
+				}
+			}
+			for (auto e : v1->edges) {
+				if (e.t == vert) {
+					e.t = v0;
+				}
+			}
+
+			itr = vertices.erase(itr);
+		}
+		else
+		{
+			++itr;
+		}
+	}
+}
+
+void Network::Graph::BuildHalfedge()
+{
+	auto pair = [](Edge& e0, Edge& e1) {
+		e0.pair = &e1;
+		e1.pair = &e0;
+	};
+	auto conn = [](Edge& e0, Edge& e1) {
+		e0.next = &e1;
+		e1.prev = &e0;
+	};
+
+	for (auto itr = vertices.begin(); itr != vertices.end(); ++itr)
+	{
+		Vertex* vert = *itr;
+		for (auto itr2 = vert->edges.begin(); itr2 != vert->edges.end(); ++itr2)
+		{
+			Edge& edge = const_cast<Edge&>(*itr2);
+
+			// pair
+			if (!edge.pair) {
+				for (auto itr3 = edge.t->edges.begin(); itr3 != edge.t->edges.end() && !edge.pair; ++itr3) {
+					if (itr3->t == vert) {
+						pair(edge, const_cast<Edge&>(*itr3));
+						break;
+					}
+				}
+			}
+
+			// next and prev
+			if (!edge.next)
+			{
+				if (edge.t->edges.size() == 2)
+				{
+					auto& e0 = *edge.t->edges.begin();
+					auto& e1 = *(++edge.t->edges.begin());
+					if (e0.t == vert) {
+						conn(edge, const_cast<Edge&>(e1));
+					} else {
+						conn(edge, const_cast<Edge&>(e0));
+					}
+				}
+				else
+				{
+					auto itr = edge.t->edges.begin();
+					for (; itr != edge.t->edges.end(); ++itr)
+					{
+						if (itr->t == vert) {
+							break;
+						}
+					}
+
+					assert(itr != edge.t->edges.end());
+
+					auto next = ++itr;
+					if (next == edge.t->edges.end()) {
+						next = edge.t->edges.begin();
+					}
+
+					//auto next = itr == edge.t->edges.begin() ? --edge.t->edges.end() : --itr;
+
+					conn(edge, const_cast<Edge&>(*next));
+				}
+			}
+		}
+	}
 }
 
 }
