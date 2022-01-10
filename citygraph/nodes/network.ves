@@ -4,12 +4,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
 import "rendergraph.variant" for VAR_TYPE_TEXTURE
 import "citygraph.variant" for VAR_TYPE_NETWORK
-import "geograph.variant" for VAR_TYPE_GEO, VarGeo
-import "geograph.config" for POINT_RADIUS
 import "citygen" for Network as city_Network
-import "geometry" for Polyline, Circle
-import "graphics" for Graphics
-import "maths.vector" for Vector3
 
 class Network is Node
 {
@@ -22,7 +17,6 @@ class Network is Node
 		]
 		this.exports = [
 			Pin(this, "nw", VAR_TYPE_NETWORK),
-			Pin(this, "geo", VAR_TYPE_GEO),			
 		]
 
 		this.layout()
@@ -49,70 +43,6 @@ class Network is Node
 			this.nw.build_topology()
 		}
 
-		if (idx == 0)
-		{
-			return Variant(VAR_TYPE_NETWORK, this.nw)
-		}
-		else if (idx == 1)
-		{
-			var major = this.nw.get_major_paths()
-			var v_major = this.build_geo_paths(major, Vector3(1.0, 0.0, 0.0))
-
-			var minor = this.nw.get_minor_paths()
-			var v_minor = this.build_geo_paths(minor, Vector3(0.0, 1.0, 0.0))
-
-			var vertices = this.nw.get_vertices()
-			var v_vertices = this.build_geo_nodes(vertices, Vector3(0.0, 0.0, 1.0))
-
-			return Variant([ v_major, v_minor, v_vertices ])
-		}
-
-		return nil
-	}
-
-	build_geo_paths(paths, color)
-	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
-		var geos = []
-
-		for (var path in paths)
-		{
-			var pts = []
-			for (var i in 0 .. path.count/2) 
-			{
-				pts.add((path[i * 2] - 0.5) * w)
-				pts.add((path[i * 2 + 1] - 0.5) * h)
-			}
-
-			var geo = VarGeo()
-			geo.shape = Polyline.init()
-			geo.shape.set_vertices(pts)
-			geo.render_style["color"] = color
-			geos.add(Variant(VAR_TYPE_GEO, geo))
-		}
-
-		return Variant(geos)
-	}
-
-	build_geo_nodes(vertices, color)
-	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
-		var geos = []
-
-		for (var i in 0 .. vertices.count/2) 
-		{
-			var x = (vertices[i * 2] - 0.5) * w
-			var y = (vertices[i * 2 + 1] - 0.5) * h
-
-			var geo = VarGeo()
-			geo.shape = Circle.init(x, y, POINT_RADIUS)
-			geos.add(Variant(VAR_TYPE_GEO, geo))
-		}
-
-		return Variant(geos)
+		return Variant(VAR_TYPE_NETWORK, this.nw)
 	}
 }

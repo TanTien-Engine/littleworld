@@ -40,27 +40,27 @@ void w_Network_build_topology()
     nw->BuildTopology();
 }
 
-void return_paths(const std::vector<std::shared_ptr<citygen::Network::Path>>& paths)
+void return_points(const std::vector<std::vector<sm::vec2>>& points)
 {
-    if (paths.empty()) {
+    if (points.empty()) {
         ves_pushnil();
         return;
     }
 
-    ves_newlist(paths.size());
-    for (int i_path = 0; i_path < paths.size(); ++i_path)
+    ves_newlist(points.size());
+    for (int i_list = 0; i_list < points.size(); ++i_list)
     {
-        ves_newlist(int(paths[i_path]->points.size() * 2));
+        ves_newlist(int(points[i_list].size() * 2));
 
-        for (int i = 0, n = (int)(paths[i_path]->points.size()); i < n; ++i) {
+        for (int i = 0, n = (int)(points[i_list].size()); i < n; ++i) {
             for (int j = 0; j < 2; ++j) {
-                ves_pushnumber(paths[i_path]->points[i].xy[j]);
+                ves_pushnumber(points[i_list][i].xy[j]);
                 ves_seti(-2, i * 2 + j);
                 ves_pop(1);
             }
         }
 
-        ves_seti(-2, i_path);
+        ves_seti(-2, i_list);
         ves_pop(1);
     }
 }
@@ -72,7 +72,7 @@ void w_Network_get_major_paths()
     
     ves_pop(1);
 
-    return_paths(major_paths);
+    return_points(major_paths);
 }
 
 void w_Network_get_minor_paths()
@@ -82,30 +82,40 @@ void w_Network_get_minor_paths()
 
     ves_pop(1);
 
-    return_paths(minor_paths);
+    return_points(minor_paths);
 }
 
-void w_Network_get_vertices()
+void w_Network_get_nodes()
 {
     auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
-    auto vertices = nw->GetVertices();
+    auto nodes = nw->GetNodes();
 
     ves_pop(1);
 
-    if (vertices.empty()) {
+    if (nodes.empty()) {
         ves_pushnil();
         return;
     }
 
-    ves_newlist(int(vertices.size() * 2));
+    ves_newlist(int(nodes.size() * 2));
 
-    for (int i = 0, n = (int)(vertices.size()); i < n; ++i) {
+    for (int i = 0, n = (int)(nodes.size()); i < n; ++i) {
         for (int j = 0; j < 2; ++j) {
-            ves_pushnumber(vertices[i].xy[j]);
+            ves_pushnumber(nodes[i].xy[j]);
             ves_seti(-2, i * 2 + j);
             ves_pop(1);
         }
     }
+}
+
+void w_Network_get_polygons()
+{
+    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    auto polygons = nw->GetPolygons();
+
+    ves_pop(1);
+
+    return_points(polygons);
 }
 
 }
@@ -119,7 +129,8 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Network.build_topology()") == 0) return w_Network_build_topology;
     if (strcmp(signature, "Network.get_major_paths()") == 0) return w_Network_get_major_paths;
     if (strcmp(signature, "Network.get_minor_paths()") == 0) return w_Network_get_minor_paths;
-    if (strcmp(signature, "Network.get_vertices()") == 0) return w_Network_get_vertices;
+    if (strcmp(signature, "Network.get_nodes()") == 0) return w_Network_get_nodes;
+    if (strcmp(signature, "Network.get_polygons()") == 0) return w_Network_get_polygons;
 
 	return nullptr;
 }

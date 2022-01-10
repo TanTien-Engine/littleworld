@@ -11,7 +11,8 @@ foreign class Network
 	foreign get_major_paths()
 	foreign get_minor_paths()
 
-	foreign get_vertices()
+	foreign get_nodes()
+	foreign get_polygons()
 }
 
 );

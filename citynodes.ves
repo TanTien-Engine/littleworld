@@ -4,7 +4,7 @@ var CITY_NODES = [
 // tensor field elements
 Regular, Wedge, Trisector, Radiate, Center, Saddle,
 // street
-Network,
+Network, Streets,
 // tools
 Streamlines, 
 ]

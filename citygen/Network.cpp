@@ -17,10 +17,9 @@ Network::Network(const std::shared_ptr<TensorField>& tf)
 
 void Network::BuildStreamlines(int num)
 {
-	m_border = std::make_shared<Path>();
 	float min = 0.0f;
 	float max = 1.0f;
-	m_border->points = {
+	m_border = {
 		{ min, min },
 		{ max, min },
 		{ max, max },
@@ -50,42 +49,50 @@ void Network::BuildTopology()
 	BuildGraph();
 }
 
-std::vector<sm::vec2> Network::GetVertices() const
+std::vector<sm::vec2> Network::GetNodes() const
 {
-	if (m_blocks.empty()) {
-		return std::vector<sm::vec2>();
-	}
-
-//	return m_blocks[0];
-
-	static int tick = 0;
-	++tick;
-	if (tick > 20) 
-	{
-		tick = 0;
-
-		++block_idx;
-		if (block_idx > m_blocks.size()) {
-			block_idx = 0;
-		}
-	}
-	return m_blocks[block_idx];
-
-	//if (!m_blocks.empty()) {
-	//	return m_blocks[10];
-	//} else {
-	//	return std::vector<sm::vec2>();
-	//}
-
 	std::vector<sm::vec2> ret;
 	for (auto& v : m_graph->vertices) {
-		ret.push_back(v->pos);
+		if (v->edges.size() != 2) {
+			ret.push_back(v->pos);
+		}
 	}
 	return ret;
 }
 
-std::shared_ptr<Network::Path> 
-Network::BuildPath(const sm::ivec2& p, bool major) const
+std::vector<std::vector<sm::vec2>> Network::GetPolygons() const
+{
+	std::vector<std::vector<sm::vec2>> blocks;
+
+	for (auto vert : m_graph->vertices)
+	{
+		for (auto& edge : vert->edges)
+		{
+			if (edge.visited) {
+				continue;
+			}
+
+			std::vector<sm::vec2> block;
+
+			const Edge* first = &edge;
+			const Edge* curr = first;
+			do
+			{
+				curr->visited = true;
+
+				block.push_back(curr->f->pos);
+
+				curr = curr->next;
+			} while (curr != first);
+
+			blocks.push_back(block);
+		}
+	}
+
+	return blocks;
+}
+
+std::vector<sm::vec2> Network::BuildPath(const sm::ivec2& p, bool major) const
 {
 	auto f = Travel(p, major, true);
 	auto b = Travel(p, major, false);
@@ -94,13 +101,13 @@ Network::BuildPath(const sm::ivec2& p, bool major) const
 	std::reverse(points.begin(), points.end());
 	std::copy(f.begin(), f.end(), std::back_inserter(points));
 
-	auto path = std::make_shared<Path>();
-	sm::douglas_peucker(points, 0.5f, path->points);
+	std::vector<sm::vec2> path;
+	sm::douglas_peucker(points, 0.5f, path);
 
 	// to 0-1
 	auto w = m_tf->GetWidth();
 	auto h = m_tf->GetHeight();
-	for (auto& p : path->points) {
+	for (auto& p : path) {
 		p.x /= w;
 		p.y /= h;
 	}
@@ -165,44 +172,44 @@ sm::vec2 Network::CalcDir(const sm::ivec2& p, bool major) const
 void Network::IntersectPaths()
 {
 	for (size_t i = 0; i < m_major_paths.size(); ++i) {
-		IntersectPaths(*m_border, *m_major_paths[i]);
+		IntersectPaths(m_border, m_major_paths[i]);
 	}
 	for (size_t i = 0; i < m_minor_paths.size(); ++i) {
-		IntersectPaths(*m_border, *m_minor_paths[i]);
+		IntersectPaths(m_border, m_minor_paths[i]);
 	}
 
 	for (size_t i = 0; i < m_major_paths.size(); ++i) {
 		for (size_t j = 0; j < m_minor_paths.size(); ++j) {
-			IntersectPaths(*m_major_paths[i], *m_minor_paths[j]);
+			IntersectPaths(m_major_paths[i], m_minor_paths[j]);
 		}
 	}
 }
 
-void Network::IntersectPaths(Path& p0, Path& p1)
+void Network::IntersectPaths(std::vector<sm::vec2>& p0, std::vector<sm::vec2>& p1)
 {
-	p0.points = PathCutBy(p0, p1);
-	p1.points = PathCutBy(p1, p0);
+	p0 = PathCutBy(p0, p1);
+	p1 = PathCutBy(p1, p0);
 }
 
-std::vector<sm::vec2> Network::PathCutBy(const Path& base, const Path& cut)
+std::vector<sm::vec2> Network::PathCutBy(const std::vector<sm::vec2>& base, const std::vector<sm::vec2>& cut)
 {
-	if (base.points.empty()) {
+	if (base.empty()) {
 		return std::vector<sm::vec2>();
 	}
 
 	std::map<float, sm::vec2> new_pts;
 
 	// points
-	for (size_t i = 0, n = base.points.size() - 1; i < n; ++i)
+	for (size_t i = 0, n = base.size() - 1; i < n; ++i)
 	{
-		for (size_t j = 0, m = cut.points.size(); j < m; ++j)
+		for (size_t j = 0, m = cut.size(); j < m; ++j)
 		{
-			if (sm::is_point_in_segment(cut.points[j], base.points[i], base.points[i + 1])) 
+			if (sm::is_point_in_segment(cut[j], base[i], base[i + 1])) 
 			{
-				float dist = sm::dis_pos_to_pos(cut.points[j], base.points[i]);
+				float dist = sm::dis_pos_to_pos(cut[j], base[i]);
 
-				float tot = sm::dis_pos_to_pos(base.points[i], base.points[i + 1]);
-				sm::vec2 new_p = base.points[i] + (base.points[i + 1] - base.points[i]) / tot * dist;
+				float tot = sm::dis_pos_to_pos(base[i], base[i + 1]);
+				sm::vec2 new_p = base[i] + (base[i + 1] - base[i]) / tot * dist;
 
 				new_pts.insert({ i + dist, new_p });
 			}
@@ -210,14 +217,14 @@ std::vector<sm::vec2> Network::PathCutBy(const Path& base, const Path& cut)
 	}
 
 	// cross
-	for (size_t i = 0, n = base.points.size() - 1; i < n; ++i)
+	for (size_t i = 0, n = base.size() - 1; i < n; ++i)
 	{
-		for (size_t j = 0, m = cut.points.size() - 1; j < m; ++j)
+		for (size_t j = 0, m = cut.size() - 1; j < m; ++j)
 		{
 			sm::vec2 new_p;
-			if (sm::intersect_segment_segment(base.points[i], base.points[i + 1], cut.points[j], cut.points[j + 1], &new_p)) 
+			if (sm::intersect_segment_segment(base[i], base[i + 1], cut[j], cut[j + 1], &new_p)) 
 			{
-				float d = sm::dis_pos_to_pos(new_p, base.points[i]) / sm::dis_pos_to_pos(base.points[i], base.points[i + 1]);
+				float d = sm::dis_pos_to_pos(new_p, base[i]) / sm::dis_pos_to_pos(base[i], base[i + 1]);
 				new_pts.insert({ i + d, new_p });
 			}
 		}
@@ -226,9 +233,9 @@ std::vector<sm::vec2> Network::PathCutBy(const Path& base, const Path& cut)
 	auto itr = new_pts.begin();
 
 	std::vector<sm::vec2> ret;
-	for (size_t i = 0, n = base.points.size(); i < n; ++i)
+	for (size_t i = 0, n = base.size(); i < n; ++i)
 	{
-		ret.push_back(base.points[i]);
+		ret.push_back(base[i]);
 
 		while (itr != new_pts.end() && itr->first < i + 1)
 		{
@@ -244,19 +251,12 @@ void Network::BuildGraph()
 {
 	auto g = std::make_shared<Graph>();
 
-	for (size_t i = 0, n = m_border->points.size() - 1; i < n; ++i) {
-		g->AddEdge(m_border->points[i], m_border->points[i + 1]);
-	}
-
+	g->AddPath(m_border);
 	for (auto& path : m_major_paths) {
-		for (size_t i = 0, n = path->points.size() - 1; i < n; ++i) {
-			g->AddEdge(path->points[i], path->points[i + 1]);
-		}
+		g->AddPath(path);
 	}
 	for (auto& path : m_minor_paths) {
-		for (size_t i = 0, n = path->points.size() - 1; i < n; ++i) {
-			g->AddEdge(path->points[i], path->points[i + 1]);
-		}
+		g->AddPath(path);
 	}
 
 	std::vector<int> num(10, 0);
@@ -266,37 +266,6 @@ void Network::BuildGraph()
 
 	//g->RemoveDegTwoVert();
 	g->BuildHalfedge();
-
-	// blocks
-
-	int i_vert = 0;
-
-	for (auto vert : g->vertices)
-	{
-		for (auto& edge : vert->edges)
-		{
-			if (edge.visited) {
-				continue;
-			}
-
-			std::vector<sm::vec2> block;
-
-			const Edge* first = &edge;
-			const Edge* curr = first;
-			do
-			{
-				curr->visited = true;
-
-				block.push_back(curr->f->pos);
-
-				curr = curr->next;
-			} while (curr != first);
-
-			m_blocks.push_back(block);
-		}
-
-		++i_vert;
-	}
 	
 	m_graph = g;
 }
@@ -350,12 +319,29 @@ Network::Vertex* Network::Graph::AddVertex(const sm::vec2& pos)
 	return vert;
 }
 
-void Network::Graph::AddEdge(const sm::vec2& p0, const sm::vec2& p1)
+void Network::Graph::AddPath(const std::vector<sm::vec2>& path)
 {
-	auto v0 = AddVertex(p0);
-	auto v1 = AddVertex(p1);
-	v0->edges.insert(Edge(v0, v1));
-	v1->edges.insert(Edge(v1, v0));
+	std::vector<Vertex*> vertices;
+
+	for (auto& pos : path) 
+	{
+		auto vert = AddVertex(pos);
+		if (vertices.empty() || vertices.back() != vert) {
+			vertices.push_back(vert);
+		}
+	}
+
+	if (vertices.size() < 2) {
+		return;
+	}
+
+	for (size_t i = 0, n = vertices.size() - 1; i < n; ++i) 
+	{
+		auto v0 = vertices[i];
+		auto v1 = vertices[i + 1];
+		v0->edges.insert(Edge(v0, v1));
+		v1->edges.insert(Edge(v1, v0));
+	}
 }
 
 void Network::Graph::RemoveDegTwoVert()

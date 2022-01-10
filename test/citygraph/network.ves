@@ -72,7 +72,15 @@ _editor.add_node(node14, 170.94435579915, -32.496094254423)
 var node15 = ::geograph::nodes::draw_geometry::DrawGeometry()
 node15.query_param("skip").value = false
 
-_editor.add_node(node15, 425.14049586777, 35.925619834711)
+_editor.add_node(node15, 582.68008112183, -48.037171899671)
+
+var node16 = ::citygraph::nodes::streets::Streets()
+
+_editor.add_node(node16, 307.61140910209, -45.991298883615)
+
+var node17 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node17, 441.22869112505, -48.025728056956)
 
 Blueprint.connect(node0, "uv", node9, "st")
 Blueprint.connect(node10, "v2", node9, "pos")
@@ -86,7 +94,10 @@ Blueprint.connect(node0, "uv", node5, "st")
 Blueprint.connect(node4, "v2", node5, "pos")
 Blueprint.connect(node5, "ret", node1, "tensor")
 Blueprint.connect(node1, "tensor_field", node14, "tf")
-Blueprint.connect(node14, "geo", node15, "geos")
+Blueprint.connect(node14, "nw", node16, "nw")
+Blueprint.connect(node16, "blocks", node17, "in0")
+Blueprint.connect(node16, "routes", node17, "in1")
+Blueprint.connect(node16, "blocks", node15, "geos")
 Blueprint.connect(node1, "tensor_field", node13, "tex")
 Blueprint.connect(node1, "tensor_field", node6, "tf")
 Blueprint.connect(node1, "next", node2, "prev")
