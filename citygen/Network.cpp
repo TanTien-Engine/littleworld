@@ -89,6 +89,11 @@ std::vector<std::vector<sm::vec2>> Network::GetPolygons() const
 		}
 	}
 
+	// pop the front
+	if (!blocks.empty()) {
+		blocks.erase(blocks.begin());
+	}
+
 	return blocks;
 }
 
