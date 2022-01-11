@@ -15,4 +15,13 @@ foreign class Network
 	foreign get_polygons()
 }
 
+foreign class Block
+{
+	init(tris) {}
+
+	foreign offset_clone(distance)
+
+	foreign get_border()
+}
+
 );

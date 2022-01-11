@@ -22,7 +22,7 @@ _editor.add_node(node3, -272.13834111664, 57.456940301756)
 
 var node4 = ::blueprint::nodes::number2::Number2()
 
-node4.value.set(0.21601697802544, 0.80490589141846)
+node4.value.set(0.56046140193939, 0.80490589141846)
 
 _editor.add_node(node4, -619.4415333632, 158.5464539783)
 
@@ -72,7 +72,7 @@ _editor.add_node(node14, 170.94435579915, -32.496094254423)
 var node15 = ::geograph::nodes::draw_geometry::DrawGeometry()
 node15.query_param("skip").value = false
 
-_editor.add_node(node15, 582.68008112183, -48.037171899671)
+_editor.add_node(node15, 651.80104280478, -60.058208714096)
 
 var node16 = ::citygraph::nodes::streets::Streets()
 
@@ -80,7 +80,20 @@ _editor.add_node(node16, 307.61140910209, -45.991298883615)
 
 var node17 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node17, 441.22869112505, -48.025728056956)
+_editor.add_node(node17, 469.32786467877, -131.49680243712)
+
+var node18 = ::citygraph::nodes::offset::Offset()
+node18.query_param("distance").value = 8.6281909942627
+
+_editor.add_node(node18, 413.34629798849, -316.74243819812)
+
+var node19 = ::citygraph::nodes::blocks::Blocks()
+
+_editor.add_node(node19, 280.95442895581, -241.72500518639)
+
+var node20 = ::citygraph::nodes::block_to_geo::BlockToGeo()
+
+_editor.add_node(node20, 587.37671258412, -239.42532702875)
 
 Blueprint.connect(node0, "uv", node9, "st")
 Blueprint.connect(node10, "v2", node9, "pos")
@@ -90,14 +103,15 @@ Blueprint.connect(node8, "ret", node11, "a")
 Blueprint.connect(node9, "ret", node11, "b")
 Blueprint.connect(node0, "uv", node7, "st")
 Blueprint.connect(node4, "v2", node7, "pos")
-Blueprint.connect(node0, "uv", node5, "st")
-Blueprint.connect(node4, "v2", node5, "pos")
-Blueprint.connect(node5, "ret", node1, "tensor")
+Blueprint.connect(node7, "ret", node1, "tensor")
 Blueprint.connect(node1, "tensor_field", node14, "tf")
 Blueprint.connect(node14, "nw", node16, "nw")
+Blueprint.connect(node16, "blocks", node19, "geos")
+Blueprint.connect(node19, "blocks", node18, "blocks")
+Blueprint.connect(node18, "blocks", node20, "blocks")
+Blueprint.connect(node20, "geos", node15, "geos")
 Blueprint.connect(node16, "blocks", node17, "in0")
 Blueprint.connect(node16, "routes", node17, "in1")
-Blueprint.connect(node16, "blocks", node15, "geos")
 Blueprint.connect(node1, "tensor_field", node13, "tex")
 Blueprint.connect(node1, "tensor_field", node6, "tf")
 Blueprint.connect(node1, "next", node2, "prev")
@@ -105,3 +119,5 @@ Blueprint.connect(node3, "tex", node2, "base_texture")
 Blueprint.connect(node1, "tensor_field", node2, "tensor_field")
 Blueprint.connect(node2, "next", node12, "prev")
 Blueprint.connect(node2, "tex", node12, "value")
+Blueprint.connect(node0, "uv", node5, "st")
+Blueprint.connect(node4, "v2", node5, "pos")

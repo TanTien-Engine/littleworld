@@ -1,0 +1,83 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "citygraph.variant" for VAR_TYPE_BLOCK
+import "geometry" for Triangles
+import "graphics" for Graphics
+import "maths.vector" for Vector3
+import "math" for Math
+
+class BlockToGeo is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "blocks", VAR_TYPE_BLOCK),
+		]
+		this.exports = [
+			Pin(this, "geos", VAR_TYPE_GEO)
+		]
+
+		this.layout()
+
+		this.v_geos = nil
+	}
+
+	on_node_dirty()
+	{
+		this.v_geos = nil
+	}
+
+	calc_value(idx)
+	{
+		var v_blocks = Blueprint.calc_input_value(this, 0)
+		if (!v_blocks) {
+			return nil
+		}
+
+		if (!this.v_geos)
+		{
+//			var w = Graphics.get_width()
+//			var h = Graphics.get_height()
+
+			var geos = []
+
+			var colors = [
+				Vector3(1.0, 0.0, 0.0),
+				Vector3(0.0, 1.0, 0.0),
+				Vector3(0.0, 0.0, 1.0),
+				Vector3(1.0, 1.0, 0.0),
+				Vector3(0.0, 1.0, 1.0),
+				Vector3(1.0, 0.0, 1.0),
+
+				Vector3(0.5, 0.0, 0.0),
+				Vector3(0.0, 0.5, 0.0),
+				Vector3(0.0, 0.0, 0.5),
+				Vector3(0.5, 0.5, 0.0),
+				Vector3(0.0, 0.5, 0.5),
+				Vector3(0.5, 0.0, 0.5),
+			]
+
+			for (var i in 0..v_blocks.value.count)
+			{
+				var pts = v_blocks.value[i].value.get_border()
+				if (!pts.isEmpty)
+				{
+					var geo = VarGeo()
+					geo.shape = Triangles.init()
+					geo.shape.set_border(pts)
+					geo.render_style["color"] = colors[Math.mod(i, colors.count)]
+					geos.add(Variant(VAR_TYPE_GEO, geo))
+				}
+			}
+
+			this.v_geos = Variant(geos)
+		}
+
+		return this.v_geos 
+	}
+}
