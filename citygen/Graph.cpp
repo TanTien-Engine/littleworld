@@ -155,6 +155,13 @@ std::vector<std::vector<sm::vec2>> Graph::GetPolygons() const
 {
 	std::vector<std::vector<sm::vec2>> polys;
 
+	// reset edge
+	for (auto vert : m_vertices) {
+		for (auto& edge : vert->edges) {
+			edge.visited = false;
+		}
+	}
+
 	for (auto vert : m_vertices)
 	{
 		for (auto& edge : vert->edges)
