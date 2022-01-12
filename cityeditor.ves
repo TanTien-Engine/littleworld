@@ -38,4 +38,22 @@ class Cityeditor is Editor
 			super.add_popup_node(node)
 		}
 	}
+
+	draw_preview()
+	{
+		if (this.scene_stack.bp_dirty) {
+			this.rebuild_all()
+		}
+
+		super.draw_preview()
+	}
+
+	rebuild_all()
+	{
+		var scene = this.scene_stack.root()
+		for (var node in scene.nodes) {
+			var bp_node = node.components["bp"]
+			bp_node.on_node_dirty()
+		}
+	}
 }
