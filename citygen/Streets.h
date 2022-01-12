@@ -11,10 +11,10 @@ namespace citygen
 
 class TensorField;
 
-class Network
+class Streets
 {
 public:
-	Network(const std::shared_ptr<TensorField>& tf);
+	Streets(const std::shared_ptr<TensorField>& tf);
 
 	void BuildStreamlines(int num);
 	void BuildTopology();
@@ -98,6 +98,6 @@ private:
 
 	std::shared_ptr<Graph> m_graph = nullptr;
 
-}; // Network
+}; // Streets
 
 }

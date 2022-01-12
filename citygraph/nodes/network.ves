@@ -4,7 +4,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
 import "rendergraph.variant" for VAR_TYPE_TEXTURE
 import "citygraph.variant" for VAR_TYPE_NETWORK
-import "citygen" for Network as city_Network
+import "citygen" for Streets
 
 class Network is Node
 {
@@ -38,7 +38,7 @@ class Network is Node
 
 		if (!this.nw) 
 		{
-			this.nw = city_Network.init(v_tex.value.tex)
+			this.nw = Streets.init(v_tex.value.tex)
 			this.nw.build_streamlines(2)
 			this.nw.build_topology()
 		}

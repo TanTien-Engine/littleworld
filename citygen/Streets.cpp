@@ -1,4 +1,4 @@
-#include "Network.h"
+#include "Streets.h"
 #include "TensorField.h"
 
 #include <sm/SM_DouglasPeucker.h>
@@ -10,12 +10,12 @@
 namespace citygen
 {
 
-Network::Network(const std::shared_ptr<TensorField>& tf)
+Streets::Streets(const std::shared_ptr<TensorField>& tf)
 	: m_tf(tf)
 {
 }
 
-void Network::BuildStreamlines(int num)
+void Streets::BuildStreamlines(int num)
 {
 	float min = 0.0f;
 	float max = 1.0f;
@@ -43,13 +43,13 @@ void Network::BuildStreamlines(int num)
 	}
 }
 
-void Network::BuildTopology()
+void Streets::BuildTopology()
 {
 	IntersectPaths();
 	BuildGraph();
 }
 
-std::vector<sm::vec2> Network::GetNodes() const
+std::vector<sm::vec2> Streets::GetNodes() const
 {
 	std::vector<sm::vec2> ret;
 	for (auto& v : m_graph->vertices) {
@@ -60,7 +60,7 @@ std::vector<sm::vec2> Network::GetNodes() const
 	return ret;
 }
 
-std::vector<std::vector<sm::vec2>> Network::GetPolygons() const
+std::vector<std::vector<sm::vec2>> Streets::GetPolygons() const
 {
 	std::vector<std::vector<sm::vec2>> blocks;
 
@@ -97,7 +97,7 @@ std::vector<std::vector<sm::vec2>> Network::GetPolygons() const
 	return blocks;
 }
 
-std::vector<sm::vec2> Network::BuildPath(const sm::ivec2& p, bool major) const
+std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, bool major) const
 {
 	auto f = Travel(p, major, true);
 	auto b = Travel(p, major, false);
@@ -120,7 +120,7 @@ std::vector<sm::vec2> Network::BuildPath(const sm::ivec2& p, bool major) const
 	return path;
 }
 
-std::vector<sm::vec2> Network::Travel(const sm::ivec2& p, bool major, bool forward) const
+std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forward) const
 {
 	std::vector<sm::vec2> points;
 
@@ -155,7 +155,7 @@ std::vector<sm::vec2> Network::Travel(const sm::ivec2& p, bool major, bool forwa
 	return points;
 }
 
-sm::vec2 Network::CalcDir(const sm::ivec2& p, bool major) const
+sm::vec2 Streets::CalcDir(const sm::ivec2& p, bool major) const
 {
 	if (p.x < 0 || p.x > m_tf->GetWidth() ||
 		p.y < 0 || p.y > m_tf->GetHeight()) {
@@ -174,7 +174,7 @@ sm::vec2 Network::CalcDir(const sm::ivec2& p, bool major) const
 	return sm::vec2(cosf(theta), sinf(theta));
 }
 
-void Network::IntersectPaths()
+void Streets::IntersectPaths()
 {
 	for (size_t i = 0; i < m_major_paths.size(); ++i) {
 		IntersectPaths(m_border, m_major_paths[i]);
@@ -190,13 +190,13 @@ void Network::IntersectPaths()
 	}
 }
 
-void Network::IntersectPaths(std::vector<sm::vec2>& p0, std::vector<sm::vec2>& p1)
+void Streets::IntersectPaths(std::vector<sm::vec2>& p0, std::vector<sm::vec2>& p1)
 {
 	p0 = PathCutBy(p0, p1);
 	p1 = PathCutBy(p1, p0);
 }
 
-std::vector<sm::vec2> Network::PathCutBy(const std::vector<sm::vec2>& base, const std::vector<sm::vec2>& cut)
+std::vector<sm::vec2> Streets::PathCutBy(const std::vector<sm::vec2>& base, const std::vector<sm::vec2>& cut)
 {
 	if (base.empty()) {
 		return std::vector<sm::vec2>();
@@ -252,7 +252,7 @@ std::vector<sm::vec2> Network::PathCutBy(const std::vector<sm::vec2>& base, cons
 	return ret;
 }
 
-void Network::BuildGraph()
+void Streets::BuildGraph()
 {
 	auto g = std::make_shared<Graph>();
 
@@ -276,10 +276,10 @@ void Network::BuildGraph()
 }
 
 //////////////////////////////////////////////////////////////////////////
-// class Network::VertexComp
+// class Streets::VertexComp
 //////////////////////////////////////////////////////////////////////////
 
-bool Network::VertexComp::operator () (const Vertex* lhs, const Vertex* rhs) const
+bool Streets::VertexComp::operator () (const Vertex* lhs, const Vertex* rhs) const
 {
 	if (lhs->pos.y == rhs->pos.y) {
 		return lhs->pos.x < rhs->pos.x;
@@ -289,10 +289,10 @@ bool Network::VertexComp::operator () (const Vertex* lhs, const Vertex* rhs) con
 }
 
 //////////////////////////////////////////////////////////////////////////
-// class Network::EdgeComp
+// class Streets::EdgeComp
 //////////////////////////////////////////////////////////////////////////
 
-bool Network::EdgeComp::operator () (const Edge& lhs, const Edge& rhs) const
+bool Streets::EdgeComp::operator () (const Edge& lhs, const Edge& rhs) const
 {
 	float ang0 = sm::get_line_angle(lhs.f->pos, lhs.t->pos);
 	float ang1 = sm::get_line_angle(rhs.f->pos, rhs.t->pos);
@@ -300,17 +300,17 @@ bool Network::EdgeComp::operator () (const Edge& lhs, const Edge& rhs) const
 }
 
 //////////////////////////////////////////////////////////////////////////
-// class Network::Graph
+// class Streets::Graph
 //////////////////////////////////////////////////////////////////////////
 
-Network::Graph::~Graph()
+Streets::Graph::~Graph()
 {
 	for (auto v : vertices) {
 		delete v;
 	}
 }
 
-Network::Vertex* Network::Graph::AddVertex(const sm::vec2& pos)
+Streets::Vertex* Streets::Graph::AddVertex(const sm::vec2& pos)
 {
 	for (auto& vert : vertices) {
 		if (sm::dis_pos_to_pos(vert->pos, pos) < SM_LARGE_EPSILON) {
@@ -324,7 +324,7 @@ Network::Vertex* Network::Graph::AddVertex(const sm::vec2& pos)
 	return vert;
 }
 
-void Network::Graph::AddPath(const std::vector<sm::vec2>& path)
+void Streets::Graph::AddPath(const std::vector<sm::vec2>& path)
 {
 	std::vector<Vertex*> vertices;
 
@@ -349,7 +349,7 @@ void Network::Graph::AddPath(const std::vector<sm::vec2>& path)
 	}
 }
 
-void Network::Graph::RemoveDegTwoVert()
+void Streets::Graph::RemoveDegTwoVert()
 {
 	for (auto itr = vertices.begin(); itr != vertices.end(); )
 	{
@@ -382,7 +382,7 @@ void Network::Graph::RemoveDegTwoVert()
 	}
 }
 
-void Network::Graph::BuildHalfedge()
+void Streets::Graph::BuildHalfedge()
 {
 	auto pair = [](Edge& e0, Edge& e1) {
 		e0.pair = &e1;

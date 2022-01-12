@@ -1,7 +1,7 @@
 #define QUOTE(...) #__VA_ARGS__
 static const char* citygenModuleSource = QUOTE(
 
-foreign class Network
+foreign class Streets
 {
 	init(tensor_field) {}
 

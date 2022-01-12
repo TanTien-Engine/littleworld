@@ -1,7 +1,7 @@
 #include "wrap_CityGen.h"
 #include "modules/script/Proxy.h"
 #include "TensorField.h"
-#include "Network.h"
+#include "Streets.h"
 #include "Block.h"
 
 #include <unirender/Texture.h>
@@ -12,33 +12,33 @@
 namespace
 {
 
-void w_Network_allocate()
+void w_Streets_allocate()
 {
     auto tex = ((tt::Proxy<ur::Texture>*)ves_toforeign(1))->obj;
     auto tf = std::make_shared<citygen::TensorField>(*tex);
-    auto nw = std::make_shared<citygen::Network>(tf);
+    auto nw = std::make_shared<citygen::Streets>(tf);
 
-    auto proxy = (tt::Proxy<citygen::Network>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Network>));
+    auto proxy = (tt::Proxy<citygen::Streets>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Streets>));
     proxy->obj = nw;
 }
 
-int w_Network_finalize(void* data)
+int w_Streets_finalize(void* data)
 {
-    auto proxy = (tt::Proxy<citygen::Network>*)(data);
+    auto proxy = (tt::Proxy<citygen::Streets>*)(data);
     proxy->~Proxy();
-    return sizeof(tt::Proxy<citygen::Network>);
+    return sizeof(tt::Proxy<citygen::Streets>);
 }
 
-void w_Network_build_streamlines()
+void w_Streets_build_streamlines()
 {
-    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto num = (int)ves_tonumber(1);
     nw->BuildStreamlines(num);
 }
 
-void w_Network_build_topology()
+void w_Streets_build_topology()
 {
-    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     nw->BuildTopology();
 }
 
@@ -67,9 +67,9 @@ void return_points(const std::vector<std::vector<sm::vec2>>& points)
     }
 }
 
-void w_Network_get_major_paths()
+void w_Streets_get_major_paths()
 {
-    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto& major_paths = nw->GetMajorPaths();
     
     ves_pop(1);
@@ -77,9 +77,9 @@ void w_Network_get_major_paths()
     return_points(major_paths);
 }
 
-void w_Network_get_minor_paths()
+void w_Streets_get_minor_paths()
 {
-    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto& minor_paths = nw->GetMinorPaths();
 
     ves_pop(1);
@@ -87,9 +87,9 @@ void w_Network_get_minor_paths()
     return_points(minor_paths);
 }
 
-void w_Network_get_nodes()
+void w_Streets_get_nodes()
 {
-    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto nodes = nw->GetNodes();
 
     ves_pop(1);
@@ -110,9 +110,9 @@ void w_Network_get_nodes()
     }
 }
 
-void w_Network_get_polygons()
+void w_Streets_get_polygons()
 {
-    auto nw = ((tt::Proxy<citygen::Network>*)ves_toforeign(0))->obj;
+    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto polygons = nw->GetPolygons();
 
     ves_pop(1);
@@ -187,12 +187,12 @@ namespace citygen
 
 VesselForeignMethodFn CityGenBindMethod(const char* signature)
 {
-    if (strcmp(signature, "Network.build_streamlines(_)") == 0) return w_Network_build_streamlines;
-    if (strcmp(signature, "Network.build_topology()") == 0) return w_Network_build_topology;
-    if (strcmp(signature, "Network.get_major_paths()") == 0) return w_Network_get_major_paths;
-    if (strcmp(signature, "Network.get_minor_paths()") == 0) return w_Network_get_minor_paths;
-    if (strcmp(signature, "Network.get_nodes()") == 0) return w_Network_get_nodes;
-    if (strcmp(signature, "Network.get_polygons()") == 0) return w_Network_get_polygons;
+    if (strcmp(signature, "Streets.build_streamlines(_)") == 0) return w_Streets_build_streamlines;
+    if (strcmp(signature, "Streets.build_topology()") == 0) return w_Streets_build_topology;
+    if (strcmp(signature, "Streets.get_major_paths()") == 0) return w_Streets_get_major_paths;
+    if (strcmp(signature, "Streets.get_minor_paths()") == 0) return w_Streets_get_minor_paths;
+    if (strcmp(signature, "Streets.get_nodes()") == 0) return w_Streets_get_nodes;
+    if (strcmp(signature, "Streets.get_polygons()") == 0) return w_Streets_get_polygons;
 
     if (strcmp(signature, "Block.offset_clone(_)") == 0) return w_Block_offset_clone;
     if (strcmp(signature, "Block.get_border()") == 0) return w_Block_get_border;
@@ -202,10 +202,10 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
 
 void CityGenBindClass(const char* class_name, VesselForeignClassMethods* methods)
 {
-    if (strcmp(class_name, "Network") == 0)
+    if (strcmp(class_name, "Streets") == 0)
     {
-        methods->allocate = w_Network_allocate;
-        methods->finalize = w_Network_finalize;
+        methods->allocate = w_Streets_allocate;
+        methods->finalize = w_Streets_finalize;
         return;
     }
 
