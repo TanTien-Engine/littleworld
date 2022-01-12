@@ -103,16 +103,29 @@ std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forwa
 	sm::vec2 fp((float)p.x, (float)p.y);
 	sm::vec2 prev_dir = sm::vec2(0, 0);
 
+	const int scale = 4;
+	std::vector<bool> visited(m_tf->GetWidth() / scale * m_tf->GetHeight() / scale, false);
+
 	const int max_steps = m_tf->GetWidth() * 2;
+	int prev_idx = 0;
 	for (size_t i = 0; i < max_steps; ++i)
 	{
 		points.push_back(fp);
 
-		int x = int(fp.x);
-		int y = int(fp.y);
-//		out_color[y * map_size + x] = color;
+		if (fp.x < 0 || fp.x > m_tf->GetWidth() ||
+			fp.y < 0 || fp.y > m_tf->GetHeight()) {
+			break;
+		}
 
-		auto dir = CalcDir(sm::ivec2(x, y), major);
+		const int idx = ((int)fp.y / scale) * (m_tf->GetWidth() / scale) + ((int)fp.x / scale);
+		if (idx != prev_idx && visited[idx]) {
+			break;
+		}
+
+		visited[idx] = true;
+		prev_idx = idx;
+
+		auto dir = CalcDir(fp, major);
 		if (!forward) {
 			dir = -dir;
 		}
@@ -122,7 +135,6 @@ std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forwa
 		prev_dir = dir;
 
 		if (dir.x == 0 && dir.y == 0) {
-//			out_color[y * map_size + x] = 255;
 			break;
 		}
 		fp += dir;
