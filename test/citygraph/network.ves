@@ -10,7 +10,7 @@ _editor.add_node(node1, -102.24823175604, 243.26904391315)
 var node2 = ::blueprint::nodes::subgraph::Subgraph()
 node2.load_from_file(_editor, "../../assets/blueprints/tensor_transform.ves")
 
-_editor.add_node(node2, 209.252818085, 263.63936759386)
+_editor.add_node(node2, 215.61645444864, 250.91209486659)
 
 var node3 = ::rendergraph::nodes::texture::Texture()
 node3.query_param("unif_name").value = "u_tex"
@@ -22,7 +22,7 @@ _editor.add_node(node3, -272.13834111664, 57.456940301756)
 
 var node4 = ::blueprint::nodes::number2::Number2()
 
-node4.value.set(0.56046140193939, 0.80490589141846)
+node4.value.set(0.73823922872543, 0.78268367052078)
 
 _editor.add_node(node4, -619.4415333632, 158.5464539783)
 
@@ -31,7 +31,7 @@ var node5 = ::citygraph::nodes::saddle::Saddle()
 _editor.add_node(node5, -304.85363391215, 250.01653018668)
 
 var node6 = ::citygraph::nodes::streamlines::Streamlines()
-node6.query_param("num").value = 3
+node6.query_param("num").value = 2
 
 _editor.add_node(node6, 170.1254521413, 97.97996394283)
 
@@ -45,7 +45,7 @@ _editor.add_node(node8, -435.90936279297, 458.44842529297)
 
 var node9 = ::citygraph::nodes::radiate::Radiate()
 
-_editor.add_node(node9, -445.36636279297, 143.27442529297)
+_editor.add_node(node9, -448.44531150235, 133.01126292836)
 
 var node10 = ::blueprint::nodes::number2::Number2()
 
@@ -59,41 +59,37 @@ _editor.add_node(node11, -185.17284545898, 408.06342163086)
 
 var node12 = ::blueprint::nodes::print::Print()
 
-_editor.add_node(node12, 444.60424401566, 258.76044231024)
+_editor.add_node(node12, 440.09635521025, 301.58538596163)
 
 var node13 = ::imagegraph::nodes::erosion::Erosion()
 
 _editor.add_node(node13, 171.51925939447, 38.588026886842)
 
-var node14 = ::citygraph::nodes::network::Network()
+var node14 = ::geograph::nodes::draw_geometry::DrawGeometry()
+node14.query_param("skip").value = false
 
-_editor.add_node(node14, 170.94435579915, -32.496094254423)
+_editor.add_node(node14, 651.80104280478, -60.058208714096)
 
-var node15 = ::geograph::nodes::draw_geometry::DrawGeometry()
-node15.query_param("skip").value = false
+var node15 = ::citygraph::nodes::streets::Streets()
 
-_editor.add_node(node15, 651.80104280478, -60.058208714096)
+_editor.add_node(node15, 174.51140910209, -54.791298883615)
 
-var node16 = ::citygraph::nodes::streets::Streets()
+var node16 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node16, 307.61140910209, -45.991298883615)
+_editor.add_node(node16, 469.32786467877, -131.49680243712)
 
-var node17 = ::blueprint::nodes::merge::Merge()
+var node17 = ::citygraph::nodes::offset::Offset()
+node17.query_param("distance").value = 10
 
-_editor.add_node(node17, 469.32786467877, -131.49680243712)
+_editor.add_node(node17, 454.48629798849, -212.68243819812)
 
-var node18 = ::citygraph::nodes::offset::Offset()
-node18.query_param("distance").value = 8.6281909942627
+var node18 = ::citygraph::nodes::blocks::Blocks()
 
-_editor.add_node(node18, 413.34629798849, -316.74243819812)
+_editor.add_node(node18, 309.99442895581, -136.45500518639)
 
-var node19 = ::citygraph::nodes::blocks::Blocks()
+var node19 = ::citygraph::nodes::block_to_geo::BlockToGeo()
 
-_editor.add_node(node19, 280.95442895581, -241.72500518639)
-
-var node20 = ::citygraph::nodes::block_to_geo::BlockToGeo()
-
-_editor.add_node(node20, 587.37671258412, -239.42532702875)
+_editor.add_node(node19, 587.37671258412, -204.33532702875)
 
 Blueprint.connect(node0, "uv", node9, "st")
 Blueprint.connect(node10, "v2", node9, "pos")
@@ -104,20 +100,17 @@ Blueprint.connect(node9, "ret", node11, "b")
 Blueprint.connect(node0, "uv", node7, "st")
 Blueprint.connect(node4, "v2", node7, "pos")
 Blueprint.connect(node7, "ret", node1, "tensor")
-Blueprint.connect(node1, "tensor_field", node14, "tf")
-Blueprint.connect(node14, "nw", node16, "nw")
-Blueprint.connect(node16, "blocks", node19, "geos")
-Blueprint.connect(node19, "blocks", node18, "blocks")
-Blueprint.connect(node18, "blocks", node20, "blocks")
-Blueprint.connect(node20, "geos", node15, "geos")
-Blueprint.connect(node16, "blocks", node17, "in0")
-Blueprint.connect(node16, "routes", node17, "in1")
+Blueprint.connect(node1, "tensor_field", node15, "tf")
+Blueprint.connect(node15, "blocks", node18, "geos")
+Blueprint.connect(node18, "blocks", node17, "blocks")
+Blueprint.connect(node17, "blocks", node19, "blocks")
+Blueprint.connect(node15, "blocks", node16, "in0")
+Blueprint.connect(node15, "routes", node16, "in1")
+Blueprint.connect(node15, "routes", node14, "geos")
 Blueprint.connect(node1, "tensor_field", node13, "tex")
 Blueprint.connect(node1, "tensor_field", node6, "tf")
-Blueprint.connect(node1, "next", node2, "prev")
+Blueprint.connect(node6, "tex", node12, "value")
 Blueprint.connect(node3, "tex", node2, "base_texture")
 Blueprint.connect(node1, "tensor_field", node2, "tensor_field")
-Blueprint.connect(node2, "next", node12, "prev")
-Blueprint.connect(node2, "tex", node12, "value")
 Blueprint.connect(node0, "uv", node5, "st")
 Blueprint.connect(node4, "v2", node5, "pos")

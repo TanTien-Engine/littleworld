@@ -2,7 +2,7 @@ import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
-import "citygraph.variant" for VAR_TYPE_NETWORK
+import "rendergraph.variant" for VAR_TYPE_TEXTURE
 import "citygraph.style" for BLOCK_COLORS
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.config" for POINT_RADIUS
@@ -10,6 +10,7 @@ import "geometry" for Polyline, Circle, Polygon, Triangles
 import "graphics" for Graphics
 import "maths.vector" for Vector3
 import "math" for Math
+import "citygen" for Streets as cg_Streets
 
 class Streets is Node
 {
@@ -18,7 +19,7 @@ class Streets is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "nw", VAR_TYPE_NETWORK)
+			Pin(this, "tf", VAR_TYPE_TEXTURE)
 		]
 		this.exports = [
 			Pin(this, "routes",    VAR_TYPE_GEO),
@@ -28,6 +29,8 @@ class Streets is Node
 
 		this.layout()
 
+		this.st = nil
+
 		this.v_routes    = nil
 		this.v_crossings = nil
 		this.v_blocks    = nil
@@ -35,6 +38,8 @@ class Streets is Node
 
 	on_node_dirty()
 	{
+		this.st = nil
+
 		this.v_routes    = nil
 		this.v_crossings = nil
 		this.v_blocks    = nil
@@ -42,21 +47,26 @@ class Streets is Node
 
 	calc_value(idx)
 	{
-		var v_nw = Blueprint.calc_input_value(this, 0)
-		if (!v_nw) {
+		var v_tex = Blueprint.calc_input_value(this, 0)
+		if (!v_tex or !v_tex.value) {
 			return nil
 		}
 
-		var nw = v_nw.value
+		if (!this.st) 
+		{
+			this.st = cg_Streets.init(v_tex.value.tex)
+			this.st.build_streamlines(2)
+			this.st.build_topology()
+		}
 
 		if (idx == 0)
 		{
 			if (!this.v_routes) 
 			{
-				var major = nw.get_major_paths()
+				var major = this.st.get_major_paths()
 				var v_major = this.build_routes(major, Vector3(1.0, 0.0, 0.0))
 
-				var minor = nw.get_minor_paths()
+				var minor = this.st.get_minor_paths()
 				var v_minor = this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
 
 				this.v_routes = Variant([ v_major, v_minor ])
@@ -68,7 +78,7 @@ class Streets is Node
 		{
 			if (!this.v_crossings)
 			{
-				var nodes = nw.get_nodes()
+				var nodes = this.st.get_nodes()
 				this.v_crossings = this.build_crossings(nodes, Vector3(0.0, 0.0, 1.0))
 			}
 
@@ -78,7 +88,7 @@ class Streets is Node
 		{
 			if (!this.v_blocks)
 			{
-				var polygons = nw.get_polygons()
+				var polygons = this.st.get_polygons()
 				this.v_blocks = this.build_blocks(polygons)
 			}
 

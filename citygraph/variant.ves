@@ -1,2 +1,1 @@
-var VAR_TYPE_NETWORK = "network"
-var VAR_TYPE_BLOCK   = "block"
+var VAR_TYPE_BLOCK = "block"
