@@ -1,5 +1,6 @@
 #include "Streets.h"
 #include "TensorField.h"
+#include "Graph.h"
 
 #include <sm/SM_DouglasPeucker.h>
 #include <SM_Calc.h>
@@ -52,9 +53,9 @@ void Streets::BuildTopology()
 std::vector<sm::vec2> Streets::GetNodes() const
 {
 	std::vector<sm::vec2> ret;
-	for (auto& v : m_graph->vertices) {
-		if (v->edges.size() != 2) {
-			ret.push_back(v->pos);
+	for (auto& vert : m_graph->GetVertices()) {
+		if (vert->edges.size() != 2) {
+			ret.push_back(vert->pos);
 		}
 	}
 	return ret;
@@ -62,34 +63,9 @@ std::vector<sm::vec2> Streets::GetNodes() const
 
 std::vector<std::vector<sm::vec2>> Streets::GetPolygons() const
 {
-	std::vector<std::vector<sm::vec2>> blocks;
+	auto blocks = m_graph->GetPolygons();
 
-	for (auto vert : m_graph->vertices)
-	{
-		for (auto& edge : vert->edges)
-		{
-			if (edge.visited) {
-				continue;
-			}
-
-			std::vector<sm::vec2> block;
-
-			const Edge* first = &edge;
-			const Edge* curr = first;
-			do
-			{
-				curr->visited = true;
-
-				block.push_back(curr->f->pos);
-
-				curr = curr->next;
-			} while (curr != first);
-
-			blocks.push_back(block);
-		}
-	}
-
-	// pop the front
+	// sikp the outside block
 	if (!blocks.empty()) {
 		blocks.erase(blocks.begin());
 	}
@@ -254,199 +230,23 @@ std::vector<sm::vec2> Streets::PathCutBy(const std::vector<sm::vec2>& base, cons
 
 void Streets::BuildGraph()
 {
-	auto g = std::make_shared<Graph>();
+	m_graph = std::make_shared<Graph>();
 
-	g->AddPath(m_border);
+	m_graph->AddPath(m_border);
 	for (auto& path : m_major_paths) {
-		g->AddPath(path);
+		m_graph->AddPath(path);
 	}
 	for (auto& path : m_minor_paths) {
-		g->AddPath(path);
+		m_graph->AddPath(path);
 	}
 
 	std::vector<int> num(10, 0);
-	for (auto itr = g->vertices.begin(); itr != g->vertices.end(); ++itr) {
-		++num[(*itr)->edges.size()];
+	for (auto& vert : m_graph->GetVertices()) {
+		++num[vert->edges.size()];
 	}
 
-	//g->RemoveDegTwoVert();
-	g->BuildHalfedge();
-	
-	m_graph = g;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// class Streets::VertexComp
-//////////////////////////////////////////////////////////////////////////
-
-bool Streets::VertexComp::operator () (const Vertex* lhs, const Vertex* rhs) const
-{
-	if (lhs->pos.y == rhs->pos.y) {
-		return lhs->pos.x < rhs->pos.x;
-	} else {
-		return lhs->pos.y < rhs->pos.y;
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////
-// class Streets::EdgeComp
-//////////////////////////////////////////////////////////////////////////
-
-bool Streets::EdgeComp::operator () (const Edge& lhs, const Edge& rhs) const
-{
-	float ang0 = sm::get_line_angle(lhs.f->pos, lhs.t->pos);
-	float ang1 = sm::get_line_angle(rhs.f->pos, rhs.t->pos);
-	return ang0 < ang1;
-}
-
-//////////////////////////////////////////////////////////////////////////
-// class Streets::Graph
-//////////////////////////////////////////////////////////////////////////
-
-Streets::Graph::~Graph()
-{
-	for (auto v : vertices) {
-		delete v;
-	}
-}
-
-Streets::Vertex* Streets::Graph::AddVertex(const sm::vec2& pos)
-{
-	for (auto& vert : vertices) {
-		if (sm::dis_pos_to_pos(vert->pos, pos) < SM_LARGE_EPSILON) {
-			return vert;
-		}
-	}
-
-	Vertex* vert = new Vertex(pos);
-	vertices.insert(vert);
-
-	return vert;
-}
-
-void Streets::Graph::AddPath(const std::vector<sm::vec2>& path)
-{
-	std::vector<Vertex*> vertices;
-
-	for (auto& pos : path) 
-	{
-		auto vert = AddVertex(pos);
-		if (vertices.empty() || vertices.back() != vert) {
-			vertices.push_back(vert);
-		}
-	}
-
-	if (vertices.size() < 2) {
-		return;
-	}
-
-	for (size_t i = 0, n = vertices.size() - 1; i < n; ++i) 
-	{
-		auto v0 = vertices[i];
-		auto v1 = vertices[i + 1];
-		v0->edges.insert(Edge(v0, v1));
-		v1->edges.insert(Edge(v1, v0));
-	}
-}
-
-void Streets::Graph::RemoveDegTwoVert()
-{
-	for (auto itr = vertices.begin(); itr != vertices.end(); )
-	{
-		Vertex* vert = *itr;
-		if (vert->edges.size() == 2) 
-		{
-			auto e0 = *vert->edges.begin();
-			auto e1 = *(++vert->edges.begin());
-
-			auto v0 = e0.t;
-			auto v1 = e1.t;
-
-			for (auto e : v0->edges) {
-				if (e.t == vert) {
-					e.t = v1;
-				}
-			}
-			for (auto e : v1->edges) {
-				if (e.t == vert) {
-					e.t = v0;
-				}
-			}
-
-			itr = vertices.erase(itr);
-		}
-		else
-		{
-			++itr;
-		}
-	}
-}
-
-void Streets::Graph::BuildHalfedge()
-{
-	auto pair = [](Edge& e0, Edge& e1) {
-		e0.pair = &e1;
-		e1.pair = &e0;
-	};
-	auto conn = [](Edge& e0, Edge& e1) {
-		e0.next = &e1;
-		e1.prev = &e0;
-	};
-
-	for (auto itr = vertices.begin(); itr != vertices.end(); ++itr)
-	{
-		Vertex* vert = *itr;
-		for (auto itr2 = vert->edges.begin(); itr2 != vert->edges.end(); ++itr2)
-		{
-			Edge& edge = const_cast<Edge&>(*itr2);
-
-			// pair
-			if (!edge.pair) {
-				for (auto itr3 = edge.t->edges.begin(); itr3 != edge.t->edges.end() && !edge.pair; ++itr3) {
-					if (itr3->t == vert) {
-						pair(edge, const_cast<Edge&>(*itr3));
-						break;
-					}
-				}
-			}
-
-			// next and prev
-			if (!edge.next)
-			{
-				if (edge.t->edges.size() == 2)
-				{
-					auto& e0 = *edge.t->edges.begin();
-					auto& e1 = *(++edge.t->edges.begin());
-					if (e0.t == vert) {
-						conn(edge, const_cast<Edge&>(e1));
-					} else {
-						conn(edge, const_cast<Edge&>(e0));
-					}
-				}
-				else
-				{
-					auto itr = edge.t->edges.begin();
-					for (; itr != edge.t->edges.end(); ++itr)
-					{
-						if (itr->t == vert) {
-							break;
-						}
-					}
-
-					assert(itr != edge.t->edges.end());
-
-					auto next = ++itr;
-					if (next == edge.t->edges.end()) {
-						next = edge.t->edges.begin();
-					}
-
-					//auto next = itr == edge.t->edges.begin() ? --edge.t->edges.end() : --itr;
-
-					conn(edge, const_cast<Edge&>(*next));
-				}
-			}
-		}
-	}
+	//m_graph->RemoveDegTwoVert();
+	m_graph->BuildHalfedge();
 }
 
 }

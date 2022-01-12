@@ -2,14 +2,14 @@
 
 #include <SM_Vector.h>
 
-#include <vector>
-#include <set>
 #include <memory>
+#include <vector>
 
 namespace citygen
 {
 
 class TensorField;
+class Graph;
 
 class Streets
 {
@@ -24,59 +24,6 @@ public:
 
 	std::vector<sm::vec2> GetNodes() const;
 	std::vector<std::vector<sm::vec2>> GetPolygons() const;
-
-private:
-	struct Vertex;
-	struct Edge;
-
-	struct VertexComp
-	{
-		bool operator () (const Vertex* lhs, const Vertex* rhs) const;
-	};
-
-	struct EdgeComp
-	{
-		bool operator () (const Edge& lhs, const Edge& rhs) const;
-	};
-
-	struct Vertex
-	{
-		Vertex(const sm::vec2& pos) : pos(pos) {}
-
-		sm::vec2 pos;
-
-		std::set<Edge, EdgeComp> edges;
-	};
-
-	struct Edge
-	{
-		Edge(Vertex* f, Vertex* t) : f(f), t(t) {
-			assert(f != t);
-		}
-
-		Vertex* f = nullptr;
-		Vertex* t = nullptr;
-
-		const Edge* pair = nullptr;
-		const Edge* prev = nullptr;
-		const Edge* next = nullptr;
-
-		mutable bool visited = false;
-	};
-
-	struct Graph
-	{
-		~Graph();
-
-		Vertex* AddVertex(const sm::vec2& pos);
-		void AddPath(const std::vector<sm::vec2>& path);
-
-		void RemoveDegTwoVert();
-
-		void BuildHalfedge();
-
-		std::set<Vertex*, VertexComp> vertices;
-	};
 
 private:
 	std::vector<sm::vec2> BuildPath(const sm::ivec2& p, bool major) const;
