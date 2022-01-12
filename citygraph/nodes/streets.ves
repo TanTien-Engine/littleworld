@@ -2,6 +2,7 @@ import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
+import "blueprint.node_param" for NodeParam
 import "rendergraph.variant" for VAR_TYPE_TEXTURE
 import "citygraph.style" for BLOCK_COLORS
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
@@ -26,6 +27,8 @@ class Streets is Node
 			Pin(this, "crossings", VAR_TYPE_GEO),
 			Pin(this, "blocks",    VAR_TYPE_GEO),
 		]
+
+		this.params.add(NodeParam("num", 2, {  "integer" : true, "region" : 10 }))
 
 		this.layout()
 
@@ -55,7 +58,10 @@ class Streets is Node
 		if (!this.st) 
 		{
 			this.st = cg_Streets.init(v_tex.value.tex)
-			this.st.build_streamlines(2)
+
+			var num = this.query_param("num").value
+			this.st.build_streamlines(num)
+
 			this.st.build_topology()
 		}
 
