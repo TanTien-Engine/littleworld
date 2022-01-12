@@ -29,7 +29,7 @@ private:
 	std::vector<sm::vec2> BuildPath(const sm::ivec2& p, bool major) const;
 
 	std::vector<sm::vec2> Travel(const sm::ivec2& p, bool major, bool forward) const;
-	sm::vec2 CalcDir(const sm::ivec2& p, bool major) const;
+	sm::vec2 CalcDir(const sm::vec2& p, bool major) const;
 
 	void IntersectPaths();
 	static void IntersectPaths(std::vector<sm::vec2>& p0, std::vector<sm::vec2>& p1);

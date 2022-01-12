@@ -131,21 +131,38 @@ std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forwa
 	return points;
 }
 
-sm::vec2 Streets::CalcDir(const sm::ivec2& p, bool major) const
+sm::vec2 Streets::CalcDir(const sm::vec2& p, bool major) const
 {
 	if (p.x < 0 || p.x > m_tf->GetWidth() ||
 		p.y < 0 || p.y > m_tf->GetHeight()) {
 		return sm::vec2(0, 0);
 	}
 
-	auto t = m_tf->GetTensor(p.x, p.y);
-	if (abs(t.x) < 0.00001) {
+	sm::vec4 tensor;
+
+	int x_min = static_cast<int>(floorf(p.x));
+	int x_max = x_min + 1;
+	int y_min = static_cast<int>(floorf(p.y));
+	int y_max = y_min + 1;
+
+	//if (x_max > m_tf->GetWidth() || y_max > m_tf->GetHeight()) 
+	//{
+		tensor = m_tf->GetTensor(x_min, y_min);
+	//}
+	//else
+	//{
+	//	sm::vec4 t_down = m_tf->GetTensor(x_min, y_min) * (x_max - p.x) + m_tf->GetTensor(x_max, y_min) * (p.x - x_min);
+	//	sm::vec4 t_up   = m_tf->GetTensor(x_min, y_max) * (x_max - p.x) + m_tf->GetTensor(x_max, y_max) * (p.x - x_min);
+	//	tensor = t_down * (y_max - p.y) + t_up * (p.y - y_min);
+	//}
+
+	if (abs(tensor.x) < 0.00001) {
 		return sm::vec2(0, 0);
 	}
 
-	float theta = atan2f(t.y, t.x) / 2.0f;
+	float theta = atan2f(tensor.y, tensor.x) / 2.0f;
 	if (!major) {
-		theta += 1.57f;
+		theta += SM_PI * 0.5;
 	}
 	return sm::vec2(cosf(theta), sinf(theta));
 }
