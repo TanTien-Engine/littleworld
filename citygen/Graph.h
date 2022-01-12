@@ -22,6 +22,8 @@ public:
 	auto& GetVertices() const { return m_vertices; }
 	std::vector<std::vector<sm::vec2>> GetPolygons() const;
 
+	void VertexMerge(float dist);
+
 private:
 	struct Vertex;
 	struct Edge;
@@ -35,16 +37,19 @@ private:
 
 	struct EdgeComp
 	{
-		bool operator () (const Edge& lhs, const Edge& rhs) const;
+		bool operator () (const Edge* lhs, const Edge* rhs) const;
 	};
 
 	struct Vertex
 	{
 		Vertex(const sm::vec2& pos) : pos(pos) {}
+		~Vertex();
+
+		void AddEdge(Vertex* vert);
 
 		sm::vec2 pos;
 
-		std::set<Edge, EdgeComp> edges;
+		std::vector<Edge*> edges;
 	};
 
 	struct Edge

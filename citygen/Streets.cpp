@@ -269,12 +269,15 @@ void Streets::BuildGraph()
 		m_graph->AddPath(path);
 	}
 
-	std::vector<int> num(10, 0);
-	for (auto& vert : m_graph->GetVertices()) {
-		++num[vert->edges.size()];
-	}
+	//std::vector<int> num(10, 0);
+	//for (auto& vert : m_graph->GetVertices()) {
+	//	++num[vert->edges.size()];
+	//}
 
 	//m_graph->RemoveDegTwoVert();
+
+	m_graph->VertexMerge(0.005f);
+
 	m_graph->BuildHalfedge();
 }
 

@@ -32,8 +32,8 @@ void Graph::AddPath(const std::vector<sm::vec2>& path)
 	{
 		auto v0 = m_vertices[i];
 		auto v1 = m_vertices[i + 1];
-		v0->edges.insert(Edge(v0, v1));
-		v1->edges.insert(Edge(v1, v0));
+		v0->AddEdge(v1);
+		v1->AddEdge(v0);
 	}
 }
 
@@ -47,20 +47,21 @@ void Graph::RemoveDegTwoVert()
 			auto e0 = *vert->edges.begin();
 			auto e1 = *(++vert->edges.begin());
 
-			auto v0 = e0.t;
-			auto v1 = e1.t;
+			auto v0 = e0->t;
+			auto v1 = e1->t;
 
 			for (auto e : v0->edges) {
-				if (e.t == vert) {
-					e.t = v1;
+				if (e->t == vert) {
+					e->t = v1;
 				}
 			}
 			for (auto e : v1->edges) {
-				if (e.t == vert) {
-					e.t = v0;
+				if (e->t == vert) {
+					e->t = v0;
 				}
 			}
 
+			delete vert;
 			itr = m_vertices.erase(itr);
 		}
 		else
@@ -72,13 +73,26 @@ void Graph::RemoveDegTwoVert()
 
 void Graph::BuildHalfedge()
 {
-	auto pair = [](Edge& e0, Edge& e1) {
-		e0.pair = &e1;
-		e1.pair = &e0;
+	// clean halfedge
+	for (auto& v : m_vertices) {
+		for (auto& e : v->edges) {
+			e->pair = nullptr;
+			e->prev = nullptr;
+			e->next = nullptr;
+		}
+	}
+	// sort edges
+	for (auto& v : m_vertices) {
+		std::sort(v->edges.begin(), v->edges.end(), EdgeComp());
+	}
+
+	auto pair = [](Edge* e0, Edge* e1) {
+		e0->pair = e1;
+		e1->pair = e0;
 	};
-	auto conn = [](Edge& e0, Edge& e1) {
-		e0.next = &e1;
-		e1.prev = &e0;
+	auto conn = [](Edge* e0, Edge* e1) {
+		e0->next = e1;
+		e1->prev = e0;
 	};
 
 	for (auto itr = m_vertices.begin(); itr != m_vertices.end(); ++itr)
@@ -86,51 +100,51 @@ void Graph::BuildHalfedge()
 		Vertex* vert = *itr;
 		for (auto itr2 = vert->edges.begin(); itr2 != vert->edges.end(); ++itr2)
 		{
-			Edge& edge = const_cast<Edge&>(*itr2);
+			auto edge = *itr2;
 
 			// pair
-			if (!edge.pair) {
-				for (auto itr3 = edge.t->edges.begin(); itr3 != edge.t->edges.end() && !edge.pair; ++itr3) {
-					if (itr3->t == vert) {
-						pair(edge, const_cast<Edge&>(*itr3));
+			if (!edge->pair) {
+				for (auto itr3 = edge->t->edges.begin(); itr3 != edge->t->edges.end() && !edge->pair; ++itr3) {
+					if ((*itr3)->t == vert) {
+						pair(edge, *itr3);
 						break;
 					}
 				}
 			}
 
 			// next and prev
-			if (!edge.next)
+			if (!edge->next)
 			{
-				if (edge.t->edges.size() == 2)
+				if (edge->t->edges.size() == 2)
 				{
-					auto& e0 = *edge.t->edges.begin();
-					auto& e1 = *(++edge.t->edges.begin());
-					if (e0.t == vert) {
-						conn(edge, const_cast<Edge&>(e1));
+					auto e0 = *edge->t->edges.begin();
+					auto e1 = *(++edge->t->edges.begin());
+					if (e0->t == vert) {
+						conn(edge, e1);
 					} else {
-						conn(edge, const_cast<Edge&>(e0));
+						conn(edge, e0);
 					}
 				}
 				else
 				{
-					auto itr = edge.t->edges.begin();
-					for (; itr != edge.t->edges.end(); ++itr)
+					auto itr = edge->t->edges.begin();
+					for (; itr != edge->t->edges.end(); ++itr)
 					{
-						if (itr->t == vert) {
+						if ((*itr)->t == vert) {
 							break;
 						}
 					}
 
-					assert(itr != edge.t->edges.end());
+					assert(itr != edge->t->edges.end());
 
 					auto next = ++itr;
-					if (next == edge.t->edges.end()) {
-						next = edge.t->edges.begin();
+					if (next == edge->t->edges.end()) {
+						next = edge->t->edges.begin();
 					}
 
-					//auto next = itr == edge.t->edges.begin() ? --edge.t->edges.end() : --itr;
+					//auto next = itr == edge->t->edges.begin() ? --edge->t->edges.end() : --itr;
 
-					conn(edge, const_cast<Edge&>(*next));
+					conn(edge, *next);
 				}
 			}
 		}
@@ -139,7 +153,8 @@ void Graph::BuildHalfedge()
 
 Graph::Vertex* Graph::AddVertex(const sm::vec2& pos)
 {
-	for (auto& vert : m_vertices) {
+	for (auto& vert : m_vertices) 
+	{
 		if (sm::dis_pos_to_pos(vert->pos, pos) < SM_LARGE_EPSILON) {
 			return vert;
 		}
@@ -158,7 +173,7 @@ std::vector<std::vector<sm::vec2>> Graph::GetPolygons() const
 	// reset edge
 	for (auto vert : m_vertices) {
 		for (auto& edge : vert->edges) {
-			edge.visited = false;
+			edge->visited = false;
 		}
 	}
 
@@ -166,18 +181,17 @@ std::vector<std::vector<sm::vec2>> Graph::GetPolygons() const
 	{
 		for (auto& edge : vert->edges)
 		{
-			if (edge.visited) {
+			if (edge->visited) {
 				continue;
 			}
 
 			std::vector<sm::vec2> block;
 
-			const Edge* first = &edge;
+			const Edge* first = edge;
 			const Edge* curr = first;
 			do
 			{
 				curr->visited = true;
-
 				block.push_back(curr->f->pos);
 
 				curr = curr->next;
@@ -188,6 +202,78 @@ std::vector<std::vector<sm::vec2>> Graph::GetPolygons() const
 	}
 
 	return polys;
+}
+
+void Graph::VertexMerge(float dist)
+{
+	for (auto itr_v = m_vertices.begin(); itr_v != m_vertices.end(); )
+	{
+		Vertex* vert = *itr_v;
+
+		Vertex* near_v = nullptr;
+		float near_d = FLT_MAX;
+		for (auto& edge : vert->edges)
+		{
+			float d = sm::dis_pos_to_pos(vert->pos, edge->t->pos);
+			if (d < near_d) {
+				near_d = d;
+				near_v = edge->t;
+			}
+		}
+
+		if (near_d < dist)
+		{
+			near_v->pos = (near_v->pos + vert->pos) / 2;
+
+			// in edges
+			for (auto& edge_t : vert->edges) 
+			{
+				for (auto itr_e = edge_t->t->edges.begin(); itr_e != edge_t->t->edges.end(); )
+				{
+					bool rm = false;
+
+					auto& edge_f = *itr_e;
+					if (edge_f->t == vert) 
+					{
+						if (edge_f->f == near_v) {
+							rm = true;
+						}
+						for (auto e : edge_t->t->edges) {
+							if (e->t == near_v) {
+								rm = true;
+								break;
+							}
+						}
+						if (rm) {
+							delete* itr_e;
+							itr_e = edge_t->t->edges.erase(itr_e);
+							rm = true;
+						} else {
+							edge_f->t = near_v;
+						}
+					}
+
+					if (!rm) {
+						++itr_e;
+					}
+				}
+			}
+
+			// out edges
+			for (auto& edge : vert->edges)
+			{
+				if (near_v != edge->t) {
+					near_v->AddEdge(edge->t);
+				}
+			}
+
+			itr_v = m_vertices.erase(itr_v);
+		}
+		else
+		{
+			++itr_v;
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -208,11 +294,32 @@ bool Graph::VertexComp::operator () (const Vertex* lhs, const Vertex* rhs) const
 // class Graph::EdgeComp
 //////////////////////////////////////////////////////////////////////////
 
-bool Graph::EdgeComp::operator () (const Edge& lhs, const Edge& rhs) const
+bool Graph::EdgeComp::operator () (const Edge* lhs, const Edge* rhs) const
 {
-	float ang0 = sm::get_line_angle(lhs.f->pos, lhs.t->pos);
-	float ang1 = sm::get_line_angle(rhs.f->pos, rhs.t->pos);
+	float ang0 = sm::get_line_angle(lhs->f->pos, lhs->t->pos);
+	float ang1 = sm::get_line_angle(rhs->f->pos, rhs->t->pos);
 	return ang0 < ang1;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// class Graph::Vertex
+//////////////////////////////////////////////////////////////////////////
+
+Graph::Vertex::~Vertex()
+{
+	for (auto& e : edges) {
+		delete e;
+	}
+}
+
+void Graph::Vertex::AddEdge(Vertex* vert)
+{
+	for (auto e : edges) {
+		if (e->t == vert) {
+			return;
+		}
+	}
+	edges.push_back(new Edge(this, vert));
 }
 
 }
