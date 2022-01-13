@@ -16,10 +16,10 @@ void w_Streets_allocate()
 {
     auto tex = ((tt::Proxy<ur::Texture>*)ves_toforeign(1))->obj;
     auto tf = std::make_shared<citygen::TensorField>(*tex);
-    auto nw = std::make_shared<citygen::Streets>(tf);
+    auto st = std::make_shared<citygen::Streets>(tf);
 
     auto proxy = (tt::Proxy<citygen::Streets>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Streets>));
-    proxy->obj = nw;
+    proxy->obj = st;
 }
 
 int w_Streets_finalize(void* data)
@@ -31,15 +31,15 @@ int w_Streets_finalize(void* data)
 
 void w_Streets_build_streamlines()
 {
-    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto num = (int)ves_tonumber(1);
-    nw->BuildStreamlines(num);
+    st->BuildStreamlines(num);
 }
 
 void w_Streets_build_topology()
 {
-    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
-    nw->BuildTopology();
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    st->BuildTopology();
 }
 
 void return_points(const std::vector<std::vector<sm::vec2>>& points)
@@ -69,28 +69,38 @@ void return_points(const std::vector<std::vector<sm::vec2>>& points)
 
 void w_Streets_get_major_paths()
 {
-    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
-    auto& major_paths = nw->GetMajorPaths();
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    auto& major_paths = st->GetMajorPaths();
+
+    std::vector<std::vector<sm::vec2>> points;
+    for (auto& path : major_paths) {
+        points.push_back(path->GetPoints());
+    }
     
     ves_pop(1);
 
-    return_points(major_paths);
+    return_points(points);
 }
 
 void w_Streets_get_minor_paths()
 {
-    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
-    auto& minor_paths = nw->GetMinorPaths();
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    auto& minor_paths = st->GetMinorPaths();
+
+    std::vector<std::vector<sm::vec2>> points;
+    for (auto& path : minor_paths) {
+        points.push_back(path->GetPoints());
+    }
 
     ves_pop(1);
 
-    return_points(minor_paths);
+    return_points(points);
 }
 
 void w_Streets_get_nodes()
 {
-    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
-    auto nodes = nw->GetNodes();
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    auto nodes = st->GetNodes();
 
     ves_pop(1);
 
@@ -112,12 +122,19 @@ void w_Streets_get_nodes()
 
 void w_Streets_get_polygons()
 {
-    auto nw = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
-    auto polygons = nw->GetPolygons();
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    auto polygons = st->GetPolygons();
 
     ves_pop(1);
 
     return_points(polygons);
+}
+
+void w_Streets_set_seed()
+{
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    auto seed = (float)ves_tonumber(1);
+    st->SetSeed(seed);
 }
 
 void w_Block_allocate()
@@ -193,6 +210,7 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Streets.get_minor_paths()") == 0) return w_Streets_get_minor_paths;
     if (strcmp(signature, "Streets.get_nodes()") == 0) return w_Streets_get_nodes;
     if (strcmp(signature, "Streets.get_polygons()") == 0) return w_Streets_get_polygons;
+    if (strcmp(signature, "Streets.set_seed(_)") == 0) return w_Streets_set_seed;
 
     if (strcmp(signature, "Block.offset_clone(_)") == 0) return w_Block_offset_clone;
     if (strcmp(signature, "Block.get_border()") == 0) return w_Block_get_border;

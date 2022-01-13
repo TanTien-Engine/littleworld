@@ -13,6 +13,8 @@ foreign class Streets
 
 	foreign get_nodes()
 	foreign get_polygons()
+
+	foreign set_seed(seed)
 }
 
 foreign class Block

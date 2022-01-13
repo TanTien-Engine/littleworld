@@ -29,6 +29,7 @@ class Streets is Node
 		]
 
 		this.params.add(NodeParam("num", 2, {  "integer" : true, "region" : 10 }))
+		this.params.add(NodeParam("seed", 0))
 
 		this.layout()
 
@@ -58,6 +59,9 @@ class Streets is Node
 		if (!this.st) 
 		{
 			this.st = cg_Streets.init(v_tex.value.tex)
+
+			var seed = this.query_param("seed").value			
+			this.st.set_seed(seed)
 
 			var num = this.query_param("num").value
 			this.st.build_streamlines(num)

@@ -1,12 +1,17 @@
 #include "Streets.h"
 #include "TensorField.h"
 #include "Graph.h"
+#include "KMeans.h"
 
 #include <sm/SM_DouglasPeucker.h>
 #include <SM_Calc.h>
 
 #include <iterator>
 #include <map>
+
+//#define BILINEAR_SAMPLING
+//#define TRAVEL_STOP_CHECK
+#define RANDOM_SELECT
 
 namespace citygen
 {
@@ -30,7 +35,22 @@ void Streets::BuildStreamlines(int num)
 
 	auto w = m_tf->GetWidth();
 	auto h = m_tf->GetHeight();
-	
+
+#ifdef RANDOM_SELECT
+	std::vector<std::shared_ptr<Path>> major_paths, minor_paths;
+
+	srand(m_seed * UINT32_MAX);
+	for (int i = 0, n = 10 * 10; i < n; ++i)
+	{
+		int x = static_cast<int>(w * rand() / RAND_MAX);
+		int y = static_cast<int>(h * rand() / RAND_MAX);
+		major_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(x, y), true)));
+		minor_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(x, y), false)));
+	}
+
+	m_major_paths = SelectPaths(major_paths, num);
+	m_minor_paths = SelectPaths(minor_paths, num);
+#else
 	for (size_t iy = 0; iy < num; ++iy) 
 	{
 		int y = static_cast<int>(h / num * (0.5f + iy));
@@ -42,6 +62,7 @@ void Streets::BuildStreamlines(int num)
 			m_minor_paths.push_back(BuildPath(sm::ivec2(x, y), false));
 		}
 	}
+#endif // RANDOM_SELECT
 }
 
 void Streets::BuildTopology()
@@ -53,11 +74,13 @@ void Streets::BuildTopology()
 std::vector<sm::vec2> Streets::GetNodes() const
 {
 	std::vector<sm::vec2> ret;
+
 	for (auto& vert : m_graph->GetVertices()) {
 		if (vert->edges.size() != 2) {
 			ret.push_back(vert->pos);
 		}
 	}
+
 	return ret;
 }
 
@@ -75,12 +98,20 @@ std::vector<std::vector<sm::vec2>> Streets::GetPolygons() const
 
 std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, bool major) const
 {
-	auto f = Travel(p, major, true);
-	auto b = Travel(p, major, false);
+	std::vector<sm::vec2> points;
 
-	auto points = b;
-	std::reverse(points.begin(), points.end());
-	std::copy(f.begin(), f.end(), std::back_inserter(points));
+	bool is_loop = false;
+	auto f = Travel(p, major, true, &is_loop);
+	if (is_loop) 
+	{
+		points = f;
+	}
+	else
+	{
+		points = Travel(p, major, false, &is_loop);
+		std::reverse(points.begin(), points.end());
+		std::copy(f.begin(), f.end(), std::back_inserter(points));
+	}
 
 	std::vector<sm::vec2> path;
 	sm::douglas_peucker(points, 0.5f, path);
@@ -96,22 +127,36 @@ std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, bool major) const
 	return path;
 }
 
-std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forward) const
+std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forward, bool* is_loop) const
 {
 	std::vector<sm::vec2> points;
 
-	sm::vec2 fp((float)p.x, (float)p.y);
+	sm::vec2 first((float)p.x, (float)p.y);
+	sm::vec2 fp(first);
 	sm::vec2 prev_dir = sm::vec2(0, 0);
+	
 
-	const int scale = 4;
+#ifdef TRAVEL_STOP_CHECK
+	const int scale = 2;
 	std::vector<bool> visited(m_tf->GetWidth() / scale * m_tf->GetHeight() / scale, false);
+#endif // TRAVEL_STOP_CHECK
+
+	float len = 0.0f;
 
 	const int max_steps = m_tf->GetWidth() * 2;
 	int prev_idx = 0;
 	for (size_t i = 0; i < max_steps; ++i)
 	{
+		if (i > 100 && sm::dis_pos_to_pos(fp, first) < 20.0f)
+		{
+			points.push_back(first);
+			*is_loop = true;
+			break;
+		}
+
 		points.push_back(fp);
 
+#ifdef TRAVEL_STOP_CHECK
 		if (fp.x < 0 || fp.x > m_tf->GetWidth() ||
 			fp.y < 0 || fp.y > m_tf->GetHeight()) {
 			break;
@@ -123,7 +168,22 @@ std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forwa
 		}
 
 		visited[idx] = true;
+		//if (i == 0) 
+		//{
+		//	const int cx = (int)fp.x;
+		//	const int cy = (int)fp.y;
+		//	const int r = 1;
+		//	for (int y = cy - r; y < cy + r; ++y) {
+		//		for (int x = cx - r; x < cx + r; ++x) {
+		//			if (x >= 0 && y >= 0 && x < m_tf->GetWidth() && y < m_tf->GetHeight()) {
+		//				const int idx = (y / scale) * (m_tf->GetWidth() / scale) + (x / scale);
+		//				visited[idx] = true;
+		//			}
+		//		}
+		//	}
+		//}
 		prev_idx = idx;
+#endif // TRAVEL_STOP_CHECK
 
 		auto dir = CalcDir(fp, major);
 		if (!forward) {
@@ -157,16 +217,20 @@ sm::vec2 Streets::CalcDir(const sm::vec2& p, bool major) const
 	int y_min = static_cast<int>(floorf(p.y));
 	int y_max = y_min + 1;
 
-	//if (x_max > m_tf->GetWidth() || y_max > m_tf->GetHeight()) 
-	//{
+#ifdef BILINEAR_SAMPLING
+	if (x_max > m_tf->GetWidth() || y_max > m_tf->GetHeight()) 
+	{
 		tensor = m_tf->GetTensor(x_min, y_min);
-	//}
-	//else
-	//{
-	//	sm::vec4 t_down = m_tf->GetTensor(x_min, y_min) * (x_max - p.x) + m_tf->GetTensor(x_max, y_min) * (p.x - x_min);
-	//	sm::vec4 t_up   = m_tf->GetTensor(x_min, y_max) * (x_max - p.x) + m_tf->GetTensor(x_max, y_max) * (p.x - x_min);
-	//	tensor = t_down * (y_max - p.y) + t_up * (p.y - y_min);
-	//}
+	}
+	else
+	{
+		sm::vec4 t_down = m_tf->GetTensor(x_min, y_min) * (x_max - p.x) + m_tf->GetTensor(x_max, y_min) * (p.x - x_min);
+		sm::vec4 t_up   = m_tf->GetTensor(x_min, y_max) * (x_max - p.x) + m_tf->GetTensor(x_max, y_max) * (p.x - x_min);
+		tensor = t_down * (y_max - p.y) + t_up * (p.y - y_min);
+	}
+#else
+	tensor = m_tf->GetTensor(x_min, y_min);
+#endif // BILINEAR_SAMPLING
 
 	if (abs(tensor.x) < 0.00001) {
 		return sm::vec2(0, 0);
@@ -182,15 +246,15 @@ sm::vec2 Streets::CalcDir(const sm::vec2& p, bool major) const
 void Streets::IntersectPaths()
 {
 	for (size_t i = 0; i < m_major_paths.size(); ++i) {
-		IntersectPaths(m_border, m_major_paths[i]);
+		IntersectPaths(m_border, m_major_paths[i]->m_pts);
 	}
 	for (size_t i = 0; i < m_minor_paths.size(); ++i) {
-		IntersectPaths(m_border, m_minor_paths[i]);
+		IntersectPaths(m_border, m_minor_paths[i]->m_pts);
 	}
 
 	for (size_t i = 0; i < m_major_paths.size(); ++i) {
 		for (size_t j = 0; j < m_minor_paths.size(); ++j) {
-			IntersectPaths(m_major_paths[i], m_minor_paths[j]);
+			IntersectPaths(m_major_paths[i]->m_pts, m_minor_paths[j]->m_pts);
 		}
 	}
 }
@@ -263,10 +327,10 @@ void Streets::BuildGraph()
 
 	m_graph->AddPath(m_border);
 	for (auto& path : m_major_paths) {
-		m_graph->AddPath(path);
+		m_graph->AddPath(path->GetPoints());
 	}
 	for (auto& path : m_minor_paths) {
-		m_graph->AddPath(path);
+		m_graph->AddPath(path->GetPoints());
 	}
 
 	//std::vector<int> num(10, 0);
@@ -276,9 +340,91 @@ void Streets::BuildGraph()
 
 	//m_graph->RemoveDegTwoVert();
 
-	m_graph->VertexMerge(0.005f);
+//	m_graph->VertexMerge(0.005f);
 
 	m_graph->BuildHalfedge();
+}
+
+std::vector<std::shared_ptr<Streets::Path>>
+Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num) const
+{
+	std::vector<sm::vec2> pts;
+	for (auto& p : paths) {
+		pts.push_back(p->m_center);
+	}
+	KMeans kmeans(pts);
+	auto groups = kmeans.Clustering(num, 0.005f);
+
+	std::vector<std::shared_ptr<Streets::Path>> ret;
+	for (auto& g : groups)
+	{
+		if (g.empty()) {
+			continue;
+		}
+
+		std::vector<std::shared_ptr<Streets::Path>> tmp;
+		for (auto i : g) {
+			tmp.push_back(paths[i]);
+		}
+		std::sort(tmp.begin(), tmp.end(), PathComp());
+
+		ret.push_back(tmp.front());
+	}
+
+	return ret;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// class Streets::Path
+//////////////////////////////////////////////////////////////////////////
+
+Streets::Path::Path(const std::vector<sm::vec2>& pts)
+	: m_pts(pts)
+{
+	Init();
+}
+
+void Streets::Path::Init()
+{
+	if (m_pts.empty()) {
+		return;
+	}
+
+	for (size_t i = 0, n = m_pts.size() - 1; i < n; ++i) {
+		m_length += sm::dis_pos_to_pos(m_pts[i], m_pts[i + 1]);
+	}
+
+	m_loop = m_pts.size() > 1 && m_pts.front() == m_pts.back();
+
+	//for (auto& p : m_pts) {
+	//	m_center += p;
+	//}
+	//m_center /= static_cast<float>(m_pts.size());
+
+	// aabb
+	sm::rect r;
+	for (auto& p : m_pts) {
+		r.Combine(p);
+	}
+	m_center = r.Center();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// class Streets::PathComp
+//////////////////////////////////////////////////////////////////////////
+
+bool Streets::PathComp::operator () (const std::shared_ptr<Path>& lhs, const std::shared_ptr<Path>& rhs) const
+{
+	return CalcPathVal(lhs) > CalcPathVal(rhs);
+}
+
+float Streets::PathComp::CalcPathVal(const std::shared_ptr<Path>& path) const
+{
+	float v = path->m_length;
+	if (path->m_loop) {
+		v += 10.0f;
+	}
+	return v;
 }
 
 }
