@@ -391,7 +391,8 @@ Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num, c
 		pts.push_back(p->m_center);
 	}
 	KMeans kmeans(pts);
-	auto groups = kmeans.Clustering(num, 0.005f);
+	auto groups = kmeans.Clustering(num * 2, 0.005f);
+
 	PathComp cmp(aabb);
 
 	std::vector<std::shared_ptr<Streets::Path>> ret;
@@ -410,6 +411,9 @@ Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num, c
 
 		ret.push_back(tmp.front());
 	}
+
+	std::sort(ret.begin(), ret.end(), cmp);
+	ret.erase(ret.begin() + num, ret.end());
 
 	return ret;
 }
