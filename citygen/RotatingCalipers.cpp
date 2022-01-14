@@ -7,20 +7,22 @@ namespace citygen
 {
 
 std::pair<sm::rect, float> 
-RotatingCalipers::CalcOBB(const std::vector<sm::vec2>&poly, bool loop)
+RotatingCalipers::CalcOBB(const std::vector<sm::vec2>& poly, bool loop)
 {
-	if (poly.size() < 3) {
+	if (poly.empty()) {
 		return std::make_pair(sm::rect(), 0.0f);
+	} else if (poly.size() == 1) {
+		return std::make_pair(sm::rect(poly[0], 0, 0), 0.0f);
 	}
 
 	float min_area = FLT_MAX;
 	sm::rect min_aabb;
 	float min_angle = 0;
 
-	const int n = loop ? poly.size() : poly.size() - 1;
+	const size_t n = loop ? poly.size() : poly.size() - 1;
 	for (size_t i = 0; i < n; ++i)
 	{
-		float i_next = i == poly.size() - 1 ? 0 : i + 1;
+		size_t i_next = i == poly.size() - 1 ? 0 : i + 1;
 		float angle = sm::get_line_angle(poly[i], poly[i_next]);
 
 		// rot
