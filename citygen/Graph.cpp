@@ -86,11 +86,15 @@ void Graph::BuildHalfedge()
 		std::sort(v->edges.begin(), v->edges.end(), EdgeComp());
 	}
 
-	auto pair = [](Edge* e0, Edge* e1) {
+	auto pair = [](Edge* e0, Edge* e1) 
+	{
+		assert(!e0->pair && !e1->pair);
 		e0->pair = e1;
 		e1->pair = e0;
 	};
-	auto conn = [](Edge* e0, Edge* e1) {
+	auto conn = [](Edge* e0, Edge* e1) 
+	{
+		assert(!e0->next && !e1->prev && e0->pair != e1 && e1->pair != e0);
 		e0->next = e1;
 		e1->prev = e0;
 	};
@@ -191,6 +195,7 @@ std::vector<std::vector<sm::vec2>> Graph::GetPolygons() const
 				curr = curr->next;
 			} while (curr != first);
 
+			assert(block.size() >= 3);
 			polys.push_back(block);
 		}
 	}
