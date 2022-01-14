@@ -470,6 +470,7 @@ void Streets::Path::Build()
 		return;
 	}
 
+	m_length = 0;
 	for (size_t i = 0, n = m_pts.size() - 1; i < n; ++i) {
 		m_length += sm::dis_pos_to_pos(m_pts[i], m_pts[i + 1]);
 	}
