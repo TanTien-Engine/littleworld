@@ -37,8 +37,9 @@ void Streets::BuildStreamlines(int num)
 		aabb.Combine(p);
 	}
 
+
 	srand(static_cast<unsigned int>(m_seed * UINT32_MAX));
-	for (int i = 0, n = 10 * 10; i < n; ++i)
+	for (int i = 0, n = aabb.Width() * aabb.Height() * 100; i < n; ++i)
 	{
 		float x = aabb.xmin + static_cast<float>(rand()) / RAND_MAX * aabb.Width();
 		float y = aabb.ymin + static_cast<float>(rand()) / RAND_MAX * aabb.Height();
