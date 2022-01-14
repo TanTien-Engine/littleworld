@@ -16,7 +16,18 @@ void w_Streets_allocate()
 {
     auto tex = ((tt::Proxy<ur::Texture>*)ves_toforeign(1))->obj;
     auto tf = std::make_shared<citygen::TensorField>(*tex);
-    auto st = std::make_shared<citygen::Streets>(tf);
+
+    float min = 0.0f;
+    float max = 1.0f;
+    std::vector<sm::vec2> border = {
+        { min, min },
+        { max, min },
+        { max, max },
+        { min, max },
+        { min, min },
+    };
+
+    auto st = std::make_shared<citygen::Streets>(tf, border);
 
     auto proxy = (tt::Proxy<citygen::Streets>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Streets>));
     proxy->obj = st;
@@ -49,7 +60,7 @@ void return_points(const std::vector<std::vector<sm::vec2>>& points)
         return;
     }
 
-    ves_newlist(points.size());
+    ves_newlist(int(points.size()));
     for (int i_list = 0; i_list < points.size(); ++i_list)
     {
         ves_newlist(int(points[i_list].size() * 2));

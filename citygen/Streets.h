@@ -14,7 +14,8 @@ class Graph;
 class Streets
 {
 public:
-	Streets(const std::shared_ptr<TensorField>& tf);
+	Streets(const std::shared_ptr<TensorField>& tf, 
+		const std::vector<sm::vec2>& border);
 
 	void BuildStreamlines(int num);
 	void BuildTopology();
@@ -35,10 +36,12 @@ public:
 	public:
 		Path(const std::vector<sm::vec2>& pts);
 
+		void Trim(const std::vector<sm::vec2>& border);
+
 		auto& GetPoints() const { return m_pts; }
 
 	private:
-		void Init();
+		void Build();
 
 	private:
 		std::vector<sm::vec2> m_pts;

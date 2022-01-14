@@ -17,40 +17,51 @@
 namespace citygen
 {
 
-Streets::Streets(const std::shared_ptr<TensorField>& tf)
+Streets::Streets(const std::shared_ptr<TensorField>& tf,
+	             const std::vector<sm::vec2>& border)
 	: m_tf(tf)
+	, m_border(border)
 {
 }
 
 void Streets::BuildStreamlines(int num)
 {
-	float min = 0.0f;
-	float max = 1.0f;
-	m_border = {
-		{ min, min },
-		{ max, min },
-		{ max, max },
-		{ min, max },
-		{ min, min },
-	};
-
 	auto w = m_tf->GetWidth();
 	auto h = m_tf->GetHeight();
 
 #ifdef RANDOM_SELECT
 	std::vector<std::shared_ptr<Path>> major_paths, minor_paths;
 
+	sm::rect aabb;
+	for (auto& p : m_border) {
+		aabb.Combine(p);
+	}
+
 	srand(static_cast<unsigned int>(m_seed * UINT32_MAX));
 	for (int i = 0, n = 10 * 10; i < n; ++i)
 	{
-		int x = static_cast<int>(w * rand() / RAND_MAX);
-		int y = static_cast<int>(h * rand() / RAND_MAX);
-		major_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(x, y), true)));
-		minor_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(x, y), false)));
+		float x = aabb.xmin + static_cast<float>(rand()) / RAND_MAX * aabb.Width();
+		float y = aabb.ymin + static_cast<float>(rand()) / RAND_MAX * aabb.Height();
+		if (sm::is_point_in_area(sm::vec2(x, y), m_border))
+		{
+			int ix = static_cast<int>(w * x);
+			int iy = static_cast<int>(h * y);
+			major_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(ix, iy), true)));
+			minor_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(ix, iy), false)));
+		}
 	}
 
-	m_major_paths = SelectPaths(major_paths, num);
-	m_minor_paths = SelectPaths(minor_paths, num);
+	if (major_paths.size() > num)
+	{
+		m_major_paths = SelectPaths(major_paths, num);
+		m_minor_paths = SelectPaths(minor_paths, num);
+	}
+	else
+	{
+		m_major_paths = major_paths;
+		m_minor_paths = minor_paths;
+	}
+
 #else
 	for (size_t iy = 0; iy < num; ++iy) 
 	{
@@ -245,16 +256,23 @@ sm::vec2 Streets::CalcDir(const sm::vec2& p, bool major) const
 
 void Streets::IntersectPaths()
 {
-	for (size_t i = 0; i < m_major_paths.size(); ++i) {
-		IntersectPaths(m_border, m_major_paths[i]->m_pts);
+	for (auto& p : m_major_paths) {
+		IntersectPaths(m_border, p->m_pts);
 	}
-	for (size_t i = 0; i < m_minor_paths.size(); ++i) {
-		IntersectPaths(m_border, m_minor_paths[i]->m_pts);
+	for (auto& p : m_minor_paths) {
+		IntersectPaths(m_border, p->m_pts);
 	}
 
-	for (size_t i = 0; i < m_major_paths.size(); ++i) {
-		for (size_t j = 0; j < m_minor_paths.size(); ++j) {
-			IntersectPaths(m_major_paths[i]->m_pts, m_minor_paths[j]->m_pts);
+	for (auto& p : m_major_paths) {
+		p->Trim(m_border);
+	}
+	for (auto& p : m_minor_paths) {
+		p->Trim(m_border);
+	}
+
+	for (auto& p0 : m_major_paths) {
+		for (auto& p1 : m_minor_paths) {
+			IntersectPaths(p0->m_pts, p1->m_pts);
 		}
 	}
 }
@@ -390,10 +408,49 @@ Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num) c
 Streets::Path::Path(const std::vector<sm::vec2>& pts)
 	: m_pts(pts)
 {
-	Init();
+	Build();
 }
 
-void Streets::Path::Init()
+void Streets::Path::Trim(const std::vector<sm::vec2>& border)
+{
+	std::vector<std::shared_ptr<Path>> paths;
+
+	std::vector<sm::vec2> pts;
+	for (auto& p : m_pts)
+	{
+		bool on_border = false;
+		for (auto& b : border) {
+			if (sm::dis_pos_to_pos(p, b) < SM_LARGE_EPSILON) {
+				on_border = true;
+				break;
+			}
+		}
+
+		if (on_border || sm::is_point_in_area(p, border)) 
+		{
+			pts.push_back(p);
+		} 
+		else 
+		{
+			if (pts.size() > 1) {
+				paths.push_back(std::make_shared<Path>(pts));
+			}
+			pts.clear();
+		}
+	}
+
+	if (paths.empty()) {
+		return;
+	}
+
+	std::sort(paths.begin(), paths.end(), PathComp());
+
+	m_pts = paths.front()->m_pts;
+
+	Build();
+}
+
+void Streets::Path::Build()
 {
 	if (m_pts.empty()) {
 		return;
