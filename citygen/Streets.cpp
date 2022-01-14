@@ -449,6 +449,9 @@ void Streets::Path::Trim(const std::vector<sm::vec2>& border)
 			pts.clear();
 		}
 	}
+	if (pts.size() > 1) {
+		paths.push_back(std::make_shared<Path>(pts));
+	}
 
 	if (paths.empty()) {
 		return;
