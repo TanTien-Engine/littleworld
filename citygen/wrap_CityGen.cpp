@@ -140,10 +140,7 @@ void w_Streets_set_seed()
 void w_Block_allocate()
 {
     auto tris = ((tt::Proxy<gs::Triangles>*)ves_toforeign(1))->obj;
-
-    auto border = tris->GetBorder();
-    std::reverse(border.begin(), border.end());
-    auto block = std::make_shared<citygen::Block>(border);
+    auto block = std::make_shared<citygen::Block>(tris->GetBorder());
 
     auto proxy = (tt::Proxy<citygen::Block>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Block>));
     proxy->obj = block;

@@ -136,13 +136,7 @@ void Graph::BuildHalfedge()
 					}
 
 					assert(itr != edge->t->edges.end());
-
-					auto next = ++itr;
-					if (next == edge->t->edges.end()) {
-						next = edge->t->edges.begin();
-					}
-
-					//auto next = itr == edge->t->edges.begin() ? --edge->t->edges.end() : --itr;
+					auto next = itr == edge->t->edges.begin() ? --edge->t->edges.end() : --itr;
 
 					conn(edge, *next);
 				}
