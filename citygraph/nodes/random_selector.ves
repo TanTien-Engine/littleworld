@@ -1,0 +1,62 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant
+import "blueprint.node_param" for NodeParam
+import "geograph.variant" for VAR_TYPE_GEO
+import "random" for Random
+
+class RandomSelector is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "geos", VAR_TYPE_GEO),
+		]
+		this.exports = [
+			Pin(this, "geos", VAR_TYPE_GEO),
+		]
+
+		this.params.add(NodeParam("num", 1, {  "integer" : true, "region" : 10 }))
+		this.params.add(NodeParam("seed", 0))
+
+		this.layout()
+
+		this.v_geos = nil
+	}	
+
+	on_node_dirty()
+	{
+		this.v_geos = nil
+	}
+
+	calc_value(idx)
+	{
+		var v_geos = Blueprint.calc_input_value(this, 0)
+		if (!v_geos or !v_geos.value) {
+			return nil
+		}
+
+		var num = this.query_param("num").value
+
+		if (v_geos.value.count < num) {
+			return v_geos
+		}
+
+		if (!this.v_geos)
+		{
+			var seed = this.query_param("seed").value
+			var random = Random.init(seed * 65535)
+			var geos = []
+			for (var i in 0..num) {
+				var idx = random.int(v_geos.value.count)
+				geos.add(v_geos.value[idx])
+			}
+			this.v_geos = Variant(geos)
+		}
+
+		return this.v_geos
+	}
+}

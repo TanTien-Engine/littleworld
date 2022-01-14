@@ -7,6 +7,8 @@ Regular, Wedge, Trisector, Radiate, Center, Saddle,
 Streets, Blocks, 
 // block
 Offset, BlockToGeo,
+// selector
+AreaSelector, RandomSelector,
 // tools
 Streamlines, 
 ]

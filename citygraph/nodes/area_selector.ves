@@ -1,0 +1,70 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant
+import "blueprint.node_param" for NodeParam
+import "geograph.variant" for VAR_TYPE_GEO
+
+class AreaSelector is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "polys", VAR_TYPE_GEO),
+		]
+		this.exports = [
+			Pin(this, "polys", VAR_TYPE_GEO),
+		]
+
+		this.params.add(NodeParam("num", 1, {  "integer" : true, "region" : 10 }))
+
+		this.layout()
+
+		this.v_polys = nil
+	}	
+
+	on_node_dirty()
+	{
+		this.v_polys = nil
+	}
+
+	calc_value(idx)
+	{
+		var v_polys = Blueprint.calc_input_value(this, 0)
+		if (!v_polys or !v_polys.value) {
+			return nil
+		}
+
+		var num = this.query_param("num").value
+
+		if (v_polys.value.count < num) {
+			return v_polys
+		}
+
+		if (!this.v_polys)
+		{
+			var poly_area = []
+			for (var item in v_polys.value) 
+			{
+				var v_poly = item
+				var area = v_poly.value.shape.calc_area()
+				poly_area.add([ v_poly, area ])
+			}
+
+			fun poly_area_cmp(v0, v1) {
+				return v0[1] > v1[1]
+			}
+			poly_area.sort(poly_area_cmp)
+
+			var polys = []
+			for (var i in 0..num) {
+				polys.add(poly_area[i][0])
+			}
+			this.v_polys = Variant(polys)
+		}
+
+		return this.v_polys
+	}
+}
