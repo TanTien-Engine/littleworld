@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SM_Vector.h>
+#include <SM_Rect.h>
 
 #include <memory>
 #include <vector>
@@ -61,9 +62,14 @@ public:
 
 	struct PathComp
 	{
+		PathComp() {}
+		PathComp(const sm::rect& aabb) : aabb(aabb) {}
+
 		bool operator () (const std::shared_ptr<Path>& lhs, const std::shared_ptr<Path>& rhs) const;
 
 		float CalcPathVal(const std::shared_ptr<Path>& path) const;
+
+		sm::rect aabb;
 	};
 
 private:
@@ -78,7 +84,8 @@ private:
 
 	void BuildGraph();
 
-	std::vector<std::shared_ptr<Path>> SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num) const;
+	std::vector<std::shared_ptr<Path>> SelectPaths(
+		const std::vector<std::shared_ptr<Path>>& paths, int num, const sm::rect& aabb) const;
 
 private:
 	std::shared_ptr<TensorField> m_tf = nullptr;

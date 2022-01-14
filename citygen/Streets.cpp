@@ -384,7 +384,7 @@ void Streets::BuildGraph()
 }
 
 std::vector<std::shared_ptr<Streets::Path>>
-Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num) const
+Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num, const sm::rect& aabb) const
 {
 	std::vector<sm::vec2> pts;
 	for (auto& p : paths) {
@@ -392,8 +392,10 @@ Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num) c
 	}
 	KMeans kmeans(pts);
 	auto groups = kmeans.Clustering(num, 0.005f);
+	PathComp cmp(aabb);
 
 	std::vector<std::shared_ptr<Streets::Path>> ret;
+
 	for (auto& g : groups)
 	{
 		if (g.empty()) {
@@ -404,7 +406,7 @@ Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num) c
 		for (auto i : g) {
 			tmp.push_back(paths[i]);
 		}
-		std::sort(tmp.begin(), tmp.end(), PathComp());
+		std::sort(tmp.begin(), tmp.end(), cmp);
 
 		ret.push_back(tmp.front());
 	}
@@ -498,7 +500,17 @@ bool Streets::PathComp::operator () (const std::shared_ptr<Path>& lhs, const std
 float Streets::PathComp::CalcPathVal(const std::shared_ptr<Path>& path) const
 {
 //	float v = path->m_length + path->m_area * 5 + path->m_perimeter;
+
 	float v = path->m_length + path->m_perimeter;
+
+	// center
+	if (aabb.IsValid() && aabb.Width() < 1.0f)
+	{
+		auto c = aabb.Center();
+		float d = fabs(path->m_center.x - c.x) / aabb.Width()
+			    + fabs(path->m_center.y - c.y) / aabb.Height();
+		v -= d * 0.1f;
+	}
 
 	if (path->m_loop) {
 		v += 10.0f;
