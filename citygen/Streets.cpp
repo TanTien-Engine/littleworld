@@ -40,7 +40,7 @@ void Streets::BuildStreamlines(int num)
 #ifdef RANDOM_SELECT
 	std::vector<std::shared_ptr<Path>> major_paths, minor_paths;
 
-	srand(m_seed * UINT32_MAX);
+	srand(static_cast<unsigned int>(m_seed * UINT32_MAX));
 	for (int i = 0, n = 10 * 10; i < n; ++i)
 	{
 		int x = static_cast<int>(w * rand() / RAND_MAX);
