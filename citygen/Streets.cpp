@@ -37,6 +37,11 @@ void Streets::BuildStreamlines(int num)
 		aabb.Combine(p);
 	}
 
+	sm::rect region(aabb);
+	region.xmin *= w;
+	region.xmax *= w;
+	region.ymin *= h;
+	region.ymax *= h;
 
 	srand(static_cast<unsigned int>(m_seed * UINT32_MAX));
 	for (int i = 0, n = aabb.Width() * aabb.Height() * 100; i < n; ++i)
@@ -47,15 +52,15 @@ void Streets::BuildStreamlines(int num)
 		{
 			int ix = static_cast<int>(w * x);
 			int iy = static_cast<int>(h * y);
-			major_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(ix, iy), true)));
-			minor_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(ix, iy), false)));
+			major_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(ix, iy), region, true)));
+			minor_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(ix, iy), region, false)));
 		}
 	}
 
 	if (major_paths.size() > num)
 	{
-		m_major_paths = SelectPaths(major_paths, num);
-		m_minor_paths = SelectPaths(minor_paths, num);
+		m_major_paths = SelectPaths(major_paths, num, aabb);
+		m_minor_paths = SelectPaths(minor_paths, num, aabb);
 	}
 	else
 	{
@@ -108,19 +113,19 @@ std::vector<std::vector<sm::vec2>> Streets::GetPolygons() const
 	return polys;
 }
 
-std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, bool major) const
+std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, const sm::rect& region, bool major) const
 {
 	std::vector<sm::vec2> points;
 
 	bool is_loop = false;
-	auto f = Travel(p, major, true, &is_loop);
+	auto f = Travel(p, region, major, true, &is_loop);
 	if (is_loop) 
 	{
 		points = f;
 	}
 	else
 	{
-		points = Travel(p, major, false, &is_loop);
+		points = Travel(p, region, major, false, &is_loop);
 		std::reverse(points.begin(), points.end());
 		std::copy(f.begin(), f.end(), std::back_inserter(points));
 	}
@@ -139,7 +144,7 @@ std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, bool major) const
 	return path;
 }
 
-std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forward, bool* is_loop) const
+std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, const sm::rect& region, bool major, bool forward, bool* is_loop) const
 {
 	std::vector<sm::vec2> points;
 
@@ -159,6 +164,11 @@ std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, bool major, bool forwa
 	int prev_idx = 0;
 	for (size_t i = 0; i < max_steps; ++i)
 	{
+		if (!sm::is_point_in_rect(fp, region)) {
+			points.push_back(fp);
+			break;
+		}
+
 		if (i > 100 && sm::dis_pos_to_pos(fp, first) < 20.0f)
 		{
 			points.push_back(first);

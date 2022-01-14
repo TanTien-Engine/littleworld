@@ -67,9 +67,9 @@ public:
 	};
 
 private:
-	std::vector<sm::vec2> BuildPath(const sm::ivec2& p, bool major) const;
+	std::vector<sm::vec2> BuildPath(const sm::ivec2& p, const sm::rect& region, bool major) const;
 
-	std::vector<sm::vec2> Travel(const sm::ivec2& p, bool major, bool forward, bool* is_loop) const;
+	std::vector<sm::vec2> Travel(const sm::ivec2& p, const sm::rect& region, bool major, bool forward, bool* is_loop) const;
 	sm::vec2 CalcDir(const sm::vec2& p, bool major) const;
 
 	void IntersectPaths();
