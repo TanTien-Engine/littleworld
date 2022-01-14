@@ -45,6 +45,7 @@ public:
 
 		float m_length = 0.0f;
 		float m_area = 0.0f;
+		float m_perimeter = 0.0f;
 
 		sm::vec2 m_center;
 

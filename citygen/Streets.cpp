@@ -2,6 +2,7 @@
 #include "TensorField.h"
 #include "Graph.h"
 #include "KMeans.h"
+#include "RotatingCalipers.h"
 
 #include <sm/SM_DouglasPeucker.h>
 #include <SM_Calc.h>
@@ -396,17 +397,13 @@ void Streets::Path::Init()
 
 	m_loop = m_pts.size() > 1 && m_pts.front() == m_pts.back();
 
-	//for (auto& p : m_pts) {
-	//	m_center += p;
-	//}
-	//m_center /= static_cast<float>(m_pts.size());
+	auto obb = RotatingCalipers::CalcOBB(m_pts, m_loop);
 
-	// aabb
-	sm::rect r;
-	for (auto& p : m_pts) {
-		r.Combine(p);
-	}
-	m_center = r.Center();
+	m_center = sm::rotate_vector(obb.first.Center(), obb.second);
+
+	auto& aabb = obb.first;
+	m_area = aabb.Width() * aabb.Height();
+	m_perimeter = aabb.Width() + aabb.Height();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -420,10 +417,13 @@ bool Streets::PathComp::operator () (const std::shared_ptr<Path>& lhs, const std
 
 float Streets::PathComp::CalcPathVal(const std::shared_ptr<Path>& path) const
 {
-	float v = path->m_length;
+//	float v = path->m_length + path->m_area * 5 + path->m_perimeter;
+	float v = path->m_length + path->m_perimeter;
+
 	if (path->m_loop) {
 		v += 10.0f;
 	}
+
 	return v;
 }
 
