@@ -87,14 +87,13 @@ std::vector<sm::vec2> Streets::GetNodes() const
 
 std::vector<std::vector<sm::vec2>> Streets::GetPolygons() const
 {
-	auto blocks = m_graph->GetPolygons();
-
-	// sikp the outside block
-	if (!blocks.empty()) {
-		blocks.erase(blocks.begin());
+	std::vector<std::vector<sm::vec2>> polys;
+	for (auto& poly : m_graph->GetPolygons()) {
+		if (!sm::is_polygon_clockwise(poly)) {
+			polys.push_back(poly);
+		}
 	}
-
-	return blocks;
+	return polys;
 }
 
 std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, bool major) const
