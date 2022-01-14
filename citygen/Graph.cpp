@@ -14,24 +14,24 @@ Graph::~Graph()
 
 void Graph::AddPath(const std::vector<sm::vec2>& path)
 {
-	std::vector<Vertex*> m_vertices;
+	std::vector<Vertex*> vertices;
 
 	for (auto& pos : path) 
 	{
 		auto vert = AddVertex(pos);
-		if (m_vertices.empty() || m_vertices.back() != vert) {
-			m_vertices.push_back(vert);
+		if (vertices.empty() || vertices.back() != vert) {
+			vertices.push_back(vert);
 		}
 	}
 
-	if (m_vertices.size() < 2) {
+	if (vertices.size() < 2) {
 		return;
 	}
 
-	for (size_t i = 0, n = m_vertices.size() - 1; i < n; ++i) 
+	for (size_t i = 0, n = vertices.size() - 1; i < n; ++i) 
 	{
-		auto v0 = m_vertices[i];
-		auto v1 = m_vertices[i + 1];
+		auto v0 = vertices[i];
+		auto v1 = vertices[i + 1];
 		v0->AddEdge(v1);
 		v1->AddEdge(v0);
 	}
