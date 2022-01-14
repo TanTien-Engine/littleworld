@@ -94,7 +94,7 @@ void Graph::BuildHalfedge()
 	};
 	auto conn = [](Edge* e0, Edge* e1) 
 	{
-		assert(!e0->next && !e1->prev && e0->pair != e1 && e1->pair != e0);
+		assert(!e0->next && !e1->prev);
 		e0->next = e1;
 		e1->prev = e0;
 	};
