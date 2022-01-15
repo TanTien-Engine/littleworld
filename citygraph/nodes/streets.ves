@@ -11,7 +11,7 @@ import "geometry" for Polyline, Circle, Polygon, Triangles
 import "graphics" for Graphics
 import "maths.vector" for Vector3
 import "math" for Math
-import "citygen" for Streets as cg_Streets
+import "citygen" for Streets as cg_Streets, Block
 
 class Streets is Node
 {
@@ -224,10 +224,23 @@ class Streets is Node
 				pts.add((polygon[i * 2 + 1] - 0.5) * h)
 			}
 
+			var ori_poly = Triangles.init()
+			ori_poly.set_border(pts)
+
+			var block = Block.init(ori_poly)
+
+			var dist = 7.0
+			var v_regions = Blueprint.calc_input_value(this, 1)
+			if (v_regions) {
+				dist = 4.5
+			}
+			var offset_block = block.offset_clone(dist)
+
+			var offset_poly = Triangles.init()
+			offset_poly.set_border(offset_block.get_border())
+
 			var geo = VarGeo()
-			geo.shape = Triangles.init()
-			geo.shape.set_border(pts)
-			geo.render_style["color"] = BLOCK_COLORS[Math.mod(i, BLOCK_COLORS.count)]
+			geo.shape = offset_poly
 			geos.add(Variant(VAR_TYPE_GEO, geo))
 		}
 
