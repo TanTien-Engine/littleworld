@@ -153,7 +153,7 @@ Graph::Vertex* Graph::AddVertex(const sm::vec2& pos)
 {
 	for (auto& vert : m_vertices) 
 	{
-		if (sm::dis_pos_to_pos(vert->pos, pos) < SM_LARGE_EPSILON) {
+		if (sm::dis_pos_to_pos(vert->pos, pos) < SM_LARGE_EPSILON * 10) {
 			return vert;
 		}
 	}
