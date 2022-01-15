@@ -3,7 +3,7 @@ static const char* citygenModuleSource = QUOTE(
 
 foreign class Streets
 {
-	init(tensor_field) {}
+	init(tensor_field, border) {}
 
 	foreign build_streamlines(num)
 	foreign build_topology()

@@ -1,8 +1,10 @@
 #include "wrap_CityGen.h"
-#include "modules/script/Proxy.h"
 #include "TensorField.h"
 #include "Streets.h"
 #include "Block.h"
+#include "modules/script/Proxy.h"
+#include "modules/script/TransHelper.h"
+#include "modules/graphics/Graphics.h"
 
 #include <unirender/Texture.h>
 #include <geoshape/Triangles.h>
@@ -17,15 +19,34 @@ void w_Streets_allocate()
     auto tex = ((tt::Proxy<ur::Texture>*)ves_toforeign(1))->obj;
     auto tf = std::make_shared<citygen::TensorField>(*tex);
 
-    float min = 0.0f;
-    float max = 1.0f;
-    std::vector<sm::vec2> border = {
-        { min, min },
-        { max, min },
-        { max, max },
-        { min, max },
-        { min, min },
-    };
+    std::vector<sm::vec2> border;
+
+    auto poly = ves_toforeign(2);
+    if (poly)
+    {
+        auto tris = ((tt::Proxy<gs::Triangles>*)poly)->obj;
+        border = tris->GetBorder();
+        border.push_back(border.front());
+
+        auto w = tt::Graphics::Instance()->GetWidth();
+        auto h = tt::Graphics::Instance()->GetHeight();
+        for (auto& p : border) {
+            p.x = p.x / w + 0.5f;
+            p.y = p.y / h + 0.5f;
+        }
+    }
+    else
+    {
+        float min = 0.0f;
+        float max = 1.0f;
+        border = {
+            { min, min },
+            { max, min },
+            { max, max },
+            { min, max },
+            { min, min },
+        };
+    }
 
     auto st = std::make_shared<citygen::Streets>(tf, border);
 

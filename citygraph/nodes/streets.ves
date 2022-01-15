@@ -20,7 +20,8 @@ class Streets is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "tf", VAR_TYPE_TEXTURE)
+			Pin(this, "tf", VAR_TYPE_TEXTURE),
+			Pin(this, "borders", VAR_TYPE_GEO),
 		]
 		this.exports = [
 			Pin(this, "routes",    VAR_TYPE_GEO),
@@ -33,7 +34,7 @@ class Streets is Node
 
 		this.layout()
 
-		this.st = nil
+		this.regions = []
 
 		this.v_routes    = nil
 		this.v_crossings = nil
@@ -42,7 +43,7 @@ class Streets is Node
 
 	on_node_dirty()
 	{
-		this.st = nil
+		this.regions.clear()
 
 		this.v_routes    = nil
 		this.v_crossings = nil
@@ -56,30 +57,59 @@ class Streets is Node
 			return nil
 		}
 
-		if (!this.st) 
+		if (this.regions.isEmpty) 
 		{
-			this.st = cg_Streets.init(v_tex.value.tex)
+			var v_borders = Blueprint.calc_input_value(this, 1)
 
-			var seed = this.query_param("seed").value			
-			this.st.set_seed(seed)
+			var borders = []
+			if (v_borders and v_borders.value) 
+			{
+				if (v_borders.value is List) {
+					for (var b in v_borders.value) {
+						borders.add(b.value.shape)
+					}
+				} else {
+					borders.add(borders.value.shape)
+				}
+			}
 
+			if (borders.isEmpty) {
+				borders.add(nil)
+			}
+
+			var seed = this.query_param("seed").value
 			var num = this.query_param("num").value
-			this.st.build_streamlines(num)
+			for (var border in borders)
+			{
+				var st = cg_Streets.init(v_tex.value.tex, border)
 
-			this.st.build_topology()
+				st.set_seed(seed)
+				st.build_streamlines(num)
+
+				st.build_topology()
+
+				this.regions.add(st)
+			}
 		}
 
 		if (idx == 0)
 		{
 			if (!this.v_routes) 
 			{
-				var major = this.st.get_major_paths()
-				var v_major = this.build_routes(major, Vector3(1.0, 0.0, 0.0))
+				var routes = []
 
-				var minor = this.st.get_minor_paths()
-				var v_minor = this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
+				for (var st in this.regions)
+				{
+					var major = st.get_major_paths()
+					var v_major = this.build_routes(major, Vector3(1.0, 0.0, 0.0))
+					routes.add(v_major)
 
-				this.v_routes = Variant([ v_major, v_minor ])
+					var minor = st.get_minor_paths()
+					var v_minor = this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
+					routes.add(v_minor)
+				}
+
+				this.v_routes = Variant(routes)
 			}
 
 			return this.v_routes
@@ -88,7 +118,16 @@ class Streets is Node
 		{
 			if (!this.v_crossings)
 			{
-				var nodes = this.st.get_nodes()
+				var nodes = []
+
+				for (var st in this.regions)
+				{
+					var _nodes = st.get_nodes()
+					for (var n in _nodes) {
+						nodes.add(n)
+					}
+				}
+
 				this.v_crossings = this.build_crossings(nodes, Vector3(0.0, 0.0, 1.0))
 			}
 
@@ -98,7 +137,16 @@ class Streets is Node
 		{
 			if (!this.v_blocks)
 			{
-				var polygons = this.st.get_polygons()
+				var polygons = []
+
+				for (var st in this.regions)
+				{
+					var _polygons = st.get_polygons()
+					for (var p in _polygons) {
+						polygons.add(p)
+					}
+				}
+
 				this.v_blocks = this.build_blocks(polygons)
 			}
 
