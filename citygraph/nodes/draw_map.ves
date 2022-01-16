@@ -1,0 +1,192 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_PORT
+import "blueprint.variant_proxy" for VariantProxy
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "geograph.nodes.draw_geometry" for DrawGeometry
+import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR
+import "maths.vector" for Vector3
+import "graphics" for Graphics
+import "geometry" for Triangles, Polyline
+import "citygen" for Block, GeometryTools
+
+class DrawMap is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "prev",        VAR_TYPE_PORT),
+			Pin(this, "major_roads", VAR_TYPE_GEO),
+			Pin(this, "minor_roads", VAR_TYPE_GEO),
+			Pin(this, "blocks",      VAR_TYPE_GEO),
+		]
+		this.exports = [
+			Pin(this, "next", VAR_TYPE_PORT)
+		]
+
+		this.layout()
+
+		this.v_geos_pass1 = Variant(List.filled(3, nil))
+		this.v_geos_pass2 = Variant(List.filled(3, nil))
+
+		this.draw_geo_node = DrawGeometry()
+
+		this.rebuild = false
+	}
+
+	on_pin_dirty(pin)
+	{
+		if (pin.slot_idx == 1) {
+			this.build_major_roads()
+		} else if (pin.slot_idx == 2) {
+			this.build_minor_roads()
+		} else if (pin.slot_idx == 3) {
+			this.build_blocks()
+		}
+	}
+
+	render_run()
+	{
+		if (!this.rebuild) 
+		{
+			this.build_major_roads()
+			this.build_minor_roads()
+			this.build_blocks()
+
+			this.rebuild = true
+		}
+
+		Blueprint.connect(VariantProxy(this.v_geos_pass1), 0, this.draw_geo_node, "geos")
+		this.draw_geo_node.render_run()
+
+		Blueprint.connect(VariantProxy(this.v_geos_pass2), 0, this.draw_geo_node, "geos")
+		this.draw_geo_node.render_run()		
+	}
+
+	build_major_roads()
+	{
+		var roads = nil
+
+		var v_polylines = Blueprint.calc_input_value(this, 1)
+		if (v_polylines)
+		{
+			var geos = []
+			this.build_roads(v_polylines, 0.01, MAJOR_ROAD_COLOR, geos)
+
+			roads = Variant(geos)
+		}
+
+		this.v_geos_pass1.value[2] = roads
+	}
+
+	build_minor_roads()
+	{
+		var roads = nil
+
+		var v_polylines = Blueprint.calc_input_value(this, 2)
+		if (v_polylines)
+		{
+			var geos = []
+			this.build_roads(v_polylines, 0.007, MINOR_ROAD_COLOR, geos)
+			
+			roads = Variant(geos)
+		}
+
+		this.v_geos_pass1.value[1] = roads
+	}
+
+	build_roads(v_polylines, width, color, out_geos)
+	{
+		if (v_polylines.value is List)
+		{
+			for (var v in v_polylines.value) {
+				this.build_roads(v, width, color, out_geos)
+			}
+		}
+		else
+		{
+			var w = Graphics.get_width()
+			var h = Graphics.get_height()
+
+			var expand = GeometryTools.polyline_expand(v_polylines.value.shape.get_vertices(), false, width)
+
+			if (expand)
+			{
+				var poly = expand[0]
+
+				var pts = []
+				for (var i in 0 .. poly.count/2) 
+				{
+					pts.add((poly[i * 2] - 0.5) * w)
+					pts.add((poly[i * 2 + 1] - 0.5) * h)
+				}
+
+				var geo = VarGeo()
+				geo.shape = Triangles.init()
+				geo.shape.set_border(pts)
+				geo.render_style["color"] = color
+
+				out_geos.add(Variant(VAR_TYPE_GEO, geo))
+			}
+		}
+	}
+
+	build_blocks()
+	{
+		var blocks = nil
+
+		var v_blocks = Blueprint.calc_input_value(this, 3)
+		if (v_blocks)
+		{
+			var geos = []
+			this.build_blocks(v_blocks, geos)
+			
+			blocks = Variant(geos)
+		}
+
+		this.v_geos_pass2.value[0] = blocks
+	}
+
+	build_blocks(v_blocks, out_geos)
+	{
+		if (v_blocks.value is List)
+		{
+			for (var v in v_blocks.value) {
+				this.build_blocks(v, out_geos)
+			}
+		}
+		else
+		{
+			var w = Graphics.get_width()
+			var h = Graphics.get_height()
+
+			var old_shape = v_blocks.value.shape
+//			var old_vts = old_shape.get_border()
+
+			var block = Block.init(old_shape)
+			var dist = 0.007
+			var offset_block = block.offset_clone(dist)
+			var old_vts = offset_block.get_border()
+
+			var vts = []
+			for (var i in 0 .. old_vts.count/2) 
+			{
+				vts.add((old_vts[i * 2] - 0.5) * w)
+				vts.add((old_vts[i * 2 + 1] - 0.5) * h)
+			}
+
+			var poly = Polyline.init()
+			poly.set_vertices(vts)
+			poly.set_closed(true)
+
+			var geo = VarGeo()
+			geo.shape = poly
+			geo.render_style["color"] = Vector3(0, 0, 0)
+
+			out_geos.add(Variant(VAR_TYPE_GEO, geo))
+		}
+	}
+}

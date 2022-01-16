@@ -26,4 +26,9 @@ foreign class Block
 	foreign get_border()
 }
 
+foreign class GeometryTools
+{
+	foreign static polyline_expand(polyline, is_closed, offset)
+}
+
 );

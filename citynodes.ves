@@ -10,5 +10,5 @@ Offset, BlockToGeo,
 // selector
 AreaSelector, RandomSelector,
 // tools
-Streamlines, 
+Streamlines, DrawMap, DrawGeometry,
 ]

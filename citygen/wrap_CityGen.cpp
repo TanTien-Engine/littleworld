@@ -8,6 +8,7 @@
 
 #include <unirender/Texture.h>
 #include <geoshape/Triangles.h>
+#include <SM_Polyline.h>
 
 #include <string>
 
@@ -27,13 +28,6 @@ void w_Streets_allocate()
         auto tris = ((tt::Proxy<gs::Triangles>*)poly)->obj;
         border = tris->GetBorder();
         border.push_back(border.front());
-
-        auto w = tt::Graphics::Instance()->GetWidth();
-        auto h = tt::Graphics::Instance()->GetHeight();
-        for (auto& p : border) {
-            p.x = p.x / w + 0.5f;
-            p.y = p.y / h + 0.5f;
-        }
     }
     else
     {
@@ -76,11 +70,6 @@ void w_Streets_build_topology()
 
 void return_points(const std::vector<std::vector<sm::vec2>>& points)
 {
-    if (points.empty()) {
-        ves_pushnil();
-        return;
-    }
-
     ves_newlist(int(points.size()));
     for (int i_list = 0; i_list < points.size(); ++i_list)
     {
@@ -226,6 +215,18 @@ void w_Block_get_border()
     }
 }
 
+void w_GeometryTools_polyline_expand()
+{
+    auto polyline = tt::list_to_vec2_array(1);
+    bool is_closed = ves_toboolean(2);
+    float offset = (float)ves_tonumber(3);
+    auto polylines = sm::polyline_expand(polyline, is_closed, offset);
+
+    ves_pop(4);
+
+    return_points(polylines);
+}
+
 }
 
 namespace citygen
@@ -243,6 +244,8 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
 
     if (strcmp(signature, "Block.offset_clone(_)") == 0) return w_Block_offset_clone;
     if (strcmp(signature, "Block.get_border()") == 0) return w_Block_get_border;
+
+    if (strcmp(signature, "static GeometryTools.polyline_expand(_,_,_)") == 0) return w_GeometryTools_polyline_expand;
 
 	return nullptr;
 }

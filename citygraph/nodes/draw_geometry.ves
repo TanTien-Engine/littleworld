@@ -1,0 +1,128 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_PORT
+import "blueprint.variant_proxy" for VariantProxy
+import "geograph.config" for POINT_RADIUS
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "geograph.nodes.draw_geometry" for DrawGeometry as gg_DrawGeometry
+import "geometry" for Polyline, Circle, Triangles
+import "graphics" for Graphics
+import "citygen" for Block
+
+class DrawGeometry is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "prev", VAR_TYPE_PORT),		
+			Pin(this, "geos", VAR_TYPE_GEO),
+		]
+		this.exports = [
+			Pin(this, "next", VAR_TYPE_PORT)
+		]
+
+		this.layout()
+
+		this.draw_geo_node = gg_DrawGeometry()
+
+		this.v_geos = Variant([])
+		Blueprint.connect(VariantProxy(this.v_geos), 0, this.draw_geo_node, "geos")
+
+		this.rebuild = false
+	}
+
+	on_pin_dirty(pin)
+	{
+		this.rebuild_geos()
+	}
+
+	render_run()
+	{
+		if (!this.rebuild) 
+		{
+			this.rebuild_geos()
+			this.rebuild = true
+		}
+
+		this.draw_geo_node.render_run()
+	}
+
+	rebuild_geos()
+	{
+		this.v_geos.value.clear()
+
+		var v_src = Blueprint.calc_input_value(this, 1)
+		this.build_geos(v_src)
+	}
+
+	build_geos(v_geo)
+	{
+		if (!v_geo.value) {
+			return
+		}
+
+		if (v_geo.value is List)
+		{
+			for (var v in v_geo.value) {
+				this.build_geos(v)
+			}
+		}
+		else
+		{
+			var w = Graphics.get_width()
+			var h = Graphics.get_height()
+
+			var new_shape = nil
+			var old_shape = v_geo.value.shape
+			if (old_shape is Polyline)
+			{
+				var old_vts = old_shape.get_vertices()
+
+				var vts = []
+				for (var i in 0 .. old_vts.count/2) 
+				{
+					vts.add((old_vts[i * 2] - 0.5) * w)
+					vts.add((old_vts[i * 2 + 1] - 0.5) * h)
+				}
+
+				new_shape = Polyline.init()
+				new_shape.set_vertices(vts)				
+			}
+			else if (old_shape is Circle)
+			{
+				var circle = old_shape.get()
+				var x = (circle[0] - 0.5) * w
+				var y = (circle[1] - 0.5) * h
+				new_shape = Circle.init(x, y, POINT_RADIUS)
+			}
+			else if (old_shape is Triangles)
+			{
+				var old_vts = old_shape.get_border()
+
+//				var block = Block.init(old_shape)
+//				var dist = 0.007
+//				var offset_block = block.offset_clone(dist)
+//				var old_vts = offset_block.get_border()
+
+				var vts = []
+				for (var i in 0 .. old_vts.count/2) 
+				{
+					vts.add((old_vts[i * 2] - 0.5) * w)
+					vts.add((old_vts[i * 2 + 1] - 0.5) * h)
+				}
+
+				new_shape = Triangles.init()
+				new_shape.set_border(vts)
+			}
+
+			var geo = VarGeo()
+			geo.render_style["color"] = v_geo.value.render_style["color"]
+			geo.render_style["fill"] = v_geo.value.render_style["fill"]
+			geo.shape = new_shape
+			this.v_geos.value.add(Variant(VAR_TYPE_GEO, geo))
+ 		}
+	}
+}
