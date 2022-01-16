@@ -218,11 +218,10 @@ void w_Block_get_border()
 void w_GeometryTools_polyline_expand()
 {
     auto polyline = tt::list_to_vec2_array(1);
-    bool is_closed = ves_toboolean(2);
-    float offset = (float)ves_tonumber(3);
-    auto polylines = sm::polyline_expand(polyline, is_closed, offset);
+    float offset = (float)ves_tonumber(2);
+    auto polylines = sm::polyline_expand(polyline, offset);
 
-    ves_pop(4);
+    ves_pop(3);
 
     return_points(polylines);
 }
@@ -245,7 +244,7 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Block.offset_clone(_)") == 0) return w_Block_offset_clone;
     if (strcmp(signature, "Block.get_border()") == 0) return w_Block_get_border;
 
-    if (strcmp(signature, "static GeometryTools.polyline_expand(_,_,_)") == 0) return w_GeometryTools_polyline_expand;
+    if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
 
 	return nullptr;
 }

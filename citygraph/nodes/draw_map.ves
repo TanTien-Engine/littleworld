@@ -111,7 +111,7 @@ class DrawMap is Node
 			var w = Graphics.get_width()
 			var h = Graphics.get_height()
 
-			var expand = GeometryTools.polyline_expand(v_polylines.value.shape.get_vertices(), false, width)
+			var expand = GeometryTools.polyline_expand(v_polylines.value.shape.get_vertices(), width)
 
 			if (expand)
 			{
