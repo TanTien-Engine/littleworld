@@ -52,8 +52,16 @@ void Streets::BuildStreamlines(int num)
 		{
 			int ix = static_cast<int>(w * x);
 			int iy = static_cast<int>(h * y);
-			major_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(ix, iy), region, true)));
-			minor_paths.push_back(std::make_shared<Path>(BuildPath(sm::ivec2(ix, iy), region, false)));
+
+			auto major_pts = BuildPath(sm::ivec2(ix, iy), region, true);
+			if (!major_pts.empty()) {
+				major_paths.push_back(std::make_shared<Path>(major_pts));
+			}
+
+			auto minor_pts = BuildPath(sm::ivec2(ix, iy), region, false);
+			if (!minor_pts.empty()) {
+				minor_paths.push_back(std::make_shared<Path>(minor_pts));
+			}
 		}
 	}
 
@@ -75,9 +83,16 @@ void Streets::BuildStreamlines(int num)
 		for (size_t ix = 0; ix < num; ++ix) 
 		{
 			int x = static_cast<int>(w / num * (0.5f + ix));
-			
-			m_major_paths.push_back(BuildPath(sm::ivec2(x, y), true));
-			m_minor_paths.push_back(BuildPath(sm::ivec2(x, y), false));
+	
+			auto major_pts = BuildPath(sm::ivec2(x, y), true);
+			if (!major_pts.empty()) {
+				m_major_paths.push_back(major_pts);
+			}
+
+			auto minor_pts = BuildPath(sm::ivec2(x, y), false);
+			if (!minor_pts.empty()) {
+				m_minor_paths.push_back(minor_pts);
+			}
 		}
 	}
 #endif // RANDOM_SELECT
@@ -220,6 +235,10 @@ std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, const sm::rect& region
 			break;
 		}
 		fp += dir;
+	}
+
+	if (points.size() == 1) {
+		points.clear();
 	}
 
 	return points;
