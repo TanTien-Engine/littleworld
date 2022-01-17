@@ -5,8 +5,6 @@ var CITY_NODES = [
 Regular, Wedge, Trisector, Radiate, Center, Saddle,
 // components
 Streets, Blocks, 
-// block
-Offset, 
 // selector
 AreaSelector, RandomSelector,
 // tools

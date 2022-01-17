@@ -6,8 +6,8 @@ import "blueprint.variant_proxy" for VariantProxy
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "citygraph.streets_helper" for StreetsHelper
-import "citygraph.variant" for VAR_TYPE_STREETS
-import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK
+import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
 import "geometry" for Triangles, Polyline
@@ -22,6 +22,7 @@ class DrawMap is Node
 		this.imports = [
 			Pin(this, "prev",    VAR_TYPE_PORT),
 			Pin(this, "streets", VAR_TYPE_STREETS),
+			Pin(this, "blocks",  VAR_TYPE_BLOCK),			
 		]
 		this.exports = [
 			Pin(this, "next", VAR_TYPE_PORT)
@@ -63,10 +64,17 @@ class DrawMap is Node
 		this.v_geos_pass2.value.clear()
 
 		var v_streets = Blueprint.calc_input_value(this, 1)
-		this.build_geos(v_streets)
+		if (v_streets) {
+			this.build_from_streets(v_streets)
+		}
+
+		var v_blocks = Blueprint.calc_input_value(this, 2)
+		if (v_blocks) {
+			this.build_from_blocks(v_blocks)
+		}
 	}
 
-	build_geos(v_streets)
+	build_from_streets(v_streets)
 	{
 		if (!v_streets) {
 			return
@@ -75,7 +83,7 @@ class DrawMap is Node
 		if (v_streets.value is List)
 		{
 			for (var item in v_streets.value) {
-				this.build_geos(item)
+				this.build_from_streets(item)
 			}
 		}
 		else
@@ -101,6 +109,47 @@ class DrawMap is Node
 			// blocks
 			var polys = StreetsHelper.build_polygons(v_streets)
 			this.build_blocks(polys, this.v_geos_pass2)
+		}
+	}
+
+	build_from_blocks(v_blocks)
+	{
+		if (!v_blocks) {
+			return
+		}
+
+		if (v_blocks.value is List)
+		{
+			for (var item in v_blocks.value) {
+				this.build_from_blocks(item)
+			}
+		}
+		else
+		{
+			var v_block = v_blocks.value
+
+			var border = v_block.block.offset(v_block.offset)
+			if (!border.isEmpty)
+			{
+				var w = Graphics.get_width()
+				var h = Graphics.get_height()
+			
+				var pts = []
+				for (var i in 0 .. border.count/2) 
+				{
+					pts.add((border[i * 2] - 0.5) * w)
+					pts.add((border[i * 2 + 1] - 0.5) * h)
+				}
+
+				var poly = Triangles.init()
+				poly.set_border(pts)
+
+				var geo = VarGeo()
+				geo.shape = poly
+				geo.render_style["color"] = COMMON_BLOCK_COLOR
+
+				this.v_geos_pass2.value.add(Variant(VAR_TYPE_GEO, geo))
+			}
 		}
 	}
 
@@ -143,8 +192,7 @@ class DrawMap is Node
 		{
 			var block = Block.init(poly.value.shape)
 			var dist = 0.007
-			var offset_block = block.offset_clone(dist)
-			var old_vts = offset_block.get_border()
+			var old_vts = block.offset(dist)
 
 			var vts = []
 			for (var i in 0 .. old_vts.count/2) 

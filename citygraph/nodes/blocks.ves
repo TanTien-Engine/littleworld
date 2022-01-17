@@ -2,7 +2,10 @@ import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
+import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO
+import "citygraph.streets_helper" for StreetsHelper
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, VarBlock
 import "citygen" for Block
 
 class Blocks is Node
@@ -12,11 +15,13 @@ class Blocks is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "blocks", VAR_TYPE_GEO)
+			Pin(this, "streets", VAR_TYPE_STREETS)
 		]
 		this.exports = [
 			Pin(this, "blocks", VAR_TYPE_GEO),
 		]
+
+		this.params.add(NodeParam("offset", 0, { "region" : 0.01 }))
 
 		this.layout()
 
@@ -28,24 +33,51 @@ class Blocks is Node
 		this.v_blocks = nil
 	}
 
+	on_param_dirty()
+	{
+		if (this.v_blocks)
+		{
+			var offset = this.query_param("offset").value
+			for (var b in this.v_blocks.value) {
+				b.value.offset = offset
+			}
+		}
+
+		Blueprint.send_pin_dirty_root(this.exports[0])
+	}
+
 	calc_value(idx)
 	{
-		var v_geos = Blueprint.calc_input_value(this, 0)
-		if (!v_geos) {
+		var v_streets = Blueprint.calc_input_value(this, 0)
+		if (!v_streets) {
 			return nil
 		}
 
-		if (!this.v_blocks) 
-		{
-			var blocks = []
-			for (var b in v_geos.value)
-			{
-				var block = Block.init(b.value.shape)
-				blocks.add(Variant(VAR_TYPE_BLOCK, block))
-			}
-			this.v_blocks = Variant(blocks)
+		if (!this.v_blocks) {
+			this.rebuild_blocks(v_streets.value)
 		}
 
 		return this.v_blocks
+	}
+
+	rebuild_blocks(v_streets)
+	{
+		var v_polygons = StreetsHelper.build_polygons(v_streets)
+
+		var blocks = []
+
+		var offset = this.query_param("offset").value
+
+		for (var item in v_polygons.value) 
+		{
+			var block = Block.init(item.value.shape)
+
+			var v_block = VarBlock(block)
+			v_block.offset = offset
+
+			blocks.add(Variant(VAR_TYPE_BLOCK, v_block))
+		}
+
+		this.v_blocks = Variant(blocks)
 	}
 }

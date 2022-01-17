@@ -10,3 +10,13 @@ class VarStreets
 		this.is_major = true
 	}
 }
+
+class VarBlock
+{
+	init(block)
+	{
+		this.block = block
+
+		this.offset = 0
+	}
+}

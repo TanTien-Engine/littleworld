@@ -169,22 +169,31 @@ int w_Block_finalize(void* data)
     return sizeof(tt::Proxy<citygen::Block>);
 }
 
-void w_Block_offset_clone()
+void w_Block_offset()
 {
     auto block = ((tt::Proxy<citygen::Block>*)ves_toforeign(0))->obj;
     auto dist = (float)ves_tonumber(1);
+
+    auto zz = block->GetBorder();
+
     auto borders = block->Offset(dist);
 
-    std::shared_ptr<citygen::Block> new_block = nullptr;
+    ves_pop(2);
+
     if (borders.empty()) {
-        new_block = std::make_shared<citygen::Block>(std::vector<sm::vec2>{});
-    } else {
-        new_block = std::make_shared<citygen::Block>(borders.front());
+        ves_newlist(0);
+        return;
     }
 
-    ves_pop(2);
-    auto proxy = (tt::Proxy<citygen::Block>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Block>));
-    proxy->obj = new_block;
+    ves_newlist(int(borders[0].size() * 2));
+
+    for (int i = 0, n = (int)(borders[0].size()); i < n; ++i) {
+        for (int j = 0; j < 2; ++j) {
+            ves_pushnumber(borders[0][i].xy[j]);
+            ves_seti(-2, i * 2 + j);
+            ves_pop(1);
+        }
+    }
 }
 
 void w_Block_get_border()
@@ -193,11 +202,6 @@ void w_Block_get_border()
     auto borders = block->GetBorder();
 
     ves_pop(1);
-
-    if (borders.empty()) {
-        ves_newlist(0);
-        return;
-    }
 
     ves_newlist(int(borders[0].size() * 2));
 
@@ -236,7 +240,7 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Streets.get_polygons()") == 0) return w_Streets_get_polygons;
     if (strcmp(signature, "Streets.set_seed(_)") == 0) return w_Streets_set_seed;
 
-    if (strcmp(signature, "Block.offset_clone(_)") == 0) return w_Block_offset_clone;
+    if (strcmp(signature, "Block.offset(_)") == 0) return w_Block_offset;
     if (strcmp(signature, "Block.get_border()") == 0) return w_Block_get_border;
 
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
