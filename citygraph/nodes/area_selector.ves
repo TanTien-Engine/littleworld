@@ -4,6 +4,8 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO
+import "citygraph.variant" for VAR_TYPE_STREETS
+import "citygraph.streets_helper" for StreetsHelper
 
 class AreaSelector is Node
 {
@@ -12,59 +14,69 @@ class AreaSelector is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "polys", VAR_TYPE_GEO),
+			Pin(this, "streets", VAR_TYPE_STREETS),
 		]
 		this.exports = [
-			Pin(this, "polys", VAR_TYPE_GEO),
+			Pin(this, "regions", VAR_TYPE_GEO),
 		]
 
 		this.params.add(NodeParam("num", 1, {  "integer" : true, "region" : 10 }))
 
 		this.layout()
 
-		this.v_polys = nil
+		this.v_polygons = nil
 	}	
 
 	on_node_dirty()
 	{
-		this.v_polys = nil
+		this.v_polygons = nil
 	}
 
 	calc_value(idx)
 	{
-		var v_polys = Blueprint.calc_input_value(this, 0)
-		if (!v_polys or !v_polys.value) {
+		var v_streets = Blueprint.calc_input_value(this, 0)
+		if (!v_streets) {
 			return nil
 		}
 
+		if (!this.v_polygons) {
+			this.rebuild_polygons(v_streets.value)
+		}
+
+		return this.v_polygons
+	}
+
+	select_polygons(v_polygons)
+	{
 		var num = this.query_param("num").value
-
-		if (v_polys.value.count < num) {
-			return v_polys
+		if (v_polygons.count < num) {
+			this.v_polygons = Variant(v_polygons)
+			return
 		}
 
-		if (!this.v_polys)
+		var poly_area = []
+		for (var item in v_polygons.value) 
 		{
-			var poly_area = []
-			for (var item in v_polys.value) 
-			{
-				var v_poly = item
-				var area = v_poly.value.shape.calc_area()
-				poly_area.add([ v_poly, area ])
-			}
-
-			fun poly_area_cmp(v0, v1) {
-				return v0[1] > v1[1]
-			}
-			poly_area.sort(poly_area_cmp)
-
-			var polys = []
-			for (var i in 0..num) {
-				polys.add(poly_area[i][0])
-			}
-			this.v_polys = Variant(polys)
+			var v_poly = item
+			var area = v_poly.value.shape.calc_area()
+			poly_area.add([ v_poly, area ])
 		}
 
-		return this.v_polys
+		fun poly_area_cmp(v0, v1) {
+			return v0[1] > v1[1]
+		}
+		poly_area.sort(poly_area_cmp)
+
+		var polys = []
+		for (var i in 0..num) {
+			polys.add(poly_area[i][0])
+		}
+		return polys
+	}
+
+	rebuild_polygons(v_streets)
+	{
+		var v_polygons = StreetsHelper.build_polygons(v_streets)
+		this.v_polygons = Variant(this.select_polygons(v_polygons))
 	}
 }

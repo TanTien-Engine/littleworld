@@ -21,7 +21,7 @@ var node4 = ::citygraph::nodes::streets::Streets()
 node4.query_param("num").value = 3
 node4.query_param("seed").value = 0
 
-_editor.add_node(node4, 84.51140910209, 157.93597384366)
+_editor.add_node(node4, 80.875045465726, 149.75415566184)
 
 var node5 = ::citygraph::nodes::regular::Regular()
 
@@ -40,7 +40,7 @@ _editor.add_node(node7, -604.83769601562, 317.34800835937)
 var node8 = ::citygraph::nodes::area_selector::AreaSelector()
 node8.query_param("num").value = 7
 
-_editor.add_node(node8, 239.80661157024, 137.68347107438)
+_editor.add_node(node8, 222.24570247933, 61.63148760331)
 
 var node9 = ::citygraph::nodes::streets::Streets()
 node9.query_param("num").value = 1
@@ -48,17 +48,24 @@ node9.query_param("seed").value = 0.72361212968826
 
 _editor.add_node(node9, 404.8748998347, 129.63025924794)
 
-var node10 = ::blueprint::nodes::merge::Merge()
+var node10 = ::citygraph::nodes::draw_map::DrawMap()
 
-_editor.add_node(node10, 619.35203927931, 64.297199937992)
+_editor.add_node(node10, 610.72385952989, 137.11055326908)
 
-var node11 = ::citygraph::nodes::draw_geometry::DrawGeometry()
+var node11 = ::citygraph::nodes::draw_network::DrawNetwork()
+node11.query_param("faces").value = false
 
-_editor.add_node(node11, 789.88180077071, 104.1251139566)
+_editor.add_node(node11, 555.90691155798, 351.02275674352)
 
-var node12 = ::citygraph::nodes::draw_map::DrawMap()
+var node12 = ::citygraph::nodes::random_selector::RandomSelector()
+node12.query_param("num").value = 5
+node12.query_param("seed").value = 0.71111112833023
 
-_editor.add_node(node12, 640.77645156595, 238.53805139079)
+_editor.add_node(node12, 223, -34.5)
+
+var node13 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node13, 443.42275597438, 274.61167466345)
 
 Blueprint.connect(node0, "uv", node5, "st")
 Blueprint.connect(node7, "v2", node5, "pos")
@@ -68,12 +75,10 @@ Blueprint.connect(node5, "ret", node6, "a")
 Blueprint.connect(node3, "ret", node6, "b")
 Blueprint.connect(node6, "v", node1, "tensor")
 Blueprint.connect(node1, "tensor_field", node4, "tf")
-Blueprint.connect(node4, "blocks", node8, "polys")
+Blueprint.connect(node4, "streets", node12, "streets")
+Blueprint.connect(node4, "streets", node8, "streets")
 Blueprint.connect(node1, "tensor_field", node9, "tf")
-Blueprint.connect(node8, "polys", node9, "borders")
-Blueprint.connect(node4, "routes", node12, "major_roads")
-Blueprint.connect(node9, "routes", node12, "minor_roads")
-Blueprint.connect(node4, "blocks", node12, "blocks")
-Blueprint.connect(node9, "routes", node10, "in0")
-Blueprint.connect(node9, "crossings", node10, "in1")
-Blueprint.connect(node9, "blocks", node10, "in2")
+Blueprint.connect(node8, "regions", node9, "borders")
+Blueprint.connect(node4, "streets", node13, "in0")
+Blueprint.connect(node9, "streets", node13, "in1")
+Blueprint.connect(node13, "list", node10, "streets")

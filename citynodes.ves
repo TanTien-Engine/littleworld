@@ -6,9 +6,9 @@ Regular, Wedge, Trisector, Radiate, Center, Saddle,
 // components
 Streets, Blocks, 
 // block
-Offset, BlockToGeo,
+Offset, 
 // selector
 AreaSelector, RandomSelector,
 // tools
-Streamlines, DrawMap, DrawGeometry,
+Streamlines, DrawMap, DrawNetwork,
 ]

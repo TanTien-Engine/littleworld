@@ -4,6 +4,8 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO
+import "citygraph.variant" for VAR_TYPE_STREETS
+import "citygraph.streets_helper" for StreetsHelper
 import "random" for Random
 
 class RandomSelector is Node
@@ -13,10 +15,10 @@ class RandomSelector is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "geos", VAR_TYPE_GEO),
+			Pin(this, "streets", VAR_TYPE_STREETS),
 		]
 		this.exports = [
-			Pin(this, "geos", VAR_TYPE_GEO),
+			Pin(this, "regions", VAR_TYPE_GEO),
 		]
 
 		this.params.add(NodeParam("num", 1, {  "integer" : true, "region" : 10 }))
@@ -24,39 +26,53 @@ class RandomSelector is Node
 
 		this.layout()
 
-		this.v_geos = nil
+		this.v_polygons = nil
 	}	
 
 	on_node_dirty()
 	{
-		this.v_geos = nil
+		this.v_polygons = nil
 	}
 
 	calc_value(idx)
 	{
-		var v_geos = Blueprint.calc_input_value(this, 0)
-		if (!v_geos or !v_geos.value) {
+		var v_streets = Blueprint.calc_input_value(this, 0)
+		if (!v_streets) {
 			return nil
 		}
 
-		var num = this.query_param("num").value
-
-		if (v_geos.value.count < num) {
-			return v_geos
+		if (!this.v_polygons) {
+			this.rebuild_polygons(v_streets.value)
 		}
 
-		if (!this.v_geos)
+		return this.v_polygons
+	}
+
+	select_polygons(v_polygons)
+	{
+		var num = this.query_param("num").value
+		if (v_polygons.value.count < num) {
+			return v_polygons
+		}
+
+		if (!this.v_polygons)
 		{
 			var seed = this.query_param("seed").value
 			var random = Random.init(seed * 65535)
 			var geos = []
 			for (var i in 0..num) {
-				var idx = random.int(v_geos.value.count)
-				geos.add(v_geos.value[idx])
+				var idx = random.int(v_polygons.value.count)
+				geos.add(v_polygons.value[idx])
 			}
-			this.v_geos = Variant(geos)
+			this.v_polygons = Variant(geos)
 		}
 
-		return this.v_geos
+		return this.v_polygons
+	}
+
+	rebuild_polygons(v_streets)
+	{
+		var v_polygons = StreetsHelper.build_polygons(v_streets)
+		this.v_polygons = Variant(this.select_polygons(v_polygons))
 	}
 }

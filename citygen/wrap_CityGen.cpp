@@ -125,11 +125,6 @@ void w_Streets_get_nodes()
 
     ves_pop(1);
 
-    if (nodes.empty()) {
-        ves_pushnil();
-        return;
-    }
-
     ves_newlist(int(nodes.size() * 2));
 
     for (int i = 0, n = (int)(nodes.size()); i < n; ++i) {

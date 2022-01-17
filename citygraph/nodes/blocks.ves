@@ -3,7 +3,6 @@ import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
 import "geograph.variant" for VAR_TYPE_GEO
-import "citygraph.variant" for VAR_TYPE_BLOCK
 import "citygen" for Block
 
 class Blocks is Node
@@ -13,10 +12,10 @@ class Blocks is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "geos", VAR_TYPE_GEO)
+			Pin(this, "blocks", VAR_TYPE_GEO)
 		]
 		this.exports = [
-			Pin(this, "blocks", VAR_TYPE_BLOCK),
+			Pin(this, "blocks", VAR_TYPE_GEO),
 		]
 
 		this.layout()

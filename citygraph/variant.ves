@@ -1,1 +1,12 @@
-var VAR_TYPE_BLOCK = "block"
+var VAR_TYPE_BLOCK   = "block"
+var VAR_TYPE_STREETS = "streets"
+
+class VarStreets
+{
+	init(streets)
+	{
+		this.streets = streets
+
+		this.is_major = true
+	}
+}

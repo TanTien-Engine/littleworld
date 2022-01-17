@@ -5,6 +5,8 @@ import "blueprint.variant" for Variant, VAR_TYPE_PORT
 import "blueprint.variant_proxy" for VariantProxy
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
+import "citygraph.streets_helper" for StreetsHelper
+import "citygraph.variant" for VAR_TYPE_STREETS
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
@@ -18,10 +20,8 @@ class DrawMap is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "prev",        VAR_TYPE_PORT),
-			Pin(this, "major_roads", VAR_TYPE_GEO),
-			Pin(this, "minor_roads", VAR_TYPE_GEO),
-			Pin(this, "blocks",      VAR_TYPE_GEO),
+			Pin(this, "prev",    VAR_TYPE_PORT),
+			Pin(this, "streets", VAR_TYPE_STREETS),
 		]
 		this.exports = [
 			Pin(this, "next", VAR_TYPE_PORT)
@@ -29,8 +29,8 @@ class DrawMap is Node
 
 		this.layout()
 
-		this.v_geos_pass1 = Variant(List.filled(3, nil))
-		this.v_geos_pass2 = Variant(List.filled(3, nil))
+		this.v_geos_pass1 = Variant([])
+		this.v_geos_pass2 = Variant([])
 
 		this.draw_geo_node = DrawGeometry()
 
@@ -39,23 +39,14 @@ class DrawMap is Node
 
 	on_pin_dirty(pin)
 	{
-		if (pin.slot_idx == 1) {
-			this.build_major_roads()
-		} else if (pin.slot_idx == 2) {
-			this.build_minor_roads()
-		} else if (pin.slot_idx == 3) {
-			this.build_blocks()
-		}
+		this.rebuild_geos()
 	}
 
 	render_run()
 	{
 		if (!this.rebuild) 
 		{
-			this.build_major_roads()
-			this.build_minor_roads()
-			this.build_blocks()
-
+			this.rebuild_geos()
 			this.rebuild = true
 		}
 
@@ -66,52 +57,61 @@ class DrawMap is Node
 		this.draw_geo_node.render_run()		
 	}
 
-	build_major_roads()
+	rebuild_geos()
 	{
-		var roads = nil
+		this.v_geos_pass1.value.clear()
+		this.v_geos_pass2.value.clear()
 
-		var v_polylines = Blueprint.calc_input_value(this, 1)
-		if (v_polylines)
-		{
-			var geos = []
-			this.build_roads(v_polylines, 0.01, MAJOR_ROAD_COLOR, geos)
-
-			roads = Variant(geos)
-		}
-
-		this.v_geos_pass1.value[2] = roads
+		var v_streets = Blueprint.calc_input_value(this, 1)
+		this.build_geos(v_streets)
 	}
 
-	build_minor_roads()
+	build_geos(v_streets)
 	{
-		var roads = nil
-
-		var v_polylines = Blueprint.calc_input_value(this, 2)
-		if (v_polylines)
-		{
-			var geos = []
-			this.build_roads(v_polylines, 0.007, MINOR_ROAD_COLOR, geos)
-			
-			roads = Variant(geos)
+		if (!v_streets) {
+			return
 		}
 
-		this.v_geos_pass1.value[1] = roads
-	}
-
-	build_roads(v_polylines, width, color, out_geos)
-	{
-		if (v_polylines.value is List)
+		if (v_streets.value is List)
 		{
-			for (var v in v_polylines.value) {
-				this.build_roads(v, width, color, out_geos)
+			for (var item in v_streets.value) {
+				this.build_geos(item)
 			}
 		}
 		else
 		{
-			var w = Graphics.get_width()
-			var h = Graphics.get_height()
+			var v_st = v_streets.value
 
-			var expand = GeometryTools.polyline_expand(v_polylines.value.shape.get_vertices(), width)
+			// edges
+			var width = 0.01
+			var color = MAJOR_ROAD_COLOR
+			var dst = this.v_geos_pass2
+			if (!v_st.is_major)
+			{
+				width = 0.007
+				color = MINOR_ROAD_COLOR
+				dst = this.v_geos_pass1
+			}
+
+			var major = v_streets.value.streets.get_major_paths()
+			this.build_roads(major, width, color, dst)
+			var minor = v_streets.value.streets.get_minor_paths()
+			this.build_roads(minor, width, color, dst)
+
+			// blocks
+			var polys = StreetsHelper.build_polygons(v_streets)
+			this.build_blocks(polys, this.v_geos_pass2)
+		}
+	}
+
+	build_roads(polylines, width, color, dst)
+	{
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		for (var polyline in polylines)
+		{
+			var expand = GeometryTools.polyline_expand(polyline, width)
 
 			if (expand)
 			{
@@ -129,44 +129,19 @@ class DrawMap is Node
 				geo.shape.set_border(pts)
 				geo.render_style["color"] = color
 
-				out_geos.add(Variant(VAR_TYPE_GEO, geo))
+				dst.value.add(Variant(VAR_TYPE_GEO, geo))
 			}
 		}
 	}
 
-	build_blocks()
+	build_blocks(polys, dst)
 	{
-		var blocks = nil
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
 
-		var v_blocks = Blueprint.calc_input_value(this, 3)
-		if (v_blocks)
+		for (var poly in polys)
 		{
-			var geos = []
-			this.build_blocks(v_blocks, geos)
-			
-			blocks = Variant(geos)
-		}
-
-		this.v_geos_pass2.value[0] = blocks
-	}
-
-	build_blocks(v_blocks, out_geos)
-	{
-		if (v_blocks.value is List)
-		{
-			for (var v in v_blocks.value) {
-				this.build_blocks(v, out_geos)
-			}
-		}
-		else
-		{
-			var w = Graphics.get_width()
-			var h = Graphics.get_height()
-
-			var old_shape = v_blocks.value.shape
-//			var old_vts = old_shape.get_border()
-
-			var block = Block.init(old_shape)
+			var block = Block.init(poly.value.shape)
 			var dist = 0.007
 			var offset_block = block.offset_clone(dist)
 			var old_vts = offset_block.get_border()
@@ -186,7 +161,7 @@ class DrawMap is Node
 			geo.shape = poly
 			geo.render_style["color"] = Vector3(0, 0, 0)
 
-			out_geos.add(Variant(VAR_TYPE_GEO, geo))
+			dst.value.add(Variant(VAR_TYPE_GEO, geo))
 		}
 	}
 }

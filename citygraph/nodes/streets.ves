@@ -4,12 +4,8 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
 import "blueprint.node_param" for NodeParam
 import "rendergraph.variant" for VAR_TYPE_TEXTURE
-import "citygraph.style" for BLOCK_COLORS
-import "geograph.variant" for VAR_TYPE_GEO, VarGeo
-import "geograph.config" for POINT_RADIUS
-import "geometry" for Polyline, Circle, Triangles
-import "maths.vector" for Vector3
-import "math" for Math
+import "citygraph.variant" for VAR_TYPE_STREETS, VarStreets
+import "geograph.variant" for VAR_TYPE_GEO
 import "citygen" for Streets as cg_Streets
 
 class Streets is Node
@@ -23,9 +19,7 @@ class Streets is Node
 			Pin(this, "borders", VAR_TYPE_GEO),
 		]
 		this.exports = [
-			Pin(this, "routes",    VAR_TYPE_GEO),
-			Pin(this, "crossings", VAR_TYPE_GEO),
-			Pin(this, "blocks",    VAR_TYPE_GEO),
+			Pin(this, "streets", VAR_TYPE_STREETS),
 		]
 
 		this.params.add(NodeParam("num", 2, {  "integer" : true, "region" : 10 }))
@@ -33,182 +27,65 @@ class Streets is Node
 
 		this.layout()
 
-		this.regions = []
-
-		this.v_routes    = nil
-		this.v_crossings = nil
-		this.v_blocks    = nil
+		this.v_streets = nil
 	}
 
 	on_node_dirty()
 	{
-		this.regions.clear()
-
-		this.v_routes    = nil
-		this.v_crossings = nil
-		this.v_blocks    = nil
+		this.v_streets = nil
 	}
 
 	calc_value(idx)
+	{
+		if (!this.v_streets) {
+			this.rebuild_streets()
+		}
+
+		return Variant(this.v_streets)
+	}
+
+	rebuild_streets()
 	{
 		var v_tex = Blueprint.calc_input_value(this, 0)
 		if (!v_tex or !v_tex.value) {
 			return nil
 		}
+	
+		this.v_streets = []
 
-		if (this.regions.isEmpty) 
+		var v_borders = Blueprint.calc_input_value(this, 1)
+
+		var borders = []
+		if (v_borders and v_borders.value) 
 		{
-			var v_borders = Blueprint.calc_input_value(this, 1)
-
-			var borders = []
-			if (v_borders and v_borders.value) 
-			{
-				if (v_borders.value is List) {
-					for (var b in v_borders.value) {
-						borders.add(b.value.shape)
-					}
-				} else {
-					borders.add(borders.value.shape)
+			if (v_borders.value is List) {
+				for (var b in v_borders.value) {
+					borders.add(b.value.shape)
 				}
-			}
-
-			if (borders.isEmpty) {
-				borders.add(nil)
-			}
-
-			var seed = this.query_param("seed").value
-			var num = this.query_param("num").value
-			for (var border in borders)
-			{
-				var st = cg_Streets.init(v_tex.value.tex, border)
-
-				st.set_seed(seed)
-				st.build_streamlines(num)
-
-				st.build_topology()
-
-				this.regions.add(st)
+			} else {
+				borders.add(borders.value.shape)
 			}
 		}
 
-		if (idx == 0)
-		{
-			if (!this.v_routes) 
-			{
-				var routes = []
-
-				for (var st in this.regions)
-				{
-					var major = st.get_major_paths()
-					var v_major = this.build_routes(major, Vector3(1.0, 0.0, 0.0))
-					routes.add(v_major)
-
-					var minor = st.get_minor_paths()
-					var v_minor = this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
-					routes.add(v_minor)
-				}
-
-				this.v_routes = Variant(routes)
-			}
-
-			return this.v_routes
-		}
-		else if (idx == 1)
-		{
-			if (!this.v_crossings)
-			{
-				var nodes = []
-
-				for (var st in this.regions)
-				{
-					var _nodes = st.get_nodes()
-					if (_nodes) {
-						for (var n in _nodes) {
-							nodes.add(n)
-						}
-					}
-				}
-
-				this.v_crossings = this.build_crossings(nodes, Vector3(0.0, 0.0, 1.0))
-			}
-
-			return this.v_crossings
-		}
-		else if (idx == 2)
-		{
-			if (!this.v_blocks)
-			{
-				var polygons = []
-
-				for (var st in this.regions)
-				{
-					var _polygons = st.get_polygons()
-					for (var p in _polygons) {
-						polygons.add(p)
-					}
-				}
-
-				this.v_blocks = this.build_blocks(polygons)
-			}
-
-			return this.v_blocks
+		if (borders.isEmpty) {
+			borders.add(nil)
 		}
 
-		return nil		
-	}
-
-	build_routes(paths, color)
-	{
-		var geos = []
-
-		for (var path in paths)
+		var seed = this.query_param("seed").value
+		var num = this.query_param("num").value
+		for (var border in borders)
 		{
-			var geo = VarGeo()
-			geo.shape = Polyline.init()
-			geo.shape.set_vertices(path)
-			geo.render_style["color"] = color
-			geos.add(Variant(VAR_TYPE_GEO, geo))
+			var st = cg_Streets.init(v_tex.value.tex, border)
+
+			st.set_seed(seed)
+			st.build_streamlines(num)
+
+			st.build_topology()
+
+			var v_st = VarStreets(st)
+			v_st.is_major = v_borders == nil
+
+			this.v_streets.add(Variant(VAR_TYPE_STREETS, v_st))
 		}
-
-		return Variant(geos)
-	}
-
-	build_crossings(nodes, color)
-	{
-		var geos = []
-
-		for (var i in 0 .. nodes.count/2) 
-		{
-			var x = nodes[i * 2]
-			var y = nodes[i * 2 + 1]
-
-			var geo = VarGeo()
-			geo.shape = Circle.init(x, y, POINT_RADIUS)
-
-			var v_geo = Variant(VAR_TYPE_GEO, geo)
-			v_geo.value.render_style["fill"] = true
-
-			geos.add(v_geo)
-		}
-
-		return Variant(geos)
-	}
-
-	build_blocks(polygons)
-	{
-		var geos = []
-
-		for (var i in 0..polygons.count)
-		{
-			var polygon = Triangles.init()
-			polygon.set_border(polygons[i])
-
-			var geo = VarGeo()
-			geo.shape = polygon 
-			geo.render_style["color"] = BLOCK_COLORS[Math.mod(i, BLOCK_COLORS.count)]
-			geos.add(Variant(VAR_TYPE_GEO, geo))
-		}
-
-		return Variant(geos)
 	}
 }
