@@ -1,4 +1,4 @@
-#include "Parcels.h"
+#include "ParcelsOBB.h"
 #include "RotatingCalipers.h"
 
 #include <SM_Calc.h>
@@ -10,19 +10,19 @@
 namespace citygen
 {
 
-Parcels::Parcels(const std::vector<sm::vec2>& border)
+ParcelsOBB::ParcelsOBB(const std::vector<sm::vec2>& border)
 	: m_border(border)
 {
 }
 
-void Parcels::Build(float max_len)
+void ParcelsOBB::Build(float max_len)
 {
 	srand(static_cast<unsigned int>(m_seed * UINT32_MAX));
 
 	m_root = std::make_shared<Node>(m_border, max_len);
 }
 
-void Parcels::Offset(float distance)
+void ParcelsOBB::Offset(float distance)
 {
 	std::queue<std::shared_ptr<Node>> buf;
 	buf.push(m_root);
@@ -49,7 +49,7 @@ void Parcels::Offset(float distance)
 	}
 }
 
-std::vector<std::vector<sm::vec2>> Parcels::GetPolygons() const
+std::vector<std::vector<sm::vec2>> ParcelsOBB::GetPolygons() const
 {
 	std::vector<std::vector<sm::vec2>> polygons;
 
@@ -74,7 +74,7 @@ std::vector<std::vector<sm::vec2>> Parcels::GetPolygons() const
 	return polygons;
 }
 
-Parcels::Node::Node(const std::vector<sm::vec2>& poly, float max_len)
+ParcelsOBB::Node::Node(const std::vector<sm::vec2>& poly, float max_len)
 	: poly(poly)
 {
 	obb = RotatingCalipers::CalcOBB(poly, true);
@@ -103,7 +103,7 @@ Parcels::Node::Node(const std::vector<sm::vec2>& poly, float max_len)
 	}
 }
 
-void Parcels::Node::Clip(const sm::vec2& p0, const sm::vec2& p1, float max_len)
+void ParcelsOBB::Node::Clip(const sm::vec2& p0, const sm::vec2& p1, float max_len)
 {
 	int find = 0;
 	std::vector<sm::vec2> poly0, poly1;

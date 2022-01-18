@@ -9,10 +9,10 @@
 namespace citygen
 {
 
-class Parcels
+class ParcelsOBB
 {
 public:
-	Parcels(const std::vector<sm::vec2>& border);
+	ParcelsOBB(const std::vector<sm::vec2>& border);
 
 	void Build(float max_len);
 
@@ -43,6 +43,6 @@ private:
 
 	float m_seed = 0.0f;
 
-}; // Parcels
+}; // ParcelsOBB
 
 }

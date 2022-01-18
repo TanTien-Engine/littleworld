@@ -26,7 +26,7 @@ foreign class Block
 	foreign get_border()
 }
 
-foreign class Parcels
+foreign class ParcelsOBB
 {
 	init(polygon) {}
 

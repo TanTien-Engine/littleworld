@@ -2,7 +2,7 @@
 #include "TensorField.h"
 #include "Streets.h"
 #include "Block.h"
-#include "Parcels.h"
+#include "ParcelsOBB.h"
 #include "modules/script/Proxy.h"
 #include "modules/script/TransHelper.h"
 #include "modules/graphics/Graphics.h"
@@ -213,39 +213,39 @@ void w_Block_get_border()
     }
 }
 
-void w_Parcels_allocate()
+void w_ParcelsOBB_allocate()
 {
     auto tris = ((tt::Proxy<gs::Triangles>*)ves_toforeign(1))->obj;
-    auto parcels = std::make_shared<citygen::Parcels>(tris->GetBorder());
+    auto parcels = std::make_shared<citygen::ParcelsOBB>(tris->GetBorder());
 
-    auto proxy = (tt::Proxy<citygen::Parcels>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Parcels>));
+    auto proxy = (tt::Proxy<citygen::ParcelsOBB>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::ParcelsOBB>));
     proxy->obj = parcels;
 }
 
-int w_Parcels_finalize(void* data)
+int w_ParcelsOBB_finalize(void* data)
 {
-    auto proxy = (tt::Proxy<citygen::Parcels>*)(data);
+    auto proxy = (tt::Proxy<citygen::ParcelsOBB>*)(data);
     proxy->~Proxy();
-    return sizeof(tt::Proxy<citygen::Parcels>);
+    return sizeof(tt::Proxy<citygen::ParcelsOBB>);
 }
 
-void w_Parcels_build()
+void w_ParcelsOBB_build()
 {
-    auto parcels = ((tt::Proxy<citygen::Parcels>*)ves_toforeign(0))->obj;
+    auto parcels = ((tt::Proxy<citygen::ParcelsOBB>*)ves_toforeign(0))->obj;
     auto max_len = (float)ves_tonumber(1);
     parcels->Build(max_len);
 }
 
-void w_Parcels_offset()
+void w_ParcelsOBB_offset()
 {
-    auto parcels = ((tt::Proxy<citygen::Parcels>*)ves_toforeign(0))->obj;
+    auto parcels = ((tt::Proxy<citygen::ParcelsOBB>*)ves_toforeign(0))->obj;
     auto dist = (float)ves_tonumber(1);
     parcels->Offset(dist);
 }
 
-void w_Parcels_get_polygons()
+void w_ParcelsOBB_get_polygons()
 {
-    auto parcels = ((tt::Proxy<citygen::Parcels>*)ves_toforeign(0))->obj;
+    auto parcels = ((tt::Proxy<citygen::ParcelsOBB>*)ves_toforeign(0))->obj;
     auto polygons = parcels->GetPolygons();
 
     ves_pop(1);
@@ -253,9 +253,9 @@ void w_Parcels_get_polygons()
     return_points(polygons);
 }
 
-void w_Parcels_set_seed()
+void w_ParcelsOBB_set_seed()
 {
-    auto parcels = ((tt::Proxy<citygen::Parcels>*)ves_toforeign(0))->obj;
+    auto parcels = ((tt::Proxy<citygen::ParcelsOBB>*)ves_toforeign(0))->obj;
     auto seed = (float)ves_tonumber(1);
     parcels->SetSeed(seed);
 }
@@ -291,10 +291,10 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Block.offset(_)") == 0) return w_Block_offset;
     if (strcmp(signature, "Block.get_border()") == 0) return w_Block_get_border;
 
-    if (strcmp(signature, "Parcels.build(_)") == 0) return w_Parcels_build;
-    if (strcmp(signature, "Parcels.offset(_)") == 0) return w_Parcels_offset;
-    if (strcmp(signature, "Parcels.get_polygons()") == 0) return w_Parcels_get_polygons;
-    if (strcmp(signature, "Parcels.set_seed(_)") == 0) return w_Parcels_set_seed;
+    if (strcmp(signature, "ParcelsOBB.build(_)") == 0) return w_ParcelsOBB_build;
+    if (strcmp(signature, "ParcelsOBB.offset(_)") == 0) return w_ParcelsOBB_offset;
+    if (strcmp(signature, "ParcelsOBB.get_polygons()") == 0) return w_ParcelsOBB_get_polygons;
+    if (strcmp(signature, "ParcelsOBB.set_seed(_)") == 0) return w_ParcelsOBB_set_seed;
 
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
 
@@ -317,10 +317,10 @@ void CityGenBindClass(const char* class_name, VesselForeignClassMethods* methods
         return;
     }
 
-    if (strcmp(class_name, "Parcels") == 0)
+    if (strcmp(class_name, "ParcelsOBB") == 0)
     {
-        methods->allocate = w_Parcels_allocate;
-        methods->finalize = w_Parcels_finalize;
+        methods->allocate = w_ParcelsOBB_allocate;
+        methods->finalize = w_ParcelsOBB_finalize;
         return;
     }
 }
