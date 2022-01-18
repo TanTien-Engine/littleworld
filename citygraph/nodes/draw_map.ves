@@ -6,7 +6,7 @@ import "blueprint.variant_proxy" for VariantProxy
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "citygraph.streets_helper" for StreetsHelper
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, VAR_TYPE_PARCELS
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
@@ -22,7 +22,8 @@ class DrawMap is Node
 		this.imports = [
 			Pin(this, "prev",    VAR_TYPE_PORT),
 			Pin(this, "streets", VAR_TYPE_STREETS),
-			Pin(this, "blocks",  VAR_TYPE_BLOCK),			
+			Pin(this, "blocks",  VAR_TYPE_BLOCK),
+			Pin(this, "parcels", VAR_TYPE_PARCELS),
 		]
 		this.exports = [
 			Pin(this, "next", VAR_TYPE_PORT)
@@ -71,6 +72,11 @@ class DrawMap is Node
 		var v_blocks = Blueprint.calc_input_value(this, 2)
 		if (v_blocks) {
 			this.build_from_blocks(v_blocks)
+		}
+
+		var v_parcels = Blueprint.calc_input_value(this, 3)
+		if (v_parcels) {
+			this.build_from_parcels(v_parcels)
 		}
 	}
 
@@ -153,6 +159,25 @@ class DrawMap is Node
 		}
 	}
 
+	build_from_parcels(v_parcels)
+	{
+		if (!v_parcels) {
+			return
+		}
+
+		if (v_parcels.value is List)
+		{
+			for (var item in v_parcels.value) {
+				this.build_from_parcels(item)
+			}
+		}
+		else
+		{
+			var parcels = v_parcels.value.parcels.get_polygons()
+			this.build_parcels(parcels, this.v_geos_pass2)
+		}
+	}
+
 	build_roads(polylines, width, color, dst)
 	{
 		var w = Graphics.get_width()
@@ -212,4 +237,30 @@ class DrawMap is Node
 			dst.value.add(Variant(VAR_TYPE_GEO, geo))
 		}
 	}
+
+	build_parcels(parcels, dst)
+	{
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		for (var poly in parcels)
+		{
+			var vts = []
+			for (var i in 0 .. poly.count/2) 
+			{
+				vts.add((poly[i * 2] - 0.5) * w)
+				vts.add((poly[i * 2 + 1] - 0.5) * h)
+			}
+
+			var poly = Polyline.init()
+			poly.set_vertices(vts)
+			poly.set_closed(true)
+
+			var geo = VarGeo()
+			geo.shape = poly
+			geo.render_style["color"] = Vector3(0, 0, 0)
+
+			dst.value.add(Variant(VAR_TYPE_GEO, geo))
+		}
+	}	
 }

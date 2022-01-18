@@ -26,6 +26,19 @@ foreign class Block
 	foreign get_border()
 }
 
+foreign class Parcels
+{
+	init(polygon) {}
+
+	foreign build(max_len)
+
+	foreign offset(distance)
+
+	foreign get_polygons()
+
+	foreign set_seed(seed)
+}
+
 foreign class GeometryTools
 {
 	foreign static polyline_expand(polyline, offset)

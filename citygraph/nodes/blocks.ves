@@ -18,7 +18,7 @@ class Blocks is Node
 			Pin(this, "streets", VAR_TYPE_STREETS)
 		]
 		this.exports = [
-			Pin(this, "blocks", VAR_TYPE_GEO),
+			Pin(this, "blocks", VAR_TYPE_BLOCK),
 		]
 
 		this.params.add(NodeParam("offset", 0, { "region" : 0.01 }))

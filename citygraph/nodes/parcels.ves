@@ -1,0 +1,76 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_PARCELS, VarParcels
+import "citygraph.streets_helper" for StreetsHelper
+import "citygen" for Parcels as cg_Parcels
+
+class Parcels is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "streets", VAR_TYPE_STREETS)
+		]
+		this.exports = [
+			Pin(this, "parcels", VAR_TYPE_PARCELS),
+		]
+
+		this.params.add(NodeParam("max_len", 0.1, { "region" : 0.2 }))
+		this.params.add(NodeParam("seed", 0))
+		this.params.add(NodeParam("offset", 0, { "region" : 0.01 }))
+
+		this.layout()
+
+		this.v_parcels = nil
+	}
+
+	on_node_dirty()
+	{
+		this.v_parcels = nil
+	}
+
+	calc_value(idx)
+	{
+		var v_streets = Blueprint.calc_input_value(this, 0)
+		if (!v_streets) {
+			return nil
+		}
+
+		if (!this.v_parcels) {
+			this.rebuild_parcels(v_streets.value)
+		}
+
+		return this.v_parcels
+	}
+
+	rebuild_parcels(v_streets)
+	{
+		var parcels = []
+
+		var offset = this.query_param("offset").value
+
+		var v_polygons = StreetsHelper.build_polygons(v_streets)
+
+		var max_len = this.query_param("max_len").value
+		var seed = this.query_param("seed").value
+		for (var item in v_polygons.value) 
+		{
+			var _parcels = cg_Parcels.init(item.value.shape)
+
+			_parcels.set_seed(seed)
+			_parcels.build(max_len)
+			_parcels.offset(offset)			
+
+			var v_parcels = VarParcels(_parcels)
+
+			parcels.add(Variant(VAR_TYPE_PARCELS, v_parcels))
+		}
+
+		this.v_parcels = Variant(parcels)
+	}
+}

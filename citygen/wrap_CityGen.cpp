@@ -2,6 +2,7 @@
 #include "TensorField.h"
 #include "Streets.h"
 #include "Block.h"
+#include "Parcels.h"
 #include "modules/script/Proxy.h"
 #include "modules/script/TransHelper.h"
 #include "modules/graphics/Graphics.h"
@@ -174,8 +175,6 @@ void w_Block_offset()
     auto block = ((tt::Proxy<citygen::Block>*)ves_toforeign(0))->obj;
     auto dist = (float)ves_tonumber(1);
 
-    auto zz = block->GetBorder();
-
     auto borders = block->Offset(dist);
 
     ves_pop(2);
@@ -214,11 +213,60 @@ void w_Block_get_border()
     }
 }
 
+void w_Parcels_allocate()
+{
+    auto tris = ((tt::Proxy<gs::Triangles>*)ves_toforeign(1))->obj;
+    auto parcels = std::make_shared<citygen::Parcels>(tris->GetBorder());
+
+    auto proxy = (tt::Proxy<citygen::Parcels>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Parcels>));
+    proxy->obj = parcels;
+}
+
+int w_Parcels_finalize(void* data)
+{
+    auto proxy = (tt::Proxy<citygen::Parcels>*)(data);
+    proxy->~Proxy();
+    return sizeof(tt::Proxy<citygen::Parcels>);
+}
+
+void w_Parcels_build()
+{
+    auto parcels = ((tt::Proxy<citygen::Parcels>*)ves_toforeign(0))->obj;
+    auto max_len = (float)ves_tonumber(1);
+    parcels->Build(max_len);
+}
+
+void w_Parcels_offset()
+{
+    auto parcels = ((tt::Proxy<citygen::Parcels>*)ves_toforeign(0))->obj;
+    auto dist = (float)ves_tonumber(1);
+    parcels->Offset(dist);
+}
+
+void w_Parcels_get_polygons()
+{
+    auto parcels = ((tt::Proxy<citygen::Parcels>*)ves_toforeign(0))->obj;
+    auto polygons = parcels->GetPolygons();
+
+    ves_pop(1);
+
+    return_points(polygons);
+}
+
+void w_Parcels_set_seed()
+{
+    auto parcels = ((tt::Proxy<citygen::Parcels>*)ves_toforeign(0))->obj;
+    auto seed = (float)ves_tonumber(1);
+    parcels->SetSeed(seed);
+}
+
 void w_GeometryTools_polyline_expand()
 {
     auto polyline = tt::list_to_vec2_array(1);
     float offset = (float)ves_tonumber(2);
-    auto polylines = sm::polyline_expand(polyline, offset);
+
+    bool is_closed = polyline.size() > 1 && polyline.front() == polyline.back();
+    auto polylines = sm::polyline_expand(polyline, offset, is_closed);
 
     ves_pop(3);
 
@@ -243,6 +291,11 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Block.offset(_)") == 0) return w_Block_offset;
     if (strcmp(signature, "Block.get_border()") == 0) return w_Block_get_border;
 
+    if (strcmp(signature, "Parcels.build(_)") == 0) return w_Parcels_build;
+    if (strcmp(signature, "Parcels.offset(_)") == 0) return w_Parcels_offset;
+    if (strcmp(signature, "Parcels.get_polygons()") == 0) return w_Parcels_get_polygons;
+    if (strcmp(signature, "Parcels.set_seed(_)") == 0) return w_Parcels_set_seed;
+
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
 
 	return nullptr;
@@ -261,6 +314,13 @@ void CityGenBindClass(const char* class_name, VesselForeignClassMethods* methods
     {
         methods->allocate = w_Block_allocate;
         methods->finalize = w_Block_finalize;
+        return;
+    }
+
+    if (strcmp(class_name, "Parcels") == 0)
+    {
+        methods->allocate = w_Parcels_allocate;
+        methods->finalize = w_Parcels_finalize;
         return;
     }
 }

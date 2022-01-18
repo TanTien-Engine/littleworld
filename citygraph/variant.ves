@@ -1,5 +1,6 @@
-var VAR_TYPE_BLOCK   = "block"
 var VAR_TYPE_STREETS = "streets"
+var VAR_TYPE_BLOCK   = "block"
+var VAR_TYPE_PARCELS = "parcels"
 
 class VarStreets
 {
@@ -18,5 +19,13 @@ class VarBlock
 		this.block = block
 
 		this.offset = 0
+	}
+}
+
+class VarParcels
+{
+	init(parcels)
+	{
+		this.parcels = parcels
 	}
 }
