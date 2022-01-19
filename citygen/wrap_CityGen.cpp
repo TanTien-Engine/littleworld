@@ -3,6 +3,7 @@
 #include "Streets.h"
 #include "Block.h"
 #include "ParcelsOBB.h"
+#include "ParcelsSS.h"
 #include "modules/script/Proxy.h"
 #include "modules/script/TransHelper.h"
 #include "modules/graphics/Graphics.h"
@@ -260,6 +261,39 @@ void w_ParcelsOBB_set_seed()
     parcels->SetSeed(seed);
 }
 
+void w_ParcelsSS_allocate()
+{
+    auto tris = ((tt::Proxy<gs::Triangles>*)ves_toforeign(1))->obj;
+    auto parcels = std::make_shared<citygen::ParcelsSS>(tris->GetBorder());
+
+    auto proxy = (tt::Proxy<citygen::ParcelsSS>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::ParcelsSS>));
+    proxy->obj = parcels;
+}
+
+int w_ParcelsSS_finalize(void* data)
+{
+    auto proxy = (tt::Proxy<citygen::ParcelsSS>*)(data);
+    proxy->~Proxy();
+    return sizeof(tt::Proxy<citygen::ParcelsSS>);
+}
+
+void w_ParcelsSS_build()
+{
+    auto parcels = ((tt::Proxy<citygen::ParcelsSS>*)ves_toforeign(0))->obj;
+    parcels->Build();
+}
+
+void w_ParcelsSS_get_polygons()
+{
+    auto parcels = ((tt::Proxy<citygen::ParcelsSS>*)ves_toforeign(0))->obj;
+    float dist = (float)ves_tonumber(1);
+    auto polygons = parcels->GetPolygons(dist);
+
+    ves_pop(2);
+
+    return_points(polygons);
+}
+
 void w_GeometryTools_polyline_expand()
 {
     auto polyline = tt::list_to_vec2_array(1);
@@ -296,6 +330,9 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "ParcelsOBB.get_polygons()") == 0) return w_ParcelsOBB_get_polygons;
     if (strcmp(signature, "ParcelsOBB.set_seed(_)") == 0) return w_ParcelsOBB_set_seed;
 
+    if (strcmp(signature, "ParcelsSS.build()") == 0) return w_ParcelsSS_build;
+    if (strcmp(signature, "ParcelsSS.get_polygons(_)") == 0) return w_ParcelsSS_get_polygons;
+
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
 
 	return nullptr;
@@ -321,6 +358,13 @@ void CityGenBindClass(const char* class_name, VesselForeignClassMethods* methods
     {
         methods->allocate = w_ParcelsOBB_allocate;
         methods->finalize = w_ParcelsOBB_finalize;
+        return;
+    }
+
+    if (strcmp(class_name, "ParcelsSS") == 0)
+    {
+        methods->allocate = w_ParcelsSS_allocate;
+        methods->finalize = w_ParcelsSS_finalize;
         return;
     }
 }

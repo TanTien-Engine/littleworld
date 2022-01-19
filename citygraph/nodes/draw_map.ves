@@ -3,6 +3,7 @@ import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant, VAR_TYPE_PORT
 import "blueprint.variant_proxy" for VariantProxy
+import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "citygraph.streets_helper" for StreetsHelper
@@ -28,6 +29,8 @@ class DrawMap is Node
 		this.exports = [
 			Pin(this, "next", VAR_TYPE_PORT)
 		]
+
+		this.params.add(NodeParam("dist", 0, { "region" : 0.2 }))
 
 		this.layout()
 
@@ -173,7 +176,8 @@ class DrawMap is Node
 		}
 		else
 		{
-			var parcels = v_parcels.value.parcels.get_polygons()
+			var dist = this.query_param("dist").value
+			var parcels = v_parcels.value.parcels.get_polygons(dist)
 			this.build_parcels(parcels, this.v_geos_pass2)
 		}
 	}

@@ -5,7 +5,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_PARCELS, VarParcels
 import "citygraph.streets_helper" for StreetsHelper
-import "citygen" for ParcelsOBB
+import "citygen" for ParcelsOBB, ParcelsSS
 
 class Parcels is Node
 {
@@ -60,11 +60,13 @@ class Parcels is Node
 		var seed = this.query_param("seed").value
 		for (var item in v_polygons.value) 
 		{
-			var _parcels = ParcelsOBB.init(item.value.shape)
+//			var _parcels = ParcelsOBB.init(item.value.shape)
+//			_parcels.set_seed(seed)
+//			_parcels.build(max_len)
+//			_parcels.offset(offset)			
 
-			_parcels.set_seed(seed)
-			_parcels.build(max_len)
-			_parcels.offset(offset)			
+			var _parcels = ParcelsSS.init(item.value.shape)
+			_parcels.build()
 
 			var v_parcels = VarParcels(_parcels)
 

@@ -18,8 +18,8 @@ var node3 = ::citygraph::nodes::center::Center()
 _editor.add_node(node3, -442.62176001746, 199.45709251652)
 
 var node4 = ::citygraph::nodes::streets::Streets()
-node4.query_param("num").value = 4
-node4.query_param("seed").value = 0
+node4.query_param("num").value = 5
+node4.query_param("seed").value = 0.29027727246284
 
 _editor.add_node(node4, 80.875045465726, 149.75415566184)
 
@@ -43,10 +43,14 @@ node8.query_param("faces").value = false
 _editor.add_node(node8, 507.54797904514, 177.86940941148)
 
 var node9 = ::citygraph::nodes::parcels::Parcels()
+node9.query_param("max_len").value = 0.1
+node9.query_param("seed").value = 0
+node9.query_param("offset").value = 0
 
 _editor.add_node(node9, 75.893032660364, 50.145866961519)
 
 var node10 = ::citygraph::nodes::draw_map::DrawMap()
+node10.query_param("dist").value = 0.10149827599525
 
 _editor.add_node(node10, 413.32577413764, 38.560615476498)
 

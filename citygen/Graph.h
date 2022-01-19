@@ -24,21 +24,8 @@ public:
 
 	void VertexMerge(float dist);
 
-private:
-	struct Vertex;
+public:
 	struct Edge;
-
-	Vertex* AddVertex(const sm::vec2& pos);
-
-	struct VertexComp
-	{
-		bool operator () (const Vertex* lhs, const Vertex* rhs) const;
-	};
-
-	struct EdgeComp
-	{
-		bool operator () (const Edge* lhs, const Edge* rhs) const;
-	};
 
 	struct Vertex
 	{
@@ -66,6 +53,19 @@ private:
 		const Edge* next = nullptr;
 
 		mutable bool visited = false;
+	};
+
+private:
+	Vertex* AddVertex(const sm::vec2& pos);
+
+	struct VertexComp
+	{
+		bool operator () (const Vertex* lhs, const Vertex* rhs) const;
+	};
+
+	struct EdgeComp
+	{
+		bool operator () (const Edge* lhs, const Edge* rhs) const;
 	};
 
 private:

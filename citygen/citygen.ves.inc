@@ -39,6 +39,15 @@ foreign class ParcelsOBB
 	foreign set_seed(seed)
 }
 
+foreign class ParcelsSS
+{
+	init(polygon) {}
+
+	foreign build()
+
+	foreign get_polygons(dist)
+}
+
 foreign class GeometryTools
 {
 	foreign static polyline_expand(polyline, offset)
