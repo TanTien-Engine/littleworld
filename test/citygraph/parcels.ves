@@ -50,9 +50,8 @@ node9.query_param("offset").value = 0
 _editor.add_node(node9, 75.893032660364, 50.145866961519)
 
 var node10 = ::citygraph::nodes::draw_map::DrawMap()
-node10.query_param("dist").value = 0.10149827599525
 
-_editor.add_node(node10, 413.32577413764, 38.560615476498)
+_editor.add_node(node10, 417.52434055953, 38.094108096288)
 
 Blueprint.connect(node0, "uv", node5, "st")
 Blueprint.connect(node7, "v2", node5, "pos")

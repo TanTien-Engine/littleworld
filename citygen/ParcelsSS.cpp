@@ -1,7 +1,10 @@
 #include "ParcelsSS.h"
 #include "Graph.h"
+#include "Math.h"
 
 #include <SM_Calc.h>
+#include <sm_const.h>
+#include <SM_Polyline.h>
 
 #include <queue>
 
@@ -13,8 +16,10 @@ ParcelsSS::ParcelsSS(const std::vector<sm::vec2>& border)
 {
 }
 
-void ParcelsSS::Build()
+void ParcelsSS::Build(float max_len)
 {
+	m_max_len = max_len;
+
 	m_poly = PolygonPtr(new Polygon_2);
 	for (auto& p : m_border) {
 		m_poly->push_back(K::Point_2(p.x, p.y));
@@ -42,51 +47,71 @@ void ParcelsSS::Build()
 	BuildGraph();
 }
 
-std::vector<std::vector<sm::vec2>> ParcelsSS::GetPolygons(float dist) const
+std::vector<std::vector<sm::vec2>> ParcelsSS::GetPolygons() const
 {
     std::vector<std::vector<sm::vec2>> polys;
 
-	
-  //  for (auto itr = m_skel->halfedges_begin(); itr != m_skel->halfedges_end(); ++itr)
-  //  {
-		//if (itr->is_bisector() && (itr->id() % 2 == 0))
-		//{
-		//	auto p1 = itr->vertex()->point();
-		//	auto p2 = itr->opposite()->vertex()->point();
+	auto graph = std::make_shared<Graph>();
 
-		//	std::vector<sm::vec2> poly;
-		//	poly.push_back(sm::vec2(p1.x(), p1.y()));
-		//	poly.push_back(sm::vec2(p2.x(), p2.y()));
-		//	polys.push_back(poly);
-		//}		
-  //  }
+	float border_width = FLT_MAX;
+	auto mid_line = TravelSkeleton(border_width);
 
+	auto out_line = m_border;
+	out_line.push_back(out_line.front());
 
-	//for (auto& v : m_graph->GetVertices())
-	//{
-	//	//if (v->edges.size() != 1)
-	//	{
-	//		for (auto& e : v->edges)
-	//		{
-	//			if (v->edges.size() > 1 && e->t->edges.size() > 1) {
-	//				polys.push_back({ v->pos, e->t->pos });
-	//			}
-	//		}
-	//	}
-	//}
+	const float ang_skip = 0.5f;
 
-	for (int i = 0, n = std::min((int)m_paths.size(), (int)(dist * 100)); i < n; ++i)
+	float curr_d = 0;
+	for (int i = 0; i < out_line.size() - 1; ++i)
 	{
-		polys.push_back(m_paths[i]->pts);
+		auto& p0 = out_line[i];
+		auto& p1 = out_line[i + 1];
+
+		float d = sm::dis_pos_to_pos(p0, p1);
+		if (curr_d + d >= m_max_len)
+		{
+			auto p = p0 + (p1 - p0) / d * (m_max_len - curr_d);
+			auto o = p + sm::rotate_vector((p1 - p).Normalized() * 10, SM_PI * 0.5f);
+
+			sm::vec2 cross;
+			size_t idx;
+			if (sm::intersect_segment_polyline(p, o, mid_line, &cross, &idx)) 
+			{
+				const float MAX_ANG = SM_PI * 0.5f;
+
+				auto v0 = (p1 - p0).Normalized();
+				auto v1 = (mid_line[(idx + 1) % mid_line.size()] - mid_line[idx]).Normalized();
+				if (fabs(v0.Dot(v1)) > 0.5f)
+				{
+					graph->AddPath({ p, cross });
+					out_line.insert(out_line.begin() + i + 1, p);
+					mid_line.insert(mid_line.begin() + idx + 1, cross);
+				}
+			} 
+
+			curr_d = 0;
+		}
+		else
+		{
+			curr_d += d;
+		}
 	}
 
-	//for (auto& path : m_paths) 
-	//{
-	//	if (path->nodes[0]->dist + path->nodes[1]->dist > dist)
-	//	{
-	//		polys.push_back(path->pts);
-	//	}
-	//}
+	Math::IntersectPaths(out_line, mid_line);
+
+	graph->AddPath(out_line);
+	graph->AddPath(mid_line);
+
+	graph->BuildHalfedge();
+
+	auto polygons = graph->GetPolygons();
+	for (auto& p : polygons)
+	{
+		auto o = sm::polyline_offset(p, m_offset, true);
+		if (!o.empty()) {
+			polys.push_back(o.front());
+		}
+	}
 
 	return polys;
 }
@@ -213,7 +238,94 @@ void ParcelsSS::BuildGraph()
 		}
 	};
 	std::sort(paths.begin(), paths.end(), PathCmp());
-	m_paths = paths;
+
+	m_root = paths.empty() ? nullptr : paths.front();
+}
+
+std::vector<sm::vec2> ParcelsSS::TravelSkeleton(float& border_width) const
+{
+	if (!m_root) {
+		return {};
+	}
+
+	auto travel = [&](const std::shared_ptr<Node>& except) -> std::vector<sm::vec2>
+	{
+		std::vector<sm::vec2> path;
+
+		std::shared_ptr<Node> prev = except;
+		std::shared_ptr<Path> curr = m_root;
+		while (curr)
+		{
+			auto v = curr->nodes[0] == prev ? curr->nodes[1] : curr->nodes[0];
+			path.push_back(v->pos);
+
+			assert(!v->paths.empty());
+			if (v->paths.size() == 1) 
+			{
+				curr = nullptr;
+			}
+			else if (v->paths.size() == 2)
+			{
+				curr = v->paths[0] == curr ? v->paths[1] : v->paths[0];
+			}
+			else
+			{
+				std::vector<float> angles;
+				for (auto& path : v->paths)
+				{
+					auto other = path->nodes[0] == v ? path->nodes[1] : path->nodes[0];
+					angles.push_back(sm::get_angle(v->pos, prev->pos, other->pos));
+				}
+
+				float min_angle = FLT_MAX;
+				int min_idx = -1;
+				for (int i = 0, n = angles.size(); i < n; ++i) 
+				{
+					const float d = fabs(angles[i] - SM_PI);
+					if (d < min_angle) {
+						min_angle = d;
+						min_idx = i;
+					}
+				}
+
+				if (min_angle > SM_PI * 0.2f) 
+				{
+					sm::vec2 out = v->pos + (v->pos - prev->pos).Normalized() * 10;
+					for (int i = 0, n = m_border.size(); i < n; ++i)
+					{
+						sm::vec2 cross;
+						if (sm::intersect_segment_segment(m_border[i], m_border[(i + 1) % n], v->pos, out, &cross))
+						{
+							const float d = sm::dis_pos_to_pos(v->pos, cross);
+							if (d < border_width) {
+								border_width = d;
+							}
+
+							path.push_back(cross);
+							break;
+						}
+					}
+
+					curr = nullptr;
+				} 
+				else 
+				{
+					assert(min_idx != -1);
+					curr = v->paths[min_idx];
+				}
+			}
+			prev = v;
+		}
+
+		return path;
+	};
+
+	auto path0 = travel(m_root->nodes[1]);
+	auto path1 = travel(m_root->nodes[0]);
+
+	std::reverse(path0.begin(), path0.end());
+	std::copy(path1.begin(), path1.end(), std::back_inserter(path0));
+	return path0;
 }
 
 }

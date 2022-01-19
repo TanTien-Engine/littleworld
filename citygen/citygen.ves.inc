@@ -43,9 +43,13 @@ foreign class ParcelsSS
 {
 	init(polygon) {}
 
-	foreign build()
+	foreign build(max_len)
 
-	foreign get_polygons(dist)
+	foreign offset(distance)
+
+	foreign get_polygons()
+
+	foreign set_seed(seed)
 }
 
 foreign class GeometryTools

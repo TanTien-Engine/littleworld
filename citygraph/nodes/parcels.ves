@@ -60,13 +60,11 @@ class Parcels is Node
 		var seed = this.query_param("seed").value
 		for (var item in v_polygons.value) 
 		{
-//			var _parcels = ParcelsOBB.init(item.value.shape)
-//			_parcels.set_seed(seed)
-//			_parcels.build(max_len)
-//			_parcels.offset(offset)			
-
-			var _parcels = ParcelsSS.init(item.value.shape)
-			_parcels.build()
+			var _parcels = ParcelsOBB.init(item.value.shape)
+//			var _parcels = ParcelsSS.init(item.value.shape)			
+			_parcels.set_seed(seed)
+			_parcels.build(max_len)
+			_parcels.offset(offset)			
 
 			var v_parcels = VarParcels(_parcels)
 

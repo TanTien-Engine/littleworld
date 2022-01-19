@@ -22,9 +22,13 @@ class ParcelsSS
 public:
 	ParcelsSS(const std::vector<sm::vec2>& border);
 
-	void Build();
+	void Build(float max_len);
 
-	std::vector<std::vector<sm::vec2>> GetPolygons(float dist) const;
+	void Offset(float distance) { m_offset = distance; }
+
+	std::vector<std::vector<sm::vec2>> GetPolygons() const;
+
+	void SetSeed(float seed) { m_seed = seed; }
 
 private:
 	struct Node;
@@ -47,6 +51,8 @@ private:
 
 	void BuildGraph();
 
+	std::vector<sm::vec2> TravelSkeleton(float& border_width) const;
+
 private:
 	typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 	typedef CGAL::Polygon_2<K>           Polygon_2;
@@ -61,8 +67,11 @@ private:
 	PolygonPtr  m_poly = nullptr;
 	SkeletonPtr m_skel = nullptr;
 
-//	std::shared_ptr<Path> m_root = nullptr;
-	std::vector<std::shared_ptr<Path>> m_paths;
+	std::shared_ptr<Path> m_root = nullptr;
+
+	float m_seed = 0.0f;
+	float m_max_len = 0.1f;
+	float m_offset = 0;
 
 }; // ParcelsSS
 

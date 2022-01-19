@@ -30,8 +30,6 @@ class DrawMap is Node
 			Pin(this, "next", VAR_TYPE_PORT)
 		]
 
-		this.params.add(NodeParam("dist", 0, { "region" : 0.2 }))
-
 		this.layout()
 
 		this.v_geos_pass1 = Variant([])
@@ -176,8 +174,7 @@ class DrawMap is Node
 		}
 		else
 		{
-			var dist = this.query_param("dist").value
-			var parcels = v_parcels.value.parcels.get_polygons(dist)
+			var parcels = v_parcels.value.parcels.get_polygons()
 			this.build_parcels(parcels, this.v_geos_pass2)
 		}
 	}

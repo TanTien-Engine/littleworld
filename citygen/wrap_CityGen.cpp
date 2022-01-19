@@ -280,18 +280,32 @@ int w_ParcelsSS_finalize(void* data)
 void w_ParcelsSS_build()
 {
     auto parcels = ((tt::Proxy<citygen::ParcelsSS>*)ves_toforeign(0))->obj;
-    parcels->Build();
+    auto max_len = (float)ves_tonumber(1);
+    parcels->Build(max_len);
+}
+
+void w_ParcelsSS_offset()
+{
+    auto parcels = ((tt::Proxy<citygen::ParcelsSS>*)ves_toforeign(0))->obj;
+    auto dist = (float)ves_tonumber(1);
+    parcels->Offset(dist);
 }
 
 void w_ParcelsSS_get_polygons()
 {
     auto parcels = ((tt::Proxy<citygen::ParcelsSS>*)ves_toforeign(0))->obj;
-    float dist = (float)ves_tonumber(1);
-    auto polygons = parcels->GetPolygons(dist);
+    auto polygons = parcels->GetPolygons();
 
-    ves_pop(2);
+    ves_pop(1);
 
     return_points(polygons);
+}
+
+void w_ParcelsSS_set_seed()
+{
+    auto parcels = ((tt::Proxy<citygen::ParcelsSS>*)ves_toforeign(0))->obj;
+    auto seed = (float)ves_tonumber(1);
+    parcels->SetSeed(seed);
 }
 
 void w_GeometryTools_polyline_expand()
@@ -330,8 +344,10 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "ParcelsOBB.get_polygons()") == 0) return w_ParcelsOBB_get_polygons;
     if (strcmp(signature, "ParcelsOBB.set_seed(_)") == 0) return w_ParcelsOBB_set_seed;
 
-    if (strcmp(signature, "ParcelsSS.build()") == 0) return w_ParcelsSS_build;
-    if (strcmp(signature, "ParcelsSS.get_polygons(_)") == 0) return w_ParcelsSS_get_polygons;
+    if (strcmp(signature, "ParcelsSS.build(_)") == 0) return w_ParcelsSS_build;
+    if (strcmp(signature, "ParcelsSS.offset(_)") == 0) return w_ParcelsSS_offset;
+    if (strcmp(signature, "ParcelsSS.get_polygons()") == 0) return w_ParcelsSS_get_polygons;
+    if (strcmp(signature, "ParcelsSS.set_seed(_)") == 0) return w_ParcelsSS_set_seed;
 
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
 
