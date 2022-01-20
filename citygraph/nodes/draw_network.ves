@@ -11,7 +11,7 @@ import "citygraph.variant" for VAR_TYPE_STREETS
 import "citygraph.style" for BLOCK_COLORS
 import "maths.vector" for Vector3
 import "graphics" for Graphics
-import "geometry" for Circle, Polyline, Triangles
+import "geometry" for Circle, Polyline, Polygon
 import "math" for Math
 
 class DrawNetwork is Node
@@ -158,8 +158,8 @@ class DrawNetwork is Node
 				pts.add((old_pts[i * 2 + 1] - 0.5) * h)
 			}
 
-			var polygon = Triangles.init()
-			polygon.set_border(pts)
+			var polygon = Polygon.init()
+			polygon.set_vertices(pts)
 
 			var geo = VarGeo()
 			geo.shape = polygon 

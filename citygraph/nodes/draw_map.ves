@@ -11,7 +11,7 @@ import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, VAR_TYPE_PARCEL
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
-import "geometry" for Triangles, Polyline
+import "geometry" for Polygon, Polyline
 import "citygen" for Block, GeometryTools
 
 class DrawMap is Node
@@ -154,8 +154,8 @@ class DrawMap is Node
 					pts.add((border[i * 2 + 1] - 0.5) * h)
 				}
 
-				var poly = Triangles.init()
-				poly.set_border(pts)
+				var poly = Polygon.init()
+				poly.set_vertices(pts)
 
 				var geo = VarGeo()
 				geo.shape = poly
@@ -234,8 +234,8 @@ class DrawMap is Node
 				}
 
 				var geo = VarGeo()
-				geo.shape = Triangles.init()
-				geo.shape.set_border(pts)
+				geo.shape = Polygon.init()
+				geo.shape.set_vertices(pts)
 				geo.render_style["color"] = color
 
 				dst.value.add(Variant(VAR_TYPE_GEO, geo))

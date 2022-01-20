@@ -10,7 +10,7 @@
 #include "modules/graphics/Graphics.h"
 
 #include <unirender/Texture.h>
-#include <geoshape/Triangles.h>
+#include <geoshape/Polygon2D.h>
 #include <SM_Polyline.h>
 
 #include <string>
@@ -28,8 +28,8 @@ void w_Streets_allocate()
     auto poly = ves_toforeign(2);
     if (poly)
     {
-        auto tris = ((tt::Proxy<gs::Triangles>*)poly)->obj;
-        border = tris->GetBorder();
+        auto poly2d = ((tt::Proxy<gs::Polygon2D>*)poly)->obj;
+        border = poly2d->GetVertices();
         border.push_back(border.front());
     }
     else
@@ -158,8 +158,8 @@ void w_Streets_set_seed()
 
 void w_Block_allocate()
 {
-    auto tris = ((tt::Proxy<gs::Triangles>*)ves_toforeign(1))->obj;
-    auto block = std::make_shared<citygen::Block>(tris->GetBorder());
+    auto poly = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
+    auto block = std::make_shared<citygen::Block>(poly->GetVertices());
 
     auto proxy = (tt::Proxy<citygen::Block>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Block>));
     proxy->obj = block;
@@ -217,8 +217,8 @@ void w_Block_get_border()
 
 void w_ParcelsOBB_allocate()
 {
-    auto tris = ((tt::Proxy<gs::Triangles>*)ves_toforeign(1))->obj;
-    auto parcels = std::make_shared<citygen::ParcelsOBB>(tris->GetBorder());
+    auto poly = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
+    auto parcels = std::make_shared<citygen::ParcelsOBB>(poly->GetVertices());
 
     auto proxy = (tt::Proxy<citygen::ParcelsOBB>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::ParcelsOBB>));
     proxy->obj = parcels;
@@ -264,8 +264,8 @@ void w_ParcelsOBB_set_seed()
 
 void w_ParcelsSS_allocate()
 {
-    auto tris = ((tt::Proxy<gs::Triangles>*)ves_toforeign(1))->obj;
-    auto parcels = std::make_shared<citygen::ParcelsSS>(tris->GetBorder());
+    auto poly = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
+    auto parcels = std::make_shared<citygen::ParcelsSS>(poly->GetVertices());
 
     auto proxy = (tt::Proxy<citygen::ParcelsSS>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::ParcelsSS>));
     proxy->obj = parcels;

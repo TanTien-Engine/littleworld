@@ -1,6 +1,6 @@
 import "blueprint.variant" for Variant
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
-import "geometry" for Triangles
+import "geometry" for Polygon
 
 class StreetsHelper
 {
@@ -29,8 +29,8 @@ class StreetsHelper
 
 			for (var block in blocks)
 			{
-				var polygon = Triangles.init()
-				polygon.set_border(block)
+				var polygon = Polygon.init()
+				polygon.set_vertices(block)
 
 				var geo = VarGeo()
 				geo.shape = polygon 
