@@ -22,9 +22,9 @@ class ShapeU is Node
 			Pin(this, "lots", VAR_TYPE_PARCELS),
 		]
 
-		this.params.add(NodeParam("front_width", 0.01, { "region" : 0.1 }))
-		this.params.add(NodeParam("left_width", 0.01, { "region" : 0.1 }))
-		this.params.add(NodeParam("right_width", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("front", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("left", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("right", 0.01, { "region" : 0.1 }))
 
 		this.layout()
 
@@ -74,13 +74,13 @@ class ShapeU is Node
 
 	build_lots(parcels, lots)
 	{
-		var front_width = this.query_param("front_width").value
-		var left_width = this.query_param("left_width").value
-		var right_width = this.query_param("right_width").value
+		var front = this.query_param("front").value
+		var left = this.query_param("left").value
+		var right = this.query_param("right").value
 
 		for (var parcel in parcels)
 		{
-			var polygons = GeometryTools.shape_u(parcel, front_width, left_width, right_width, false)
+			var polygons = GeometryTools.shape_u(parcel, front, left, right, false)
 			if (!polygons.isEmpty)
 			{
 				var poly = Polyline.init()

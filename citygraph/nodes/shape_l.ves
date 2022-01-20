@@ -22,8 +22,8 @@ class ShapeL is Node
 			Pin(this, "lots", VAR_TYPE_PARCELS),
 		]
 
-		this.params.add(NodeParam("front_width", 0.01, { "region" : 0.1 }))
-		this.params.add(NodeParam("left_width", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("front", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("left", 0.01, { "region" : 0.1 }))
 
 		this.layout()
 
@@ -73,12 +73,12 @@ class ShapeL is Node
 
 	build_lots(parcels, lots)
 	{
-		var front_width = this.query_param("front_width").value
-		var left_width = this.query_param("left_width").value
+		var front = this.query_param("front").value
+		var left = this.query_param("left").value
 
 		for (var parcel in parcels)
 		{
-			var polygons = GeometryTools.shape_l(parcel, front_width, left_width, false)
+			var polygons = GeometryTools.shape_l(parcel, front, left, false)
 			if (!polygons.isEmpty)
 			{
 				var poly = Polyline.init()

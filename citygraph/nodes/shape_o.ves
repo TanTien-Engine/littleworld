@@ -5,7 +5,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "citygraph.variant" for VAR_TYPE_PARCELS, VAR_TYPE_LOTS
-import "geometry" for Polyline
+import "geometry" for Polygon
 import "maths.vector" for Vector3
 import "citygen" for GeometryTools
 
@@ -22,10 +22,10 @@ class ShapeO is Node
 			Pin(this, "lots", VAR_TYPE_PARCELS),
 		]
 
-		this.params.add(NodeParam("front_width", 0.01, { "region" : 0.1 }))
-		this.params.add(NodeParam("back_width", 0.01, { "region" : 0.1 }))		
-		this.params.add(NodeParam("left_width", 0.01, { "region" : 0.1 }))
-		this.params.add(NodeParam("right_width", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("front", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("back", 0.01, { "region" : 0.1 }))		
+		this.params.add(NodeParam("left", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("right", 0.01, { "region" : 0.1 }))
 
 		this.layout()
 
@@ -75,19 +75,18 @@ class ShapeO is Node
 
 	build_lots(parcels, lots)
 	{
-		var front_width = this.query_param("front_width").value
-		var back_width = this.query_param("back_width").value		
-		var left_width = this.query_param("left_width").value
-		var right_width = this.query_param("right_width").value
+		var front = this.query_param("front").value
+		var back = this.query_param("back").value		
+		var left = this.query_param("left").value
+		var right = this.query_param("right").value
 
 		for (var parcel in parcels)
 		{
-			var polygons = GeometryTools.shape_o(parcel, front_width, back_width, left_width, right_width, false)
+			var polygons = GeometryTools.shape_o(parcel, front, back, left, right, false)
 			if (!polygons.isEmpty)
 			{
-				var poly = Polyline.init()
+				var poly = Polygon.init()
 				poly.set_vertices(polygons[0])
-				poly.set_closed(true)
 
 				var geo = VarGeo()
 				geo.shape = poly
