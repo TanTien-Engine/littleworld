@@ -87,6 +87,9 @@ class ShapeO is Node
 			{
 				var poly = Polygon.init()
 				poly.set_vertices(polygons[0])
+				for (var i in 1 .. polygons.count) {
+					poly.add_hole(polygons[i])
+				}
 
 				var geo = VarGeo()
 				geo.shape = poly

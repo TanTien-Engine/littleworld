@@ -5,7 +5,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "citygraph.variant" for VAR_TYPE_PARCELS, VAR_TYPE_LOTS
-import "geometry" for Polyline
+import "geometry" for Polygon
 import "maths.vector" for Vector3
 import "citygen" for GeometryTools
 
@@ -83,9 +83,11 @@ class ShapeU is Node
 			var polygons = GeometryTools.shape_u(parcel, front, left, right, false)
 			if (!polygons.isEmpty)
 			{
-				var poly = Polyline.init()
+				var poly = Polygon.init()
 				poly.set_vertices(polygons[0])
-				poly.set_closed(true)
+				for (var i in 1 .. polygons.count) {
+					poly.add_hole(polygons[i])
+				}
 
 				var geo = VarGeo()
 				geo.shape = poly

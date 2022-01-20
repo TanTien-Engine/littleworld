@@ -60,19 +60,19 @@ node11.query_param("left").value = 0.024881169199944
 _editor.add_node(node11, 215.60694580078, -57.794079589844)
 
 var node12 = ::citygraph::nodes::shape_u::ShapeU()
-node12.query_param("front").value = 0.012222222052515
-node12.query_param("left").value = 0.028888890519738
-node12.query_param("right").value = 0.017777778208256
+node12.query_param("front").value = 0.02333333529532
+node12.query_param("left").value = 0.02333333529532
+node12.query_param("right").value = 0.024444444105029
 
 _editor.add_node(node12, 205, -175.5)
 
 var node13 = ::citygraph::nodes::shape_o::ShapeO()
-node13.query_param("front").value = 0.012222222052515
-node13.query_param("back").value = 0.0088888891041279
-node13.query_param("left").value = 0.01111111138016
-node13.query_param("right").value = 0.01111111138016
+node13.query_param("front").value = 0.016666667535901
+node13.query_param("back").value = 0.013874275609851
+node13.query_param("left").value = 0.014985385350883
+node13.query_param("right").value = 0.022763164713979
 
-_editor.add_node(node13, 197, -296.5)
+_editor.add_node(node13, 197.51315811823, -296.5)
 
 var node14 = ::citygraph::nodes::blocks::Blocks()
 node14.query_param("offset").value = 0.0031111112330109
@@ -90,7 +90,7 @@ Blueprint.connect(node1, "tensor_field", node4, "tf")
 Blueprint.connect(node4, "streets", node14, "streets")
 Blueprint.connect(node4, "streets", node9, "streets")
 Blueprint.connect(node9, "parcels", node13, "parcels")
-Blueprint.connect(node8, "next", node10, "prev")
-Blueprint.connect(node13, "lots", node10, "objs")
 Blueprint.connect(node9, "parcels", node12, "parcels")
+Blueprint.connect(node8, "next", node10, "prev")
+Blueprint.connect(node12, "lots", node10, "objs")
 Blueprint.connect(node9, "parcels", node11, "parcels")
