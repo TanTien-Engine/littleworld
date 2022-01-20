@@ -51,7 +51,7 @@ _editor.add_node(node9, 83.165759933091, 32.873139688792)
 
 var node10 = ::citygraph::nodes::draw_map::DrawMap()
 
-_editor.add_node(node10, 417.52434055953, 38.094108096288)
+_editor.add_node(node10, 495.01532167731, 95.032593420813)
 
 var node11 = ::citygraph::nodes::shape_l::ShapeL()
 node11.query_param("front").value = 0.021547835320234
@@ -90,7 +90,7 @@ Blueprint.connect(node1, "tensor_field", node4, "tf")
 Blueprint.connect(node4, "streets", node14, "streets")
 Blueprint.connect(node4, "streets", node9, "streets")
 Blueprint.connect(node9, "parcels", node13, "parcels")
+Blueprint.connect(node8, "next", node10, "prev")
+Blueprint.connect(node13, "lots", node10, "objs")
 Blueprint.connect(node9, "parcels", node12, "parcels")
 Blueprint.connect(node9, "parcels", node11, "parcels")
-Blueprint.connect(node4, "streets", node8, "streets")
-Blueprint.connect(node8, "next", node10, "prev")
