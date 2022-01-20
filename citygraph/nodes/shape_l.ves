@@ -4,7 +4,7 @@ import "blueprint.variant" for Variant
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
-import "citygraph.variant" for VAR_TYPE_PARCELS, VAR_TYPE_LOTS
+import "citygraph.variant" for VAR_TYPE_LOTS
 import "geometry" for Polygon
 import "maths.vector" for Vector3
 import "citygen" for GeometryTools
@@ -16,10 +16,10 @@ class ShapeL is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "parcels", VAR_TYPE_PARCELS),
+			Pin(this, "lots", VAR_TYPE_LOTS),
 		]
 		this.exports = [
-			Pin(this, "lots", VAR_TYPE_PARCELS),
+			Pin(this, "lots", VAR_TYPE_LOTS),
 		]
 
 		this.params.add(NodeParam("front", 0.01, { "region" : 0.1 }))
@@ -37,48 +37,28 @@ class ShapeL is Node
 
 	calc_value(idx)
 	{
-		var v_parcels = Blueprint.calc_input_value(this, 0)
-		if (!v_parcels) {
+		var v_lots = Blueprint.calc_input_value(this, 0)
+		if (!v_lots) {
 			return nil
 		}
 
-		if (!this.v_lots) 
-		{
-			var lots = []
-			this.build_from_parcels(v_parcels, lots)
-			this.v_lots = Variant(lots)
+		if (!this.v_lots) {
+			this.v_lots = Variant(this.build_lots(v_lots.value))
 		}
 
 		return this.v_lots
 	}
 
-	build_from_parcels(v_parcels, lots)
+	build_lots(lots)
 	{
-		if (!v_parcels) {
-			return
-		}
+		var ret = []
 
-		if (v_parcels.value is List)
-		{
-			for (var item in v_parcels.value) {
-				this.build_from_parcels(item, lots)
-			}
-		}
-		else
-		{
-			var parcels = v_parcels.value.parcels.get_polygons()
-			this.build_lots(parcels, lots)
-		}
-	}
-
-	build_lots(parcels, lots)
-	{
 		var front = this.query_param("front").value
 		var left = this.query_param("left").value
 
-		for (var parcel in parcels)
+		for (var lot in lots)
 		{
-			var polygons = GeometryTools.shape_l(parcel, front, left, false)
+			var polygons = GeometryTools.shape_l(lot.value.shape, front, left, false)
 			if (!polygons.isEmpty)
 			{
 				var poly = Polygon.init()
@@ -91,8 +71,10 @@ class ShapeL is Node
 				geo.shape = poly
 				geo.render_style["color"] = Vector3(0, 0, 0)
 
-				lots.add(Variant(VAR_TYPE_GEO, geo))
+				ret.add(Variant(VAR_TYPE_GEO, geo))
 			}
 		}
+
+		return ret
 	}	
 }

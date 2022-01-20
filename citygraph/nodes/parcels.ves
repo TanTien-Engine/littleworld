@@ -3,9 +3,12 @@ import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_PARCELS, VarParcels
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_LOTS
 import "citygraph.streets_helper" for StreetsHelper
 import "citygen" for ParcelsOBB, ParcelsSS
+import "geometry" for Polygon
+import "maths.vector" for Vector3
 
 class Parcels is Node
 {
@@ -17,7 +20,7 @@ class Parcels is Node
 			Pin(this, "streets", VAR_TYPE_STREETS)
 		]
 		this.exports = [
-			Pin(this, "parcels", VAR_TYPE_PARCELS),
+			Pin(this, "lots", VAR_TYPE_LOTS),
 		]
 
 		this.params.add(NodeParam("max_len", 0.1, { "region" : 0.2 }))
@@ -26,12 +29,13 @@ class Parcels is Node
 
 		this.layout()
 
-		this.v_parcels = nil
+		this.parcels = nil
+		this.v_polygons = nil
 	}
 
 	on_node_dirty()
 	{
-		this.v_parcels = nil
+		this.parcels = nil
 	}
 
 	calc_value(idx)
@@ -41,16 +45,19 @@ class Parcels is Node
 			return nil
 		}
 
-		if (!this.v_parcels) {
+		if (!this.parcels) {
 			this.rebuild_parcels(v_streets.value)
 		}
+		if (!this.v_polygons) {
+			this.rebuild_polygons()
+		}
 
-		return this.v_parcels
+		return this.v_polygons
 	}
 
 	rebuild_parcels(v_streets)
 	{
-		var parcels = []
+		this.parcels = []
 
 		var offset = this.query_param("offset").value
 
@@ -66,11 +73,31 @@ class Parcels is Node
 			_parcels.build(max_len)
 			_parcels.offset(offset)			
 
-			var v_parcels = VarParcels(_parcels)
+			this.parcels.add(_parcels)
+		}
+	}
 
-			parcels.add(Variant(VAR_TYPE_PARCELS, v_parcels))
+	rebuild_polygons()
+	{
+		var dst_polys = []
+
+		for (var parcel in this.parcels)
+		{
+			var src_polys = parcel.get_polygons()
+
+			for (var src_poly in src_polys)
+			{
+				var dst_poly = Polygon.init()
+				dst_poly.set_vertices(src_poly)
+
+				var geo = VarGeo()
+				geo.shape = dst_poly
+				geo.render_style["color"] = Vector3(0, 0, 0)
+
+				dst_polys.add(Variant(VAR_TYPE_GEO, geo))
+			}
 		}
 
-		this.v_parcels = Variant(parcels)
+		this.v_polygons = Variant(dst_polys)
 	}
 }

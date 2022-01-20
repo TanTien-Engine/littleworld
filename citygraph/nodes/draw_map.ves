@@ -7,7 +7,7 @@ import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "citygraph.streets_helper" for StreetsHelper
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, VAR_TYPE_PARCELS, VAR_TYPE_LOTS
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
@@ -129,22 +129,6 @@ class DrawMap is Node
 					var geo = VarGeo()
 					geo.shape = poly
 					geo.render_style["color"] = COMMON_BLOCK_COLOR
-
-					this.v_geos_pass2.value.add(Variant(VAR_TYPE_GEO, geo))
-				}
-			}
-			else if (v_objs.type == VAR_TYPE_PARCELS)
-			{
-				var parcels = v_objs.value.parcels.get_polygons()
-				for (var parcel in parcels)
-				{
-					var poly = Polyline.init()
-					poly.set_vertices(parcel)
-					poly.set_closed(true)
-
-					var geo = VarGeo()
-					geo.shape = poly
-					geo.render_style["color"] = Vector3(0, 0, 0)
 
 					this.v_geos_pass2.value.add(Variant(VAR_TYPE_GEO, geo))
 				}

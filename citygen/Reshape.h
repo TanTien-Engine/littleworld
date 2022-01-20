@@ -4,6 +4,9 @@
 #include <SM_Rect.h>
 
 #include <vector>
+#include <memory>
+
+namespace gs { class Polygon2D; }
 
 namespace citygen
 {
@@ -11,7 +14,7 @@ namespace citygen
 class Reshape
 {
 public:
-	Reshape(const std::vector<sm::vec2>& border);
+	Reshape(const std::shared_ptr<gs::Polygon2D>& polygon);
 
 	std::vector<std::vector<sm::vec2>> 
 		ShapeL(float front_width, float left_width, bool remainder) const;
@@ -24,7 +27,7 @@ private:
 	sm::vec2 CalcRectPos(const sm::vec2& relative) const;
 
 private:
-	std::vector<sm::vec2> m_border;
+	std::shared_ptr<gs::Polygon2D> m_polygon = nullptr;
 
 	std::pair<sm::rect, float> m_obb;
 

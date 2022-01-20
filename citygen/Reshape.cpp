@@ -1,16 +1,17 @@
 #include "Reshape.h"
 #include "RotatingCalipers.h"
 
+#include <geoshape/Polygon2D.h>
 #include <SM_Polygon.h>
 #include <SM_Calc.h>
 
 namespace citygen
 {
 
-Reshape::Reshape(const std::vector<sm::vec2>& border)
-	: m_border(border)
+Reshape::Reshape(const std::shared_ptr<gs::Polygon2D>& polygon)
+	: m_polygon(polygon)
 {
-	m_obb = RotatingCalipers::CalcOBB(border, true);
+	m_obb = RotatingCalipers::CalcOBB(m_polygon->GetVertices(), true);
 }
 
 std::vector<std::vector<sm::vec2>> 
@@ -42,8 +43,8 @@ Reshape::ShapeL(float front_width, float left_width, bool remainder) const
 	};
 
 	return remainder ? 
-		sm::polygon_intersection({ m_border }, clip) : 
-		sm::polygon_difference({ m_border }, clip);
+		sm::polygon_intersection({ m_polygon->GetVertices() }, clip) : 
+		sm::polygon_difference({ m_polygon->GetVertices() }, clip);
 }
 
 std::vector<std::vector<sm::vec2>>
@@ -68,8 +69,8 @@ Reshape::ShapeU(float front_width, float left_width, float right_width, bool rem
 	}
 
 	return remainder ?
-		sm::polygon_intersection({ m_border }, clip) :
-		sm::polygon_difference({ m_border }, clip);
+		sm::polygon_intersection({ m_polygon->GetVertices() }, clip) :
+		sm::polygon_difference({ m_polygon->GetVertices() }, clip);
 }
 
 std::vector<std::vector<sm::vec2>>
@@ -94,8 +95,8 @@ Reshape::ShapeO(float front_width, float back_width, float left_width, float rig
 	}
 
 	return remainder ?
-		sm::polygon_intersection({ m_border }, clip) :
-		sm::polygon_difference({ m_border }, clip);
+		sm::polygon_intersection({ m_polygon->GetVertices() }, clip) :
+		sm::polygon_difference({ m_polygon->GetVertices() }, clip);
 }
 
 sm::vec2 Reshape::CalcRectPos(const sm::vec2& relative) const

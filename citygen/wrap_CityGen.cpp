@@ -337,7 +337,7 @@ void w_GeometryTools_polyline_expand()
 
 void w_GeometryTools_shape_l()
 {
-    auto polygon = tt::list_to_vec2_array(1);
+    auto polygon = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
     float front_width = (float)ves_tonumber(2);
     float left_width = (float)ves_tonumber(3);
     bool remainder = ves_toboolean(4);
@@ -352,7 +352,7 @@ void w_GeometryTools_shape_l()
 
 void w_GeometryTools_shape_u()
 {
-    auto polygon = tt::list_to_vec2_array(1);
+    auto polygon = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
     float front_width = (float)ves_tonumber(2);
     float left_width = (float)ves_tonumber(3);
     float right_width = (float)ves_tonumber(4);
@@ -368,7 +368,7 @@ void w_GeometryTools_shape_u()
 
 void w_GeometryTools_shape_o()
 {
-    auto polygon = tt::list_to_vec2_array(1);
+    auto polygon = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
     float front_width = (float)ves_tonumber(2);
     float back_width = (float)ves_tonumber(3);
     float left_width = (float)ves_tonumber(4);
