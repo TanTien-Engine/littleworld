@@ -1,0 +1,96 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "citygraph.variant" for VAR_TYPE_PARCELS, VAR_TYPE_LOTS
+import "geometry" for Polyline
+import "maths.vector" for Vector3
+import "citygen" for GeometryTools
+
+class ShapeL is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "parcels", VAR_TYPE_PARCELS),
+		]
+		this.exports = [
+			Pin(this, "lots", VAR_TYPE_PARCELS),
+		]
+
+		this.params.add(NodeParam("front_width", 0.01, { "region" : 0.1 }))
+		this.params.add(NodeParam("left_width", 0.01, { "region" : 0.1 }))
+
+		this.layout()
+
+		this.v_lots = nil
+	}
+
+	on_node_dirty()
+	{
+		this.v_lots = nil
+	}
+
+	calc_value(idx)
+	{
+		var v_parcels = Blueprint.calc_input_value(this, 0)
+		if (!v_parcels) {
+			return nil
+		}
+
+		if (!this.v_lots) 
+		{
+			var lots = []
+			this.build_from_parcels(v_parcels, lots)
+			this.v_lots = Variant(lots)
+		}
+
+		return this.v_lots
+	}
+
+	build_from_parcels(v_parcels, lots)
+	{
+		if (!v_parcels) {
+			return
+		}
+
+		if (v_parcels.value is List)
+		{
+			for (var item in v_parcels.value) {
+				this.build_from_parcels(item, lots)
+			}
+		}
+		else
+		{
+			var parcels = v_parcels.value.parcels.get_polygons()
+			this.build_lots(parcels, lots)
+		}
+	}
+
+	build_lots(parcels, lots)
+	{
+		var front_width = this.query_param("front_width").value
+		var left_width = this.query_param("left_width").value
+
+		for (var parcel in parcels)
+		{
+			var polygons = GeometryTools.shape_l(parcel, front_width, left_width, false)
+			if (!polygons.isEmpty)
+			{
+				var poly = Polyline.init()
+				poly.set_vertices(polygons[0])
+				poly.set_closed(true)
+
+				var geo = VarGeo()
+				geo.shape = poly
+				geo.render_style["color"] = Vector3(0, 0, 0)
+
+				lots.add(Variant(VAR_TYPE_GEO, geo))
+			}
+		}
+	}	
+}

@@ -7,7 +7,7 @@ import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "citygraph.streets_helper" for StreetsHelper
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, VAR_TYPE_PARCELS
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, VAR_TYPE_PARCELS, VAR_TYPE_LOTS
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
@@ -25,6 +25,7 @@ class DrawMap is Node
 			Pin(this, "streets", VAR_TYPE_STREETS),
 			Pin(this, "blocks",  VAR_TYPE_BLOCK),
 			Pin(this, "parcels", VAR_TYPE_PARCELS),
+			Pin(this, "lots",    VAR_TYPE_LOTS),			
 		]
 		this.exports = [
 			Pin(this, "next", VAR_TYPE_PORT)
@@ -78,6 +79,11 @@ class DrawMap is Node
 		var v_parcels = Blueprint.calc_input_value(this, 3)
 		if (v_parcels) {
 			this.build_from_parcels(v_parcels)
+		}
+
+		var v_lots = Blueprint.calc_input_value(this, 4)
+		if (v_lots) {
+			this.build_from_lots(v_lots)
 		}
 	}
 
@@ -176,6 +182,34 @@ class DrawMap is Node
 		{
 			var parcels = v_parcels.value.parcels.get_polygons()
 			this.build_parcels(parcels, this.v_geos_pass2)
+		}
+	}
+
+	build_from_lots(v_lots)
+	{
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		for (var lot in v_lots.value)
+		{
+			var old_vts = lot.value.shape.get_vertices()
+
+			var vts = []
+			for (var i in 0 .. old_vts.count/2) 
+			{
+				vts.add((old_vts[i * 2] - 0.5) * w)
+				vts.add((old_vts[i * 2 + 1] - 0.5) * h)
+			}
+
+			var poly = Polyline.init()
+			poly.set_vertices(vts)
+			poly.set_closed(true)
+
+			var geo = VarGeo()
+			geo.shape = poly
+			geo.render_style["color"] = Vector3(0, 0, 0)
+
+			this.v_geos_pass2.value.add(Variant(VAR_TYPE_GEO, geo))
 		}
 	}
 

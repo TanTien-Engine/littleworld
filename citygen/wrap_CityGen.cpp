@@ -4,6 +4,7 @@
 #include "Block.h"
 #include "ParcelsOBB.h"
 #include "ParcelsSS.h"
+#include "Reshape.h"
 #include "modules/script/Proxy.h"
 #include "modules/script/TransHelper.h"
 #include "modules/graphics/Graphics.h"
@@ -316,9 +317,57 @@ void w_GeometryTools_polyline_expand()
     bool is_closed = polyline.size() > 1 && polyline.front() == polyline.back();
     auto polylines = sm::polyline_expand(polyline, offset, is_closed);
 
-    ves_pop(3);
+    ves_pop(ves_argnum());
 
     return_points(polylines);
+}
+
+void w_GeometryTools_shape_l()
+{
+    auto polygon = tt::list_to_vec2_array(1);
+    float front_width = (float)ves_tonumber(2);
+    float left_width = (float)ves_tonumber(3);
+    bool remainder = ves_toboolean(4);
+
+    citygen::Reshape rs(polygon);
+    auto polygons = rs.ShapeL(front_width, left_width, remainder);
+
+    ves_pop(ves_argnum());
+
+    return_points(polygons);
+}
+
+void w_GeometryTools_shape_u()
+{
+    auto polygon = tt::list_to_vec2_array(1);
+    float front_width = (float)ves_tonumber(2);
+    float left_width = (float)ves_tonumber(3);
+    float right_width = (float)ves_tonumber(4);
+    bool remainder = ves_toboolean(5);
+
+    citygen::Reshape rs(polygon);
+    auto polygons = rs.ShapeU(front_width, left_width, right_width, remainder);
+
+    ves_pop(ves_argnum());
+
+    return_points(polygons);
+}
+
+void w_GeometryTools_shape_o()
+{
+    auto polygon = tt::list_to_vec2_array(1);
+    float front_width = (float)ves_tonumber(2);
+    float back_width = (float)ves_tonumber(3);
+    float left_width = (float)ves_tonumber(4);
+    float right_width = (float)ves_tonumber(5);
+    bool remainder = ves_toboolean(6);
+
+    citygen::Reshape rs(polygon);
+    auto polygons = rs.ShapeO(front_width, back_width, left_width, right_width, remainder);
+
+    ves_pop(ves_argnum());
+
+    return_points(polygons);
 }
 
 }
@@ -350,6 +399,9 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "ParcelsSS.set_seed(_)") == 0) return w_ParcelsSS_set_seed;
 
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
+    if (strcmp(signature, "static GeometryTools.shape_l(_,_,_,_)") == 0) return w_GeometryTools_shape_l;
+    if (strcmp(signature, "static GeometryTools.shape_u(_,_,_,_,_)") == 0) return w_GeometryTools_shape_u;
+    if (strcmp(signature, "static GeometryTools.shape_o(_,_,_,_,_,_)") == 0) return w_GeometryTools_shape_o;
 
 	return nullptr;
 }
