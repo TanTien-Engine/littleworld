@@ -1,0 +1,78 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -600.56720751102, 248.5620708077)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/gen_tensor_field.ves")
+
+_editor.add_node(node1, -102.24823175604, 243.26904391315)
+
+var node2 = ::blueprint::nodes::number2::Number2()
+
+node2.value.set(0.76046144962311, 0.76046144962311)
+
+_editor.add_node(node2, -599.4415333632, 180.36463579648)
+
+var node3 = ::citygraph::nodes::center::Center()
+
+_editor.add_node(node3, -442.62176001746, 199.45709251652)
+
+var node4 = ::citygraph::nodes::streets::Streets()
+node4.query_param("num").value = 5
+node4.query_param("seed").value = 0.27916616201401
+
+_editor.add_node(node4, 80.875045465726, 149.75415566184)
+
+var node5 = ::citygraph::nodes::regular::Regular()
+
+_editor.add_node(node5, -443.70316493277, 278.92947394157)
+
+var node6 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node6, -295.87018152433, 246.18065915584)
+
+var node7 = ::blueprint::nodes::number2::Number2()
+
+node7.value.set(0, 0.51223009824753)
+
+_editor.add_node(node7, -604.83769601562, 317.34800835937)
+
+var node8 = ::citygraph::nodes::draw_network::DrawNetwork()
+node8.query_param("faces").value = false
+
+_editor.add_node(node8, 272.83971892878, 162.96729765806)
+
+var node9 = ::citygraph::nodes::parcels::Parcels()
+node9.query_param("max_len").value = 0.1
+node9.query_param("seed").value = 0
+node9.query_param("offset").value = 0
+
+_editor.add_node(node9, 83.165759933091, 32.873139688792)
+
+var node10 = ::citygraph::nodes::draw_map::DrawMap()
+
+_editor.add_node(node10, 495.01532167731, 95.032593420813)
+
+var node11 = ::citygraph::nodes::blocks::Blocks()
+node11.query_param("offset").value = 0.0031111112330109
+
+_editor.add_node(node11, 102, 280.5)
+
+var node12 = ::citygraph::nodes::offset::Offset()
+node12.query_param("distance").value = 0.0014444444095716
+
+_editor.add_node(node12, 348, -18.5)
+
+Blueprint.connect(node0, "uv", node5, "st")
+Blueprint.connect(node7, "v2", node5, "pos")
+Blueprint.connect(node0, "uv", node3, "st")
+Blueprint.connect(node2, "v2", node3, "pos")
+Blueprint.connect(node5, "ret", node6, "a")
+Blueprint.connect(node3, "ret", node6, "b")
+Blueprint.connect(node6, "v", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node4, "tf")
+Blueprint.connect(node4, "streets", node11, "streets")
+Blueprint.connect(node4, "streets", node9, "streets")
+Blueprint.connect(node9, "lots", node12, "lots")
+Blueprint.connect(node8, "next", node10, "prev")
+Blueprint.connect(node12, "lots", node10, "objs")

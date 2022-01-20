@@ -54,6 +54,7 @@ foreign class ParcelsSS
 
 foreign class GeometryTools
 {
+	foreign static polyline_offset(polyline, distance, is_closed)
 	foreign static polyline_expand(polyline, offset)
 
 	foreign static shape_l(polygon, front_width, left_width, remainder)

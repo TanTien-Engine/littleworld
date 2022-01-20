@@ -309,6 +309,19 @@ void w_ParcelsSS_set_seed()
     parcels->SetSeed(seed);
 }
 
+void w_GeometryTools_polyline_offset()
+{
+    auto polygon = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
+    float distance = (float)ves_tonumber(2);
+    bool is_closed = ves_toboolean(3);
+
+    auto polylines = sm::polyline_offset(polygon->GetVertices(), distance, is_closed);
+
+    ves_pop(ves_argnum());
+
+    return_points(polylines);
+}
+
 void w_GeometryTools_polyline_expand()
 {
     auto polyline = tt::list_to_vec2_array(1);
@@ -398,7 +411,9 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "ParcelsSS.get_polygons()") == 0) return w_ParcelsSS_get_polygons;
     if (strcmp(signature, "ParcelsSS.set_seed(_)") == 0) return w_ParcelsSS_set_seed;
 
+    if (strcmp(signature, "static GeometryTools.polyline_offset(_,_,_)") == 0) return w_GeometryTools_polyline_offset;
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
+
     if (strcmp(signature, "static GeometryTools.shape_l(_,_,_,_)") == 0) return w_GeometryTools_shape_l;
     if (strcmp(signature, "static GeometryTools.shape_u(_,_,_,_,_)") == 0) return w_GeometryTools_shape_u;
     if (strcmp(signature, "static GeometryTools.shape_o(_,_,_,_,_,_)") == 0) return w_GeometryTools_shape_o;
