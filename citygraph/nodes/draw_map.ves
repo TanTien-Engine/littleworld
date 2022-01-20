@@ -13,6 +13,7 @@ import "maths.vector" for Vector3
 import "graphics" for Graphics
 import "geometry" for Polygon, Polyline
 import "citygen" for Block, GeometryTools
+import "maths" for Matrix44
 
 class DrawMap is Node
 {
@@ -33,12 +34,20 @@ class DrawMap is Node
 
 		this.layout()
 
+		this.cam_mat = Matrix44.init()
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+		this.cam_mat.scale(w, h, 1.0)
+		this.cam_mat.translate(-w/2, -h/2, 0.0)
+
 		this.v_geos_pass1 = Variant([])
 		this.v_geos_pass2 = Variant([])
 
 		this.draw_geo_node = DrawGeometry()
 
 		this.rebuild = false
+
+		Blueprint.connect(VariantProxy(this.cam_mat), 0, this.draw_geo_node, "mat")		
 	}
 
 	on_pin_dirty(pin)
@@ -83,7 +92,7 @@ class DrawMap is Node
 
 		var v_lots = Blueprint.calc_input_value(this, 4)
 		if (v_lots) {
-			this.build_from_lots(v_lots)
+			this.v_geos_pass2.value.add(v_lots)
 		}
 	}
 
@@ -144,18 +153,8 @@ class DrawMap is Node
 			var border = v_block.block.offset(v_block.offset)
 			if (!border.isEmpty)
 			{
-				var w = Graphics.get_width()
-				var h = Graphics.get_height()
-			
-				var pts = []
-				for (var i in 0 .. border.count/2) 
-				{
-					pts.add((border[i * 2] - 0.5) * w)
-					pts.add((border[i * 2 + 1] - 0.5) * h)
-				}
-
 				var poly = Polygon.init()
-				poly.set_vertices(pts)
+				poly.set_vertices(border)
 
 				var geo = VarGeo()
 				geo.shape = poly
@@ -185,57 +184,17 @@ class DrawMap is Node
 		}
 	}
 
-	build_from_lots(v_lots)
-	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
-		for (var lot in v_lots.value)
-		{
-			var old_vts = lot.value.shape.get_vertices()
-
-			var vts = []
-			for (var i in 0 .. old_vts.count/2) 
-			{
-				vts.add((old_vts[i * 2] - 0.5) * w)
-				vts.add((old_vts[i * 2 + 1] - 0.5) * h)
-			}
-
-			var poly = Polyline.init()
-			poly.set_vertices(vts)
-			poly.set_closed(true)
-
-			var geo = VarGeo()
-			geo.shape = poly
-			geo.render_style["color"] = Vector3(0, 0, 0)
-
-			this.v_geos_pass2.value.add(Variant(VAR_TYPE_GEO, geo))
-		}
-	}
-
 	build_roads(polylines, width, color, dst)
 	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
 		for (var polyline in polylines)
 		{
 			var expand = GeometryTools.polyline_expand(polyline, width)
 
 			if (expand)
 			{
-				var poly = expand[0]
-
-				var pts = []
-				for (var i in 0 .. poly.count/2) 
-				{
-					pts.add((poly[i * 2] - 0.5) * w)
-					pts.add((poly[i * 2 + 1] - 0.5) * h)
-				}
-
 				var geo = VarGeo()
 				geo.shape = Polygon.init()
-				geo.shape.set_vertices(pts)
+				geo.shape.set_vertices(expand[0])
 				geo.render_style["color"] = color
 
 				dst.value.add(Variant(VAR_TYPE_GEO, geo))
@@ -245,21 +204,11 @@ class DrawMap is Node
 
 	build_blocks(polys, dst)
 	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
 		for (var poly in polys)
 		{
 			var block = Block.init(poly.value.shape)
 			var dist = 0.007
-			var old_vts = block.offset(dist)
-
-			var vts = []
-			for (var i in 0 .. old_vts.count/2) 
-			{
-				vts.add((old_vts[i * 2] - 0.5) * w)
-				vts.add((old_vts[i * 2 + 1] - 0.5) * h)
-			}
+			var vts = block.offset(dist)
 
 			var poly = Polyline.init()
 			poly.set_vertices(vts)
@@ -275,20 +224,10 @@ class DrawMap is Node
 
 	build_parcels(parcels, dst)
 	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
-		for (var poly in parcels)
+		for (var parcel in parcels)
 		{
-			var vts = []
-			for (var i in 0 .. poly.count/2) 
-			{
-				vts.add((poly[i * 2] - 0.5) * w)
-				vts.add((poly[i * 2 + 1] - 0.5) * h)
-			}
-
 			var poly = Polyline.init()
-			poly.set_vertices(vts)
+			poly.set_vertices(parcel)
 			poly.set_closed(true)
 
 			var geo = VarGeo()

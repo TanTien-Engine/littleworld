@@ -13,6 +13,7 @@ import "maths.vector" for Vector3
 import "graphics" for Graphics
 import "geometry" for Circle, Polyline, Polygon
 import "math" for Math
+import "maths" for Matrix44
 
 class DrawNetwork is Node
 {
@@ -32,12 +33,20 @@ class DrawNetwork is Node
 
 		this.layout()
 
+		this.cam_mat = Matrix44.init()
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+		this.cam_mat.scale(w, h, 1.0)
+		this.cam_mat.translate(-w/2, -h/2, 0.0)
+
 		this.draw_geo_node = DrawGeometry()
 
 		this.v_geos = Variant([])
 		Blueprint.connect(VariantProxy(this.v_geos), 0, this.draw_geo_node, "geos")
 
 		this.rebuild = false
+
+		Blueprint.connect(VariantProxy(this.cam_mat), 0, this.draw_geo_node, "mat")
 	}
 
 	on_pin_dirty(pin)
@@ -102,13 +111,10 @@ class DrawNetwork is Node
 
 	build_crossings(nodes, color)
 	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
 		for (var i in 0 .. nodes.count/2) 
 		{
-			var x = (nodes[i * 2] - 0.5) * w
-			var y = (nodes[i * 2 + 1] - 0.5) * h
+			var x = nodes[i * 2]
+			var y = nodes[i * 2 + 1]
 
 			var geo = VarGeo()
 			geo.shape = Circle.init(x, y, POINT_RADIUS)
@@ -121,21 +127,11 @@ class DrawNetwork is Node
 
 	build_routes(paths, color)
 	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
 		for (var path in paths)
 		{
-			var pts = []
-			for (var i in 0 .. path.count/2) 
-			{
-				pts.add((path[i * 2] - 0.5) * w)
-				pts.add((path[i * 2 + 1] - 0.5) * h)
-			}
-
 			var geo = VarGeo()
 			geo.shape = Polyline.init()
-			geo.shape.set_vertices(pts)
+			geo.shape.set_vertices(path)
 			geo.render_style["color"] = color
 
 			this.v_geos.value.add(Variant(VAR_TYPE_GEO, geo))
@@ -144,22 +140,10 @@ class DrawNetwork is Node
 
 	build_blocks(polygons)
 	{
-		var w = Graphics.get_width()
-		var h = Graphics.get_height()
-
-		for (var i in 0..polygons.count)
+		for (var poly in polygons)
 		{
-			var old_pts = polygons[i]
-
-			var pts = []
-			for (var i in 0 .. old_pts.count/2) 
-			{
-				pts.add((old_pts[i * 2] - 0.5) * w)
-				pts.add((old_pts[i * 2 + 1] - 0.5) * h)
-			}
-
 			var polygon = Polygon.init()
-			polygon.set_vertices(pts)
+			polygon.set_vertices(poly)
 
 			var geo = VarGeo()
 			geo.shape = polygon 
