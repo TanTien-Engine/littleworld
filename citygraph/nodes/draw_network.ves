@@ -148,6 +148,7 @@ class DrawNetwork is Node
 			var geo = VarGeo()
 			geo.shape = polygon 
 			geo.render_style["color"] = BLOCK_COLORS[Math.mod(i, BLOCK_COLORS.count)]
+			geo.render_style["fill"] = true
 
 			this.v_geos.value.add(Variant(VAR_TYPE_GEO, geo))
 		}

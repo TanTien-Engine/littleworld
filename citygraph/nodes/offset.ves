@@ -68,6 +68,7 @@ class Offset is Node
 				var geo = VarGeo()
 				geo.shape = poly
 				geo.render_style["color"] = Vector3(0, 0, 0)
+				geo.render_style["fill"] = false
 
 				ret.add(Variant(VAR_TYPE_GEO, geo))
 			}

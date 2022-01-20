@@ -93,6 +93,7 @@ class Parcels is Node
 				var geo = VarGeo()
 				geo.shape = dst_poly
 				geo.render_style["color"] = Vector3(0, 0, 0)
+				geo.render_style["fill"] = false
 
 				dst_polys.add(Variant(VAR_TYPE_GEO, geo))
 			}

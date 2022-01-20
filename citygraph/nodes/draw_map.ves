@@ -129,6 +129,7 @@ class DrawMap is Node
 					var geo = VarGeo()
 					geo.shape = poly
 					geo.render_style["color"] = COMMON_BLOCK_COLOR
+					geo.render_style["fill"] = false
 
 					this.v_geos_pass2.value.add(Variant(VAR_TYPE_GEO, geo))
 				}
