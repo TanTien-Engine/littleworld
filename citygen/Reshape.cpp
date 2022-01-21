@@ -4,6 +4,7 @@
 #include <geoshape/Polygon2D.h>
 #include <SM_Polygon.h>
 #include <SM_Calc.h>
+#include <sm_const.h>
 
 namespace citygen
 {
@@ -115,8 +116,8 @@ sm::vec2 Reshape::CalcRectPos(const sm::vec2& relative) const
 	};
 
 	auto& r = m_obb.first;
-	float x = to_absolute(r.xmin, r.xmax, relative.x);
-	float y = to_absolute(r.ymin, r.ymax, relative.y);
+	float x = to_absolute(r.xmin - SM_LARGE_EPSILON, r.xmax + SM_LARGE_EPSILON, relative.x);
+	float y = to_absolute(r.ymin - SM_LARGE_EPSILON, r.ymax + SM_LARGE_EPSILON, relative.y);
 
 	return sm::rotate_vector(sm::vec2(x, y), m_obb.second);
 }
