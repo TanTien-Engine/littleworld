@@ -1,0 +1,29 @@
+import "blueprint.variant" for Variant
+
+class Utility
+{
+	static list_flatten(v_list)
+	{
+		var items = []
+		this.list_flatten(v_list, items)
+		return items
+	}
+
+	static list_flatten(v_src, dst_list)
+	{
+		if (!v_src) {
+			return
+		}
+
+		if (v_src.value is List)
+		{
+			for (var item in v_src.value) {
+				this.list_flatten(item, dst_list)
+			}
+		}
+		else
+		{
+			dst_list.add(v_src)
+		}
+	}
+}

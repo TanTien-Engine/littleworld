@@ -65,71 +65,63 @@ var node13 = ::imagegraph::nodes::erosion::Erosion()
 
 _editor.add_node(node13, 171.51925939447, 38.588026886842)
 
-var node14 = ::geograph::nodes::draw_geometry::DrawGeometry()
-node14.query_param("skip").value = false
+var node14 = ::citygraph::nodes::streets::Streets()
+node14.query_param("num").value = 3
+node14.query_param("seed").value = 0
 
-_editor.add_node(node14, 747.14972117375, -174.9155927981)
+_editor.add_node(node14, 174.51140910209, -54.791298883615)
 
-var node15 = ::citygraph::nodes::streets::Streets()
-node15.query_param("num").value = 3
-node15.query_param("seed").value = 0
+var node15 = ::citygraph::nodes::offset::Offset()
+node15.query_param("distance").value = 0.005168185569346
 
-_editor.add_node(node15, 174.51140910209, -54.791298883615)
+_editor.add_node(node15, 987.48629798849, 148.48285105808)
 
-var node16 = ::blueprint::nodes::merge::Merge()
+var node16 = ::citygraph::nodes::regular::Regular()
 
-_editor.add_node(node16, 456.6005919515, -8.7695297098469)
+_editor.add_node(node16, -470.9758922055, 563.47492848702)
 
-var node17 = ::citygraph::nodes::offset::Offset()
-node17.query_param("distance").value = 4.5015225410461
+var node17 = ::blueprint::nodes::add::Add()
 
-_editor.add_node(node17, 454.48629798849, -212.68243819812)
+_editor.add_node(node17, -292.23381788797, 555.27156824675)
 
-var node18 = ::citygraph::nodes::blocks::Blocks()
+var node18 = ::blueprint::nodes::number2::Number2()
 
-_editor.add_node(node18, 309.99442895581, -136.45500518639)
+node18.value.set(0, 0.51223009824753)
 
-var node19 = ::citygraph::nodes::block_to_geo::BlockToGeo()
+_editor.add_node(node18, 495.89930398438, 406.52500835937)
 
-_editor.add_node(node19, 587.37671258412, -204.33532702875)
+var node19 = ::citygraph::nodes::area_selector::AreaSelector()
+node19.query_param("num").value = 5
 
-var node20 = ::citygraph::nodes::regular::Regular()
+_editor.add_node(node19, 810.12363636364, 146.48636363636)
 
-_editor.add_node(node20, -470.9758922055, 563.47492848702)
+var node20 = ::citygraph::nodes::random_selector::RandomSelector()
+node20.query_param("num").value = 1
+node20.query_param("seed").value = 0.62791818380356
 
-var node21 = ::blueprint::nodes::add::Add()
+_editor.add_node(node20, 635.4873600025, 166.08983470066)
 
-_editor.add_node(node21, -292.23381788797, 555.27156824675)
+var node21 = ::citygraph::nodes::streets::Streets()
+node21.query_param("num").value = 1
+node21.query_param("seed").value = 0.90460407733917
 
-var node22 = ::blueprint::nodes::number2::Number2()
+_editor.add_node(node21, 779.58564363636, 22.109598090909)
 
-node22.value.set(0, 0.51223009824753)
+var node22 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node22, 495.89930398438, 406.52500835937)
+_editor.add_node(node22, 831.10415039063, 260.15837402344)
 
-var node23 = ::citygraph::nodes::area_selector::AreaSelector()
-node23.query_param("num").value = 7
+var node23 = ::citygraph::nodes::draw_network::DrawNetwork()
+node23.query_param("faces").value = false
 
-_editor.add_node(node23, 594.6, 145.7)
+_editor.add_node(node23, 932.34020996094, 49.052734375)
 
-var node24 = ::citygraph::nodes::random_selector::RandomSelector()
-node24.query_param("num").value = 2
-node24.query_param("seed").value = 0.93280708789825
+var node24 = ::citygraph::nodes::draw_map::DrawMap()
 
-_editor.add_node(node24, 426.0473600025, 137.04983470066)
+_editor.add_node(node24, 1028.702471369, -86.301837713074)
 
-var node25 = ::citygraph::nodes::streets::Streets()
-node25.query_param("num").value = 1
-node25.query_param("seed").value = 0.90460407733917
-
-_editor.add_node(node25, 779.58564363636, 22.109598090909)
-
-var node26 = ::blueprint::nodes::merge::Merge()
-
-_editor.add_node(node26, 831.10415039063, 260.15837402344)
-
-Blueprint.connect(node0, "uv", node20, "st")
-Blueprint.connect(node22, "v2", node20, "pos")
+Blueprint.connect(node0, "uv", node16, "st")
+Blueprint.connect(node18, "v2", node16, "pos")
 Blueprint.connect(node0, "uv", node9, "st")
 Blueprint.connect(node10, "v2", node9, "pos")
 Blueprint.connect(node0, "uv", node8, "st")
@@ -138,23 +130,15 @@ Blueprint.connect(node8, "ret", node11, "a")
 Blueprint.connect(node9, "ret", node11, "b")
 Blueprint.connect(node0, "uv", node7, "st")
 Blueprint.connect(node4, "v2", node7, "pos")
-Blueprint.connect(node20, "ret", node21, "a")
-Blueprint.connect(node7, "ret", node21, "b")
-Blueprint.connect(node21, "v", node1, "tensor")
-Blueprint.connect(node1, "tensor_field", node15, "tf")
-Blueprint.connect(node15, "blocks", node24, "geos")
-Blueprint.connect(node15, "blocks", node23, "polys")
-Blueprint.connect(node1, "tensor_field", node25, "tf")
-Blueprint.connect(node23, "polys", node25, "borders")
-Blueprint.connect(node23, "polys", node26, "in0")
-Blueprint.connect(node25, "routes", node26, "in1")
-Blueprint.connect(node25, "blocks", node18, "geos")
-Blueprint.connect(node18, "blocks", node17, "blocks")
-Blueprint.connect(node17, "blocks", node19, "blocks")
-Blueprint.connect(node15, "blocks", node16, "in0")
-Blueprint.connect(node15, "routes", node16, "in1")
-Blueprint.connect(node15, "crossings", node16, "in2")
-Blueprint.connect(node16, "list", node14, "geos")
+Blueprint.connect(node16, "ret", node17, "a")
+Blueprint.connect(node7, "ret", node17, "b")
+Blueprint.connect(node17, "v", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node21, "tf")
+Blueprint.connect(node1, "tensor_field", node14, "tf")
+Blueprint.connect(node14, "blocks", node20, "polys")
+Blueprint.connect(node20, "polys", node15, "lots")
+Blueprint.connect(node15, "lots", node24, "objs")
+Blueprint.connect(node14, "blocks", node19, "polys")
 Blueprint.connect(node1, "tensor_field", node13, "tex")
 Blueprint.connect(node1, "tensor_field", node6, "tf")
 Blueprint.connect(node3, "tex", node2, "base_texture")

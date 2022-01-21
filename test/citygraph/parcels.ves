@@ -38,13 +38,13 @@ node7.value.set(0, 0.51223009824753)
 _editor.add_node(node7, -604.83769601562, 317.34800835937)
 
 var node8 = ::citygraph::nodes::draw_network::DrawNetwork()
-node8.query_param("faces").value = true
+node8.query_param("faces").value = false
 
 _editor.add_node(node8, 305.06864020216, 158.86114494867)
 
 var node9 = ::citygraph::nodes::parcels::Parcels()
-node9.query_param("max_len").value = 0.1
-node9.query_param("seed").value = 0
+node9.query_param("max_len").value = 0.080715216696262
+node9.query_param("seed").value = 0.38135385513306
 
 _editor.add_node(node9, 81.678156627306, 24.526032250775)
 
@@ -60,6 +60,7 @@ Blueprint.connect(node5, "ret", node6, "a")
 Blueprint.connect(node3, "ret", node6, "b")
 Blueprint.connect(node6, "v", node1, "tensor")
 Blueprint.connect(node1, "tensor_field", node4, "tf")
-Blueprint.connect(node4, "streets", node9, "streets")
-Blueprint.connect(node8, "next", node10, "prev")
+Blueprint.connect(node4, "blocks", node9, "blocks")
 Blueprint.connect(node9, "lots", node10, "objs")
+Blueprint.connect(node10, "next", node8, "prev")
+Blueprint.connect(node4, "streets", node8, "streets")

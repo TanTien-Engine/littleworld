@@ -6,13 +6,12 @@ import "blueprint.variant_proxy" for VariantProxy
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
-import "citygraph.streets_helper" for StreetsHelper
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK
+import "citygraph.variant" for VAR_TYPE_STREETS
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
-import "geometry" for Polygon, Polyline
-import "citygen" for Block, GeometryTools
+import "geometry" for Polyline
+import "citygen" for GeometryTools
 import "maths" for Matrix44
 
 class DrawMap is Node
@@ -111,28 +110,6 @@ class DrawMap is Node
 				this.build_roads(major, width, color, dst)
 				var minor = v_streets.streets.get_minor_paths()
 				this.build_roads(minor, width, color, dst)
-
-				// blocks
-				var polys = StreetsHelper.build_polygons(v_objs)
-				this.build_blocks(polys, this.v_geos_pass2)
-			}
-			else if (v_objs.type == VAR_TYPE_BLOCK)
-			{
-				var v_block = v_objs.value
-
-				var border = v_block.block.offset(v_block.offset)
-				if (!border.isEmpty)
-				{
-					var poly = Polygon.init()
-					poly.set_vertices(border)
-
-					var geo = VarGeo()
-					geo.shape = poly
-					geo.render_style["color"] = COMMON_BLOCK_COLOR
-					geo.render_style["fill"] = false
-
-					this.v_geos_pass2.value.add(Variant(VAR_TYPE_GEO, geo))
-				}
 			}
 			else
 			{
@@ -145,37 +122,16 @@ class DrawMap is Node
 	{
 		for (var polyline in polylines)
 		{
-			var expand = GeometryTools.polyline_expand(polyline, width)
-
-			if (expand)
+			var polygon = GeometryTools.polyline_expand(polyline, width)
+			if (polygon)
 			{
 				var geo = VarGeo()
-				geo.shape = Polygon.init()
-				geo.shape.set_vertices(expand[0])
+				geo.shape = polygon
 				geo.render_style["color"] = color
+				geo.render_style["fill"] = true
 
 				dst.value.add(Variant(VAR_TYPE_GEO, geo))
 			}
-		}
-	}
-
-	build_blocks(polys, dst)
-	{
-		for (var poly in polys)
-		{
-			var block = Block.init(poly.value.shape)
-			var dist = 0.007
-			var vts = block.offset(dist)
-
-			var poly = Polyline.init()
-			poly.set_vertices(vts)
-			poly.set_closed(true)
-
-			var geo = VarGeo()
-			geo.shape = poly
-			geo.render_style["color"] = Vector3(0, 0, 0)
-
-			dst.value.add(Variant(VAR_TYPE_GEO, geo))
 		}
 	}
 }

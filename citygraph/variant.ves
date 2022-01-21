@@ -1,6 +1,4 @@
 var VAR_TYPE_STREETS = "streets"
-var VAR_TYPE_BLOCK   = "block"
-var VAR_TYPE_LOTS    = "lots"
 
 class VarStreets
 {
@@ -9,15 +7,5 @@ class VarStreets
 		this.streets = streets
 
 		this.is_major = true
-	}
-}
-
-class VarBlock
-{
-	init(block)
-	{
-		this.block = block
-
-		this.offset = 0
 	}
 }

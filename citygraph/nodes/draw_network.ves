@@ -11,7 +11,7 @@ import "citygraph.variant" for VAR_TYPE_STREETS
 import "citygraph.style" for BLOCK_COLORS
 import "maths.vector" for Vector3
 import "graphics" for Graphics
-import "geometry" for Circle, Polyline, Polygon
+import "geometry" for Circle
 import "math" for Math
 import "maths" for Matrix44
 
@@ -98,9 +98,9 @@ class DrawNetwork is Node
 			{
 				// edges
 				var major = v_streets.value.streets.get_major_paths()
-				this.build_routes(major,  Vector3(1.0, 0.0, 0.0))
+				this.build_routes(major, Vector3(1.0, 0.0, 0.0))
 				var minor = v_streets.value.streets.get_minor_paths()
-				this.build_routes(minor,  Vector3(0.0, 1.0, 0.0))
+				this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
 
 				// nodes
 				var nodes = v_streets.value.streets.get_nodes()
@@ -130,8 +130,7 @@ class DrawNetwork is Node
 		for (var path in paths)
 		{
 			var geo = VarGeo()
-			geo.shape = Polyline.init()
-			geo.shape.set_vertices(path)
+			geo.shape = path
 			geo.render_style["color"] = color
 
 			this.v_geos.value.add(Variant(VAR_TYPE_GEO, geo))
@@ -142,11 +141,8 @@ class DrawNetwork is Node
 	{
 		for (var i in 0..polygons.count)
 		{
-			var polygon = Polygon.init()
-			polygon.set_vertices(polygons[i])
-
 			var geo = VarGeo()
-			geo.shape = polygon 
+			geo.shape = polygons[i]
 			geo.render_style["color"] = BLOCK_COLORS[Math.mod(i, BLOCK_COLORS.count)]
 			geo.render_style["fill"] = true
 

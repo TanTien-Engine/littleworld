@@ -17,15 +17,6 @@ foreign class Streets
 	foreign set_seed(seed)
 }
 
-foreign class Block
-{
-	init(tris) {}
-
-	foreign offset(distance)
-
-	foreign get_border()
-}
-
 foreign class ParcelsOBB
 {
 	init(polygon) {}
@@ -56,6 +47,8 @@ foreign class GeometryTools
 	foreign static shape_l(polygon, front_width, left_width, remainder)
 	foreign static shape_u(polygon, front_width, left_width, right_width, remainder)
 	foreign static shape_o(polygon, front_width, back_width, left_width, right_width, remainder)
+
+	foreign static is_counterclockwise(polygon)
 }
 
 );

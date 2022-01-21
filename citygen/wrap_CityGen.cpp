@@ -1,7 +1,6 @@
 #include "wrap_CityGen.h"
 #include "TensorField.h"
 #include "Streets.h"
-#include "Block.h"
 #include "ParcelsOBB.h"
 #include "ParcelsSS.h"
 #include "Reshape.h"
@@ -11,12 +10,80 @@
 
 #include <unirender/Texture.h>
 #include <geoshape/Polygon2D.h>
+#include <geoshape/Polyline2D.h>
 #include <SM_Polyline.h>
+#include <SM_Test.h>
 
 #include <string>
 
 namespace
 {
+
+void return_multi_polylines(const std::vector<std::vector<sm::vec2>>& polylines)
+{
+    ves_pop(ves_argnum());
+
+    const int num = (int)(polylines.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        auto poly = std::make_shared<gs::Polyline2D>();
+        poly->SetVertices(polylines[i]);
+
+        ves_pushnil();
+        ves_import_class("geometry", "Polyline");
+        auto proxy = (tt::Proxy<gs::Polyline2D>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<gs::Polyline2D>));
+        proxy->obj = poly;
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
+    }
+}
+
+void return_polygon(const std::vector<std::vector<sm::vec2>>& polygon)
+{
+    if (polygon.empty()) 
+    {
+        ves_set_nil(0);
+    }
+    else
+    {
+        auto poly = std::make_shared<gs::Polygon2D>();
+        poly->SetVertices(polygon[0]);
+        for (int i = 1, n = polygon.size(); i < n; ++i) {
+            poly->AddHole(polygon[i]);
+        }
+
+        ves_pop(ves_argnum());
+
+        ves_pushnil();
+        ves_import_class("geometry", "Polygon");
+        auto proxy = (tt::Proxy<gs::Polygon2D>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<gs::Polygon2D>));
+        proxy->obj = poly;
+        ves_pop(1);
+    }
+}
+
+void return_multi_polygons(const std::vector<std::vector<sm::vec2>>& polygons)
+{
+    ves_pop(ves_argnum());
+
+    const int num = (int)(polygons.size());
+    ves_newlist(num);
+    for (int i = 0; i < num; ++i)
+    {
+        auto poly = std::make_shared<gs::Polygon2D>();
+        poly->SetVertices(polygons[i]);
+
+        ves_pushnil();
+        ves_import_class("geometry", "Polygon");
+        auto proxy = (tt::Proxy<gs::Polygon2D>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<gs::Polygon2D>));
+        proxy->obj = poly;
+        ves_pop(1);
+        ves_seti(-2, i);
+        ves_pop(1);
+    }
+}
 
 void w_Streets_allocate()
 {
@@ -76,11 +143,11 @@ void w_Streets_get_major_paths()
     auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto& major_paths = st->GetMajorPaths();
 
-    std::vector<std::vector<sm::vec2>> points;
+    std::vector<std::vector<sm::vec2>> polylines;
     for (auto& path : major_paths) {
-        points.push_back(path->GetPoints());
+        polylines.push_back(path->GetPoints());
     }
-    tt::return_list(points);
+    return_multi_polylines(polylines);
 }
 
 void w_Streets_get_minor_paths()
@@ -88,11 +155,11 @@ void w_Streets_get_minor_paths()
     auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto& minor_paths = st->GetMinorPaths();
 
-    std::vector<std::vector<sm::vec2>> points;
+    std::vector<std::vector<sm::vec2>> polylines;
     for (auto& path : minor_paths) {
-        points.push_back(path->GetPoints());
+        polylines.push_back(path->GetPoints());
     }
-    tt::return_list(points);
+    return_multi_polylines(polylines);
 }
 
 void w_Streets_get_nodes()
@@ -106,7 +173,7 @@ void w_Streets_get_polygons()
 {
     auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto polygons = st->GetPolygons();
-    tt::return_list(polygons);
+    return_multi_polygons(polygons);
 }
 
 void w_Streets_set_seed()
@@ -114,31 +181,6 @@ void w_Streets_set_seed()
     auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto seed = (float)ves_tonumber(1);
     st->SetSeed(seed);
-}
-
-void w_Block_allocate()
-{
-    auto poly = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
-    auto block = std::make_shared<citygen::Block>(poly->GetVertices());
-
-    auto proxy = (tt::Proxy<citygen::Block>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<citygen::Block>));
-    proxy->obj = block;
-}
-
-int w_Block_finalize(void* data)
-{
-    auto proxy = (tt::Proxy<citygen::Block>*)(data);
-    proxy->~Proxy();
-    return sizeof(tt::Proxy<citygen::Block>);
-}
-
-void w_Block_offset()
-{
-    auto block = ((tt::Proxy<citygen::Block>*)ves_toforeign(0))->obj;
-    auto dist = (float)ves_tonumber(1);
-
-    auto borders = block->Offset(dist);
-    tt::return_list(borders[0]);
 }
 
 void w_ParcelsOBB_allocate()
@@ -168,8 +210,7 @@ void w_ParcelsOBB_get_polygons()
 {
     auto parcels = ((tt::Proxy<citygen::ParcelsOBB>*)ves_toforeign(0))->obj;
     auto polygons = parcels->GetPolygons();
-
-    tt::return_list(polygons);
+    return_multi_polygons(polygons);
 }
 
 void w_ParcelsOBB_set_seed()
@@ -206,8 +247,7 @@ void w_ParcelsSS_get_polygons()
 {
     auto parcels = ((tt::Proxy<citygen::ParcelsSS>*)ves_toforeign(0))->obj;
     auto polygons = parcels->GetPolygons();
-
-    tt::return_list(polygons);
+    return_multi_polygons(polygons);
 }
 
 void w_ParcelsSS_set_seed()
@@ -224,17 +264,18 @@ void w_GeometryTools_polyline_offset()
     bool is_closed = ves_toboolean(3);
 
     auto polylines = sm::polyline_offset(polygon->GetVertices(), distance, is_closed);
-    tt::return_list(polylines);
+    return_polygon(polylines);
 }
 
 void w_GeometryTools_polyline_expand()
 {
-    auto polyline = tt::list_to_vec2_array(1);
+    auto polyline = ((tt::Proxy<gs::Polyline2D>*)ves_toforeign(1))->obj;
     float offset = (float)ves_tonumber(2);
 
-    bool is_closed = polyline.size() > 1 && polyline.front() == polyline.back();
-    auto polylines = sm::polyline_expand(polyline, offset, is_closed);
-    tt::return_list(polylines);
+    auto& vertices = polyline->GetVertices();
+    bool is_closed = vertices.size() > 1 && vertices.front() == vertices.back();
+    auto polylines = sm::polyline_expand(vertices, offset, is_closed);
+    return_polygon(polylines);
 }
 
 void w_GeometryTools_shape_l()
@@ -245,8 +286,7 @@ void w_GeometryTools_shape_l()
     bool remainder = ves_toboolean(4);
 
     citygen::Reshape rs(polygon);
-    auto polygons = rs.ShapeL(front_width, left_width, remainder);
-    tt::return_list(polygons);
+    return_polygon(rs.ShapeL(front_width, left_width, remainder));
 }
 
 void w_GeometryTools_shape_u()
@@ -258,8 +298,7 @@ void w_GeometryTools_shape_u()
     bool remainder = ves_toboolean(5);
 
     citygen::Reshape rs(polygon);
-    auto polygons = rs.ShapeU(front_width, left_width, right_width, remainder);
-    tt::return_list(polygons);
+    return_polygon(rs.ShapeU(front_width, left_width, right_width, remainder));
 }
 
 void w_GeometryTools_shape_o()
@@ -272,8 +311,13 @@ void w_GeometryTools_shape_o()
     bool remainder = ves_toboolean(6);
 
     citygen::Reshape rs(polygon);
-    auto polygons = rs.ShapeO(front_width, back_width, left_width, right_width, remainder);
-    tt::return_list(polygons);
+    return_polygon(rs.ShapeO(front_width, back_width, left_width, right_width, remainder));
+}
+
+void w_GeometryTools_is_counterclockwise()
+{
+    auto polygon = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
+    ves_set_boolean(0, !sm::is_polygon_clockwise(polygon->GetVertices()));
 }
 
 }
@@ -291,8 +335,6 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Streets.get_polygons()") == 0) return w_Streets_get_polygons;
     if (strcmp(signature, "Streets.set_seed(_)") == 0) return w_Streets_set_seed;
 
-    if (strcmp(signature, "Block.offset(_)") == 0) return w_Block_offset;
-
     if (strcmp(signature, "ParcelsOBB.build(_)") == 0) return w_ParcelsOBB_build;
     if (strcmp(signature, "ParcelsOBB.get_polygons()") == 0) return w_ParcelsOBB_get_polygons;
     if (strcmp(signature, "ParcelsOBB.set_seed(_)") == 0) return w_ParcelsOBB_set_seed;
@@ -303,10 +345,10 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
 
     if (strcmp(signature, "static GeometryTools.polyline_offset(_,_,_)") == 0) return w_GeometryTools_polyline_offset;
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
-
     if (strcmp(signature, "static GeometryTools.shape_l(_,_,_,_)") == 0) return w_GeometryTools_shape_l;
     if (strcmp(signature, "static GeometryTools.shape_u(_,_,_,_,_)") == 0) return w_GeometryTools_shape_u;
     if (strcmp(signature, "static GeometryTools.shape_o(_,_,_,_,_,_)") == 0) return w_GeometryTools_shape_o;
+    if (strcmp(signature, "static GeometryTools.is_counterclockwise(_)") == 0) return w_GeometryTools_is_counterclockwise;
 
 	return nullptr;
 }
@@ -317,13 +359,6 @@ void CityGenBindClass(const char* class_name, VesselForeignClassMethods* methods
     {
         methods->allocate = w_Streets_allocate;
         methods->finalize = w_Streets_finalize;
-        return;
-    }
-
-    if (strcmp(class_name, "Block") == 0)
-    {
-        methods->allocate = w_Block_allocate;
-        methods->finalize = w_Block_finalize;
         return;
     }
 

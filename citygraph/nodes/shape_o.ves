@@ -1,11 +1,9 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
-import "citygraph.variant" for VAR_TYPE_LOTS
-import "geometry" for Polygon
 import "maths.vector" for Vector3
 import "citygen" for GeometryTools
 
@@ -16,10 +14,10 @@ class ShapeO is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "lots", VAR_TYPE_LOTS),
+			Pin(this, "lots", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
-			Pin(this, "lots", VAR_TYPE_LOTS),
+			Pin(this, "lots", VAR_TYPE_ARRAY),
 		]
 
 		this.params.add(NodeParam("front", 0.01, { "region" : 0.1 }))
@@ -62,17 +60,11 @@ class ShapeO is Node
 
 		for (var lot in lots)
 		{
-			var polygons = GeometryTools.shape_o(lot.value.shape, front, back, left, right, false)
-			if (!polygons.isEmpty)
+			var polygon = GeometryTools.shape_o(lot.value.shape, front, back, left, right, false)
+			if (polygon and GeometryTools.is_counterclockwise(polygon))
 			{
-				var poly = Polygon.init()
-				poly.set_vertices(polygons[0])
-				for (var i in 1 .. polygons.count) {
-					poly.add_hole(polygons[i])
-				}
-
 				var geo = VarGeo()
-				geo.shape = poly
+				geo.shape = polygon
 				geo.render_style["color"] = Vector3(0, 0, 0)
 				geo.render_style["fill"] = false
 

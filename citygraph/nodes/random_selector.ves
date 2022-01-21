@@ -1,11 +1,9 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
-import "blueprint.variant" for Variant
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.node_param" for NodeParam
-import "geograph.variant" for VAR_TYPE_GEO
-import "citygraph.variant" for VAR_TYPE_STREETS
-import "citygraph.streets_helper" for StreetsHelper
+import "citygraph.utility" for Utility
 import "random" for Random
 
 class RandomSelector is Node
@@ -15,10 +13,10 @@ class RandomSelector is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "streets", VAR_TYPE_STREETS),
+			Pin(this, "polys", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
-			Pin(this, "regions", VAR_TYPE_GEO),
+			Pin(this, "polys", VAR_TYPE_ARRAY),
 		]
 
 		this.params.add(NodeParam("num", 1, {  "integer" : true, "region" : 10 }))
@@ -36,43 +34,31 @@ class RandomSelector is Node
 
 	calc_value(idx)
 	{
-		var v_streets = Blueprint.calc_input_value(this, 0)
-		if (!v_streets) {
-			return nil
-		}
-
-		if (!this.v_polygons) {
-			this.rebuild_polygons(v_streets.value)
+		if (!this.v_polygons) 
+		{
+			var v_polys = Blueprint.calc_input_value(this, 0)
+			var all_polys = Utility.list_flatten(v_polys)
+			var sel_polys = this.select_polygons(all_polys)
+			this.v_polygons = Variant(sel_polys)
 		}
 
 		return this.v_polygons
 	}
 
-	select_polygons(v_polygons)
+	select_polygons(src_polys)
 	{
 		var num = this.query_param("num").value
-		if (v_polygons.value.count < num) {
-			return v_polygons
+		if (src_polys.count < num) {
+			return src_polys
 		}
 
-		if (!this.v_polygons)
-		{
-			var seed = this.query_param("seed").value
-			var random = Random.init(seed * 65535)
-			var geos = []
-			for (var i in 0..num) {
-				var idx = random.int(v_polygons.value.count)
-				geos.add(v_polygons.value[idx])
-			}
-			this.v_polygons = Variant(geos)
+		var seed = this.query_param("seed").value
+		var random = Random.init(seed * 65535)
+		var polys = []
+		for (var i in 0..num) {
+			var idx = random.int(src_polys.value.count)
+			polys.add(src_polys.value[idx])
 		}
-
-		return this.v_polygons
-	}
-
-	rebuild_polygons(v_streets)
-	{
-		var v_polygons = StreetsHelper.build_polygons(v_streets)
-		this.v_polygons = Variant(this.select_polygons(v_polygons))
+		return polys
 	}
 }

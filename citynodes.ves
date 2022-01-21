@@ -4,7 +4,7 @@ var CITY_NODES = [
 // tensor field elements
 Regular, Wedge, Trisector, Radiate, Center, Saddle,
 // components
-Streets, Blocks, Parcels,
+Streets, Parcels,
 // selector
 AreaSelector, RandomSelector,
 // operator

@@ -1,13 +1,11 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_LOTS
-import "citygraph.streets_helper" for StreetsHelper
+import "citygraph.utility" for Utility
 import "citygen" for ParcelsOBB, ParcelsSS
-import "geometry" for Polygon
 import "maths.vector" for Vector3
 
 class Parcels is Node
@@ -17,10 +15,10 @@ class Parcels is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "streets", VAR_TYPE_STREETS)
+			Pin(this, "blocks", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
-			Pin(this, "lots", VAR_TYPE_LOTS),
+			Pin(this, "lots", VAR_TYPE_ARRAY),
 		]
 
 		this.params.add(NodeParam("max_len", 0.1, { "region" : 0.2 }))
@@ -28,74 +26,52 @@ class Parcels is Node
 
 		this.layout()
 
-		this.parcels = nil
-		this.v_polygons = nil
+		this.v_lots = nil
 	}
 
 	on_node_dirty()
 	{
-		this.parcels = nil
-		this.v_polygons = nil
+		this.v_lots = nil
 	}
 
 	calc_value(idx)
 	{
-		var v_streets = Blueprint.calc_input_value(this, 0)
-		if (!v_streets) {
-			return nil
+		if (!this.v_lots) 
+		{
+			var v_polys = Blueprint.calc_input_value(this, 0)
+			var all_polys = Utility.list_flatten(v_polys)
+			this.v_lots = this.build_lots(all_polys)
 		}
 
-		if (!this.parcels) {
-			this.rebuild_parcels(v_streets.value)
-		}
-		if (!this.v_polygons) {
-			this.rebuild_polygons()
-		}
-
-		return this.v_polygons
+		return this.v_lots
 	}
 
-	rebuild_parcels(v_streets)
+	build_lots(blocks)
 	{
-		this.parcels = []
-
-		var v_polygons = StreetsHelper.build_polygons(v_streets)
+		var ret = []
 
 		var max_len = this.query_param("max_len").value
 		var seed = this.query_param("seed").value
-		for (var item in v_polygons.value) 
+
+		for (var block in blocks)
 		{
-			var _parcels = ParcelsOBB.init(item.value.shape)
-//			var _parcels = ParcelsSS.init(item.value.shape)			
-			_parcels.set_seed(seed)
-			_parcels.build(max_len)
+			var parcels = ParcelsOBB.init(block.value.shape)
+//			var parcels = ParcelsSS.init(block.value.shape)			
+			parcels.set_seed(seed)
+			parcels.build(max_len)
 
-			this.parcels.add(_parcels)
-		}
-	}
-
-	rebuild_polygons()
-	{
-		var dst_polys = []
-
-		for (var parcel in this.parcels)
-		{
-			var src_polys = parcel.get_polygons()
-
-			for (var src_poly in src_polys)
+			var polygons = parcels.get_polygons()
+			for (var polygon in polygons)
 			{
-				var dst_poly = Polygon.init()
-				dst_poly.set_vertices(src_poly)
-
 				var geo = VarGeo()
-				geo.shape = dst_poly
+				geo.shape = polygon
 				geo.render_style["color"] = Vector3(0, 0, 0)
 				geo.render_style["fill"] = false
 
-				dst_polys.add(Variant(VAR_TYPE_GEO, geo))
-			}
+				ret.add(Variant(VAR_TYPE_GEO, geo))
+			}			
 		}
 
-		this.v_polygons = Variant(dst_polys)
+		return Variant(ret)
 	}
 }
