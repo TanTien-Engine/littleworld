@@ -37,7 +37,7 @@ node7.value.set(0, 0.51223009824753)
 
 _editor.add_node(node7, -604.83769601562, 317.34800835937)
 
-var node8 = ::citygraph::nodes::draw_network::DrawNetwork()
+var node8 = ::citygraph::nodes::draw_geo2d::DrawGeo2d()
 node8.query_param("faces").value = false
 
 _editor.add_node(node8, 272.83971892878, 162.96729765806)
@@ -48,7 +48,7 @@ node9.query_param("seed").value = 0
 
 _editor.add_node(node9, 83.165759933091, 32.873139688792)
 
-var node10 = ::citygraph::nodes::draw_map::DrawMap()
+var node10 = ::citygraph::nodes::draw_map2d::DrawMap2d()
 
 _editor.add_node(node10, 495.01532167731, 95.032593420813)
 
@@ -64,7 +64,7 @@ Blueprint.connect(node2, "v2", node3, "pos")
 Blueprint.connect(node5, "ret", node6, "a")
 Blueprint.connect(node3, "ret", node6, "b")
 Blueprint.connect(node6, "v", node1, "tensor")
-Blueprint.connect(node1, "tensor_field", node4, "tf")
+Blueprint.connect(node1, "tensor_field", node4, "tensor")
 Blueprint.connect(node4, "blocks", node9, "blocks")
 Blueprint.connect(node9, "lots", node11, "lots")
 Blueprint.connect(node8, "next", node10, "prev")

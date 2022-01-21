@@ -14,7 +14,7 @@ import "geometry" for Polyline
 import "citygen" for GeometryTools
 import "maths" for Matrix44
 
-class DrawMap is Node
+class DrawMap2d is Node
 {
 	init()
 	{

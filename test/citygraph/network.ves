@@ -72,7 +72,7 @@ node14.query_param("seed").value = 0
 _editor.add_node(node14, 174.51140910209, -54.791298883615)
 
 var node15 = ::citygraph::nodes::offset::Offset()
-node15.query_param("distance").value = 0.005168185569346
+node15.query_param("distance").value = 0.0085015194490552
 
 _editor.add_node(node15, 987.48629798849, 148.48285105808)
 
@@ -109,16 +109,33 @@ _editor.add_node(node21, 779.58564363636, 22.109598090909)
 
 var node22 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node22, 831.10415039063, 260.15837402344)
+_editor.add_node(node22, 1014.1517564285, 225.32468779982)
 
-var node23 = ::citygraph::nodes::draw_network::DrawNetwork()
+var node23 = ::citygraph::nodes::draw_geo2d::DrawGeo2d()
 node23.query_param("faces").value = false
 
 _editor.add_node(node23, 932.34020996094, 49.052734375)
 
-var node24 = ::citygraph::nodes::draw_map::DrawMap()
+var node24 = ::citygraph::nodes::draw_map2d::DrawMap2d()
 
 _editor.add_node(node24, 1028.702471369, -86.301837713074)
+
+var node25 = ::citygraph::nodes::parcels::Parcels()
+node25.query_param("max_len").value = 0.11370551586151
+node25.query_param("seed").value = 0
+
+_editor.add_node(node25, 630.43968545991, -132.0780437745)
+
+var node26 = ::citygraph::nodes::offset::Offset()
+node26.query_param("distance").value = 0.0054058497771621
+
+_editor.add_node(node26, 771.90259235322, -121.81000626591)
+
+var node27 = ::citygraph::nodes::shape_l::ShapeL()
+node27.query_param("front").value = 0.019170396029949
+node27.query_param("left").value = 0.031392619013786
+
+_editor.add_node(node27, 906.91328047522, -198.99029865637)
 
 Blueprint.connect(node0, "uv", node16, "st")
 Blueprint.connect(node18, "v2", node16, "pos")
@@ -133,14 +150,19 @@ Blueprint.connect(node4, "v2", node7, "pos")
 Blueprint.connect(node16, "ret", node17, "a")
 Blueprint.connect(node7, "ret", node17, "b")
 Blueprint.connect(node17, "v", node1, "tensor")
-Blueprint.connect(node1, "tensor_field", node21, "tf")
-Blueprint.connect(node1, "tensor_field", node14, "tf")
+Blueprint.connect(node1, "tensor_field", node14, "tensor")
 Blueprint.connect(node14, "blocks", node20, "polys")
 Blueprint.connect(node20, "polys", node15, "lots")
-Blueprint.connect(node15, "lots", node24, "objs")
 Blueprint.connect(node14, "blocks", node19, "polys")
+Blueprint.connect(node1, "tensor_field", node21, "tensor")
+Blueprint.connect(node19, "polys", node21, "regions")
+Blueprint.connect(node21, "blocks", node25, "blocks")
+Blueprint.connect(node25, "lots", node26, "lots")
+Blueprint.connect(node26, "lots", node27, "lots")
+Blueprint.connect(node27, "lots", node24, "objs")
+Blueprint.connect(node21, "streets", node23, "streets")
 Blueprint.connect(node1, "tensor_field", node13, "tex")
-Blueprint.connect(node1, "tensor_field", node6, "tf")
+Blueprint.connect(node1, "tensor_field", node6, "tensor")
 Blueprint.connect(node3, "tex", node2, "base_texture")
 Blueprint.connect(node1, "tensor_field", node2, "tensor_field")
 Blueprint.connect(node0, "uv", node5, "st")

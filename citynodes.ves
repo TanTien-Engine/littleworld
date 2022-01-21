@@ -10,5 +10,5 @@ AreaSelector, RandomSelector,
 // operator
 Offset, ShapeL, ShapeU, ShapeO,
 // tools
-Streamlines, DrawMap, DrawNetwork,
+Streamlines, DrawGeo2d, DrawMap2d,
 ]

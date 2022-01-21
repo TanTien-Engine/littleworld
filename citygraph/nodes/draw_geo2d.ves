@@ -1,7 +1,7 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
-import "blueprint.variant" for Variant, VAR_TYPE_PORT
+import "blueprint.variant" for Variant, VAR_TYPE_PORT, VAR_TYPE_ARRAY
 import "blueprint.variant_proxy" for VariantProxy
 import "blueprint.node_param" for NodeParam
 import "geograph.nodes.draw_geometry" for DrawGeometry
@@ -15,15 +15,15 @@ import "geometry" for Circle
 import "math" for Math
 import "maths" for Matrix44
 
-class DrawNetwork is Node
+class DrawGeo2d is Node
 {
 	init()
 	{
 		super.init()
 	
 		this.imports = [
-			Pin(this, "prev",    VAR_TYPE_PORT),
-			Pin(this, "streets", VAR_TYPE_STREETS),
+			Pin(this, "prev", VAR_TYPE_PORT),
+			Pin(this, "objs", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
 			Pin(this, "next", VAR_TYPE_PORT)
@@ -69,42 +69,50 @@ class DrawNetwork is Node
 	{
 		this.v_geos.value.clear()
 
-		var v_streets = Blueprint.calc_input_value(this, 1)
-		this.build_geos(v_streets)
+		var v_objs = Blueprint.calc_input_value(this, 1)
+		this.build_geos(v_objs)
 	}
 
-	build_geos(v_streets)
+	build_geos(v_objs)
 	{
-		if (!v_streets) {
+		if (!v_objs) {
 			return
 		}
 
-		if (v_streets.value is List)
+		if (v_objs.value is List)
 		{
-			for (var item in v_streets.value) {
+			for (var item in v_objs.value) {
 				this.build_geos(item)
 			}
 		}
 		else
 		{
-			var faces = this.query_param("faces").value
-			if (faces)
+			if (v_objs.type == VAR_TYPE_STREETS)
 			{
-				// blocks
-				var blocks = v_streets.value.streets.get_polygons()
-				this.build_blocks(blocks)
+				var v_streets = v_objs.value			
+				var faces = this.query_param("faces").value
+				if (faces)
+				{
+					// blocks
+					var blocks = v_streets.streets.get_polygons()
+					this.build_blocks(blocks)
+				}
+				else
+				{
+					// edges
+					var major = v_streets.streets.get_major_paths()
+					this.build_routes(major, Vector3(1.0, 0.0, 0.0))
+					var minor = v_streets.streets.get_minor_paths()
+					this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
+
+					// nodes
+					var nodes = v_streets.streets.get_nodes()
+					this.build_crossings(nodes, Vector3(0.0, 0.0, 1.0))
+				}
 			}
 			else
 			{
-				// edges
-				var major = v_streets.value.streets.get_major_paths()
-				this.build_routes(major, Vector3(1.0, 0.0, 0.0))
-				var minor = v_streets.value.streets.get_minor_paths()
-				this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
-
-				// nodes
-				var nodes = v_streets.value.streets.get_nodes()
-				this.build_crossings(nodes, Vector3(0.0, 0.0, 1.0))
+				this.v_geos.value.add(v_objs)
 			}
 		}
 	}

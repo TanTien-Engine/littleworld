@@ -17,8 +17,8 @@ class Streets is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "tf", VAR_TYPE_TEXTURE),
-			Pin(this, "borders", VAR_TYPE_GEO),
+			Pin(this, "tensor",  VAR_TYPE_TEXTURE),
+			Pin(this, "regions", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
 			Pin(this, "streets", VAR_TYPE_ARRAY),
@@ -67,27 +67,27 @@ class Streets is Node
 	
 		this.v_streets = []
 
-		var v_borders = Blueprint.calc_input_value(this, 1)
+		var v_regions = Blueprint.calc_input_value(this, 1)
 
-		var borders = []
-		if (v_borders and v_borders.value) 
+		var regions = []
+		if (v_regions and v_regions.value) 
 		{
-			if (v_borders.value is List) {
-				for (var b in v_borders.value) {
-					borders.add(b.value.shape)
+			if (v_regions.value is List) {
+				for (var b in v_regions.value) {
+					regions.add(b.value.shape)
 				}
 			} else {
-				borders.add(borders.value.shape)
+				regions.add(regions.value.shape)
 			}
 		}
 
-		if (borders.isEmpty) {
-			borders.add(nil)
+		if (regions.isEmpty) {
+			regions.add(nil)
 		}
 
 		var seed = this.query_param("seed").value
 		var num = this.query_param("num").value
-		for (var border in borders)
+		for (var border in regions)
 		{
 			var st = cg_Streets.init(v_tex.value.tex, border)
 
@@ -97,7 +97,7 @@ class Streets is Node
 			st.build_topology()
 
 			var v_st = VarStreets(st)
-			v_st.is_major = v_borders == nil
+			v_st.is_major = v_regions == nil
 
 			this.v_streets.add(Variant(VAR_TYPE_STREETS, v_st))
 		}
