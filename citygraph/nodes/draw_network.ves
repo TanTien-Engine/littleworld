@@ -140,10 +140,10 @@ class DrawNetwork is Node
 
 	build_blocks(polygons)
 	{
-		for (var poly in polygons)
+		for (var i in 0..polygons.count)
 		{
 			var polygon = Polygon.init()
-			polygon.set_vertices(poly)
+			polygon.set_vertices(polygons[i])
 
 			var geo = VarGeo()
 			geo.shape = polygon 
