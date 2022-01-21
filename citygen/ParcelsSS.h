@@ -24,8 +24,6 @@ public:
 
 	void Build(float max_len);
 
-	void Offset(float distance) { m_offset = distance; }
-
 	std::vector<std::vector<sm::vec2>> GetPolygons() const;
 
 	void SetSeed(float seed) { m_seed = seed; }
@@ -71,7 +69,6 @@ private:
 
 	float m_seed = 0.0f;
 	float m_max_len = 0.1f;
-	float m_offset = 0;
 
 }; // ParcelsSS
 

@@ -16,8 +16,6 @@ public:
 
 	void Build(float max_len);
 
-	void Offset(float distance);
-
 	std::vector<std::vector<sm::vec2>> GetPolygons() const;
 
 	void SetSeed(float seed) { m_seed = seed; }
@@ -29,7 +27,7 @@ private:
 
 		void Clip(const sm::vec2& p0, const sm::vec2& p1, float max_len);
 
-		std::vector<sm::vec2> poly, poly_offset;
+		std::vector<sm::vec2> poly;
 
 		std::pair<sm::rect, float> obb;
 

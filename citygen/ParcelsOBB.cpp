@@ -22,33 +22,6 @@ void ParcelsOBB::Build(float max_len)
 	m_root = std::make_shared<Node>(m_border, max_len);
 }
 
-void ParcelsOBB::Offset(float distance)
-{
-	std::queue<std::shared_ptr<Node>> buf;
-	buf.push(m_root);
-
-	while (!buf.empty())
-	{
-		auto n = buf.front(); buf.pop();
-
-		if (!n->children[0] && !n->children[1])
-		{
-			auto offset_poly = sm::polyline_offset(n->poly, distance, true);
-			if (!offset_poly.empty()) {
-				n->poly_offset = offset_poly.front();
-			} else {
-				n->poly_offset.clear();
-			}
-		}
-
-		for (auto& c : n->children) {
-			if (c) {
-				buf.push(c);
-			}
-		}
-	}
-}
-
 std::vector<std::vector<sm::vec2>> ParcelsOBB::GetPolygons() const
 {
 	std::vector<std::vector<sm::vec2>> polygons;
@@ -60,8 +33,8 @@ std::vector<std::vector<sm::vec2>> ParcelsOBB::GetPolygons() const
 	{
 		auto n = buf.front(); buf.pop();
 
-		if (!n->children[0] && !n->children[1] && !n->poly_offset.empty()) {
-			polygons.push_back(n->poly_offset);
+		if (!n->children[0] && !n->children[1] && !n->poly.empty()) {
+			polygons.push_back(n->poly);
 		}
 
 		for (auto& c : n->children) {

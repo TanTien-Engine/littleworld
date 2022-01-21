@@ -32,8 +32,6 @@ foreign class ParcelsOBB
 
 	foreign build(max_len)
 
-	foreign offset(distance)
-
 	foreign get_polygons()
 
 	foreign set_seed(seed)
@@ -44,8 +42,6 @@ foreign class ParcelsSS
 	init(polygon) {}
 
 	foreign build(max_len)
-
-	foreign offset(distance)
 
 	foreign get_polygons()
 

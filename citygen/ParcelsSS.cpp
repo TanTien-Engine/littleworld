@@ -49,8 +49,6 @@ void ParcelsSS::Build(float max_len)
 
 std::vector<std::vector<sm::vec2>> ParcelsSS::GetPolygons() const
 {
-    std::vector<std::vector<sm::vec2>> polys;
-
 	auto graph = std::make_shared<Graph>();
 
 	float border_width = FLT_MAX;
@@ -104,15 +102,12 @@ std::vector<std::vector<sm::vec2>> ParcelsSS::GetPolygons() const
 
 	graph->BuildHalfedge();
 
-	auto polygons = graph->GetPolygons();
-	for (auto& p : polygons)
-	{
-		auto o = sm::polyline_offset(p, m_offset, true);
-		if (!o.empty()) {
-			polys.push_back(o.front());
+	std::vector<std::vector<sm::vec2>> polys;
+	for (auto& poly : graph->GetPolygons()) {
+		if (!sm::is_polygon_clockwise(poly)) {
+			polys.push_back(poly);
 		}
 	}
-
 	return polys;
 }
 
