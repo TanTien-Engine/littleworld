@@ -82,6 +82,14 @@ node14.query_param("left").value = 0.026813456788659
 
 _editor.add_node(node14, 385.86789536566, 18.165099386879)
 
+var node15 = ::citygraph::nodes::shape_o::ShapeO()
+node15.query_param("front").value = 0.01
+node15.query_param("back").value = 0.01
+node15.query_param("left").value = 0.01
+node15.query_param("right").value = 0.01
+
+_editor.add_node(node15, 394.12566223145, -95.811480712891)
+
 Blueprint.connect(node0, "uv", node5, "st")
 Blueprint.connect(node7, "v2", node5, "pos")
 Blueprint.connect(node0, "uv", node3, "st")
@@ -93,6 +101,7 @@ Blueprint.connect(node1, "tensor_field", node4, "tensor")
 Blueprint.connect(node4, "blocks", node13, "polys")
 Blueprint.connect(node4, "blocks", node8, "blocks")
 Blueprint.connect(node8, "lots", node9, "lots")
-Blueprint.connect(node9, "lots", node14, "lots")
-Blueprint.connect(node14, "lots", node10, "lots")
+Blueprint.connect(node9, "lots", node15, "lots")
+Blueprint.connect(node15, "lots", node10, "lots")
 Blueprint.connect(node10, "boxes", node11, "list")
+Blueprint.connect(node9, "lots", node14, "lots")

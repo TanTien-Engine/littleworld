@@ -327,18 +327,28 @@ void w_GeometryTools_polygon_extrude()
     float distance = (float)ves_tonumber(2);
 
     size_t idx = 0;
-    std::vector<size_t> face_idx;
-
     std::vector<pm3::Polytope::PointPtr> verts;
-    auto& border = polygon->GetVertices();
-    for (auto& p : border) {
-        verts.push_back(std::make_shared<pm3::Polytope::Point>(sm::vec3(p.x, 0.0f, p.y)));
-        face_idx.push_back(idx++);
+
+    auto create_face = [&](const std::vector<sm::vec2>& vertices) ->std::vector<size_t>
+    {
+        std::vector<size_t> ret;
+        for (auto& p : vertices) {
+            verts.push_back(std::make_shared<pm3::Polytope::Point>(sm::vec3(p.x, 0.0f, p.y)));
+            ret.push_back(idx++);
+        }
+        return ret;
+    };
+
+    std::vector<size_t> border_idx = create_face(polygon->GetVertices());
+    std::vector<std::vector<size_t>> holes_idx;
+    for (auto& hole : polygon->GetHoles()) {
+        holes_idx.push_back(create_face(hole));
     }
 
     std::vector<pm3::Polytope::FacePtr> faces;
     auto face = std::make_shared<pm3::Polytope::Face>();
-    face->border = face_idx;
+    face->border = border_idx;
+    face->holes = holes_idx;
     faces.push_back(face);
 
     auto polytope = std::make_shared<pm3::Polytope>(verts, faces);
