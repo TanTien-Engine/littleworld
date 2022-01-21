@@ -49,6 +49,8 @@ foreign class GeometryTools
 	foreign static shape_o(polygon, front_width, back_width, left_width, right_width, remainder)
 
 	foreign static is_counterclockwise(polygon)
+
+	foreign static polygon_extrude(polygon, distance)
 }
 
 );

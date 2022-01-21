@@ -11,6 +11,7 @@
 #include <unirender/Texture.h>
 #include <geoshape/Polygon2D.h>
 #include <geoshape/Polyline2D.h>
+#include <polymesh3/Polytope.h>
 #include <SM_Polyline.h>
 #include <SM_Test.h>
 
@@ -320,6 +321,60 @@ void w_GeometryTools_is_counterclockwise()
     ves_set_boolean(0, !sm::is_polygon_clockwise(polygon->GetVertices()));
 }
 
+void w_GeometryTools_polygon_extrude()
+{
+    auto polygon = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
+    float distance = (float)ves_tonumber(2);
+
+    size_t idx = 0;
+    std::vector<size_t> face_idx;
+
+    std::vector<pm3::Polytope::PointPtr> verts;
+    auto& border = polygon->GetVertices();
+    for (auto& p : border) {
+        verts.push_back(std::make_shared<pm3::Polytope::Point>(sm::vec3(p.x, 0.0f, p.y)));
+        face_idx.push_back(idx++);
+    }
+
+    std::vector<pm3::Polytope::FacePtr> faces;
+    auto face = std::make_shared<pm3::Polytope::Face>();
+    face->border = face_idx;
+    faces.push_back(face);
+
+    auto polytope = std::make_shared<pm3::Polytope>(verts, faces);
+    {
+        auto topo_poly = polytope->GetTopoPoly();
+        assert(topo_poly);
+
+        bool create_face[he::Polyhedron::ExtrudeMaxCount];
+        create_face[he::Polyhedron::ExtrudeFront] = true;
+        create_face[he::Polyhedron::ExtrudeBack] = true;
+        create_face[he::Polyhedron::ExtrudeSide] = true;
+
+        std::vector<he::TopoID> face_ids;
+        auto& faces = topo_poly->GetLoops();
+        face_ids.reserve(faces.Size());
+        auto first_f = faces.Head();
+        auto curr_f = first_f;
+        do {
+            face_ids.push_back(curr_f->ids);
+            curr_f = curr_f->linked_next;
+        } while (curr_f != first_f);
+
+        if (topo_poly->Extrude(-distance, face_ids, create_face)) {
+            polytope->BuildFromTopo();
+        }
+    }
+
+    ves_pop(ves_argnum());
+
+    ves_pushnil();
+    ves_import_class("geometry", "Polytope");
+    auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
+    proxy->obj = polytope;
+    ves_pop(1);
+}
+
 }
 
 namespace citygen
@@ -349,6 +404,7 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "static GeometryTools.shape_u(_,_,_,_,_)") == 0) return w_GeometryTools_shape_u;
     if (strcmp(signature, "static GeometryTools.shape_o(_,_,_,_,_,_)") == 0) return w_GeometryTools_shape_o;
     if (strcmp(signature, "static GeometryTools.is_counterclockwise(_)") == 0) return w_GeometryTools_is_counterclockwise;
+    if (strcmp(signature, "static GeometryTools.polygon_extrude(_,_)") == 0) return w_GeometryTools_polygon_extrude;
 
 	return nullptr;
 }

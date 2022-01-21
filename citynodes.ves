@@ -8,7 +8,7 @@ Streets, Parcels,
 // selector
 AreaSelector, RandomSelector,
 // operator
-Offset, ShapeL, ShapeU, ShapeO,
+Offset, ShapeL, ShapeU, ShapeO, Extrude,
 // tools
 Streamlines, DrawGeo2d, DrawMap2d,
 ]
