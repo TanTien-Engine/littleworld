@@ -1,6 +1,6 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER, VAR_TYPE_FUNCTION
 import "blueprint.node_param" for NodeParam
 import "blueprint.blueprint" for Blueprint
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
@@ -16,7 +16,7 @@ class Extrude is Node
 	
 		this.imports = [
 			Pin(this, "lots", VAR_TYPE_ARRAY),
-			Pin(this, "dist", VAR_TYPE_NUMBER),
+			Pin(this, "dist", [ VAR_TYPE_NUMBER, VAR_TYPE_FUNCTION ]),
 		]
 		this.exports = [
 			Pin(this, "boxes", VAR_TYPE_ARRAY),
@@ -47,6 +47,9 @@ class Extrude is Node
 		var all_lots = Utility.list_flatten(v_lots)		
 		for (var v_lot in all_lots)
 		{
+			if (v_distance.type == VAR_TYPE_FUNCTION) {
+				distance = v_distance.value.func_call().value
+			}
 			var polytope = GeometryTools.polygon_extrude(v_lot.value.shape, distance)
 			
 			var geo = VarGeo()
