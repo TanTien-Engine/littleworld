@@ -82,40 +82,30 @@ node14.query_param("left").value = 0.026813456788659
 
 _editor.add_node(node14, 550.33070528302, 147.91716550258)
 
-var node15 = ::blueprint::nodes::function::Function()
+var node15 = ::blueprint::nodes::random::Random()
+node15.query_param("seed").value = 0.24394260346889
 
-node15.set_size(392.74, 155.58)
-node15.title = "calc_height"
+_editor.add_node(node15, 411.40466626176, -41.15556023586)
 
-_editor.add_node(node15, 419.84858545198, -14.561007232968)
+var node16 = ::blueprint::nodes::number::Number()
 
-var node16 = ::blueprint::nodes::func_out::FuncOut()
+node16.value = 0.18613484501839
 
-node16.var_name = "height"
-node16.var_type = "num"
+_editor.add_node(node16, 282.24787643535, -7.1074746593599)
 
-_editor.add_node(node16, 547.59748548933, -86.280990684228)
+var node17 = ::blueprint::nodes::number::Number()
 
-var node17 = ::blueprint::nodes::random::Random()
-node17.query_param("seed").value = 0.24394260346889
+node17.value = 0.03599751740694
 
-_editor.add_node(node17, 418.40466626176, -106.15556023586)
+_editor.add_node(node17, 280.76022874035, -74.87609189528)
 
-var node18 = ::blueprint::nodes::number::Number()
+var node18 = ::blueprint::nodes::evaluate::Evaluate()
 
-node18.value = 0.18613484501839
+_editor.add_node(node18, 554.70470466872, -19.820107314571)
 
-_editor.add_node(node18, 289.24787643535, -72.10747465936)
-
-var node19 = ::blueprint::nodes::number::Number()
-
-node19.value = 0.03599751740694
-
-_editor.add_node(node19, 287.76022874035, -139.87609189528)
-
-Blueprint.connect(node18, "v", node17, "min")
-Blueprint.connect(node19, "v", node17, "max")
-Blueprint.connect(node17, "val", node16, "var")
+Blueprint.connect(node16, "v", node15, "min")
+Blueprint.connect(node17, "v", node15, "max")
+Blueprint.connect(node15, "val", node18, "pin")
 Blueprint.connect(node0, "uv", node5, "st")
 Blueprint.connect(node7, "v2", node5, "pos")
 Blueprint.connect(node0, "uv", node3, "st")
@@ -129,5 +119,5 @@ Blueprint.connect(node4, "blocks", node8, "blocks")
 Blueprint.connect(node8, "lots", node9, "lots")
 Blueprint.connect(node9, "lots", node14, "lots")
 Blueprint.connect(node9, "lots", node10, "lots")
-Blueprint.connect(node15, "func", node10, "dist")
+Blueprint.connect(node18, "eval", node10, "dist")
 Blueprint.connect(node10, "boxes", node11, "list")
