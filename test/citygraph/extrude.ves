@@ -50,6 +50,7 @@ _editor.add_node(node9, 388.82498802006, 101.66279879722)
 
 var node10 = ::citygraph::nodes::extrude::Extrude()
 node10.query_param("distance").value = 0
+node10.query_param("roof").value = true
 
 _editor.add_node(node10, 708.88710614356, 0.68098808326936)
 
@@ -57,9 +58,9 @@ var node11 = ::blueprint::nodes::subgraph::Subgraph()
 node11.load_from_file(_editor, "../../assets/blueprints/9_edit_draw.ves")
 node11.set_prop_value("ortho", false)
 
-node11.op_node.cam.position.set(-0.57915817863377, 0.96272706812622, 0.97301004543086)
-node11.op_node.cam.yaw = -745.8
-node11.op_node.cam.pitch = -35
+node11.op_node.cam.position.set(0.10539016952133, 0.20459609167687, 0.98849838776163)
+node11.op_node.cam.yaw = -804.7
+node11.op_node.cam.pitch = -42.6
 node11.op_node.cam.zoom = 45
 node11.op_node.cam.update_vectors()
 node11.op_node.speed = 0.21526837348938
@@ -89,7 +90,7 @@ _editor.add_node(node15, 411.40466626176, -41.15556023586)
 
 var node16 = ::blueprint::nodes::number::Number()
 
-node16.value = 0.18613484501839
+node16.value = 0.063912622630596
 
 _editor.add_node(node16, 282.24787643535, -7.1074746593599)
 
@@ -99,13 +100,13 @@ node17.value = 0.03599751740694
 
 _editor.add_node(node17, 280.76022874035, -74.87609189528)
 
-var node18 = ::blueprint::nodes::evaluate::Evaluate()
+var node18 = ::blueprint::nodes::lazy_eval::LazyEval()
 
-_editor.add_node(node18, 554.70470466872, -19.820107314571)
+_editor.add_node(node18, 548.36853706855, -21.540364791425)
 
 Blueprint.connect(node16, "v", node15, "min")
 Blueprint.connect(node17, "v", node15, "max")
-Blueprint.connect(node15, "val", node18, "pin")
+Blueprint.connect(node15, "val", node18, "val")
 Blueprint.connect(node0, "uv", node5, "st")
 Blueprint.connect(node7, "v2", node5, "pos")
 Blueprint.connect(node0, "uv", node3, "st")
@@ -119,5 +120,5 @@ Blueprint.connect(node4, "blocks", node8, "blocks")
 Blueprint.connect(node8, "lots", node9, "lots")
 Blueprint.connect(node9, "lots", node14, "lots")
 Blueprint.connect(node9, "lots", node10, "lots")
-Blueprint.connect(node18, "eval", node10, "dist")
+Blueprint.connect(node18, "pin", node10, "dist")
 Blueprint.connect(node10, "boxes", node11, "list")

@@ -50,7 +50,8 @@ foreign class GeometryTools
 
 	foreign static is_counterclockwise(polygon)
 
-	foreign static polygon_extrude(polygon, distance)
+	foreign static polygon_extrude_face(polygon, distance)
+	foreign static polygon_extrude_skeleton(polygon, distance)
 }
 
 );

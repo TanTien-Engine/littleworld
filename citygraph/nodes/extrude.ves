@@ -1,12 +1,13 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER, VAR_TYPE_EVALUATE
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER, VAR_TYPE_PIN
 import "blueprint.node_param" for NodeParam
 import "blueprint.blueprint" for Blueprint
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.brush" for Brush
 import "citygraph.utility" for Utility
 import "citygen" for GeometryTools
+import "maths" for Matrix44
 
 class Extrude is Node
 {
@@ -16,13 +17,14 @@ class Extrude is Node
 	
 		this.imports = [
 			Pin(this, "lots", VAR_TYPE_ARRAY),
-			Pin(this, "dist", [ VAR_TYPE_NUMBER, VAR_TYPE_EVALUATE ]),
+			Pin(this, "dist", [ VAR_TYPE_NUMBER, VAR_TYPE_PIN ]),
 		]
 		this.exports = [
 			Pin(this, "boxes", VAR_TYPE_ARRAY),
 		]
 
 		this.params.add(NodeParam("distance", 0.0, { "region" : 0.1 }))
+		this.params.add(NodeParam("roof", false))
 
 		this.layout()
 	}
@@ -40,12 +42,14 @@ class Extrude is Node
 			distance = v_distance.value
 		}
 
+		var roof = this.query_param("roof").value
+
 		var boxes = []
 
 		var all_lots = Utility.list_flatten(v_lots)		
 		for (var v_lot in all_lots)
 		{
-			if (v_distance and v_distance.type == VAR_TYPE_EVALUATE) 
+			if (v_distance and v_distance.type == VAR_TYPE_PIN) 
 			{
 				var pin = v_distance.value
 				var v_dist = Blueprint.calc_input_value(pin.node, pin.slot_idx)
@@ -53,13 +57,32 @@ class Extrude is Node
 					distance = v_dist.value
 				}
 			}
-			var polytope = GeometryTools.polygon_extrude(v_lot.value.shape, distance)
 			
 			var geo = VarGeo()
-			geo.shape = Brush([ polytope ])
+			if (roof)
+			{
+				var bottom = GeometryTools.polyline_offset(v_lot.value.shape, 0.003, true)
+				if (!bottom) {
+					bottom = v_lot.value.shape
+				}
+				var base = GeometryTools.polygon_extrude_face(bottom, distance)
+
+				var roof = GeometryTools.polygon_extrude_skeleton(v_lot.value.shape, distance * 0.2)
+				var mat = Matrix44.init()
+				mat.translate(0, distance, 0)
+				roof.transform(mat)
+
+				geo.shape = Brush([ base, roof ])
+			}
+			else
+			{
+				var polytope = GeometryTools.polygon_extrude_face(v_lot.value.shape, distance)
+
+				geo.shape = Brush([ polytope ])
+			}
 			boxes.add(Variant(VAR_TYPE_GEO, geo))
 		}
 
-		return Variant(boxes)		
+		return Variant(boxes)
 	}
 }
