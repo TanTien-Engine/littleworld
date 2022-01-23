@@ -20,17 +20,6 @@ class Graph;
 class StraightSkeleton
 {
 public:
-	StraightSkeleton(const std::vector<sm::vec2>& border);
-
-	std::vector<std::vector<sm::vec2>> Offset(float distance) const;
-
-	std::vector<std::vector<sm::vec2>> Faces() const;
-
-	std::vector<sm::vec2> TravelStroke(const std::vector<sm::vec2>& border) const;
-
-	std::map<sm::vec2, float> GetAllNodeDist() const;
-
-private:
 	struct Node;
 
 	struct Path
@@ -48,6 +37,23 @@ private:
 
 		float dist = FLT_MAX;
 	};
+
+	struct PathTree
+	{
+		std::vector<std::shared_ptr<Node>> nodes;
+		std::vector<std::shared_ptr<Path>> edges;
+
+		std::shared_ptr<Path> GetRoot() const;
+	};
+
+public:
+	StraightSkeleton(const std::vector<sm::vec2>& border);
+
+	std::vector<std::vector<sm::vec2>> Offset(float distance) const;
+
+	std::vector<std::vector<sm::vec2>> Faces() const;
+
+	std::shared_ptr<PathTree> GetPathTree() const;
 
 private:
 	void BuildPathTree() const;
@@ -67,7 +73,7 @@ private:
 private:
 	PolygonPtr m_poly;
 
-	mutable std::shared_ptr<Path> m_path_tree_root = nullptr;
+	mutable std::shared_ptr<PathTree> m_path_tree = nullptr;
 
 }; // StraightSkeleton
 

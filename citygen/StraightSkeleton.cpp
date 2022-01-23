@@ -83,6 +83,16 @@ std::vector<std::vector<sm::vec2>> StraightSkeleton::Faces() const
 	return ret;
 }
 
+std::shared_ptr<StraightSkeleton::PathTree> 
+StraightSkeleton::GetPathTree() const
+{
+	if (!m_path_tree) {
+		BuildPathTree();
+	}
+
+	return m_path_tree;
+}
+
 void StraightSkeleton::BuildPathTree() const
 {
 	auto graph = std::make_shared<Graph>();
@@ -209,144 +219,11 @@ void StraightSkeleton::BuildPathTree() const
 		}
 	}
 
-	struct PathCmp
-	{
-		bool operator()(std::shared_ptr<Path> a, std::shared_ptr<Path> b) const {
-			return a->nodes[0]->dist + a->nodes[1]->dist 
-			     > b->nodes[0]->dist + b->nodes[1]->dist;
-		}
-	};
-	std::sort(paths.begin(), paths.end(), PathCmp());
-
-	m_path_tree_root = paths.empty() ? nullptr : paths.front();
-}
-
-std::vector<sm::vec2> StraightSkeleton::TravelStroke(const std::vector<sm::vec2>& border) const
-{
-	if (!m_path_tree_root) {
-		BuildPathTree();
+	m_path_tree = std::make_shared<PathTree>();
+	for (auto& itr : v2n) {
+		m_path_tree->nodes.push_back(itr.second);
 	}
-
-	float border_width = FLT_MAX;
-
-	auto travel = [&](const std::shared_ptr<Node>& except) -> std::vector<sm::vec2>
-	{
-		std::vector<sm::vec2> path;
-
-		std::shared_ptr<Node> prev = except;
-		std::shared_ptr<Path> curr = m_path_tree_root;
-		while (curr)
-		{
-			auto v = curr->nodes[0] == prev ? curr->nodes[1] : curr->nodes[0];
-			path.push_back(v->pos);
-
-			assert(!v->paths.empty());
-			if (v->paths.size() == 1) 
-			{
-				curr = nullptr;
-			}
-			else if (v->paths.size() == 2)
-			{
-				curr = v->paths[0] == curr ? v->paths[1] : v->paths[0];
-			}
-			else
-			{
-				std::vector<float> angles;
-				for (auto& path : v->paths)
-				{
-					auto other = path->nodes[0] == v ? path->nodes[1] : path->nodes[0];
-					angles.push_back(sm::get_angle(v->pos, prev->pos, other->pos));
-				}
-
-				float min_angle = FLT_MAX;
-				int min_idx = -1;
-				for (size_t i = 0, n = angles.size(); i < n; ++i) 
-				{
-					const float d = static_cast<float>(fabs(angles[i] - SM_PI));
-					if (d < min_angle) {
-						min_angle = d;
-						min_idx = static_cast<int>(i);
-					}
-				}
-
-				if (min_angle > SM_PI * 0.2f) 
-				{
-					sm::vec2 out = v->pos + (v->pos - prev->pos).Normalized() * 10;
-					for (size_t i = 0, n = border.size(); i < n; ++i)
-					{
-						sm::vec2 cross;
-						if (sm::intersect_segment_segment(border[i], border[(i + 1) % n], v->pos, out, &cross))
-						{
-							const float d = sm::dis_pos_to_pos(v->pos, cross);
-							if (d < border_width) {
-								border_width = d;
-							}
-
-							path.push_back(cross);
-							break;
-						}
-					}
-
-					curr = nullptr;
-				} 
-				else 
-				{
-					assert(min_idx != -1);
-					curr = v->paths[min_idx];
-				}
-			}
-			prev = v;
-		}
-
-		return path;
-	};
-
-	auto path0 = travel(m_path_tree_root->nodes[1]);
-	auto path1 = travel(m_path_tree_root->nodes[0]);
-
-	std::reverse(path0.begin(), path0.end());
-	std::copy(path1.begin(), path1.end(), std::back_inserter(path0));
-	return path0;
-}
-
-std::map<sm::vec2, float> StraightSkeleton::GetAllNodeDist() const
-{
-	if (!m_path_tree_root) {
-		BuildPathTree();
-	}
-
-	std::map<sm::vec2, float> ret;
-
-	std::queue<std::shared_ptr<Node>> buf;
-	buf.push(m_path_tree_root->nodes[0]);
-	buf.push(m_path_tree_root->nodes[1]);
-
-	std::set<std::shared_ptr<Node>> old_set;
-	old_set.insert(m_path_tree_root->nodes[0]);
-	old_set.insert(m_path_tree_root->nodes[1]);
-
-	while (!buf.empty())
-	{
-		auto n = buf.front(); buf.pop();
-
-		// fixme
-		float dist = n->dist;
-		if (n == m_path_tree_root->nodes[0] || m_path_tree_root->nodes[1]) {
-			dist = std::max(m_path_tree_root->nodes[0]->dist, m_path_tree_root->nodes[1]->dist);
-		}
-		ret.insert({ n->pos, dist });
-
-		for (auto& p : n->paths) 
-		{
-			auto o = n == p->nodes[0] ? p->nodes[1] : p->nodes[0];
-			if (old_set.find(o) == old_set.end()) {
-				buf.push(o);
-				old_set.insert(o);
-			}
-		}
-	}
-
-	return ret;
+	m_path_tree->edges = paths;
 }
 
 std::vector<std::vector<sm::vec2>> 
@@ -366,6 +243,24 @@ StraightSkeleton::GetBorder(const std::vector<PolygonPtr>& polys)
     }
 
     return ret;
+}
+
+std::shared_ptr<StraightSkeleton::Path> 
+StraightSkeleton::PathTree::GetRoot() const
+{
+	std::shared_ptr<StraightSkeleton::Path> root = nullptr;
+
+	float max_dist = -FLT_MAX;
+	for (auto& path : edges)
+	{
+		const float d = path->nodes[0]->dist + path->nodes[1]->dist;
+		if (d > max_dist) {
+			max_dist = d;
+			root = path;
+		}
+	}
+
+	return root;
 }
 
 }

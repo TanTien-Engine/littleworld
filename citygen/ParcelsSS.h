@@ -22,6 +22,9 @@ public:
 	void SetSeed(float seed) { m_seed = seed; }
 
 private:
+	std::vector<sm::vec2> TravelStroke() const;
+
+private:
 	std::vector<sm::vec2> m_border;
 
 	std::shared_ptr<StraightSkeleton> m_ss = nullptr;

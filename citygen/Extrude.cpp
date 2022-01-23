@@ -114,6 +114,46 @@ private:
 
 }; // PolyBuilder
 
+std::map<sm::vec2, float> CalcPosHeight(const citygen::StraightSkeleton& ss)
+{
+    auto path_tree = ss.GetPathTree();
+    auto path_root = path_tree->GetRoot();
+    assert(path_root);
+
+	std::map<sm::vec2, float> ret;
+
+	std::queue<std::shared_ptr<citygen::StraightSkeleton::Node>> buf;
+	buf.push(path_root->nodes[0]);
+	buf.push(path_root->nodes[1]);
+
+	std::set<std::shared_ptr<citygen::StraightSkeleton::Node>> old_set;
+	old_set.insert(path_root->nodes[0]);
+	old_set.insert(path_root->nodes[1]);
+
+	while (!buf.empty())
+	{
+		auto n = buf.front(); buf.pop();
+
+		// fixme
+		float dist = n->dist;
+		if (n == path_root->nodes[0] || n == path_root->nodes[1]) {
+			dist = std::max(path_root->nodes[0]->dist, path_root->nodes[1]->dist);
+		}
+		ret.insert({ n->pos, dist });
+
+		for (auto& p : n->paths) 
+		{
+			auto o = n == p->nodes[0] ? p->nodes[1] : p->nodes[0];
+			if (old_set.find(o) == old_set.end()) {
+				buf.push(o);
+				old_set.insert(o);
+			}
+		}
+	}
+
+	return ret;
+}
+
 }
 
 namespace citygen
@@ -162,8 +202,7 @@ Extrude::Skeleton(const std::shared_ptr<gs::Polygon2D>& polygon, float distance)
         return Face(polygon, distance);
     }
 
-    auto pos2dist = ss.GetAllNodeDist();
-
+    auto pos2dist = CalcPosHeight(ss);
 
     for (auto& f : faces) 
     {
@@ -186,15 +225,6 @@ Extrude::Skeleton(const std::shared_ptr<gs::Polygon2D>& polygon, float distance)
                     }
                 }
                 dist = nearest_dist;
-
-                //for (auto itr : pos2dist) 
-                //{
-                //    float d = sm::dis_pos_to_pos(p, itr.first);
-                //    if (d < SM_LARGE_EPSILON) {
-                //        dist = itr.second;
-                //        break;
-                //    }
-                //}
             } 
             else 
             {
