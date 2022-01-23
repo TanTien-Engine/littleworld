@@ -58,12 +58,12 @@ var node11 = ::blueprint::nodes::subgraph::Subgraph()
 node11.load_from_file(_editor, "../../assets/blueprints/9_edit_draw.ves")
 node11.set_prop_value("ortho", false)
 
-node11.op_node.cam.position.set(0.10539016952133, 0.20459609167687, 0.98849838776163)
-node11.op_node.cam.yaw = -804.7
-node11.op_node.cam.pitch = -42.6
+node11.op_node.cam.position.set(0.36811258347859, 0.11647368107035, 0.47239700670069)
+node11.op_node.cam.yaw = -815
+node11.op_node.cam.pitch = -25.3
 node11.op_node.cam.zoom = 45
 node11.op_node.cam.update_vectors()
-node11.op_node.speed = 0.21526837348938
+node11.op_node.speed = 0.027770342305303
 
 _editor.add_node(node11, 892.46668469137, 23.189572393479)
 

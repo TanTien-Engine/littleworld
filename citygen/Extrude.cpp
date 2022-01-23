@@ -1,20 +1,9 @@
 #include "Extrude.h"
+#include "StraightSkeleton.h"
 
 #include <geoshape/Polygon2D.h>
 #include <polymesh3/Polytope.h>
-
-#define CGAL_NO_GMP 1
-#undef BOOST_NONCOPYABLE_BASE_TOKEN_DEFINED
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Polygon_2.h>
-#include <CGAL/create_straight_skeleton_2.h>
-#include <boost/smart_ptr/shared_ptr.hpp>
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Polygon_2<K>           Polygon_2;
-typedef CGAL::Straight_skeleton_2<K> Skeleton;
-typedef boost::shared_ptr<Polygon_2> PolygonPtr;
-typedef boost::shared_ptr<Skeleton>  SkeletonPtr;
+#include <SM_Calc.h>
 
 namespace
 {
@@ -24,7 +13,7 @@ class PolyBuilder
 public:
 	PolyBuilder() {}
 
-    void AddFace(const std::vector<sm::vec2>& border, const std::vector<std::vector<sm::vec2>>& holes, float height = 0.0f)
+    void AddFace(const std::vector<sm::vec2>& border, const std::vector<std::vector<sm::vec2>>& holes)
     {
         if (border.empty()) {
             return;
@@ -32,10 +21,23 @@ public:
 
         auto face = std::make_shared<pm3::Polytope::Face>();
 
-        face->border = AddPoints(border, height);
+        face->border = AddPoints(border);
         for (auto& hole : holes) {
-            face->holes.push_back(AddPoints(hole, height));
+            face->holes.push_back(AddPoints(hole));
         }
+
+        m_faces.push_back(face);
+    }
+
+    void AddFace(const std::vector<sm::vec3>& border)
+    {
+        if (border.empty()) {
+            return;
+        }
+
+        auto face = std::make_shared<pm3::Polytope::Face>();
+
+        face->border = AddPoints(border);
 
         m_faces.push_back(face);
     }
@@ -48,7 +50,7 @@ public:
     auto& GetVertices() const { return m_verts; }
 
 private:
-    std::vector<size_t> AddPoints(const std::vector<sm::vec2>& points, float height = 0.0f)
+    std::vector<size_t> AddPoints(const std::vector<sm::vec2>& points)
     {
         std::vector<size_t> idxes;
 
@@ -57,15 +59,44 @@ private:
             size_t idx = 0;
 
             auto itr = m_pos2idx.find(p);
+            if (itr != m_pos2idx.end())
+            {
+                idx = itr->second;
+            }
+            else
+            {
+                auto vert = std::make_shared<pm3::Polytope::Point>(sm::vec3(p.x, 0.0f, p.y));
+                idx = m_verts.size();
+                m_pos2idx.insert({ p, idx });
+                m_verts.push_back(vert);
+            }
+
+            idxes.push_back(idx);
+        }
+
+        return idxes;
+    }
+
+    std::vector<size_t> AddPoints(const std::vector<sm::vec3>& points)
+    {
+        std::vector<size_t> idxes;
+
+        for (auto& p : points)
+        {
+            size_t idx = 0;
+
+            auto p2 = sm::vec2(p.x, p.z);
+
+            auto itr = m_pos2idx.find(p2);
             if (itr != m_pos2idx.end()) 
             {
                 idx = itr->second;
             } 
             else 
             {
-                auto vert = std::make_shared<pm3::Polytope::Point>(sm::vec3(p.x, height, p.y));
+                auto vert = std::make_shared<pm3::Polytope::Point>(p);
                 idx = m_verts.size();
-                m_pos2idx.insert({ p, idx });
+                m_pos2idx.insert({ p2, idx });
                 m_verts.push_back(vert);
             }
 
@@ -124,29 +155,55 @@ Extrude::Skeleton(const std::shared_ptr<gs::Polygon2D>& polygon, float distance)
     PolyBuilder builder;
     builder.AddFace(polygon->GetVertices(), polygon->GetHoles());
 
-    auto poly = PolygonPtr(new Polygon_2);
-    for (auto& p : polygon->GetVertices()) {
-        poly->push_back(K::Point_2(p.x, p.y));
-    }
+    StraightSkeleton ss(polygon->GetVertices());
+    auto faces = ss.Faces();
 
-    auto skel = CGAL::create_interior_straight_skeleton_2(poly);
-    if (!skel) {
+    if (faces.empty()) {
         return Face(polygon, distance);
     }
-    for (auto itr = skel->faces_begin(); itr != skel->faces_end(); ++itr)
+
+    auto pos2dist = ss.GetAllNodeDist();
+
+
+    for (auto& f : faces) 
     {
-        std::vector<sm::vec2> pts;
+        std::vector<sm::vec3> face_h;
+        for (auto& p : f)
+        {
+            float dist = 0.0f;
 
-        auto first = itr->halfedge();
-        auto curr = first;
-        do {
-            auto p = curr->vertex()->point();
-            pts.push_back(sm::vec2((float)p.x(), (float)p.y()));
+            auto itr = pos2dist.find(p);
+            if (itr == pos2dist.end()) 
+            {
+                float nearest = FLT_MAX;
+                float nearest_dist = 0;
+                for (auto itr : pos2dist) 
+                {
+                    float d = sm::dis_pos_to_pos(p, itr.first);
+                    if (d < nearest) {
+                        nearest = d;
+                        nearest_dist = itr.second;
+                    }
+                }
+                dist = nearest_dist;
 
-            curr = curr->next();
-        } while (curr != first);
+                //for (auto itr : pos2dist) 
+                //{
+                //    float d = sm::dis_pos_to_pos(p, itr.first);
+                //    if (d < SM_LARGE_EPSILON) {
+                //        dist = itr.second;
+                //        break;
+                //    }
+                //}
+            } 
+            else 
+            {
+                dist = itr->second;
+            }
 
-        builder.AddFace(pts, {}, distance);
+            face_h.push_back({ p.x, dist * 0.5f, p.y });
+        }
+        builder.AddFace(face_h);
     }
 
     std::set<sm::vec2> border_set;
