@@ -5,6 +5,11 @@
 namespace citygen
 {
 
+Graph::Graph(float epsilon)
+	: m_epsilon(epsilon)
+{
+}
+
 Graph::~Graph()
 {
 	for (auto v : m_vertices) {
@@ -158,7 +163,7 @@ Graph::Vertex* Graph::QueryVertex(const sm::vec2& pos) const
 	}
 
 	for (auto& vert : m_vertices) {
-		if (sm::dis_pos_to_pos(vert->pos, pos) < SM_LARGE_EPSILON * 10) {
+		if (sm::dis_pos_to_pos(vert->pos, pos) < m_epsilon) {
 			return vert;
 		}
 	}

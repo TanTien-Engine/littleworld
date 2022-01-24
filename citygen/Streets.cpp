@@ -416,7 +416,7 @@ Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num, c
 
 bool Streets::TranslateNode(Graph::Vertex* v, const sm::vec2& p)
 {
-	if (v->pos == p || sm::dis_pos_to_pos(v->pos, p) < SM_LARGE_EPSILON * 10) {
+	if (v->pos == p || sm::dis_pos_to_pos(v->pos, p) < m_graph->GetEpsilon()) {
 		return false;
 	}
 

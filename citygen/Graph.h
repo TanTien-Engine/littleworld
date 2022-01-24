@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SM_Vector.h>
+#include <sm_const.h>
 
 #include <vector>
 #include <set>
@@ -11,6 +12,7 @@ namespace citygen
 class Graph
 {
 public:
+	Graph(float epsilon = SM_LARGE_EPSILON * 10);
 	~Graph();
 
 	void AddPath(const std::vector<sm::vec2>& path);
@@ -23,6 +25,8 @@ public:
 	std::vector<std::vector<sm::vec2>> GetPolygons() const;
 
 	void VertexMerge(float dist);
+
+	float GetEpsilon() const { return m_epsilon; }
 
 public:
 	struct Edge;
@@ -71,6 +75,8 @@ private:
 	};
 
 private:
+	float m_epsilon;
+
 	std::set<Vertex*, VertexComp> m_vertices;
 
 }; // Graph
