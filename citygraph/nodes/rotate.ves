@@ -1,0 +1,35 @@
+import "blueprint.node" for Node
+import "blueprint.node_function" for NodeFunction
+
+var CODE = "
+
+vec4 rotate(vec4 tensor, float angle)
+{	
+	float theta = atan(tensor.y, tensor.x) / 2.0f;
+	theta += angle;
+
+	float c = cos(theta * 2);
+	float s = sin(theta * 2);
+
+	vec4 tensor_r;
+	tensor_r.x = c;
+	tensor_r.y = s;
+	tensor_r.z = s;
+	tensor_r.w = -c;
+
+	float len = sqrt(tensor.x * tensor.x + tensor.y * tensor.y);
+	return tensor_r * len;
+}
+
+"
+class Rotate is Node
+{
+	init() 
+	{
+		super.init()
+	
+		this.layout()
+
+		this.node_func = NodeFunction(this, "compute", CODE, "glsl", "rotate", [])
+	}
+}

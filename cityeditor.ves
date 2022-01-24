@@ -23,16 +23,11 @@ class Cityeditor is Editor
 			super.add_popup_node(node)
 		}
 
-		import "editor.imagenodes" for IMAGE_NODES
-		for (var node in IMAGE_NODES) {
+		import "editor.noisenodes" for NOISE_NODES
+		for (var node in NOISE_NODES) {
 			super.add_popup_node(node)
 		}
-
-		import "editor.geonodes" for GEO_NODES
-		for (var node in GEO_NODES) {
-			super.add_popup_node(node)
-		}
-				
+		
 		import "citynodes" for CITY_NODES
 		for (var node in CITY_NODES) {
 			super.add_popup_node(node)
