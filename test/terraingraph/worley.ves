@@ -29,7 +29,7 @@ var node3 = ::shadergraph::nodes::tex_coord::TexCoord()
 _editor.add_node(node3, -490.47415191372, 201.62934052971)
 
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "../../assets/blueprints/tools/gen_heightmap.ves")
+node4.load_from_file(_editor, "../../assets/blueprints/heightmap/gen_heightmap.ves")
 
 _editor.add_node(node4, -71.07417905785, 196.31479308264)
 

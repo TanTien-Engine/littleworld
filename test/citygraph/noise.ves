@@ -49,12 +49,12 @@ node9.query_param("faces").value = false
 _editor.add_node(node9, 301.50611320377, 176.86966416363)
 
 var node10 = ::blueprint::nodes::subgraph::Subgraph()
-node10.load_from_file(_editor, "../../assets/blueprints/tools/gen_tensor_field.ves")
+node10.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
 
 _editor.add_node(node10, -1226.9728889742, -817.69385108858)
 
 var node11 = ::blueprint::nodes::subgraph::Subgraph()
-node11.load_from_file(_editor, "../../assets/blueprints/tools/tensor_transform.ves")
+node11.load_from_file(_editor, "../../assets/blueprints/tensorfield/tensor_transform.ves")
 
 _editor.add_node(node11, -973.55820276949, -808.5271637715)
 

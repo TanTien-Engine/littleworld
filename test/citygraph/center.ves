@@ -3,7 +3,7 @@ var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
 _editor.add_node(node0, -577.25101141785, 223.94339011649)
 
 var node1 = ::blueprint::nodes::subgraph::Subgraph()
-node1.load_from_file(_editor, "../../assets/blueprints/tools/gen_tensor_field.ves")
+node1.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
 
 _editor.add_node(node1, -102.24823175604, 243.26904391315)
 
@@ -17,7 +17,7 @@ node3.load_from_file(_editor, "../../../tantien/assets/blueprints/rendergraph/dr
 _editor.add_node(node3, 469.25582379854, 264.01901204206)
 
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "../../assets/blueprints/tools/tensor_transform.ves")
+node4.load_from_file(_editor, "../../assets/blueprints/tensorfield/tensor_transform.ves")
 
 _editor.add_node(node4, 175.78515877211, 254.07717921875)
 
