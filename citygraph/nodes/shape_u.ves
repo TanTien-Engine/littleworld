@@ -25,13 +25,6 @@ class ShapeU is Node
 		this.params.add(NodeParam("right", 0.01, { "region" : 0.1 }))
 
 		this.layout()
-
-		this.v_lots = nil
-	}
-
-	on_node_dirty()
-	{
-		this.v_lots = nil
 	}
 
 	calc_value(idx)
@@ -41,11 +34,7 @@ class ShapeU is Node
 			return nil
 		}
 
-		if (!this.v_lots) {
-			this.v_lots = Variant(this.build_lots(v_lots.value))
-		}
-
-		return this.v_lots
+		return Variant(this.build_lots(v_lots.value))
 	}
 
 	build_lots(lots)

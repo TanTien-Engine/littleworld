@@ -23,26 +23,13 @@ class RandomSelector is Node
 		this.params.add(NodeParam("seed", 0))
 
 		this.layout()
-
-		this.v_polygons = nil
-	}	
-
-	on_node_dirty()
-	{
-		this.v_polygons = nil
 	}
 
 	calc_value(idx)
 	{
-		if (!this.v_polygons) 
-		{
-			var v_polys = Blueprint.calc_input_value(this, 0)
-			var all_polys = Utility.list_flatten(v_polys)
-			var sel_polys = this.select_polygons(all_polys)
-			this.v_polygons = Variant(sel_polys)
-		}
-
-		return this.v_polygons
+		var v_polys = Blueprint.calc_input_value(this, 0)
+		var all_polys = Utility.list_flatten(v_polys)
+		return Variant(this.select_polygons(all_polys))
 	}
 
 	select_polygons(src_polys)

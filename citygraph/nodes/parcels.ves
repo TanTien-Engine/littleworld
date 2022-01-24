@@ -25,25 +25,13 @@ class Parcels is Node
 		this.params.add(NodeParam("seed", 0))
 
 		this.layout()
-
-		this.v_lots = nil
-	}
-
-	on_node_dirty()
-	{
-		this.v_lots = nil
 	}
 
 	calc_value(idx)
 	{
-		if (!this.v_lots) 
-		{
-			var v_polys = Blueprint.calc_input_value(this, 0)
-			var all_polys = Utility.list_flatten(v_polys)
-			this.v_lots = this.build_lots(all_polys)
-		}
-
-		return this.v_lots
+		var v_polys = Blueprint.calc_input_value(this, 0)
+		var all_polys = Utility.list_flatten(v_polys)
+		return this.build_lots(all_polys)
 	}
 
 	build_lots(blocks)
