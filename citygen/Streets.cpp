@@ -129,7 +129,7 @@ std::vector<std::vector<sm::vec2>> Streets::GetPolygons() const
 	return polys;
 }
 
-void Streets::TranslateNodes(const std::vector<sm::vec2>& nodes)
+bool Streets::TranslateNodes(const std::vector<sm::vec2>& nodes)
 {
 	std::vector<Graph::Vertex*> ori_nodes;
 	for (auto& vert : m_graph->GetVertices()) {
@@ -139,12 +139,17 @@ void Streets::TranslateNodes(const std::vector<sm::vec2>& nodes)
 	}
 
 	if (nodes.size() != ori_nodes.size()) {
-		return;
+		return false;
 	}
 
+	bool dirty = false;
 	for (int i = 0, n = nodes.size(); i < n; ++i) {
-		TranslateNode(ori_nodes[i], nodes[i]);
+		if (TranslateNode(ori_nodes[i], nodes[i])) {
+			dirty = true;
+		}
 	}
+
+	return dirty;
 }
 
 std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, const sm::rect& region, bool major) const
@@ -409,10 +414,10 @@ Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num, c
 	return ret;
 }
 
-void Streets::TranslateNode(Graph::Vertex* v, const sm::vec2& p)
+bool Streets::TranslateNode(Graph::Vertex* v, const sm::vec2& p)
 {
 	if (v->pos == p || sm::dis_pos_to_pos(v->pos, p) < SM_LARGE_EPSILON * 10) {
-		return;
+		return false;
 	}
 
 	auto offset = p - v->pos;
@@ -453,6 +458,8 @@ void Streets::TranslateNode(Graph::Vertex* v, const sm::vec2& p)
 	}
 
 	v->pos = p;
+
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////

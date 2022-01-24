@@ -189,7 +189,8 @@ void w_Streets_set_nodes()
 {
     auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto pts = tt::list_to_vec2_array(1);
-    st->TranslateNodes(pts);
+    bool dirty = st->TranslateNodes(pts);
+    ves_set_boolean(0, dirty);
 }
 
 void w_ParcelsOBB_allocate()

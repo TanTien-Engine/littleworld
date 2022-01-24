@@ -210,6 +210,8 @@ class Streets is Node
 		var w = Graphics.get_width()
 		var h = Graphics.get_height()
 
+		var dirty = false
+
 		for (var i = 0; i < streets.count; i = i + 1)
 		{
 			var pos = []
@@ -221,10 +223,14 @@ class Streets is Node
 				pos.add(y)
 			}
 
-			streets[i].value.streets.set_nodes(pos)
+			if (streets[i].value.streets.set_nodes(pos)) {
+				dirty = true
+			}			
 		}
 
-		Blueprint.send_pin_dirty_root(this.exports[0])
-		Blueprint.send_pin_dirty_root(this.exports[1])
+		if (dirty) {
+			Blueprint.send_pin_dirty_root(this.exports[0])
+			Blueprint.send_pin_dirty_root(this.exports[1])
+		}
 	}
 }

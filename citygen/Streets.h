@@ -30,7 +30,7 @@ public:
 
 	void SetSeed(float seed) { m_seed = seed; }
 
-	void TranslateNodes(const std::vector<sm::vec2>& nodes);
+	bool TranslateNodes(const std::vector<sm::vec2>& nodes);
 
 public:
 	struct PathComp;
@@ -91,7 +91,7 @@ private:
 	std::vector<std::shared_ptr<Path>> SelectPaths(
 		const std::vector<std::shared_ptr<Path>>& paths, int num, const sm::rect& aabb) const;
 
-	void TranslateNode(Graph::Vertex* v, const sm::vec2& p);
+	bool TranslateNode(Graph::Vertex* v, const sm::vec2& p);
 
 private:
 	std::shared_ptr<TensorField> m_tf = nullptr;
