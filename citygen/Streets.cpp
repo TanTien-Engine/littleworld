@@ -13,7 +13,6 @@
 
 //#define BILINEAR_SAMPLING
 //#define TRAVEL_STOP_CHECK
-#define RANDOM_SELECT
 
 namespace citygen
 {
@@ -25,13 +24,10 @@ Streets::Streets(const std::shared_ptr<TensorField>& tf,
 {
 }
 
-void Streets::BuildStreamlines(int num)
+void Streets::BuildStreamlines(int num, bool random)
 {
 	auto w = m_tf->GetWidth();
 	auto h = m_tf->GetHeight();
-
-#ifdef RANDOM_SELECT
-	std::vector<std::shared_ptr<Path>> major_paths, minor_paths;
 
 	sm::rect aabb;
 	for (auto& p : m_border) {
@@ -44,59 +40,61 @@ void Streets::BuildStreamlines(int num)
 	region.ymin *= h;
 	region.ymax *= h;
 
-	srand(static_cast<unsigned int>(m_seed * UINT32_MAX));
-	for (int i = 0, n = aabb.Width() * aabb.Height() * 100; i < n; ++i)
+	if (random)
 	{
-		float x = aabb.xmin + static_cast<float>(rand()) / RAND_MAX * aabb.Width();
-		float y = aabb.ymin + static_cast<float>(rand()) / RAND_MAX * aabb.Height();
-		if (sm::is_point_in_area(sm::vec2(x, y), m_border))
+		std::vector<std::shared_ptr<Path>> major_paths, minor_paths;
+
+		srand(static_cast<unsigned int>(m_seed * UINT32_MAX));
+		for (int i = 0, n = aabb.Width() * aabb.Height() * 100; i < n; ++i)
 		{
-			int ix = static_cast<int>(w * x);
-			int iy = static_cast<int>(h * y);
+			float x = aabb.xmin + static_cast<float>(rand()) / RAND_MAX * aabb.Width();
+			float y = aabb.ymin + static_cast<float>(rand()) / RAND_MAX * aabb.Height();
+			if (sm::is_point_in_area(sm::vec2(x, y), m_border))
+			{
+				int ix = static_cast<int>(w * x);
+				int iy = static_cast<int>(h * y);
 
-			auto major_pts = BuildPath(sm::ivec2(ix, iy), region, true);
-			if (!major_pts.empty()) {
-				major_paths.push_back(std::make_shared<Path>(major_pts));
-			}
+				auto major_pts = BuildPath(sm::ivec2(ix, iy), region, true);
+				if (!major_pts.empty()) {
+					major_paths.push_back(std::make_shared<Path>(major_pts));
+				}
 
-			auto minor_pts = BuildPath(sm::ivec2(ix, iy), region, false);
-			if (!minor_pts.empty()) {
-				minor_paths.push_back(std::make_shared<Path>(minor_pts));
+				auto minor_pts = BuildPath(sm::ivec2(ix, iy), region, false);
+				if (!minor_pts.empty()) {
+					minor_paths.push_back(std::make_shared<Path>(minor_pts));
+				}
 			}
 		}
-	}
 
-	if (major_paths.size() > num)
-	{
-		m_major_paths = SelectPaths(major_paths, num, aabb);
-		m_minor_paths = SelectPaths(minor_paths, num, aabb);
+		if (major_paths.size() > num)
+		{
+			m_major_paths = SelectPaths(major_paths, num, aabb);
+			m_minor_paths = SelectPaths(minor_paths, num, aabb);
+		}
+		else
+		{
+			m_major_paths = major_paths;
+			m_minor_paths = minor_paths;
+		}
 	}
 	else
 	{
-		m_major_paths = major_paths;
-		m_minor_paths = minor_paths;
-	}
-
-#else
-	for (size_t iy = 0; iy < num; ++iy) 
-	{
-		int y = static_cast<int>(h / num * (0.5f + iy));
-		for (size_t ix = 0; ix < num; ++ix) 
+		for (size_t i = 0; i < num; ++i)
 		{
-			int x = static_cast<int>(w / num * (0.5f + ix));
+			int x = static_cast<int>(w / num * (0.5f + i));
+			int y = static_cast<int>(h / num * (0.5f + i));
 	
-			auto major_pts = BuildPath(sm::ivec2(x, y), true);
+			auto major_pts = BuildPath(sm::ivec2(x, y), region, true);
 			if (!major_pts.empty()) {
-				m_major_paths.push_back(major_pts);
+				m_major_paths.push_back(std::make_shared<Path>(major_pts));
 			}
 
-			auto minor_pts = BuildPath(sm::ivec2(x, y), false);
+			auto minor_pts = BuildPath(sm::ivec2(x, y), region, false);
 			if (!minor_pts.empty()) {
-				m_minor_paths.push_back(minor_pts);
+				m_minor_paths.push_back(std::make_shared<Path>(minor_pts));
 			}
 		}
 	}
-#endif // RANDOM_SELECT
 }
 
 void Streets::BuildTopology()

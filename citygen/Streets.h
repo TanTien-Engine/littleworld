@@ -19,7 +19,7 @@ public:
 	Streets(const std::shared_ptr<TensorField>& tf, 
 		const std::vector<sm::vec2>& border);
 
-	void BuildStreamlines(int num);
+	void BuildStreamlines(int num, bool random);
 	void BuildTopology();
 
 	auto& GetMajorPaths() const { return m_major_paths; }

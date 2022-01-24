@@ -142,7 +142,7 @@ class Streets is Node
 			var st = cg_Streets.init(v_tex.value.tex, border)
 
 			st.set_seed(seed)
-			st.build_streamlines(num)
+			st.build_streamlines(num, seed != 1.0)
 
 			st.build_topology()
 

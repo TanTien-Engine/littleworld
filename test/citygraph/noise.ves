@@ -4,7 +4,7 @@ _editor.add_node(node0, -1149.0076447763, -15.046917246399)
 
 var node1 = ::citygraph::nodes::streets::Streets()
 node1.query_param("num").value = 3
-node1.query_param("seed").value = 0
+node1.query_param("seed").value = 1
 
 _editor.add_node(node1, -8.7465973017613, -42.876295462212)
 

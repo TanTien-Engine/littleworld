@@ -131,7 +131,8 @@ void w_Streets_build_streamlines()
 {
     auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto num = (int)ves_tonumber(1);
-    st->BuildStreamlines(num);
+    auto random = ves_toboolean(2);
+    st->BuildStreamlines(num, random);
 }
 
 void w_Streets_build_topology()
@@ -365,7 +366,7 @@ namespace citygen
 
 VesselForeignMethodFn CityGenBindMethod(const char* signature)
 {
-    if (strcmp(signature, "Streets.build_streamlines(_)") == 0) return w_Streets_build_streamlines;
+    if (strcmp(signature, "Streets.build_streamlines(_,_)") == 0) return w_Streets_build_streamlines;
     if (strcmp(signature, "Streets.build_topology()") == 0) return w_Streets_build_topology;
     if (strcmp(signature, "Streets.get_major_paths()") == 0) return w_Streets_get_major_paths;
     if (strcmp(signature, "Streets.get_minor_paths()") == 0) return w_Streets_get_minor_paths;

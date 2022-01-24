@@ -5,7 +5,7 @@ foreign class Streets
 {
 	init(tensor_field, border) {}
 
-	foreign build_streamlines(num)
+	foreign build_streamlines(num, random)
 	foreign build_topology()
 
 	foreign get_major_paths()
