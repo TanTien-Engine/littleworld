@@ -44,22 +44,26 @@ class DrawGeo2d is Node
 		this.v_geos = Variant([])
 		Blueprint.connect(VariantProxy(this.v_geos), 0, this.draw_geo_node, "geos")
 
-		this.rebuild = false
-
 		Blueprint.connect(VariantProxy(this.cam_mat), 0, this.draw_geo_node, "mat")
+
+		this.need_rebuild = false
 	}
 
 	on_pin_dirty(pin)
 	{
-		this.rebuild_geos()
+		this.need_rebuild = true
+	}
+
+	on_node_dirty()
+	{
+		this.need_rebuild = true
 	}
 
 	render_run()
 	{
-		if (!this.rebuild) 
-		{
+		if (this.need_rebuild) {
 			this.rebuild_geos()
-			this.rebuild = true
+			this.need_rebuild = false
 		}
 
 		this.draw_geo_node.render_run()
