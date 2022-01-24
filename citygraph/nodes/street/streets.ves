@@ -9,7 +9,7 @@ import "blueprint.nodes.array" for Array
 import "rendergraph.variant" for VAR_TYPE_TEXTURE
 import "citygraph.variant" for VAR_TYPE_STREETS, VarStreets
 import "citygraph.utility" for Utility
-import "citygraph.nodes.draw_geo2d" for DrawGeo2d
+import "citygraph.nodes.render.draw_geo2d" for DrawGeo2d
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.config" for POINT_RADIUS
 import "maths.vector" for Vector2, Vector3

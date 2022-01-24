@@ -39,7 +39,7 @@ node6.value.set(0.19791598618031, 0.5)
 
 _editor.add_node(node6, -448.81244245411, 207.4624539783)
 
-var node7 = ::citygraph::nodes::radiate::Radiate()
+var node7 = ::citygraph::nodes::tensor::radiate::Radiate()
 
 _editor.add_node(node7, -304.85363391215, 250.01653018668)
 

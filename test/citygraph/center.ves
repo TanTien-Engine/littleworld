@@ -7,7 +7,7 @@ node1.load_from_file(_editor, "../../assets/blueprints/tools/gen_tensor_field.ve
 
 _editor.add_node(node1, -102.24823175604, 243.26904391315)
 
-var node2 = ::citygraph::nodes::center::Center()
+var node2 = ::citygraph::nodes::tensor::center::Center()
 
 _editor.add_node(node2, -430.8020641638, 276.53433753366)
 
@@ -47,7 +47,7 @@ var node8 = ::blueprint::nodes::add::Add()
 
 _editor.add_node(node8, -291.2398988708, 244.37940764624)
 
-var node9 = ::citygraph::nodes::center::Center()
+var node9 = ::citygraph::nodes::tensor::center::Center()
 
 _editor.add_node(node9, -434.91337821338, 204.5306846411)
 

@@ -13,17 +13,17 @@ node2.value.set(0.76046144962311, 0.76046144962311)
 
 _editor.add_node(node2, -611.1543333632, 108.62373579648)
 
-var node3 = ::citygraph::nodes::center::Center()
+var node3 = ::citygraph::nodes::tensor::center::Center()
 
 _editor.add_node(node3, -454.33456001746, 127.71619251652)
 
-var node4 = ::citygraph::nodes::streets::Streets()
+var node4 = ::citygraph::nodes::street::streets::Streets()
 node4.query_param("num").value = 5
 node4.query_param("seed").value = 0.29027727246284
 
 _editor.add_node(node4, 80.875045465726, 149.75415566184)
 
-var node5 = ::citygraph::nodes::regular::Regular()
+var node5 = ::citygraph::nodes::tensor::regular::Regular()
 
 _editor.add_node(node5, -455.41596493277, 207.18857394157)
 
@@ -37,18 +37,18 @@ node7.value.set(0, 0.51223009824753)
 
 _editor.add_node(node7, -616.55049601562, 245.60710835937)
 
-var node8 = ::citygraph::nodes::parcels::Parcels()
+var node8 = ::citygraph::nodes::building::parcels::Parcels()
 node8.query_param("max_len").value = 0.1
 node8.query_param("seed").value = 0
 
 _editor.add_node(node8, 235.04802647655, 92.115299569259)
 
-var node9 = ::citygraph::nodes::offset::Offset()
+var node9 = ::citygraph::nodes::block::offset::Offset()
 node9.query_param("distance").value = 0.0099999997764826
 
 _editor.add_node(node9, 388.82498802006, 101.66279879722)
 
-var node10 = ::citygraph::nodes::extrude::Extrude()
+var node10 = ::citygraph::nodes::building::extrude::Extrude()
 node10.query_param("distance").value = 0
 node10.query_param("roof").value = true
 
@@ -67,17 +67,17 @@ node11.op_node.speed = 0.027770342305303
 
 _editor.add_node(node11, 893.21799949227, 23.189572393479)
 
-var node12 = ::citygraph::nodes::draw_geo2d::DrawGeo2d()
+var node12 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
 node12.query_param("faces").value = false
 
 _editor.add_node(node12, 453.21303811822, 317.64337396291)
 
-var node13 = ::citygraph::nodes::area_selector::AreaSelector()
+var node13 = ::citygraph::nodes::block::area_selector::AreaSelector()
 node13.query_param("num").value = 2
 
 _editor.add_node(node13, 240.72467041016, 284.80438232422)
 
-var node14 = ::citygraph::nodes::shape_l::ShapeL()
+var node14 = ::citygraph::nodes::block::shape_l::ShapeL()
 node14.query_param("front").value = 0.023480124771595
 node14.query_param("left").value = 0.026813456788659
 

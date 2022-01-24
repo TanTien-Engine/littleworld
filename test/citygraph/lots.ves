@@ -13,17 +13,17 @@ node2.value.set(0.76046144962311, 0.76046144962311)
 
 _editor.add_node(node2, -599.4415333632, 180.36463579648)
 
-var node3 = ::citygraph::nodes::center::Center()
+var node3 = ::citygraph::nodes::tensor::center::Center()
 
 _editor.add_node(node3, -442.62176001746, 199.45709251652)
 
-var node4 = ::citygraph::nodes::streets::Streets()
+var node4 = ::citygraph::nodes::street::streets::Streets()
 node4.query_param("num").value = 5
 node4.query_param("seed").value = 0.29027727246284
 
 _editor.add_node(node4, 80.875045465726, 149.75415566184)
 
-var node5 = ::citygraph::nodes::regular::Regular()
+var node5 = ::citygraph::nodes::tensor::regular::Regular()
 
 _editor.add_node(node5, -443.70316493277, 278.92947394157)
 
@@ -37,35 +37,35 @@ node7.value.set(0, 0.51223009824753)
 
 _editor.add_node(node7, -604.83769601562, 317.34800835937)
 
-var node8 = ::citygraph::nodes::draw_geo2d::DrawGeo2d()
+var node8 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
 node8.query_param("faces").value = false
 
 _editor.add_node(node8, 272.83971892878, 162.96729765806)
 
-var node9 = ::citygraph::nodes::parcels::Parcels()
+var node9 = ::citygraph::nodes::building::parcels::Parcels()
 node9.query_param("max_len").value = 0.1
 node9.query_param("seed").value = 0
 
 _editor.add_node(node9, 83.165759933091, 32.873139688792)
 
-var node10 = ::citygraph::nodes::draw_map2d::DrawMap2d()
+var node10 = ::citygraph::nodes::render::draw_map2d::DrawMap2d()
 
 _editor.add_node(node10, 495.01532167731, 95.032593420813)
 
-var node11 = ::citygraph::nodes::shape_l::ShapeL()
+var node11 = ::citygraph::nodes::block::shape_l::ShapeL()
 node11.query_param("front").value = 0.021547835320234
 node11.query_param("left").value = 0.024881169199944
 
 _editor.add_node(node11, 215.60694580078, -57.794079589844)
 
-var node12 = ::citygraph::nodes::shape_u::ShapeU()
+var node12 = ::citygraph::nodes::block::shape_u::ShapeU()
 node12.query_param("front").value = 0.02000000141561
 node12.query_param("left").value = 0.024444444105029
 node12.query_param("right").value = 0.030000001192093
 
 _editor.add_node(node12, 205, -175.5)
 
-var node13 = ::citygraph::nodes::shape_o::ShapeO()
+var node13 = ::citygraph::nodes::block::shape_o::ShapeO()
 node13.query_param("front").value = 0.016666667535901
 node13.query_param("back").value = 0.013874275609851
 node13.query_param("left").value = 0.014985385350883
@@ -73,7 +73,7 @@ node13.query_param("right").value = 0.022763164713979
 
 _editor.add_node(node13, 197.51315811823, -296.5)
 
-var node14 = ::citygraph::nodes::offset::Offset()
+var node14 = ::citygraph::nodes::block::offset::Offset()
 node14.query_param("distance").value = 0.0086835343390703
 
 _editor.add_node(node14, 255.84819523674, 29.5)

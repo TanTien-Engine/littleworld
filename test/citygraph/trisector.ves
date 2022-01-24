@@ -39,7 +39,7 @@ node6.value.set(0.5, 0.5)
 
 _editor.add_node(node6, -448.81244245411, 207.4624539783)
 
-var node7 = ::citygraph::nodes::trisector::Trisector()
+var node7 = ::citygraph::nodes::tensor::trisector::Trisector()
 
 _editor.add_node(node7, -304.85363391215, 250.01653018668)
 

@@ -49,7 +49,7 @@ node8.value.set(1, 1)
 
 _editor.add_node(node8, -562.21869339326, 163.10718575892)
 
-var node9 = ::citygraph::nodes::regular::Regular()
+var node9 = ::citygraph::nodes::tensor::regular::Regular()
 
 _editor.add_node(node9, -423.47194909512, 281.36713820414)
 
@@ -59,7 +59,7 @@ node10.value = 0
 
 _editor.add_node(node10, -563.08457358667, 249.27548655703)
 
-var node11 = ::citygraph::nodes::regular::Regular()
+var node11 = ::citygraph::nodes::tensor::regular::Regular()
 
 _editor.add_node(node11, -425.76631423412, 164.65158598776)
 

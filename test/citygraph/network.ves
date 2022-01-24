@@ -26,24 +26,24 @@ node4.value.set(0.76046144962311, 0.76046144962311)
 
 _editor.add_node(node4, -619.4415333632, 158.5464539783)
 
-var node5 = ::citygraph::nodes::saddle::Saddle()
+var node5 = ::citygraph::nodes::tensor::saddle::Saddle()
 
 _editor.add_node(node5, -304.85363391215, 250.01653018668)
 
-var node6 = ::citygraph::nodes::streamlines::Streamlines()
+var node6 = ::citygraph::nodes::street::streamlines::Streamlines()
 node6.query_param("num").value = 7
 
 _editor.add_node(node6, 170.1254521413, 97.97996394283)
 
-var node7 = ::citygraph::nodes::center::Center()
+var node7 = ::citygraph::nodes::tensor::center::Center()
 
 _editor.add_node(node7, -353.53085092655, 355.82072888016)
 
-var node8 = ::citygraph::nodes::radiate::Radiate()
+var node8 = ::citygraph::nodes::tensor::radiate::Radiate()
 
 _editor.add_node(node8, -435.90936279297, 458.44842529297)
 
-var node9 = ::citygraph::nodes::radiate::Radiate()
+var node9 = ::citygraph::nodes::tensor::radiate::Radiate()
 
 _editor.add_node(node9, -448.44531150235, 133.01126292836)
 
@@ -65,18 +65,18 @@ var node13 = ::imagegraph::nodes::erosion::Erosion()
 
 _editor.add_node(node13, 171.51925939447, 38.588026886842)
 
-var node14 = ::citygraph::nodes::streets::Streets()
+var node14 = ::citygraph::nodes::street::streets::Streets()
 node14.query_param("num").value = 3
 node14.query_param("seed").value = 0
 
 _editor.add_node(node14, 174.51140910209, -54.791298883615)
 
-var node15 = ::citygraph::nodes::offset::Offset()
+var node15 = ::citygraph::nodes::block::offset::Offset()
 node15.query_param("distance").value = 0.0085015194490552
 
 _editor.add_node(node15, 987.48629798849, 148.48285105808)
 
-var node16 = ::citygraph::nodes::regular::Regular()
+var node16 = ::citygraph::nodes::tensor::regular::Regular()
 
 _editor.add_node(node16, -470.9758922055, 563.47492848702)
 
@@ -90,18 +90,18 @@ node18.value.set(0, 0.51223009824753)
 
 _editor.add_node(node18, 495.89930398438, 406.52500835937)
 
-var node19 = ::citygraph::nodes::area_selector::AreaSelector()
+var node19 = ::citygraph::nodes::block::area_selector::AreaSelector()
 node19.query_param("num").value = 5
 
 _editor.add_node(node19, 810.12363636364, 146.48636363636)
 
-var node20 = ::citygraph::nodes::random_selector::RandomSelector()
+var node20 = ::citygraph::nodes::block::random_selector::RandomSelector()
 node20.query_param("num").value = 1
 node20.query_param("seed").value = 0.62791818380356
 
 _editor.add_node(node20, 635.4873600025, 166.08983470066)
 
-var node21 = ::citygraph::nodes::streets::Streets()
+var node21 = ::citygraph::nodes::street::streets::Streets()
 node21.query_param("num").value = 1
 node21.query_param("seed").value = 0.90460407733917
 
@@ -111,27 +111,27 @@ var node22 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node22, 1014.1517564285, 225.32468779982)
 
-var node23 = ::citygraph::nodes::draw_geo2d::DrawGeo2d()
+var node23 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
 node23.query_param("faces").value = false
 
 _editor.add_node(node23, 932.34020996094, 49.052734375)
 
-var node24 = ::citygraph::nodes::draw_map2d::DrawMap2d()
+var node24 = ::citygraph::nodes::render::draw_map2d::DrawMap2d()
 
 _editor.add_node(node24, 1028.702471369, -86.301837713074)
 
-var node25 = ::citygraph::nodes::parcels::Parcels()
+var node25 = ::citygraph::nodes::building::parcels::Parcels()
 node25.query_param("max_len").value = 0.11370551586151
 node25.query_param("seed").value = 0
 
 _editor.add_node(node25, 630.43968545991, -132.0780437745)
 
-var node26 = ::citygraph::nodes::offset::Offset()
+var node26 = ::citygraph::nodes::block::offset::Offset()
 node26.query_param("distance").value = 0.0054058497771621
 
 _editor.add_node(node26, 771.90259235322, -121.81000626591)
 
-var node27 = ::citygraph::nodes::shape_l::ShapeL()
+var node27 = ::citygraph::nodes::block::shape_l::ShapeL()
 node27.query_param("front").value = 0.019170396029949
 node27.query_param("left").value = 0.031392619013786
 

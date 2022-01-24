@@ -31,24 +31,24 @@ node5.value.set(0.21601697802544, 0.80490589141846)
 
 _editor.add_node(node5, -619.4415333632, 158.5464539783)
 
-var node6 = ::citygraph::nodes::saddle::Saddle()
+var node6 = ::citygraph::nodes::tensor::saddle::Saddle()
 
 _editor.add_node(node6, -304.85363391215, 250.01653018668)
 
-var node7 = ::citygraph::nodes::streamlines::Streamlines()
+var node7 = ::citygraph::nodes::street::streamlines::Streamlines()
 node7.query_param("num").value = 2
 
 _editor.add_node(node7, 366.35119190899, 179.40551495604)
 
-var node8 = ::citygraph::nodes::center::Center()
+var node8 = ::citygraph::nodes::tensor::center::Center()
 
 _editor.add_node(node8, -353.53085092655, 355.82072888016)
 
-var node9 = ::citygraph::nodes::radiate::Radiate()
+var node9 = ::citygraph::nodes::tensor::radiate::Radiate()
 
 _editor.add_node(node9, -435.90936279297, 458.44842529297)
 
-var node10 = ::citygraph::nodes::radiate::Radiate()
+var node10 = ::citygraph::nodes::tensor::radiate::Radiate()
 
 _editor.add_node(node10, -445.36636279297, 143.27442529297)
 

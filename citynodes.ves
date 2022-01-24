@@ -1,14 +1,18 @@
-import "citygraph.nodes.*"
+import "citygraph.nodes.tensor.*"
+import "citygraph.nodes.street.*"
+import "citygraph.nodes.block.*"
+import "citygraph.nodes.building.*"
+import "citygraph.nodes.render.*"
 
 var CITY_NODES = [ 
 // tensor field elements
 Regular, Wedge, Trisector, Radiate, Center, Saddle, Rotate,
-// components
-Streets, Parcels,
-// selector
-AreaSelector, RandomSelector,
-// operator
-Offset, ShapeL, ShapeU, ShapeO, Extrude,
-// tools
-Streamlines, DrawGeo2d, DrawMap2d,
+// street
+Streets, Streamlines,
+// block
+Offset, AreaSelector, RandomSelector, ShapeL, ShapeU, ShapeO,
+// building
+Parcels, Extrude,
+// render
+DrawGeo2d, DrawMap2d,
 ]

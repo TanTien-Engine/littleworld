@@ -2,13 +2,13 @@ var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
 
 _editor.add_node(node0, -1149.0076447763, -15.046917246399)
 
-var node1 = ::citygraph::nodes::streets::Streets()
+var node1 = ::citygraph::nodes::street::streets::Streets()
 node1.query_param("num").value = 3
 node1.query_param("seed").value = 1
 
 _editor.add_node(node1, -8.7465973017613, -42.876295462212)
 
-var node2 = ::citygraph::nodes::regular::Regular()
+var node2 = ::citygraph::nodes::tensor::regular::Regular()
 
 _editor.add_node(node2, -974.16680129641, -31.041171512986)
 
@@ -22,28 +22,28 @@ node4.value.set(0.69721138477325, 0.17498914897442)
 
 _editor.add_node(node4, -1154.4656322553, 55.015304816165)
 
-var node5 = ::citygraph::nodes::draw_map2d::DrawMap2d()
+var node5 = ::citygraph::nodes::render::draw_map2d::DrawMap2d()
 
 _editor.add_node(node5, 462.738271369, 66.46164228693)
 
-var node6 = ::citygraph::nodes::parcels::Parcels()
+var node6 = ::citygraph::nodes::building::parcels::Parcels()
 node6.query_param("max_len").value = 0.11370551586151
 node6.query_param("seed").value = 0
 
 _editor.add_node(node6, 353.43196545991, -35.447443774499)
 
-var node7 = ::citygraph::nodes::offset::Offset()
+var node7 = ::citygraph::nodes::block::offset::Offset()
 node7.query_param("distance").value = 0.0054058497771621
 
 _editor.add_node(node7, 494.89487235322, -25.179406265909)
 
-var node8 = ::citygraph::nodes::shape_l::ShapeL()
+var node8 = ::citygraph::nodes::block::shape_l::ShapeL()
 node8.query_param("front").value = 0.019170396029949
 node8.query_param("left").value = 0.031392619013786
 
 _editor.add_node(node8, 678.22086047522, -31.497258656369)
 
-var node9 = ::citygraph::nodes::draw_geo2d::DrawGeo2d()
+var node9 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
 node9.query_param("faces").value = false
 
 _editor.add_node(node9, 301.50611320377, 176.86966416363)
@@ -99,7 +99,7 @@ node18.init_texture("../../../tantien/assets/textures/noise/perlin_grad2d.png")
 
 _editor.add_node(node18, -1969.3174840978, -364.21631859476)
 
-var node19 = ::citygraph::nodes::rotate::Rotate()
+var node19 = ::citygraph::nodes::tensor::rotate::Rotate()
 
 _editor.add_node(node19, -955.16029469649, -298.90499621605)
 
@@ -109,7 +109,7 @@ node20.value.set(0.5537611246109, 0.40931668877602)
 
 _editor.add_node(node20, -1151.8857818321, -141.7493484154)
 
-var node21 = ::citygraph::nodes::regular::Regular()
+var node21 = ::citygraph::nodes::tensor::regular::Regular()
 
 _editor.add_node(node21, -970.9565165481, -119.79697842508)
 
