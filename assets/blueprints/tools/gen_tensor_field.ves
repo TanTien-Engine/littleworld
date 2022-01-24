@@ -29,7 +29,7 @@ node4.value.set(32, 32, 1)
 _editor.add_node(node4, 18.953474966549, 538.42712049187)
 
 var node5 = ::rendergraph::nodes::shader_code::ShaderCode()
-node5.init_filepath("../shaders/tensor_field_comp.glsl")
+node5.init_filepath("../../shaders/tensor_field_comp.glsl")
 
 _editor.add_node(node5, -141.69493726552, 648.85674449562)
 

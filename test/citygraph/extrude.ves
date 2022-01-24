@@ -3,7 +3,7 @@ var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
 _editor.add_node(node0, -612.28000751102, 176.8211708077)
 
 var node1 = ::blueprint::nodes::subgraph::Subgraph()
-node1.load_from_file(_editor, "../../assets/blueprints/gen_tensor_field.ves")
+node1.load_from_file(_editor, "../../assets/blueprints/tools/gen_tensor_field.ves")
 
 _editor.add_node(node1, -113.96103175604, 171.52814391315)
 
@@ -55,7 +55,7 @@ node10.query_param("roof").value = true
 _editor.add_node(node10, 708.88710614356, 0.68098808326936)
 
 var node11 = ::blueprint::nodes::subgraph::Subgraph()
-node11.load_from_file(_editor, "../../assets/blueprints/9_edit_draw.ves")
+node11.load_from_file(_editor, "../../assets/blueprints/render/9_edit_draw.ves")
 node11.set_prop_value("ortho", false)
 
 node11.op_node.cam.position.set(-0.027453040652143, 0.12483264668699, 0.15500457184231)

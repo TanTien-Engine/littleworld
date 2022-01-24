@@ -3,7 +3,7 @@ var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
 _editor.add_node(node0, -968.30687114738, 107.49437989861)
 
 var node1 = ::blueprint::nodes::subgraph::Subgraph()
-node1.load_from_file(_editor, "../../assets/blueprints/gen_tensor_field.ves")
+node1.load_from_file(_editor, "../../assets/blueprints/tools/gen_tensor_field.ves")
 
 _editor.add_node(node1, -467.66823175604, 46.03904391315)
 

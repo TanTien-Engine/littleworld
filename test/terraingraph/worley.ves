@@ -20,7 +20,7 @@ node1.query_param("features_mode").value = { "max" : 5, "integer" : true, "min" 
 _editor.add_node(node1, -332.52737210924, 112.01448124139)
 
 var node2 = ::blueprint::nodes::subgraph::Subgraph()
-node2.load_from_file(_editor, "../../assets/blueprints/draw_terrain_gray.ves")
+node2.load_from_file(_editor, "../../assets/blueprints/render/draw_terrain_gray.ves")
 
 _editor.add_node(node2, 232.90326529927, 150.68381895147)
 
@@ -29,7 +29,7 @@ var node3 = ::shadergraph::nodes::tex_coord::TexCoord()
 _editor.add_node(node3, -490.47415191372, 201.62934052971)
 
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "../../assets/blueprints/gen_heightmap.ves")
+node4.load_from_file(_editor, "../../assets/blueprints/tools/gen_heightmap.ves")
 
 _editor.add_node(node4, -71.07417905785, 196.31479308264)
 

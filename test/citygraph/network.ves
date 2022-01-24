@@ -3,12 +3,12 @@ var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
 _editor.add_node(node0, -636.86557114738, 315.63897989861)
 
 var node1 = ::blueprint::nodes::subgraph::Subgraph()
-node1.load_from_file(_editor, "../../assets/blueprints/gen_tensor_field.ves")
+node1.load_from_file(_editor, "../../assets/blueprints/tools/gen_tensor_field.ves")
 
 _editor.add_node(node1, -102.24823175604, 243.26904391315)
 
 var node2 = ::blueprint::nodes::subgraph::Subgraph()
-node2.load_from_file(_editor, "../../assets/blueprints/tensor_transform.ves")
+node2.load_from_file(_editor, "../../assets/blueprints/tools/tensor_transform.ves")
 
 _editor.add_node(node2, 215.61645444864, 250.91209486659)
 

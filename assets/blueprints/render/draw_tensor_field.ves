@@ -105,7 +105,7 @@ _editor.add_node(node6, -223.05257443076, -190.79010489722)
 var node7 = ::rendergraph::nodes::texture::Texture()
 node7.query_param("unif_name").value = "u_tex"
 node7.gamma_correction = false
-node7.init_texture("../textures/ibfv/grid_big.png")
+node7.init_texture("../../textures/ibfv/grid_big.png")
 node7.set_sampler("nearest_repeat")
 
 _editor.add_node(node7, -141.25389099121, -463.12936401367)
