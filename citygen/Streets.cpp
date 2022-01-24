@@ -129,6 +129,24 @@ std::vector<std::vector<sm::vec2>> Streets::GetPolygons() const
 	return polys;
 }
 
+void Streets::TranslateNodes(const std::vector<sm::vec2>& nodes)
+{
+	std::vector<Graph::Vertex*> ori_nodes;
+	for (auto& vert : m_graph->GetVertices()) {
+		if (vert->edges.size() != 2) {
+			ori_nodes.push_back(vert);
+		}
+	}
+
+	if (nodes.size() != ori_nodes.size()) {
+		return;
+	}
+
+	for (int i = 0, n = nodes.size(); i < n; ++i) {
+		TranslateNode(ori_nodes[i], nodes[i]);
+	}
+}
+
 std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, const sm::rect& region, bool major) const
 {
 	std::vector<sm::vec2> points;
@@ -330,6 +348,30 @@ void Streets::BuildGraph()
 //	m_graph->VertexMerge(0.005f);
 
 	m_graph->BuildHalfedge();
+
+	BindGraph2Path();
+}
+
+void Streets::BindGraph2Path()
+{
+	auto bind_path = [&](const std::shared_ptr<Path>& path)
+	{
+		path->m_verts.clear();
+
+		for (auto& p : path->m_pts)
+		{
+			auto v = m_graph->QueryVertex(p);
+			assert(v);
+			path->m_verts.push_back(v);
+		}
+	};
+
+	for (auto& path : m_major_paths) {
+		bind_path(path);
+	}
+	for (auto& path : m_minor_paths) {
+		bind_path(path);
+	}
 }
 
 std::vector<std::shared_ptr<Streets::Path>>
@@ -365,6 +407,52 @@ Streets::SelectPaths(const std::vector<std::shared_ptr<Path>>& paths, int num, c
 	ret.erase(ret.begin() + num, ret.end());
 
 	return ret;
+}
+
+void Streets::TranslateNode(Graph::Vertex* v, const sm::vec2& p)
+{
+	if (v->pos == p || sm::dis_pos_to_pos(v->pos, p) < SM_LARGE_EPSILON * 10) {
+		return;
+	}
+
+	auto offset = p - v->pos;
+
+	for (auto& e : v->edges)
+	{
+		std::vector<Graph::Vertex*> path;
+
+		auto curr = e;
+		while (true)
+		{
+			path.push_back(curr->t);
+			if (curr->t->edges.size() == 2)
+			{
+				curr = curr->t->edges[0]->t == curr->f ? curr->t->edges[1] : curr->t->edges[0];
+			}
+			else
+			{
+				break;
+			}
+		}
+
+		if (path.empty()) {
+			continue;
+		}
+
+		float tot_d = sm::dis_pos_to_pos(v->pos, path[0]->pos);
+		for (int i = 0, n = path.size() - 1; i < n; ++i) {
+			tot_d += sm::dis_pos_to_pos(path[i]->pos, path[i + 1]->pos);
+		}
+
+		for (int i = 0, n = path.size() - 1; i < n; ++i)
+		{
+			auto d = sm::dis_pos_to_pos(v->pos, path[i]->pos);
+			assert(d < tot_d);
+			path[i]->pos += offset / tot_d * (tot_d - d);
+		}
+	}
+
+	v->pos = p;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -417,6 +505,15 @@ void Streets::Path::Trim(const std::vector<sm::vec2>& border)
 	m_pts = paths.front()->m_pts;
 
 	Build();
+}
+
+std::vector<sm::vec2> Streets::Path::GetGraphPoints() const
+{
+	std::vector<sm::vec2> pts;
+	for (auto& v : m_verts) {
+		pts.push_back(v->pos);
+	}
+	return pts;
 }
 
 void Streets::Path::Build()

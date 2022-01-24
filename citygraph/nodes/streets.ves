@@ -4,11 +4,20 @@ import "blueprint.variant" for VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant
 import "blueprint.node_param" for NodeParam
+import "blueprint.node_editor" for NodeEditor
+import "blueprint.nodes.array" for Array
 import "rendergraph.variant" for VAR_TYPE_TEXTURE
 import "citygraph.variant" for VAR_TYPE_STREETS, VarStreets
+import "citygraph.utility" for Utility
+import "citygraph.nodes.draw_geo2d" for DrawGeo2d
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
-import "maths.vector" for Vector3
+import "geograph.config" for POINT_RADIUS
+import "maths.vector" for Vector2, Vector3
 import "citygen" for Streets as cg_Streets
+import "graphics" for Graphics
+import "geometry" for Circle
+
+var EDITOR = nil
 
 class Streets is Node
 {
@@ -31,6 +40,11 @@ class Streets is Node
 		this.layout()
 
 		this.v_streets = nil
+
+		// editor
+		this.edit_pts_node = Array()
+		this.draw_editor_node = DrawGeo2d()
+		Blueprint.connect(this, "streets", this.draw_editor_node, "objs")		
 	}
 
 	on_node_dirty()
@@ -44,18 +58,54 @@ class Streets is Node
 			this.rebuild_streets()
 		}
 
-		if (idx == 0) 
-		{
+		if (idx == 0) {
 			return Variant(this.v_streets)
-		} 
-		else if (idx == 1) 
-		{
-			var v_blocks = []
-			this.build_blocks(this.v_streets, v_blocks)
-			return Variant(v_blocks)
+		} else if (idx == 1) {
+			return this.build_blocks()
 		}
 
 		return nil
+	}
+
+	bind_editor()
+	{
+		if (!EDITOR) {
+			EDITOR = NodeEditor("../littleworld/assets/blueprints/editor/translate_points.ves")
+		}
+
+		Blueprint.connect(this.edit_pts_node.exports[0], EDITOR.editor_node.imports[1])
+
+		Blueprint.send_node_dirty_root(EDITOR.editor_node)
+
+		return true
+	}
+
+	draw_editor() 
+	{
+		Graphics.on_cam_update(0, 0, 1)
+
+		this.draw_editor_node.render_run()
+
+		if (EDITOR) {
+			EDITOR.draw()
+		}		
+	}
+
+	on_mouse_pressed(x, y, btn) 
+	{
+		EDITOR.on_mouse_pressed(x, y, btn)
+	}
+
+	on_mouse_released(x, y, btn) 
+	{
+		EDITOR.on_mouse_released(x, y, btn)
+	}
+
+	on_mouse_dragged(x, y, btn) 
+	{
+		EDITOR.on_mouse_dragged(x, y, btn)
+
+		this.update_from_editor()
 	}
 
 	rebuild_streets()
@@ -101,23 +151,18 @@ class Streets is Node
 
 			this.v_streets.add(Variant(VAR_TYPE_STREETS, v_st))
 		}
+
+		this.build_edit_points()
 	}
 
-	build_blocks(v_streets, v_blocks)
+	build_blocks()
 	{
-		if (!v_streets) {
-			return
-		}
+		var v_blocks = []
 
-		if (v_streets.value is List)
+		var streets = Utility.list_flatten(this.v_streets)
+		for (var st in streets)
 		{
-			for (var item in v_streets.value) {
-				this.build_blocks(item, v_blocks)
-			}
-		}
-		else
-		{
-			var blocks = v_streets.value.streets.get_polygons()
+			var blocks = st.value.streets.get_polygons()
 			for (var block in blocks)
 			{
 				var geo = VarGeo()
@@ -125,7 +170,61 @@ class Streets is Node
 				geo.render_style["color"] = Vector3(0, 0, 0)
 				geo.render_style["fill"] = false
 				v_blocks.add(Variant(VAR_TYPE_GEO, geo))
-			}
+			}			
 		}
+
+		return Variant(v_blocks)
+	}
+
+	build_edit_points()
+	{
+		this.edit_pts_node.list.clear()
+
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		var streets = Utility.list_flatten(this.v_streets)
+		for (var st in streets)
+		{
+			var pts = []
+
+			var nodes = st.value.streets.get_nodes()
+			for (var i in 0 .. nodes.count/2) 
+			{
+				var x = (nodes[i * 2] - 0.5) * w
+				var y = (nodes[i * 2 + 1] - 0.5) * h
+				pts.add(Variant(Vector2(x, y)))
+			}
+
+			this.edit_pts_node.list.add(Variant(pts))
+		}
+	}
+
+	update_from_editor()
+	{
+		var streets = Utility.list_flatten(this.v_streets)
+		if (streets.count != this.edit_pts_node.list.count) {
+			return
+		}
+
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		for (var i = 0; i < streets.count; i = i + 1)
+		{
+			var pos = []
+			for (var p in this.edit_pts_node.list[i].value) 
+			{
+				var x = p.value.x / w + 0.5
+				var y = p.value.y / h + 0.5
+				pos.add(x)
+				pos.add(y)
+			}
+
+			streets[i].value.streets.set_nodes(pos)
+		}
+
+		Blueprint.send_pin_dirty_root(this.exports[0])
+		Blueprint.send_pin_dirty_root(this.exports[1])
 	}
 }

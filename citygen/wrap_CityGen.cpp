@@ -147,7 +147,7 @@ void w_Streets_get_major_paths()
 
     std::vector<std::vector<sm::vec2>> polylines;
     for (auto& path : major_paths) {
-        polylines.push_back(path->GetPoints());
+        polylines.push_back(path->GetGraphPoints());
     }
     return_multi_polylines(polylines);
 }
@@ -159,7 +159,7 @@ void w_Streets_get_minor_paths()
 
     std::vector<std::vector<sm::vec2>> polylines;
     for (auto& path : minor_paths) {
-        polylines.push_back(path->GetPoints());
+        polylines.push_back(path->GetGraphPoints());
     }
     return_multi_polylines(polylines);
 }
@@ -183,6 +183,13 @@ void w_Streets_set_seed()
     auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
     auto seed = (float)ves_tonumber(1);
     st->SetSeed(seed);
+}
+
+void w_Streets_set_nodes()
+{
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    auto pts = tt::list_to_vec2_array(1);
+    st->TranslateNodes(pts);
 }
 
 void w_ParcelsOBB_allocate()
@@ -364,6 +371,7 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Streets.get_nodes()") == 0) return w_Streets_get_nodes;
     if (strcmp(signature, "Streets.get_polygons()") == 0) return w_Streets_get_polygons;
     if (strcmp(signature, "Streets.set_seed(_)") == 0) return w_Streets_set_seed;
+    if (strcmp(signature, "Streets.set_nodes(_)") == 0) return w_Streets_set_nodes;
 
     if (strcmp(signature, "ParcelsOBB.build(_)") == 0) return w_ParcelsOBB_build;
     if (strcmp(signature, "ParcelsOBB.get_polygons()") == 0) return w_ParcelsOBB_get_polygons;

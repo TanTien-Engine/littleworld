@@ -149,13 +149,28 @@ void Graph::BuildHalfedge()
 	}
 }
 
-Graph::Vertex* Graph::AddVertex(const sm::vec2& pos)
+Graph::Vertex* Graph::QueryVertex(const sm::vec2& pos) const
 {
-	for (auto& vert : m_vertices) 
-	{
+	Graph::Vertex v(pos);
+	auto itr = m_vertices.find(&v);
+	if (itr != m_vertices.end()) {
+		return *itr;
+	}
+
+	for (auto& vert : m_vertices) {
 		if (sm::dis_pos_to_pos(vert->pos, pos) < SM_LARGE_EPSILON * 10) {
 			return vert;
 		}
+	}
+
+	return nullptr;
+}
+
+Graph::Vertex* Graph::AddVertex(const sm::vec2& pos)
+{
+	auto v = QueryVertex(pos);
+	if (v) {
+		return v;
 	}
 
 	Vertex* vert = new Vertex(pos);

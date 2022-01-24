@@ -15,6 +15,8 @@ foreign class Streets
 	foreign get_polygons()
 
 	foreign set_seed(seed)
+
+	foreign set_nodes(pts)
 }
 
 foreign class ParcelsOBB

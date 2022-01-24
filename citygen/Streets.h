@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Graph.h"
+
 #include <SM_Vector.h>
 #include <SM_Rect.h>
 
@@ -10,7 +12,6 @@ namespace citygen
 {
 
 class TensorField;
-class Graph;
 
 class Streets
 {
@@ -29,6 +30,8 @@ public:
 
 	void SetSeed(float seed) { m_seed = seed; }
 
+	void TranslateNodes(const std::vector<sm::vec2>& nodes);
+
 public:
 	struct PathComp;
 
@@ -40,12 +43,14 @@ public:
 		void Trim(const std::vector<sm::vec2>& border);
 
 		auto& GetPoints() const { return m_pts; }
+		std::vector<sm::vec2> GetGraphPoints() const;
 
 	private:
 		void Build();
 
 	private:
 		std::vector<sm::vec2> m_pts;
+		std::vector<Graph::Vertex*> m_verts;
 
 		float m_length = 0.0f;
 		float m_area = 0.0f;
@@ -81,9 +86,12 @@ private:
 	void IntersectPaths();
 
 	void BuildGraph();
+	void BindGraph2Path();
 
 	std::vector<std::shared_ptr<Path>> SelectPaths(
 		const std::vector<std::shared_ptr<Path>>& paths, int num, const sm::rect& aabb) const;
+
+	void TranslateNode(Graph::Vertex* v, const sm::vec2& p);
 
 private:
 	std::shared_ptr<TensorField> m_tf = nullptr;

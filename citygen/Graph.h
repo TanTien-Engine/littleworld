@@ -55,6 +55,8 @@ public:
 		mutable bool visited = false;
 	};
 
+	Vertex* QueryVertex(const sm::vec2& pos) const;
+
 private:
 	Vertex* AddVertex(const sm::vec2& pos);
 
