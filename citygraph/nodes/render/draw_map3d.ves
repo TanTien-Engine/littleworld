@@ -216,18 +216,14 @@ class DrawMap3d is Node
 
 	build_block_model(poly, color)
 	{
-		var polygon = GeometryTools.polyline_offset(poly, 0.01, true)
-		if (polygon)
-		{
-			var polytope = GeometryTools.polygon_extrude_face(polygon, 0.001)
+		var polytope = GeometryTools.polygon_extrude_face(poly, 0.001)
 
-			var brush = Brush([ polytope ])
-			brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))
+		var brush = Brush([ polytope ])
+		brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))
 
-			var geo = VarGeo()
-			geo.shape = brush
+		var geo = VarGeo()
+		geo.shape = brush
 
-			this.v_models.value.add(Variant(VAR_TYPE_GEO, geo))
-		}
+		this.v_models.value.add(Variant(VAR_TYPE_GEO, geo))
 	}
 }
