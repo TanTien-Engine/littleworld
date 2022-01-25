@@ -10,7 +10,7 @@ Regular, Wedge, Trisector, Radiate, Center, Saddle, Rotate,
 // street
 Streets, Streamlines,
 // block
-Offset, AreaSelector, RandomSelector, ShapeL, ShapeU, ShapeO,
+Offset, AreaSelector, RandomSelector, ShapeL, ShapeU, ShapeO, SetBlockType,
 // building
 Parcels, Extrude,
 // render
