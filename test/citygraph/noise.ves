@@ -3,7 +3,7 @@ var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
 _editor.add_node(node0, -968.99371179286, -135.65900245201)
 
 var node1 = ::citygraph::nodes::street::streets::Streets()
-node1.query_param("num").value = 3
+node1.query_param("num").value = 2
 node1.query_param("seed").value = 1
 
 _editor.add_node(node1, 196.94554458184, -215.21299942843)
@@ -39,14 +39,14 @@ _editor.add_node(node7, 510.58701423682, -191.51611023212)
 
 var node8 = ::citygraph::nodes::block::shape_l::ShapeL()
 node8.query_param("front").value = 0.019170396029949
-node8.query_param("left").value = 0.031392619013786
+node8.query_param("left").value = 0.056763306260109
 
 _editor.add_node(node8, 693.91300235883, -197.83396262258)
 
 var node9 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
 node9.query_param("faces").value = false
 
-_editor.add_node(node9, 351.19825508738, -76.467039802583)
+_editor.add_node(node9, 894.31643690556, -404.38522162077)
 
 var node10 = ::blueprint::nodes::subgraph::Subgraph()
 node10.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
@@ -56,7 +56,7 @@ _editor.add_node(node10, -93.82985599076, -437.98303629419)
 var node11 = ::blueprint::nodes::subgraph::Subgraph()
 node11.load_from_file(_editor, "../../assets/blueprints/tensorfield/tensor_transform.ves")
 
-_editor.add_node(node11, 159.58483021395, -428.81634897711)
+_editor.add_node(node11, 182.68483021395, -524.51634897711)
 
 var node12 = ::rendergraph::nodes::texture::Texture()
 node12.query_param("unif_name").value = "u_tex"
@@ -68,7 +68,7 @@ _editor.add_node(node12, -93.42996535136, -559.35150354194)
 
 var node13 = ::blueprint::nodes::print::Print()
 
-_editor.add_node(node13, 388.90473097556, -428.96305788207)
+_editor.add_node(node13, 406.62034097556, -540.08824788207)
 
 var node14 = ::blueprint::nodes::number2::Number2()
 
@@ -102,6 +102,21 @@ node19.set_prop_value("seed", 0.12512849271297)
 
 _editor.add_node(node19, -434.37745744626, -218.34755546928)
 
+var node20 = ::citygraph::nodes::block::area_selector::AreaSelector()
+node20.query_param("num").value = 3
+
+_editor.add_node(node20, 365.70547668457, -318.58432739258)
+
+var node21 = ::citygraph::nodes::street::streets::Streets()
+node21.query_param("num").value = 1
+node21.query_param("seed").value = 0.32682833075523
+
+_editor.add_node(node21, 520.58547607422, -333.10432128906)
+
+var node22 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node22, 748.59561434659, -429.25789989125)
+
 Blueprint.connect(node17, "v", node18, "v")
 Blueprint.connect(node0, "uv", node15, "st")
 Blueprint.connect(node14, "v2", node15, "pos")
@@ -116,7 +131,12 @@ Blueprint.connect(node19, "tensor", node10, "tensor")
 Blueprint.connect(node12, "tex", node11, "base_texture")
 Blueprint.connect(node10, "tensor_field", node11, "tensor_field")
 Blueprint.connect(node10, "tensor_field", node1, "tensor")
-Blueprint.connect(node1, "streets", node9, "objs")
+Blueprint.connect(node1, "blocks", node20, "polys")
+Blueprint.connect(node10, "tensor_field", node21, "tensor")
+Blueprint.connect(node20, "polys", node21, "regions")
+Blueprint.connect(node1, "streets", node22, "in0")
+Blueprint.connect(node21, "streets", node22, "in1")
+Blueprint.connect(node22, "list", node9, "objs")
 Blueprint.connect(node1, "blocks", node6, "blocks")
 Blueprint.connect(node6, "lots", node7, "lots")
 Blueprint.connect(node7, "lots", node8, "lots")

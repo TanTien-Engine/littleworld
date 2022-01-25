@@ -78,4 +78,33 @@ std::vector<sm::vec2> Math::PathCutBy(const std::vector<sm::vec2>& base, const s
 	return ret;
 }
 
+std::vector<sm::vec2> 
+Math::RemoveDuplicatedPos(const std::vector<sm::vec2>& polyline)
+{
+	std::vector<sm::vec2> ret;
+	for (auto& p : polyline)
+	{
+		if (!ret.empty())
+		{
+			auto& last = ret.back();
+			if (fabs(p.x - last.x) < SM_LARGE_EPSILON * 10 &&
+				fabs(p.y - last.y) < SM_LARGE_EPSILON * 10) {
+				continue;
+			}
+		}
+		ret.push_back(p);
+	}
+	return ret;
+}
+
+std::vector<std::vector<sm::vec2>>
+Math::RemoveDuplicatedPos(const std::vector<std::vector<sm::vec2>>& polylines)
+{
+	std::vector<std::vector<sm::vec2>> ret;
+	for (auto& p : polylines) {
+		ret.push_back(RemoveDuplicatedPos(p));
+	}
+	return ret;
+}
+
 }

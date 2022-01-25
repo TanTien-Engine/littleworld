@@ -126,7 +126,12 @@ void main()
     depth = depth + 0.001 * geo_idx;
     gDepth = vec3(depth);
 
-    gMain = ambient + diffuse + specular; 
+    if (fs_in.frag_col != vec3(1.0)) {
+    	gMain = fs_in.frag_col;
+    } else {
+    	gMain = ambient + diffuse + specular;
+    }
+
     gNormal = N;
 }
 "

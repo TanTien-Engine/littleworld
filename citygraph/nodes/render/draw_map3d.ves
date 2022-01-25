@@ -5,12 +5,16 @@ import "blueprint.variant" for Variant, VAR_TYPE_PORT, VAR_TYPE_ARRAY
 import "blueprint.input_proxy" for InputProxy
 import "blueprint.variant_proxy" for VariantProxy
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "geograph.brush" for Brush
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "editor.node_cache" for NODE_CACHE
 import "citygraph.variant" for VAR_TYPE_STREETS
+import "citygraph.style" for MAJOR_ROAD_COLOR
 import "maths.vector" for Vector3
 import "geometry" for Polyline3D
 import "graphics" for Graphics
+import "citygen" for GeometryTools
+import "math" for Math
 
 class DrawMap3d is Node
 {
@@ -28,15 +32,18 @@ class DrawMap3d is Node
 
 		this.layout()
 
-		this.draw_buildings_node = NODE_CACHE.fetch("../littleworld/assets/blueprints/render/9_edit_draw.ves", nil)
-		Blueprint.connect(InputProxy(this, 1), 0, this.draw_buildings_node, "list")
+		this.v_models = Variant([])
 
-		this.draw_streets_node = DrawGeometry()
+		this.draw_model_node = NODE_CACHE.fetch("../littleworld/assets/blueprints/render/9_edit_draw.ves", nil)
+//		Blueprint.connect(InputProxy(this, 1), 0, this.draw_model_node, "list")
+		Blueprint.connect(VariantProxy(this.v_models), 0, this.draw_model_node, "list")
 
-		this.v_streets = Variant([])
-		Blueprint.connect(VariantProxy(this.v_streets), 0, this.draw_streets_node, "geos")
+		this.draw_shape_node = DrawGeometry()
 
-		Blueprint.connect(this.draw_buildings_node.op_node, "mat", this.draw_streets_node, "mat")
+		this.v_shapes = Variant([])
+		Blueprint.connect(VariantProxy(this.v_shapes), 0, this.draw_shape_node, "geos")
+
+		Blueprint.connect(this.draw_model_node.op_node, "mat", this.draw_shape_node, "mat")
 
 		this.need_rebuild = false
 	}
@@ -45,7 +52,7 @@ class DrawMap3d is Node
 	{
 		if (pin == this.imports[1])
 		{
-			this.draw_buildings_node.on_pin_dirty(this.draw_buildings_node.imports[1])
+			this.draw_model_node.on_pin_dirty(this.draw_model_node.imports[1])
 
 			this.need_rebuild = true
 		}
@@ -63,44 +70,45 @@ class DrawMap3d is Node
 			this.need_rebuild = false
 		}
 
-		Graphics.set_cam_ortho(false)
+//		Graphics.set_cam_ortho(false)
 
-		this.draw_streets_node.render_run()
+		this.draw_shape_node.render_run()
 
-		this.draw_buildings_node.render_run()
+		this.draw_model_node.render_run()
 	}
 
 	on_key_pressed(key) {
-		this.draw_buildings_node.on_key_pressed(key)
+		this.draw_model_node.on_key_pressed(key)
 	}
 
 	on_key_released(key) {
-		this.draw_buildings_node.on_key_released(key)
+		this.draw_model_node.on_key_released(key)
 	}
 
 	on_mouse_pressed(x, y, btn) {
-		this.draw_buildings_node.on_mouse_pressed(x, y, btn)
+		this.draw_model_node.on_mouse_pressed(x, y, btn)
 	}
 
 	on_mouse_released(x, y, btn) {
-		this.draw_buildings_node.on_mouse_released(x, y, btn)
+		this.draw_model_node.on_mouse_released(x, y, btn)
 	}
 
 	on_mouse_moved(x, y, btn) {
-		this.draw_buildings_node.on_mouse_moved(x, y, btn)
+		this.draw_model_node.on_mouse_moved(x, y, btn)
 	}
 
 	on_mouse_dragged(x, y, btn) {
-		this.draw_buildings_node.on_mouse_dragged(x, y, btn)
+		this.draw_model_node.on_mouse_dragged(x, y, btn)
 	}
 
 	on_mouse_scrolled(x, y, dx, dy) {
-		this.draw_buildings_node.on_mouse_scrolled(x, y, dx, dy)
+		this.draw_model_node.on_mouse_scrolled(x, y, dx, dy)
 	}
 
 	rebuild_geos()
 	{
-		this.v_streets.value.clear()
+		this.v_models.value.clear()
+		this.v_shapes.value.clear()
 
 		var v_objs = Blueprint.calc_input_value(this, 1)
 		this.build_streets(v_objs)
@@ -123,14 +131,22 @@ class DrawMap3d is Node
 			var v_streets = v_objs.value
 
 			// edges
+
 			var major = v_streets.streets.get_major_paths()
-			this.build_routes(major, Vector3(1.0, 0.0, 0.0))
+//			this.build_routes_shape(major, Vector3(1.0, 0.0, 0.0))
+			this.build_routes_model(major, MAJOR_ROAD_COLOR)
+
 			var minor = v_streets.streets.get_minor_paths()
-			this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
+//			this.build_routes_shape(minor, Vector3(0.0, 1.0, 0.0))
+			this.build_routes_model(minor, MAJOR_ROAD_COLOR)
+		}
+		else if (v_objs.type == VAR_TYPE_GEO)
+		{
+			this.v_models.value.add(v_objs)
 		}
 	}
 
-	build_routes(paths, color)
+	build_routes_shape(paths, color)
 	{
 		for (var path in paths)
 		{
@@ -151,7 +167,28 @@ class DrawMap3d is Node
 			geo.shape = poly3d
 			geo.render_style["color"] = color
 
-			this.v_streets.value.add(Variant(VAR_TYPE_GEO, geo))
+			this.v_shapes.value.add(Variant(VAR_TYPE_GEO, geo))
 		}
-	}	
+	}
+
+	build_routes_model(paths, color)
+	{
+		var width = 0.01
+		for (var path in paths)
+		{
+			var polygon = GeometryTools.polyline_expand(path, width)
+			if (polygon)
+			{
+				var polytope = GeometryTools.polygon_extrude_face(polygon, -0.001)
+
+				var brush = Brush([ polytope ])
+				brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))
+
+				var geo = VarGeo()
+				geo.shape = brush
+
+				this.v_models.value.add(Variant(VAR_TYPE_GEO, geo))
+			}
+		}
+	}
 }

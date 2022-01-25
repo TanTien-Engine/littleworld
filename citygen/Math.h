@@ -14,6 +14,11 @@ public:
 
 	static std::vector<sm::vec2> PathCutBy(const std::vector<sm::vec2>& base, const std::vector<sm::vec2>& cut);
 
+	static std::vector<sm::vec2> 
+		RemoveDuplicatedPos(const std::vector<sm::vec2>& polyline);
+	static std::vector<std::vector<sm::vec2>> 
+		RemoveDuplicatedPos(const std::vector<std::vector<sm::vec2>>& polylines);
+
 }; // Math
 
 }

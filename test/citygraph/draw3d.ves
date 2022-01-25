@@ -18,8 +18,8 @@ var node3 = ::citygraph::nodes::tensor::center::Center()
 _editor.add_node(node3, -454.33456001746, 127.71619251652)
 
 var node4 = ::citygraph::nodes::street::streets::Streets()
-node4.query_param("num").value = 5
-node4.query_param("seed").value = 0.29027727246284
+node4.query_param("num").value = 1
+node4.query_param("seed").value = 1
 
 _editor.add_node(node4, 80.875045465726, 149.75415566184)
 
@@ -71,7 +71,7 @@ node13.query_param("left").value = 0.026813456788659
 _editor.add_node(node13, 550.33070528302, 147.91716550258)
 
 var node14 = ::blueprint::nodes::random::Random()
-node14.query_param("seed").value = 0.24394260346889
+node14.query_param("seed").value = 0.65105926990509
 
 _editor.add_node(node14, 411.40466626176, -41.15556023586)
 
@@ -93,7 +93,7 @@ _editor.add_node(node17, 548.36853706855, -21.540364791425)
 
 var node18 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
 
-_editor.add_node(node18, 980.29119944037, 269.83238997086)
+_editor.add_node(node18, 978.42843547119, 269.83238997086)
 
 var node19 = ::blueprint::nodes::merge::Merge()
 
@@ -111,6 +111,7 @@ Blueprint.connect(node3, "ret", node6, "b")
 Blueprint.connect(node6, "v", node1, "tensor")
 Blueprint.connect(node1, "tensor_field", node4, "tensor")
 Blueprint.connect(node4, "blocks", node12, "polys")
+Blueprint.connect(node4, "streets", node11, "objs")
 Blueprint.connect(node4, "blocks", node8, "blocks")
 Blueprint.connect(node8, "lots", node9, "lots")
 Blueprint.connect(node9, "lots", node13, "lots")

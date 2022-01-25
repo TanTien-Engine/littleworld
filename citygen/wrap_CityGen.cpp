@@ -5,6 +5,7 @@
 #include "ParcelsSS.h"
 #include "Reshape.h"
 #include "Extrude.h"
+#include "Math.h"
 #include "modules/script/Proxy.h"
 #include "modules/script/TransHelper.h"
 #include "modules/graphics/Graphics.h"
@@ -15,6 +16,7 @@
 #include <polymesh3/Polytope.h>
 #include <SM_Polyline.h>
 #include <SM_Test.h>
+#include <SM_DouglasPeucker.h>
 
 #include <string>
 
@@ -148,7 +150,8 @@ void w_Streets_get_major_paths()
 
     std::vector<std::vector<sm::vec2>> polylines;
     for (auto& path : major_paths) {
-        polylines.push_back(path->GetGraphPoints());
+        auto fixed = citygen::Math::RemoveDuplicatedPos(path->GetGraphPoints());
+        polylines.push_back(fixed);
     }
     return_multi_polylines(polylines);
 }
@@ -160,7 +163,8 @@ void w_Streets_get_minor_paths()
 
     std::vector<std::vector<sm::vec2>> polylines;
     for (auto& path : minor_paths) {
-        polylines.push_back(path->GetGraphPoints());
+        auto fixed = citygen::Math::RemoveDuplicatedPos(path->GetGraphPoints());
+        polylines.push_back(fixed);
     }
     return_multi_polylines(polylines);
 }
@@ -286,6 +290,14 @@ void w_GeometryTools_polyline_expand()
     auto& vertices = polyline->GetVertices();
     bool is_closed = vertices.size() > 1 && vertices.front() == vertices.back();
     auto polylines = sm::polyline_expand(vertices, offset, is_closed);
+
+    // fixme: build brush bug, simplify first
+    for (auto& poly : polylines) {
+        std::vector<sm::vec2> pts;
+        sm::douglas_peucker(poly, 0.0001f, pts);
+        poly = pts;
+    }
+
     return_polygon(polylines);
 }
 
