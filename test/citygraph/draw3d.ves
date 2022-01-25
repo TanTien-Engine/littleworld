@@ -1,0 +1,121 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -612.28000751102, 176.8211708077)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node1, -113.96103175604, 171.52814391315)
+
+var node2 = ::blueprint::nodes::number2::Number2()
+
+node2.value.set(0.76046144962311, 0.76046144962311)
+
+_editor.add_node(node2, -611.1543333632, 108.62373579648)
+
+var node3 = ::citygraph::nodes::tensor::center::Center()
+
+_editor.add_node(node3, -454.33456001746, 127.71619251652)
+
+var node4 = ::citygraph::nodes::street::streets::Streets()
+node4.query_param("num").value = 5
+node4.query_param("seed").value = 0.29027727246284
+
+_editor.add_node(node4, 80.875045465726, 149.75415566184)
+
+var node5 = ::citygraph::nodes::tensor::regular::Regular()
+
+_editor.add_node(node5, -455.41596493277, 207.18857394157)
+
+var node6 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node6, -307.58298152433, 174.43975915584)
+
+var node7 = ::blueprint::nodes::number2::Number2()
+
+node7.value.set(0, 0.51223009824753)
+
+_editor.add_node(node7, -616.55049601562, 245.60710835937)
+
+var node8 = ::citygraph::nodes::building::parcels::Parcels()
+node8.query_param("max_len").value = 0.1
+node8.query_param("seed").value = 0
+
+_editor.add_node(node8, 235.04802647655, 92.115299569259)
+
+var node9 = ::citygraph::nodes::block::offset::Offset()
+node9.query_param("distance").value = 0.0099999997764826
+
+_editor.add_node(node9, 388.82498802006, 101.66279879722)
+
+var node10 = ::citygraph::nodes::building::extrude::Extrude()
+node10.query_param("distance").value = 0
+node10.query_param("roof").value = true
+
+_editor.add_node(node10, 708.88710614356, 0.68098808326936)
+
+var node11 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
+node11.query_param("faces").value = false
+
+_editor.add_node(node11, 453.21303811822, 317.64337396291)
+
+var node12 = ::citygraph::nodes::block::area_selector::AreaSelector()
+node12.query_param("num").value = 2
+
+_editor.add_node(node12, 240.72467041016, 284.80438232422)
+
+var node13 = ::citygraph::nodes::block::shape_l::ShapeL()
+node13.query_param("front").value = 0.023480124771595
+node13.query_param("left").value = 0.026813456788659
+
+_editor.add_node(node13, 550.33070528302, 147.91716550258)
+
+var node14 = ::blueprint::nodes::random::Random()
+node14.query_param("seed").value = 0.24394260346889
+
+_editor.add_node(node14, 411.40466626176, -41.15556023586)
+
+var node15 = ::blueprint::nodes::number::Number()
+
+node15.value = 0.063912622630596
+
+_editor.add_node(node15, 282.24787643535, -7.1074746593599)
+
+var node16 = ::blueprint::nodes::number::Number()
+
+node16.value = 0.03599751740694
+
+_editor.add_node(node16, 280.76022874035, -74.87609189528)
+
+var node17 = ::blueprint::nodes::lazy_eval::LazyEval()
+
+_editor.add_node(node17, 548.36853706855, -21.540364791425)
+
+var node18 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
+
+_editor.add_node(node18, 980.29119944037, 269.83238997086)
+
+var node19 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node19, 805.66333007813, 250.90536499023)
+
+Blueprint.connect(node15, "v", node14, "min")
+Blueprint.connect(node16, "v", node14, "max")
+Blueprint.connect(node14, "val", node17, "val")
+Blueprint.connect(node0, "uv", node5, "st")
+Blueprint.connect(node7, "v2", node5, "pos")
+Blueprint.connect(node0, "uv", node3, "st")
+Blueprint.connect(node2, "v2", node3, "pos")
+Blueprint.connect(node5, "ret", node6, "a")
+Blueprint.connect(node3, "ret", node6, "b")
+Blueprint.connect(node6, "v", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node4, "tensor")
+Blueprint.connect(node4, "blocks", node12, "polys")
+Blueprint.connect(node4, "blocks", node8, "blocks")
+Blueprint.connect(node8, "lots", node9, "lots")
+Blueprint.connect(node9, "lots", node13, "lots")
+Blueprint.connect(node9, "lots", node10, "lots")
+Blueprint.connect(node17, "pin", node10, "dist")
+Blueprint.connect(node4, "streets", node19, "in0")
+Blueprint.connect(node10, "boxes", node19, "in1")
+Blueprint.connect(node19, "list", node18, "objs")

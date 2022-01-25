@@ -14,5 +14,5 @@ Offset, AreaSelector, RandomSelector, ShapeL, ShapeU, ShapeO,
 // building
 Parcels, Extrude,
 // render
-DrawGeo2d, DrawMap2d,
+DrawGeo2d, DrawMap2d, DrawMap3d,
 ]

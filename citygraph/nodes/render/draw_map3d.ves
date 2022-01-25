@@ -1,0 +1,157 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_PORT, VAR_TYPE_ARRAY
+import "blueprint.input_proxy" for InputProxy
+import "blueprint.variant_proxy" for VariantProxy
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "geograph.nodes.draw_geometry" for DrawGeometry
+import "editor.node_cache" for NODE_CACHE
+import "citygraph.variant" for VAR_TYPE_STREETS
+import "maths.vector" for Vector3
+import "geometry" for Polyline3D
+import "graphics" for Graphics
+
+class DrawMap3d is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "prev", VAR_TYPE_PORT),
+			Pin(this, "objs", VAR_TYPE_ARRAY)
+		]
+		this.exports = [
+			Pin(this, "next", VAR_TYPE_PORT)
+		]
+
+		this.layout()
+
+		this.draw_buildings_node = NODE_CACHE.fetch("../littleworld/assets/blueprints/render/9_edit_draw.ves", nil)
+		Blueprint.connect(InputProxy(this, 1), 0, this.draw_buildings_node, "list")
+
+		this.draw_streets_node = DrawGeometry()
+
+		this.v_streets = Variant([])
+		Blueprint.connect(VariantProxy(this.v_streets), 0, this.draw_streets_node, "geos")
+
+		Blueprint.connect(this.draw_buildings_node.op_node, "mat", this.draw_streets_node, "mat")
+
+		this.need_rebuild = false
+	}
+
+	on_pin_dirty(pin)
+	{
+		if (pin == this.imports[1])
+		{
+			this.draw_buildings_node.on_pin_dirty(this.draw_buildings_node.imports[1])
+
+			this.need_rebuild = true
+		}
+	}
+
+	on_node_dirty()
+	{
+		this.need_rebuild = true
+	}
+
+	render_run()
+	{
+		if (this.need_rebuild) {
+			this.rebuild_geos()
+			this.need_rebuild = false
+		}
+
+		Graphics.set_cam_ortho(false)
+
+		this.draw_streets_node.render_run()
+
+		this.draw_buildings_node.render_run()
+	}
+
+	on_key_pressed(key) {
+		this.draw_buildings_node.on_key_pressed(key)
+	}
+
+	on_key_released(key) {
+		this.draw_buildings_node.on_key_released(key)
+	}
+
+	on_mouse_pressed(x, y, btn) {
+		this.draw_buildings_node.on_mouse_pressed(x, y, btn)
+	}
+
+	on_mouse_released(x, y, btn) {
+		this.draw_buildings_node.on_mouse_released(x, y, btn)
+	}
+
+	on_mouse_moved(x, y, btn) {
+		this.draw_buildings_node.on_mouse_moved(x, y, btn)
+	}
+
+	on_mouse_dragged(x, y, btn) {
+		this.draw_buildings_node.on_mouse_dragged(x, y, btn)
+	}
+
+	on_mouse_scrolled(x, y, dx, dy) {
+		this.draw_buildings_node.on_mouse_scrolled(x, y, dx, dy)
+	}
+
+	rebuild_geos()
+	{
+		this.v_streets.value.clear()
+
+		var v_objs = Blueprint.calc_input_value(this, 1)
+		this.build_streets(v_objs)
+	}
+
+	build_streets(v_objs)
+	{
+		if (!v_objs) {
+			return
+		}
+
+		if (v_objs.value is List)
+		{
+			for (var item in v_objs.value) {
+				this.build_streets(item)
+			}
+		}
+		else if (v_objs.type == VAR_TYPE_STREETS)
+		{
+			var v_streets = v_objs.value
+
+			// edges
+			var major = v_streets.streets.get_major_paths()
+			this.build_routes(major, Vector3(1.0, 0.0, 0.0))
+			var minor = v_streets.streets.get_minor_paths()
+			this.build_routes(minor, Vector3(0.0, 1.0, 0.0))
+		}
+	}
+
+	build_routes(paths, color)
+	{
+		for (var path in paths)
+		{
+			var vertices_3d = []
+
+			var vertices_2d = path.get_vertices()
+			for (var i in 0 .. vertices_2d.count / 2)
+			{
+				vertices_3d.add(vertices_2d[i * 2])
+				vertices_3d.add(0)				
+				vertices_3d.add(vertices_2d[i * 2 + 1])				
+			}
+
+			var poly3d = Polyline3D.init()
+			poly3d.set_vertices(vertices_3d)
+
+			var geo = VarGeo()
+			geo.shape = poly3d
+			geo.render_style["color"] = color
+
+			this.v_streets.value.add(Variant(VAR_TYPE_GEO, geo))
+		}
+	}	
+}
