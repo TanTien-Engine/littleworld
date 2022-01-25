@@ -1,4 +1,9 @@
 var VAR_TYPE_STREETS = "streets"
+var VAR_TYPE_BLOCK   = "block"
+
+var BLOCK_TYPE_COMMON = "common"
+var BLOCK_TYPE_PARK   = "park"
+var BLOCK_TYPE_RIVER  = "river"
 
 class VarStreets
 {
@@ -7,5 +12,20 @@ class VarStreets
 		this.streets = streets
 
 		this.is_major = true
+	}
+}
+
+class VarBlock
+{
+	init(poly)
+	{
+		this.poly = poly
+		this.type = BLOCK_TYPE_COMMON
+	}
+
+	init(poly, type)
+	{
+		this.poly = poly
+		this.type = type
 	}
 }

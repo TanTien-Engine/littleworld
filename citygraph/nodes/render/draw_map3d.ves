@@ -8,8 +8,8 @@ import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.brush" for Brush
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "editor.node_cache" for NODE_CACHE
-import "citygraph.variant" for VAR_TYPE_STREETS
-import "citygraph.style" for MAJOR_ROAD_COLOR
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, BLOCK_TYPE_RIVER
+import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR, GREEN_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "geometry" for Polyline3D
 import "graphics" for Graphics
@@ -130,15 +130,38 @@ class DrawMap3d is Node
 		{
 			var v_streets = v_objs.value
 
-			// edges
+			var color = nil
+			if (v_streets.is_major) {
+				color = MAJOR_ROAD_COLOR
+			} else {
+				color = MINOR_ROAD_COLOR
+			}
 
+			// edges
 			var major = v_streets.streets.get_major_paths()
 //			this.build_routes_shape(major, Vector3(1.0, 0.0, 0.0))
-			this.build_routes_model(major, MAJOR_ROAD_COLOR)
+			this.build_routes_model(major, color)
 
 			var minor = v_streets.streets.get_minor_paths()
 //			this.build_routes_shape(minor, Vector3(0.0, 1.0, 0.0))
-			this.build_routes_model(minor, MAJOR_ROAD_COLOR)
+			this.build_routes_model(minor, color)
+
+//			// blocks
+//			var blocks = v_streets.streets.get_polygons()
+//			for (var block in blocks) {
+//				this.build_block_model(block.value.shape, COMMON_BLOCK_COLOR)
+//			}
+		}
+		else if (v_objs.type == VAR_TYPE_BLOCK)
+		{
+			var block = v_objs.value
+			var color = Vector3(0, 0, 0)
+			if (block.type == BLOCK_TYPE_COMMON) {
+				color = COMMON_BLOCK_COLOR
+			} else if (block.type == BLOCK_TYPE_PARK) {
+				color = GREEN_BLOCK_COLOR
+			}	
+			this.build_block_model(block.poly, color)			
 		}
 		else if (v_objs.type == VAR_TYPE_GEO)
 		{
@@ -173,13 +196,12 @@ class DrawMap3d is Node
 
 	build_routes_model(paths, color)
 	{
-		var width = 0.01
 		for (var path in paths)
 		{
-			var polygon = GeometryTools.polyline_expand(path, width)
+			var polygon = GeometryTools.polyline_expand(path, 0.01)
 			if (polygon)
 			{
-				var polytope = GeometryTools.polygon_extrude_face(polygon, -0.001)
+				var polytope = GeometryTools.polygon_extrude_face(polygon, 0.001)
 
 				var brush = Brush([ polytope ])
 				brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))
@@ -189,6 +211,23 @@ class DrawMap3d is Node
 
 				this.v_models.value.add(Variant(VAR_TYPE_GEO, geo))
 			}
+		}
+	}
+
+	build_block_model(poly, color)
+	{
+		var polygon = GeometryTools.polyline_offset(poly, 0.01, true)
+		if (polygon)
+		{
+			var polytope = GeometryTools.polygon_extrude_face(polygon, 0.001)
+
+			var brush = Brush([ polytope ])
+			brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))
+
+			var geo = VarGeo()
+			geo.shape = brush
+
+			this.v_models.value.add(Variant(VAR_TYPE_GEO, geo))
 		}
 	}
 }

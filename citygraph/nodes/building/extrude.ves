@@ -6,6 +6,7 @@ import "blueprint.blueprint" for Blueprint
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.brush" for Brush
 import "citygraph.utility" for Utility
+import "citygraph.variant" for VAR_TYPE_BLOCK, VarBlock
 import "citygen" for GeometryTools
 import "maths" for Matrix44
 
@@ -61,13 +62,13 @@ class Extrude is Node
 			var geo = VarGeo()
 			if (roof)
 			{
-				var bottom = GeometryTools.polyline_offset(v_lot.value.shape, 0.003, true)
+				var bottom = GeometryTools.polyline_offset(v_lot.value.poly, 0.003, true)
 				if (!bottom) {
-					bottom = v_lot.value.shape
+					bottom = v_lot.value.poly
 				}
 				var base = GeometryTools.polygon_extrude_face(bottom, distance)
 
-				var roof = GeometryTools.polygon_extrude_skeleton(v_lot.value.shape, distance * 0.2)
+				var roof = GeometryTools.polygon_extrude_skeleton(v_lot.value.poly, distance * 0.2)
 				var mat = Matrix44.init()
 				mat.translate(0, distance, 0)
 				roof.transform(mat)
@@ -76,7 +77,7 @@ class Extrude is Node
 			}
 			else
 			{
-				var polytope = GeometryTools.polygon_extrude_face(v_lot.value.shape, distance)
+				var polytope = GeometryTools.polygon_extrude_face(v_lot.value.poly, distance)
 
 				geo.shape = Brush([ polytope ])
 			}

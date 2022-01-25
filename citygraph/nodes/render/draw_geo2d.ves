@@ -7,8 +7,8 @@ import "blueprint.node_param" for NodeParam
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.config" for POINT_RADIUS
-import "citygraph.variant" for VAR_TYPE_STREETS
-import "citygraph.style" for BLOCK_COLORS
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK
+import "citygraph.style" for BLOCK_COLORS, COMMON_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
 import "geometry" for Circle
@@ -113,6 +113,13 @@ class DrawGeo2d is Node
 					var nodes = v_streets.streets.get_nodes()
 					this.build_crossings(nodes, Vector3(0.0, 0.0, 1.0))
 				}
+			}
+			else if (v_objs.type == VAR_TYPE_BLOCK)
+			{
+				var geo = VarGeo()
+				geo.shape = v_objs.value.poly
+				geo.render_style["color"] = Vector3(0, 0, 0)
+				this.v_geos.value.add(Variant(VAR_TYPE_GEO, geo))
 			}
 			else
 			{

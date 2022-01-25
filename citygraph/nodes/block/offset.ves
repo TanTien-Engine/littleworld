@@ -3,7 +3,7 @@ import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
-import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "citygraph.variant" for VAR_TYPE_BLOCK, VarBlock
 import "maths.vector" for Vector3
 import "citygen" for GeometryTools
 
@@ -43,15 +43,11 @@ class Offset is Node
 
 		for (var lot in lots)
 		{
-			var polygon = GeometryTools.polyline_offset(lot.value.shape, distance, true)
+			var polygon = GeometryTools.polyline_offset(lot.value.poly, distance, true)
 			if (polygon and GeometryTools.is_counterclockwise(polygon))
 			{
-				var geo = VarGeo()
-				geo.shape = polygon
-				geo.render_style["color"] = Vector3(0, 0, 0)
-				geo.render_style["fill"] = false
-
-				ret.add(Variant(VAR_TYPE_GEO, geo))
+				var block = VarBlock(polygon, lot.value.type)
+				ret.add(Variant(VAR_TYPE_BLOCK, block))
 			}
 		}
 

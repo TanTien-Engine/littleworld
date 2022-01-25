@@ -4,6 +4,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.node_param" for NodeParam
 import "citygraph.utility" for Utility
+import "citygraph.variant" for VAR_TYPE_BLOCK, VarBlock
 
 class AreaSelector is Node
 {
@@ -40,7 +41,7 @@ class AreaSelector is Node
 
 		var poly_area = []
 		for (var v_poly in src_polys) {
-			var area = v_poly.value.shape.calc_area()
+			var area = v_poly.value.poly.calc_area()
 			poly_area.add([ v_poly, area ])
 		}
 
