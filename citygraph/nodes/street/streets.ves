@@ -43,6 +43,7 @@ class Streets is Node
 		// editor
 		this.edit_pts_node = Array()
 		this.draw_editor_node = DrawGeo2d()
+		this.draw_editor_node.imports[1].hide = true
 		Blueprint.connect(this, "streets", this.draw_editor_node, "objs")		
 	}
 
