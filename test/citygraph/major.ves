@@ -1,0 +1,65 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -745.78380255234, 388.67955014655)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node1, -11.89862075604, 425.73982691315)
+
+var node2 = ::blueprint::nodes::number2::Number2()
+
+node2.value.set(1, 0.72956001758575)
+
+_editor.add_node(node2, -747.66042592519, 323.93487546591)
+
+var node3 = ::citygraph::nodes::tensor::saddle::Saddle()
+
+_editor.add_node(node3, -603.39442730058, 363.15015828586)
+
+var node4 = ::citygraph::nodes::tensor::regular::Regular()
+
+_editor.add_node(node4, -598.79709881707, 437.75111856967)
+
+var node5 = ::blueprint::nodes::number2::Number2()
+
+node5.value.set(0, 0.51223009824753)
+
+_editor.add_node(node5, -742.86377104042, 459.0465384916)
+
+var node6 = ::citygraph::nodes::street::streets::Streets()
+node6.query_param("num").value = 5
+node6.query_param("seed").value = 1
+node6.query_param("type").value = "default"
+
+_editor.add_node(node6, 180.73680547086, 384.12882848325)
+
+var node7 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
+node7.query_param("faces").value = false
+
+_editor.add_node(node7, 341.80577791525, 465.60375904369)
+
+var node8 = ::citygraph::nodes::render::draw_map2d::DrawMap2d()
+
+_editor.add_node(node8, 339.95872028772, 372.53940551992)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "../../assets/blueprints/tensorfield/tensor_add_noise.ves")
+node9.set_prop_value("seed", 0.17405299842358)
+
+_editor.add_node(node9, -254.30700532214, 354.76383548701)
+
+var node10 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node10, -443.36278794672, 422.78103708112)
+
+Blueprint.connect(node0, "uv", node4, "st")
+Blueprint.connect(node5, "v2", node4, "pos")
+Blueprint.connect(node0, "uv", node3, "st")
+Blueprint.connect(node2, "v2", node3, "pos")
+Blueprint.connect(node4, "ret", node10, "a")
+Blueprint.connect(node3, "ret", node10, "b")
+Blueprint.connect(node10, "v", node9, "tensor")
+Blueprint.connect(node9, "tensor", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node6, "tensor")
+Blueprint.connect(node6, "streets", node8, "objs")
