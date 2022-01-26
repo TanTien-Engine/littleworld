@@ -1,0 +1,166 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -745.78380255234, 388.67955014655)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node1, -11.89862075604, 425.73982691315)
+
+var node2 = ::blueprint::nodes::number2::Number2()
+
+node2.value.set(1, 0.72956001758575)
+
+_editor.add_node(node2, -747.66042592519, 323.93487546591)
+
+var node3 = ::citygraph::nodes::tensor::saddle::Saddle()
+
+_editor.add_node(node3, -603.39442730058, 363.15015828586)
+
+var node4 = ::citygraph::nodes::tensor::regular::Regular()
+
+_editor.add_node(node4, -598.79709881707, 437.75111856967)
+
+var node5 = ::blueprint::nodes::number2::Number2()
+
+node5.value.set(0, 0.51223009824753)
+
+_editor.add_node(node5, -742.86377104042, 459.0465384916)
+
+var node6 = ::citygraph::nodes::street::streets::Streets()
+node6.query_param("num").value = 1
+node6.query_param("seed").value = 0.62514662742615
+node6.query_param("ortho").value = false
+node6.query_param("type").value = "river"
+
+_editor.add_node(node6, 180.73680547086, 384.12882848325)
+
+var node7 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
+node7.query_param("faces").value = false
+
+_editor.add_node(node7, 260.72313328714, -109.44582773317)
+
+var node8 = ::citygraph::nodes::render::draw_map2d::DrawMap2d()
+
+_editor.add_node(node8, 620.23572028772, 243.74240551992)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "../../assets/blueprints/tensorfield/tensor_add_noise.ves")
+node9.set_prop_value("seed", 0.17405299842358)
+
+_editor.add_node(node9, -254.30700532214, 354.76383548701)
+
+var node10 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node10, -454.36278794672, 412.78103708112)
+
+var node11 = ::blueprint::nodes::subgraph::Subgraph()
+node11.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node11, -456.34312328046, 31.957196845531)
+
+var node12 = ::citygraph::nodes::street::streets::Streets()
+node12.query_param("num").value = 1
+node12.query_param("seed").value = 0.51836580038071
+node12.query_param("ortho").value = true
+node12.query_param("type").value = "default"
+
+_editor.add_node(node12, -222.65292072712, 39.522165400779)
+
+var node13 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node13, 458.58516455078, 199.8572791748)
+
+var node14 = ::citygraph::nodes::street::streets::Streets()
+node14.query_param("num").value = 7
+node14.query_param("seed").value = 1
+node14.query_param("ortho").value = true
+node14.query_param("type").value = "default"
+
+_editor.add_node(node14, -219.77824269411, -114.95772301999)
+
+var node15 = ::citygraph::nodes::block::area_selector::AreaSelector()
+node15.query_param("num").value = 1
+
+_editor.add_node(node15, -104.43563103454, 183.58188430789)
+
+var node16 = ::citygraph::nodes::block::offset::Offset()
+node16.query_param("distance").value = 0.0063052196055651
+
+_editor.add_node(node16, -240.38335460316, 196.08831045608)
+
+var node17 = ::citygraph::nodes::building::parcels::Parcels()
+node17.query_param("max_len").value = 0.050375126302242
+node17.query_param("seed").value = 0
+
+_editor.add_node(node17, -47.396075162021, -140.82641601563)
+
+var node18 = ::citygraph::nodes::block::offset::Offset()
+node18.query_param("distance").value = 0.0027669635601342
+
+_editor.add_node(node18, 92.097324718129, -126.08506774902)
+
+var node19 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
+
+_editor.add_node(node19, 620.30165416775, 169.14271369036)
+
+var node20 = ::citygraph::nodes::building::extrude::Extrude()
+node20.query_param("distance").value = 0
+node20.query_param("roof").value = false
+
+_editor.add_node(node20, 245.41321117099, -248.2259206183)
+
+var node21 = ::blueprint::nodes::random::Random()
+node21.query_param("seed").value = 0
+
+_editor.add_node(node21, -36.006469351117, -316.0663074581)
+
+var node22 = ::blueprint::nodes::number::Number()
+
+node22.value = 0.10044132173061
+
+_editor.add_node(node22, -169.14431962764, -326.2502305233)
+
+var node23 = ::blueprint::nodes::lazy_eval::LazyEval()
+
+_editor.add_node(node23, 99.731663137464, -298.26126168728)
+
+var node24 = ::citygraph::nodes::block::offset::Offset()
+node24.query_param("distance").value = 0.0099999997764826
+
+_editor.add_node(node24, -35.970389160157, -5.245291015626)
+
+var node25 = ::citygraph::nodes::block::random_selector::RandomSelector()
+node25.query_param("num").value = 1
+node25.query_param("seed").value = 0.67361831665039
+
+_editor.add_node(node25, 92.374349340472, 212.08793629819)
+
+Blueprint.connect(node22, "v", node21, "max")
+Blueprint.connect(node21, "val", node23, "val")
+Blueprint.connect(node0, "uv", node4, "st")
+Blueprint.connect(node5, "v2", node4, "pos")
+Blueprint.connect(node0, "uv", node3, "st")
+Blueprint.connect(node2, "v2", node3, "pos")
+Blueprint.connect(node4, "ret", node10, "a")
+Blueprint.connect(node3, "ret", node10, "b")
+Blueprint.connect(node10, "v", node11, "tensor")
+Blueprint.connect(node11, "tensor_field", node12, "tensor")
+Blueprint.connect(node10, "v", node9, "tensor")
+Blueprint.connect(node9, "tensor", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node6, "tensor")
+Blueprint.connect(node6, "blocks", node16, "blocks")
+Blueprint.connect(node16, "blocks", node25, "blocks")
+Blueprint.connect(node11, "tensor_field", node14, "tensor")
+Blueprint.connect(node25, "selected", node14, "regions")
+Blueprint.connect(node14, "blocks", node24, "blocks")
+Blueprint.connect(node24, "blocks", node17, "blocks")
+Blueprint.connect(node17, "blocks", node18, "blocks")
+Blueprint.connect(node18, "blocks", node20, "blocks")
+Blueprint.connect(node23, "pin", node20, "dist")
+Blueprint.connect(node6, "streets", node13, "in0")
+Blueprint.connect(node12, "streets", node13, "in1")
+Blueprint.connect(node14, "streets", node13, "in2")
+Blueprint.connect(node20, "boxes", node13, "in3")
+Blueprint.connect(node13, "list", node19, "objs")
+Blueprint.connect(node16, "blocks", node15, "blocks")

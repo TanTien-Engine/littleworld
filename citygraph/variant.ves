@@ -4,10 +4,10 @@ var VAR_TYPE_BLOCK   = "block"
 var ROAD_TYPE_MAJOR = "major"
 var ROAD_TYPE_MINOR = "minor"
 var ROAD_TYPE_TINY  = "tiny"
+var ROAD_TYPE_RIVER = "river"
 
 var BLOCK_TYPE_COMMON = "common"
 var BLOCK_TYPE_PARK   = "park"
-var BLOCK_TYPE_RIVER  = "river"
 
 class VarStreets
 {

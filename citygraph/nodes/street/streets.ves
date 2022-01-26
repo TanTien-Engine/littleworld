@@ -7,7 +7,7 @@ import "blueprint.node_param" for NodeParam
 import "blueprint.node_editor" for NodeEditor
 import "blueprint.nodes.array" for Array
 import "rendergraph.variant" for VAR_TYPE_TEXTURE
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, ROAD_TYPE_MAJOR, ROAD_TYPE_MINOR, ROAD_TYPE_TINY, VarStreets, VarBlock
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, ROAD_TYPE_MAJOR, ROAD_TYPE_MINOR, ROAD_TYPE_TINY, ROAD_TYPE_RIVER, VarStreets, VarBlock
 import "citygraph.utility" for Utility
 import "citygraph.nodes.render.draw_geo2d" for DrawGeo2d
 import "geograph.config" for POINT_RADIUS
@@ -36,7 +36,7 @@ class Streets is Node
 		this.params.add(NodeParam("num", 2, {  "integer" : true, "region" : 10 }))
 		this.params.add(NodeParam("seed", 0))
 		this.params.add(NodeParam("ortho", true))		
-		this.params.add(NodeParam("type", "default", { "combo" : [ "default", "major", "minor", "tiny" ] }))
+		this.params.add(NodeParam("type", "default", { "combo" : [ "default", "major", "minor", "tiny", "river" ] }))
 
 		this.layout()
 
@@ -151,7 +151,9 @@ class Streets is Node
 			r_type = ROAD_TYPE_MINOR
 		} else if (type == "tiny") {
 			r_type = ROAD_TYPE_TINY
-		}
+		} else if (type == "river") {
+			r_type = ROAD_TYPE_RIVER
+		} 
 
 		var seed = this.query_param("seed").value
 		var ortho = this.query_param("ortho").value		

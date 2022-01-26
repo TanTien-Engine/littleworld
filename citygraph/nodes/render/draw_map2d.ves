@@ -6,8 +6,8 @@ import "blueprint.variant_proxy" for VariantProxy
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, BLOCK_TYPE_RIVER, ROAD_TYPE_MAJOR, ROAD_TYPE_MINOR, ROAD_TYPE_TINY
-import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR, GREEN_BLOCK_COLOR
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, ROAD_TYPE_MAJOR, ROAD_TYPE_MINOR, ROAD_TYPE_TINY, ROAD_TYPE_RIVER
+import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, RIVER_COLOR, COMMON_BLOCK_COLOR, GREEN_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
 import "geometry" for Polyline
@@ -120,6 +120,12 @@ class DrawMap2d is Node
 					color = MINOR_ROAD_COLOR
 					dst = this.v_geos_pass1
 				}
+				else if (v_streets.type == ROAD_TYPE_RIVER)
+				{
+					width = 0.012
+					color = RIVER_COLOR
+					dst = this.v_geos_pass1
+				}				
 
 				var major = v_streets.streets.get_major_paths()
 				this.build_roads(major, width, color, dst)
