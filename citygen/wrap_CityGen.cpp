@@ -190,6 +190,13 @@ void w_Streets_set_seed()
     st->SetSeed(seed);
 }
 
+void w_Streets_set_ortho()
+{
+    auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
+    auto ortho = ves_toboolean(1);
+    st->SetOrtho(ortho);
+}
+
 void w_Streets_set_nodes()
 {
     auto st = ((tt::Proxy<citygen::Streets>*)ves_toforeign(0))->obj;
@@ -385,6 +392,7 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "Streets.get_nodes()") == 0) return w_Streets_get_nodes;
     if (strcmp(signature, "Streets.get_polygons()") == 0) return w_Streets_get_polygons;
     if (strcmp(signature, "Streets.set_seed(_)") == 0) return w_Streets_set_seed;
+    if (strcmp(signature, "Streets.set_ortho(_)") == 0) return w_Streets_set_ortho;
     if (strcmp(signature, "Streets.set_nodes(_)") == 0) return w_Streets_set_nodes;
 
     if (strcmp(signature, "ParcelsOBB.build(_)") == 0) return w_ParcelsOBB_build;

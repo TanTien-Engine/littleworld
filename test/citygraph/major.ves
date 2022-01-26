@@ -30,6 +30,7 @@ _editor.add_node(node5, -742.86377104042, 459.0465384916)
 var node6 = ::citygraph::nodes::street::streets::Streets()
 node6.query_param("num").value = 5
 node6.query_param("seed").value = 1
+node6.query_param("ortho").value = false
 node6.query_param("type").value = "default"
 
 _editor.add_node(node6, 180.73680547086, 384.12882848325)

@@ -15,6 +15,7 @@ foreign class Streets
 	foreign get_polygons()
 
 	foreign set_seed(seed)
+	foreign set_ortho(ortho)	
 
 	foreign set_nodes(pts)
 }

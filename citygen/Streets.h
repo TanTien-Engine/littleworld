@@ -30,6 +30,8 @@ public:
 
 	void SetSeed(float seed) { m_seed = seed; }
 
+	void SetOrtho(bool ortho) { m_ortho = ortho; }
+
 	bool TranslateNodes(const std::vector<sm::vec2>& nodes);
 
 public:
@@ -102,6 +104,9 @@ private:
 	std::shared_ptr<Graph> m_graph = nullptr;
 
 	float m_seed = 0.0f;
+
+	bool m_ortho = true;
+	mutable float m_minor_angle = 0.0f;
 
 }; // Streets
 

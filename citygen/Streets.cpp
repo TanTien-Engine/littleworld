@@ -152,6 +152,11 @@ bool Streets::TranslateNodes(const std::vector<sm::vec2>& nodes)
 
 std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, const sm::rect& region, bool major) const
 {
+	if (!m_ortho) {
+		const float max_ang = 20.0f / 180.0f * SM_PI;
+		m_minor_angle = -max_ang + max_ang * 2 * static_cast<float>(rand()) / RAND_MAX;
+	}
+
 	std::vector<sm::vec2> points;
 
 	bool is_loop = false;
@@ -301,7 +306,7 @@ sm::vec2 Streets::CalcDir(const sm::vec2& p, bool major) const
 
 	float theta = atan2f(tensor.y, tensor.x) / 2.0f;
 	if (!major) {
-		theta += SM_PI * 0.5;
+		theta += SM_PI * 0.5 + m_minor_angle;
 	}
 	return sm::vec2(cosf(theta), sinf(theta));
 }

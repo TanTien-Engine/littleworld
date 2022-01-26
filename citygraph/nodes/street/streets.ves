@@ -35,6 +35,7 @@ class Streets is Node
 
 		this.params.add(NodeParam("num", 2, {  "integer" : true, "region" : 10 }))
 		this.params.add(NodeParam("seed", 0))
+		this.params.add(NodeParam("ortho", true))		
 		this.params.add(NodeParam("type", "default", { "combo" : [ "default", "major", "minor", "tiny" ] }))
 
 		this.layout()
@@ -153,12 +154,14 @@ class Streets is Node
 		}
 
 		var seed = this.query_param("seed").value
+		var ortho = this.query_param("ortho").value		
 		var num = this.query_param("num").value
 		for (var border in regions)
 		{
 			var st = cg_Streets.init(v_tex.value.tex, border)
 
 			st.set_seed(seed)
+			st.set_ortho(ortho)
 			st.build_streamlines(num, seed != 1.0)
 
 			st.build_topology()
