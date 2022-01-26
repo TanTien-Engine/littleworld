@@ -7,7 +7,7 @@ import "blueprint.node_param" for NodeParam
 import "blueprint.node_editor" for NodeEditor
 import "blueprint.nodes.array" for Array
 import "rendergraph.variant" for VAR_TYPE_TEXTURE
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, VarStreets, VarBlock
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, ROAD_TYPE_MAJOR, ROAD_TYPE_MINOR, ROAD_TYPE_TINY, VarStreets, VarBlock
 import "citygraph.utility" for Utility
 import "citygraph.nodes.render.draw_geo2d" for DrawGeo2d
 import "geograph.config" for POINT_RADIUS
@@ -35,6 +35,7 @@ class Streets is Node
 
 		this.params.add(NodeParam("num", 2, {  "integer" : true, "region" : 10 }))
 		this.params.add(NodeParam("seed", 0))
+		this.params.add(NodeParam("type", "default", { "combo" : [ "default", "major", "minor", "tiny" ] }))
 
 		this.layout()
 
@@ -135,6 +136,22 @@ class Streets is Node
 			regions.add(nil)
 		}
 
+		var r_type = nil
+		var type = this.query_param("type").value
+		if (type == "default") {
+			if (v_regions == nil) {
+				r_type = ROAD_TYPE_MAJOR
+			} else {
+				r_type = ROAD_TYPE_MINOR
+			}
+		} else if (type == "major") {
+			r_type = ROAD_TYPE_MAJOR
+		} else if (type == "minor") {
+			r_type = ROAD_TYPE_MINOR
+		} else if (type == "tiny") {
+			r_type = ROAD_TYPE_TINY
+		}
+
 		var seed = this.query_param("seed").value
 		var num = this.query_param("num").value
 		for (var border in regions)
@@ -146,9 +163,7 @@ class Streets is Node
 
 			st.build_topology()
 
-			var v_st = VarStreets(st)
-			v_st.is_major = v_regions == nil
-
+			var v_st = VarStreets(st, r_type)
 			this.v_streets.add(Variant(VAR_TYPE_STREETS, v_st))
 		}
 

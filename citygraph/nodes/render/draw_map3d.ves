@@ -8,7 +8,7 @@ import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.brush" for Brush
 import "geograph.nodes.draw_geometry" for DrawGeometry
 import "editor.node_cache" for NODE_CACHE
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, BLOCK_TYPE_RIVER
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, BLOCK_TYPE_RIVER, ROAD_TYPE_MAJOR, ROAD_TYPE_MINOR, ROAD_TYPE_TINY
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR, GREEN_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "geometry" for Polyline3D
@@ -130,21 +130,32 @@ class DrawMap3d is Node
 		{
 			var v_streets = v_objs.value
 
-			var color = nil
-			if (v_streets.is_major) {
+			var width = 0.008
+			var color = MAJOR_ROAD_COLOR
+			if (v_streets.type == ROAD_TYPE_MAJOR)
+			{
+				width = 0.008
 				color = MAJOR_ROAD_COLOR
-			} else {
+			}
+			else if (v_streets.type == ROAD_TYPE_MINOR)
+			{
+				width = 0.006
+				color = MINOR_ROAD_COLOR
+			}
+			else if (v_streets.type == ROAD_TYPE_TINY)
+			{
+				width = 0.004
 				color = MINOR_ROAD_COLOR
 			}
 
 			// edges
 			var major = v_streets.streets.get_major_paths()
 //			this.build_routes_shape(major, Vector3(1.0, 0.0, 0.0))
-			this.build_routes_model(major, color)
+			this.build_routes_model(major, color, width)
 
 			var minor = v_streets.streets.get_minor_paths()
 //			this.build_routes_shape(minor, Vector3(0.0, 1.0, 0.0))
-			this.build_routes_model(minor, color)
+			this.build_routes_model(minor, color, width)
 
 //			// blocks
 //			var blocks = v_streets.streets.get_polygons()
@@ -194,11 +205,11 @@ class DrawMap3d is Node
 		}
 	}
 
-	build_routes_model(paths, color)
+	build_routes_model(paths, color, width)
 	{
 		for (var path in paths)
 		{
-			var polygon = GeometryTools.polyline_expand(path, 0.01)
+			var polygon = GeometryTools.polyline_expand(path, width)
 			if (polygon)
 			{
 				var polytope = GeometryTools.polygon_extrude_face(polygon, -0.001)

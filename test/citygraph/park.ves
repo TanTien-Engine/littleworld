@@ -20,6 +20,7 @@ _editor.add_node(node3, -703.2323670875, 576.57654742652)
 var node4 = ::citygraph::nodes::street::streets::Streets()
 node4.query_param("num").value = 2
 node4.query_param("seed").value = 0.53472173213959
+node4.query_param("type").value = "default"
 
 _editor.add_node(node4, -715.93426297412, 297.64615343117)
 
@@ -93,6 +94,7 @@ _editor.add_node(node17, 584.84647891288, -156.24316156858)
 var node18 = ::citygraph::nodes::street::streets::Streets()
 node18.query_param("num").value = 2
 node18.query_param("seed").value = 0
+node18.query_param("type").value = "default"
 
 _editor.add_node(node18, -719.4222708, 180.63584221903)
 
@@ -281,6 +283,7 @@ _editor.add_node(node51, 69.679248734403, 310.16314726937)
 var node52 = ::citygraph::nodes::street::streets::Streets()
 node52.query_param("num").value = 2
 node52.query_param("seed").value = 0
+node52.query_param("type").value = "tiny"
 
 _editor.add_node(node52, 542.99054142538, 144.65401564578)
 
@@ -296,6 +299,7 @@ _editor.add_node(node54, 687.66769835647, 152.47353561275)
 var node55 = ::citygraph::nodes::street::streets::Streets()
 node55.query_param("num").value = 1
 node55.query_param("seed").value = 0
+node55.query_param("type").value = "tiny"
 
 _editor.add_node(node55, 898.37058138646, 158.83072074153)
 

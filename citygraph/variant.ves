@@ -1,17 +1,20 @@
 var VAR_TYPE_STREETS = "streets"
 var VAR_TYPE_BLOCK   = "block"
 
+var ROAD_TYPE_MAJOR = "major"
+var ROAD_TYPE_MINOR = "minor"
+var ROAD_TYPE_TINY  = "tiny"
+
 var BLOCK_TYPE_COMMON = "common"
 var BLOCK_TYPE_PARK   = "park"
 var BLOCK_TYPE_RIVER  = "river"
 
 class VarStreets
 {
-	init(streets)
+	init(streets, type)
 	{
 		this.streets = streets
-
-		this.is_major = true
+		this.type = type
 	}
 }
 

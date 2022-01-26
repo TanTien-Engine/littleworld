@@ -6,7 +6,7 @@ import "blueprint.variant_proxy" for VariantProxy
 import "blueprint.node_param" for NodeParam
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.nodes.draw_geometry" for DrawGeometry
-import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, BLOCK_TYPE_RIVER
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, BLOCK_TYPE_RIVER, ROAD_TYPE_MAJOR, ROAD_TYPE_MINOR, ROAD_TYPE_TINY
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, COMMON_BLOCK_COLOR, GREEN_BLOCK_COLOR
 import "maths.vector" for Vector3
 import "graphics" for Graphics
@@ -99,13 +99,24 @@ class DrawMap2d is Node
 			{
 				var v_streets = v_objs.value
 
-				// edges
-				var width = 0.01
+				var width = 0.006
 				var color = MAJOR_ROAD_COLOR
 				var dst = this.v_geos_pass2
-				if (!v_streets.is_major)
+				if (v_streets.type == ROAD_TYPE_MAJOR)
 				{
-					width = 0.007
+					width = 0.006
+					color = MAJOR_ROAD_COLOR
+					dst = this.v_geos_pass2
+				}
+				else if (v_streets.type == ROAD_TYPE_MINOR)
+				{
+					width = 0.006
+					color = MINOR_ROAD_COLOR
+					dst = this.v_geos_pass1
+				}
+				else if (v_streets.type == ROAD_TYPE_TINY)
+				{
+					width = 0.004
 					color = MINOR_ROAD_COLOR
 					dst = this.v_geos_pass1
 				}
