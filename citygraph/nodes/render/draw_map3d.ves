@@ -201,7 +201,7 @@ class DrawMap3d is Node
 			var polygon = GeometryTools.polyline_expand(path, 0.01)
 			if (polygon)
 			{
-				var polytope = GeometryTools.polygon_extrude_face(polygon, 0.001)
+				var polytope = GeometryTools.polygon_extrude_face(polygon, -0.001)
 
 				var brush = Brush([ polytope ])
 				brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))
@@ -216,7 +216,7 @@ class DrawMap3d is Node
 
 	build_block_model(poly, color)
 	{
-		var polytope = GeometryTools.polygon_extrude_face(poly, 0.001)
+		var polytope = GeometryTools.polygon_extrude_face(poly, -0.001)
 
 		var brush = Brush([ polytope ])
 		brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))
