@@ -7,12 +7,51 @@
 
 #include <sm/SM_DouglasPeucker.h>
 #include <SM_Calc.h>
-
 #include <iterator>
 #include <map>
 
 //#define BILINEAR_SAMPLING
 //#define TRAVEL_STOP_CHECK
+//#define USE_EIGENVECTORS
+
+#ifdef USE_EIGENVECTORS
+#include <Eigen/Dense>
+#endif // USE_EIGENVECTORS
+
+namespace
+{
+
+#ifdef USE_EIGENVECTORS
+
+#define FLOAT_COMPARISON_EPSILON 1e-5
+
+bool isFuzzyNull(float a)
+{
+    return (fabs(a) < FLOAT_COMPARISON_EPSILON);
+}
+
+bool isFuzzyEqual(float a, float b)
+{
+    return (fabs(a - b) / FLOAT_COMPARISON_EPSILON <= fmin(fabs(a), fabs(b)));
+}
+
+bool isSymetricalAndTraceless(const sm::vec4& tensor)
+{
+	return isFuzzyEqual(tensor.y, tensor.z)
+		&& isFuzzyNull(tensor.x + tensor.w);
+}
+
+bool isDegenerate(const sm::vec4& tensor)
+{
+    return isFuzzyNull(tensor.x)
+            && isFuzzyNull(tensor.y)
+            && isFuzzyNull(tensor.z)
+            && isFuzzyNull(tensor.w);
+}
+
+#endif // USE_EIGENVECTORS
+
+}
 
 namespace citygen
 {
@@ -300,6 +339,39 @@ sm::vec2 Streets::CalcDir(const sm::vec2& p, bool major) const
 	tensor = m_tf->GetTensor(x_min, y_min);
 #endif // BILINEAR_SAMPLING
 
+#ifdef USE_EIGENVECTORS
+	if (!isSymetricalAndTraceless(tensor))
+	{
+		return sm::vec2(0, 0);
+	}
+	if (isDegenerate(tensor))
+	{
+		return sm::vec2(0, 0);
+	}
+	if (isFuzzyEqual(tensor.x, 1) && isFuzzyEqual(tensor.y, 0))
+	{
+		return major ? sm::vec2(1, 0) : sm::vec2(0, 1);
+	}
+
+	Eigen::Matrix2f m(2, 2);
+	m(0, 0) = tensor.x;
+	m(1, 0) = tensor.y;
+	m(0, 1) = tensor.z;
+	m(1, 1) = tensor.w;
+
+	Eigen::EigenSolver<Eigen::Matrix2f> es(m);
+	sm::vec2 vec1(es.eigenvectors().col(0).real()[0], es.eigenvectors().col(0).real()[1]);
+	sm::vec2 vec2(es.eigenvectors().col(1).real()[0], es.eigenvectors().col(1).real()[1]);
+	sm::vec2 val(es.eigenvalues()[0].real(), es.eigenvalues()[1].real());
+	if (isFuzzyEqual(val.x, fmax(val.x, val.y)))
+	{
+		return major ? vec1 : vec2;
+	}
+	else
+	{
+		return major ? vec2 : vec1;
+	}
+#else
 	if (abs(tensor.x) < 0.00001) {
 		return sm::vec2(0, 0);
 	}
@@ -309,6 +381,7 @@ sm::vec2 Streets::CalcDir(const sm::vec2& p, bool major) const
 		theta += SM_PI * 0.5 + m_minor_angle;
 	}
 	return sm::vec2(cosf(theta), sinf(theta));
+#endif // USE_EIGENVECTORS
 }
 
 void Streets::IntersectPaths()
