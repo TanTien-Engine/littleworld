@@ -1,0 +1,395 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -861.177814581, 625.6815257177)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node1, -372.53883882604, 637.32849882315)
+
+var node2 = ::blueprint::nodes::number2::Number2()
+
+node2.value.set(0.76046144962311, 0.76046144962311)
+
+_editor.add_node(node2, -860.0521404332, 557.48409070648)
+
+var node3 = ::citygraph::nodes::tensor::center::Center()
+
+_editor.add_node(node3, -703.2323670875, 576.57654742652)
+
+var node4 = ::citygraph::nodes::street::streets::Streets()
+node4.query_param("num").value = 2
+node4.query_param("seed").value = 0.53472173213959
+
+_editor.add_node(node4, -715.93426297412, 297.64615343117)
+
+var node5 = ::citygraph::nodes::tensor::regular::Regular()
+
+_editor.add_node(node5, -704.3137720028, 656.04892885157)
+
+var node6 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node6, -566.16078859433, 640.24011406584)
+
+var node7 = ::blueprint::nodes::number2::Number2()
+
+node7.value.set(0, 0.51223009824753)
+
+_editor.add_node(node7, -865.4483030856, 694.46746326937)
+
+var node8 = ::citygraph::nodes::building::parcels::Parcels()
+node8.query_param("max_len").value = 0.055122073739767
+node8.query_param("seed").value = 0
+
+_editor.add_node(node8, 365.12385535205, 645.72890372242)
+
+var node9 = ::citygraph::nodes::block::offset::Offset()
+node9.query_param("distance").value = 0.0016073066508397
+
+_editor.add_node(node9, 526.46303313202, 631.34820295038)
+
+var node10 = ::citygraph::nodes::building::extrude::Extrude()
+node10.query_param("distance").value = 0
+node10.query_param("roof").value = false
+
+_editor.add_node(node10, 697.36293501906, 562.09459223643)
+
+var node11 = ::citygraph::nodes::block::area_selector::AreaSelector()
+node11.query_param("num").value = 3
+
+_editor.add_node(node11, -569.18053361766, 289.87971508466)
+
+var node12 = ::citygraph::nodes::block::shape_l::ShapeL()
+node12.query_param("front").value = 0.014716864563525
+node12.query_param("left").value = 0.016939086839557
+
+_editor.add_node(node12, 694.64244937193, 693.4977118045)
+
+var node13 = ::blueprint::nodes::random::Random()
+node13.query_param("seed").value = 0.65105926990509
+
+_editor.add_node(node13, 399.88049513726, 520.2580439173)
+
+var node14 = ::blueprint::nodes::number::Number()
+
+node14.value = 0.063912622630596
+
+_editor.add_node(node14, 270.72370531085, 554.3061294938)
+
+var node15 = ::blueprint::nodes::number::Number()
+
+node15.value = 0
+
+_editor.add_node(node15, 269.23605761585, 486.53751225788)
+
+var node16 = ::blueprint::nodes::lazy_eval::LazyEval()
+
+_editor.add_node(node16, 536.84436594405, 539.87323936173)
+
+var node17 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
+
+_editor.add_node(node17, 584.84647891288, -156.24316156858)
+
+var node18 = ::citygraph::nodes::street::streets::Streets()
+node18.query_param("num").value = 2
+node18.query_param("seed").value = 0
+
+_editor.add_node(node18, -719.4222708, 180.63584221903)
+
+var node19 = ::citygraph::nodes::block::offset::Offset()
+node19.query_param("distance").value = 0.0029041008092463
+
+_editor.add_node(node19, 216.38328128294, 656.04737786146)
+
+var node20 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node20, -409.71881545505, 226.44982365943)
+
+var node21 = ::blueprint::nodes::store::Store()
+
+node21.var_name = "tensor_field"
+
+_editor.add_node(node21, -167.95914357734, 645.28623316953)
+
+var node22 = ::blueprint::nodes::load::Load()
+
+node22.var_name = "tensor_field"
+
+_editor.add_node(node22, -867.4136877727, 250.18492975281)
+
+var node23 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node23, -421.58307183726, 375.05943024204)
+
+var node24 = ::blueprint::nodes::store::Store()
+
+node24.var_name = "roads"
+
+_editor.add_node(node24, -286.99234836124, 386.54373113814)
+
+var node25 = ::blueprint::nodes::load::Load()
+
+node25.var_name = "roads"
+
+_editor.add_node(node25, 278.44198465793, -105.61412716152)
+
+var node26 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node26, 444.23131456977, -216.16914632469)
+
+var node27 = ::citygraph::nodes::render::draw_map2d::DrawMap2d()
+
+_editor.add_node(node27, 584.97605623774, -88.352792983346)
+
+var node28 = ::citygraph::nodes::block::area_selector::AreaSelector()
+node28.query_param("num").value = 5
+
+_editor.add_node(node28, -725.26138315697, -31.776539550068)
+
+var node29 = ::citygraph::nodes::block::set_block_type::SetBlockType()
+node29.query_param("type").value = "park"
+
+_editor.add_node(node29, -401.26138315696, -51.867448640983)
+
+var node30 = ::blueprint::nodes::store::Store()
+
+node30.var_name = "park_blocks"
+
+_editor.add_node(node30, -270.35740810368, -53.056724209165)
+
+var node31 = ::blueprint::nodes::store::Store()
+
+node31.var_name = "build_blocks"
+
+_editor.add_node(node31, -268.26080683629, -120.56596506002)
+
+var node32 = ::blueprint::nodes::load::Load()
+
+node32.var_name = "build_blocks"
+
+_editor.add_node(node32, 70.748193973542, 666.71535661626)
+
+var node33 = ::blueprint::nodes::store::Store()
+
+node33.var_name = "blocks"
+
+_editor.add_node(node33, -277.31995570093, 238.10562385575)
+
+var node34 = ::blueprint::nodes::commentary::Commentary()
+
+node34.set_size(835.6, 248.75)
+node34.title = "Tensorfield"
+
+_editor.add_node(node34, -518.18133056641, 755.30847900391)
+
+var node35 = ::blueprint::nodes::commentary::Commentary()
+
+node35.set_size(747.87016, 353.29521)
+node35.title = "Streets"
+
+_editor.add_node(node35, -559.14026835939, 457.38718761719)
+
+var node36 = ::blueprint::nodes::load::Load()
+
+node36.var_name = "blocks"
+
+_editor.add_node(node36, -869.96884690198, -13.214141604764)
+
+var node37 = ::citygraph::nodes::block::random_selector::RandomSelector()
+node37.query_param("num").value = 3
+node37.query_param("seed").value = 0.14296671748161
+
+_editor.add_node(node37, -584.82758484588, -41.817363319961)
+
+var node38 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node38, -396.00272522674, -133.4384778774)
+
+var node39 = ::blueprint::nodes::commentary::Commentary()
+
+node39.set_size(729.510346, 254.731998)
+node39.title = "Blocks"
+
+_editor.add_node(node39, -567.29079760937, 45.021391679682)
+
+var node40 = ::blueprint::nodes::commentary::Commentary()
+
+node40.set_size(894.66109220001, 326.3310134)
+node40.title = "Lots & Buildings"
+
+_editor.add_node(node40, 454.4910304892, 752.74041387699)
+
+var node41 = ::blueprint::nodes::store::Store()
+
+node41.var_name = "buildings"
+
+_editor.add_node(node41, 832.88870861216, 582.88822354212)
+
+var node42 = ::blueprint::nodes::load::Load()
+
+node42.var_name = "park_blocks"
+
+_editor.add_node(node42, 281.15312066775, -150.25236222913)
+
+var node43 = ::blueprint::nodes::load::Load()
+
+node43.var_name = "build_blocks"
+
+_editor.add_node(node43, 285.55312982303, -197.55236222913)
+
+var node44 = ::blueprint::nodes::load::Load()
+
+node44.var_name = "buildings"
+
+_editor.add_node(node44, 283.24226312381, -248.19342057874)
+
+var node45 = ::blueprint::nodes::load::Load()
+
+node45.var_name = "park_blocks"
+
+_editor.add_node(node45, 401.53967077465, 150.84208250578)
+
+var node46 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node46, 73.949737239003, 241.3772097177)
+
+var node47 = ::blueprint::nodes::subgraph::Subgraph()
+node47.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node47, 801.90689481215, 289.56963736861)
+
+var node48 = ::blueprint::nodes::number2::Number2()
+
+node48.value.set(0.56652504205704, 0.48874723911285)
+
+_editor.add_node(node48, 75.075411386803, 173.17977470648)
+
+var node49 = ::citygraph::nodes::tensor::center::Center()
+
+_editor.add_node(node49, 223.4251847325, 215.26223142652)
+
+var node50 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node50, 368.96676322567, 255.93579806584)
+
+var node51 = ::blueprint::nodes::number2::Number2()
+
+node51.value.set(0.015371237881482, 0.48203790187836)
+
+_editor.add_node(node51, 69.679248734403, 310.16314726937)
+
+var node52 = ::citygraph::nodes::street::streets::Streets()
+node52.query_param("num").value = 2
+node52.query_param("seed").value = 0
+
+_editor.add_node(node52, 542.99054142538, 144.65401564578)
+
+var node53 = ::citygraph::nodes::tensor::wedge::Wedge()
+
+_editor.add_node(node53, 221.61639580962, 288.56428451927)
+
+var node54 = ::citygraph::nodes::block::area_selector::AreaSelector()
+node54.query_param("num").value = 3
+
+_editor.add_node(node54, 687.66769835647, 152.47353561275)
+
+var node55 = ::citygraph::nodes::street::streets::Streets()
+node55.query_param("num").value = 1
+node55.query_param("seed").value = 0
+
+_editor.add_node(node55, 898.37058138646, 158.83072074153)
+
+var node56 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node56, 850.80777165477, 50.196802060465)
+
+var node57 = ::blueprint::nodes::store::Store()
+
+node57.var_name = "park_roads"
+
+_editor.add_node(node57, 989.17141911573, 59.601799578705)
+
+var node58 = ::blueprint::nodes::load::Load()
+
+node58.var_name = "park_roads"
+
+_editor.add_node(node58, 279.53852908436, -297.83605413516)
+
+var node59 = ::blueprint::nodes::subgraph::Subgraph()
+node59.load_from_file(_editor, "../../assets/blueprints/tensorfield/tensor_add_noise.ves")
+node59.set_prop_value("seed", 0)
+
+_editor.add_node(node59, 558.72752898791, 273.89460768289)
+
+var node60 = ::blueprint::nodes::commentary::Commentary()
+
+node60.set_size(1159.999669, 378.5641119)
+node60.title = "Parks"
+
+_editor.add_node(node60, 571.00243035945, 368.19760777812)
+
+Blueprint.connect(node46, "uv", node53, "uv")
+Blueprint.connect(node51, "v2", node53, "pos")
+Blueprint.connect(node46, "uv", node49, "st")
+Blueprint.connect(node48, "v2", node49, "pos")
+Blueprint.connect(node53, "ret", node50, "a")
+Blueprint.connect(node49, "ret", node50, "b")
+Blueprint.connect(node50, "v", node59, "tensor")
+Blueprint.connect(node59, "tensor", node47, "tensor")
+Blueprint.connect(node14, "v", node13, "min")
+Blueprint.connect(node15, "v", node13, "max")
+Blueprint.connect(node13, "val", node16, "val")
+Blueprint.connect(node0, "uv", node5, "st")
+Blueprint.connect(node7, "v2", node5, "pos")
+Blueprint.connect(node5, "ret", node6, "a")
+Blueprint.connect(node6, "v", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node21, "var")
+Blueprint.connect(node21, "var", node22, "var")
+Blueprint.connect(node22, "var", node4, "tensor")
+Blueprint.connect(node4, "blocks", node11, "blocks")
+Blueprint.connect(node22, "var", node18, "tensor")
+Blueprint.connect(node11, "selected", node18, "regions")
+Blueprint.connect(node4, "streets", node23, "in0")
+Blueprint.connect(node18, "streets", node23, "in1")
+Blueprint.connect(node23, "list", node24, "var")
+Blueprint.connect(node24, "var", node25, "var")
+Blueprint.connect(node11, "others", node20, "in0")
+Blueprint.connect(node18, "blocks", node20, "in1")
+Blueprint.connect(node20, "list", node33, "var")
+Blueprint.connect(node33, "var", node36, "var")
+Blueprint.connect(node36, "var", node28, "blocks")
+Blueprint.connect(node28, "selected", node37, "blocks")
+Blueprint.connect(node37, "others", node38, "in0")
+Blueprint.connect(node28, "others", node38, "in1")
+Blueprint.connect(node38, "list", node31, "var")
+Blueprint.connect(node31, "var", node43, "var")
+Blueprint.connect(node31, "var", node32, "var")
+Blueprint.connect(node32, "var", node19, "blocks")
+Blueprint.connect(node19, "blocks", node8, "blocks")
+Blueprint.connect(node8, "blocks", node9, "blocks")
+Blueprint.connect(node9, "blocks", node12, "blocks")
+Blueprint.connect(node9, "blocks", node10, "blocks")
+Blueprint.connect(node16, "pin", node10, "dist")
+Blueprint.connect(node10, "boxes", node41, "var")
+Blueprint.connect(node41, "var", node44, "var")
+Blueprint.connect(node37, "selected", node29, "blocks")
+Blueprint.connect(node29, "blocks", node30, "var")
+Blueprint.connect(node30, "var", node45, "var")
+Blueprint.connect(node47, "tensor_field", node52, "tensor")
+Blueprint.connect(node45, "var", node52, "regions")
+Blueprint.connect(node52, "blocks", node54, "blocks")
+Blueprint.connect(node47, "tensor_field", node55, "tensor")
+Blueprint.connect(node54, "selected", node55, "regions")
+Blueprint.connect(node52, "streets", node56, "in0")
+Blueprint.connect(node55, "streets", node56, "in1")
+Blueprint.connect(node56, "list", node57, "var")
+Blueprint.connect(node57, "var", node58, "var")
+Blueprint.connect(node30, "var", node42, "var")
+Blueprint.connect(node25, "var", node26, "in0")
+Blueprint.connect(node42, "var", node26, "in1")
+Blueprint.connect(node43, "var", node26, "in2")
+Blueprint.connect(node44, "var", node26, "in3")
+Blueprint.connect(node58, "var", node26, "in4")
+Blueprint.connect(node26, "list", node17, "objs")
+Blueprint.connect(node0, "uv", node3, "st")
+Blueprint.connect(node2, "v2", node3, "pos")
