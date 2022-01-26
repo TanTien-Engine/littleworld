@@ -4,6 +4,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "citygraph.variant" for VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, VarBlock
+import "citygraph.utility" for Utility
 
 class SetBlockType is Node
 {
@@ -30,7 +31,8 @@ class SetBlockType is Node
 			return nil
 		}
 
-		return Variant(this.build_blocks(v_blocks.value))
+		var all_blocks = Utility.list_flatten(v_blocks)
+		return Variant(this.build_blocks(all_blocks))
 	}
 
 	build_blocks(blocks)
