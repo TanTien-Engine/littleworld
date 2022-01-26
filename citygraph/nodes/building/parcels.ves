@@ -18,7 +18,7 @@ class Parcels is Node
 			Pin(this, "blocks", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
-			Pin(this, "lots", VAR_TYPE_ARRAY),
+			Pin(this, "blocks", VAR_TYPE_ARRAY),
 		]
 
 		this.params.add(NodeParam("max_len", 0.1, { "region" : 0.2 }))
@@ -31,10 +31,10 @@ class Parcels is Node
 	{
 		var v_polys = Blueprint.calc_input_value(this, 0)
 		var all_polys = Utility.list_flatten(v_polys)
-		return this.build_lots(all_polys)
+		return this.build_blocks(all_polys)
 	}
 
-	build_lots(blocks)
+	build_blocks(blocks)
 	{
 		var ret = []
 

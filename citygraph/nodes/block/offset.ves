@@ -14,10 +14,10 @@ class Offset is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "lots", VAR_TYPE_ARRAY),
+			Pin(this, "blocks", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
-			Pin(this, "lots", VAR_TYPE_ARRAY),
+			Pin(this, "blocks", VAR_TYPE_ARRAY),
 		]
 
 		this.params.add(NodeParam("distance", 0.002, { "region" : 0.01 }))
@@ -27,27 +27,27 @@ class Offset is Node
 
 	calc_value(idx)
 	{
-		var v_lots = Blueprint.calc_input_value(this, 0)
-		if (!v_lots) {
+		var v_blocks = Blueprint.calc_input_value(this, 0)
+		if (!v_blocks) {
 			return nil
 		}
 
-		return Variant(this.build_lots(v_lots.value))
+		return Variant(this.build_blocks(v_blocks.value))
 	}
 
-	build_lots(lots)
+	build_blocks(blocks)
 	{
 		var ret = []
 
 		var distance = this.query_param("distance").value
 
-		for (var lot in lots)
+		for (var block in blocks)
 		{
-			var polygon = GeometryTools.polyline_offset(lot.value.poly, distance, true)
+			var polygon = GeometryTools.polyline_offset(block.value.poly, distance, true)
 			if (polygon and GeometryTools.is_counterclockwise(polygon))
 			{
-				var block = VarBlock(polygon, lot.value.type)
-				ret.add(Variant(VAR_TYPE_BLOCK, block))
+				var v_block = VarBlock(polygon, block.value.type)
+				ret.add(Variant(VAR_TYPE_BLOCK, v_block))
 			}
 		}
 

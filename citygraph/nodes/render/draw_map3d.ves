@@ -154,14 +154,14 @@ class DrawMap3d is Node
 		}
 		else if (v_objs.type == VAR_TYPE_BLOCK)
 		{
-			var block = v_objs.value
+			var v_block = v_objs.value
 			var color = Vector3(0, 0, 0)
-			if (block.type == BLOCK_TYPE_COMMON) {
+			if (v_block.type == BLOCK_TYPE_COMMON) {
 				color = COMMON_BLOCK_COLOR
-			} else if (block.type == BLOCK_TYPE_PARK) {
+			} else if (v_block.type == BLOCK_TYPE_PARK) {
 				color = GREEN_BLOCK_COLOR
 			}	
-			this.build_block_model(block.poly, color)			
+			this.build_block_model(v_block.poly, color)			
 		}
 		else if (v_objs.type == VAR_TYPE_GEO)
 		{

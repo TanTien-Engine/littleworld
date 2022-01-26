@@ -117,16 +117,16 @@ class DrawMap2d is Node
 			}
 			else if (v_objs.type == VAR_TYPE_BLOCK)
 			{
-				var block = v_objs.value
+				var v_block = v_objs.value
 				var color = Vector3(0, 0, 0)
-				if (block.type == BLOCK_TYPE_COMMON) {
+				if (v_block.type == BLOCK_TYPE_COMMON) {
 					color = COMMON_BLOCK_COLOR
-				} else if (block.type == BLOCK_TYPE_PARK) {
+				} else if (v_block.type == BLOCK_TYPE_PARK) {
 					color = GREEN_BLOCK_COLOR
 				}
 
 				var geo = VarGeo()
-				geo.shape = block.poly
+				geo.shape = v_block.poly
 				geo.render_style["color"] = color
 				geo.render_style["fill"] = true
 				this.v_geos_pass1.value.add(Variant(VAR_TYPE_GEO, geo))
