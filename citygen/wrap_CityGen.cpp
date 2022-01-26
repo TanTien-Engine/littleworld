@@ -242,6 +242,13 @@ void w_ParcelsOBB_set_seed()
     parcels->SetSeed(seed);
 }
 
+void w_ParcelsOBB_set_density_center()
+{
+    auto parcels = ((tt::Proxy<citygen::ParcelsOBB>*)ves_toforeign(0))->obj;
+    auto center = tt::list_to_vec2(1);
+    parcels->SetDensityCenter(center);
+}
+
 void w_ParcelsSS_allocate()
 {
     auto poly = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
@@ -277,6 +284,10 @@ void w_ParcelsSS_set_seed()
     auto parcels = ((tt::Proxy<citygen::ParcelsSS>*)ves_toforeign(0))->obj;
     auto seed = (float)ves_tonumber(1);
     parcels->SetSeed(seed);
+}
+
+void w_ParcelsSS_set_density_center()
+{
 }
 
 void w_GeometryTools_polyline_offset()
@@ -398,10 +409,12 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "ParcelsOBB.build(_)") == 0) return w_ParcelsOBB_build;
     if (strcmp(signature, "ParcelsOBB.get_polygons()") == 0) return w_ParcelsOBB_get_polygons;
     if (strcmp(signature, "ParcelsOBB.set_seed(_)") == 0) return w_ParcelsOBB_set_seed;
+    if (strcmp(signature, "ParcelsOBB.set_density_center(_)") == 0) return w_ParcelsOBB_set_density_center;
 
     if (strcmp(signature, "ParcelsSS.build(_)") == 0) return w_ParcelsSS_build;
     if (strcmp(signature, "ParcelsSS.get_polygons()") == 0) return w_ParcelsSS_get_polygons;
     if (strcmp(signature, "ParcelsSS.set_seed(_)") == 0) return w_ParcelsSS_set_seed;
+    if (strcmp(signature, "ParcelsSS.set_density_center(_)") == 0) return w_ParcelsSS_set_density_center;
 
     if (strcmp(signature, "static GeometryTools.polyline_offset(_,_,_)") == 0) return w_GeometryTools_polyline_offset;
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;

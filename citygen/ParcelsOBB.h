@@ -19,13 +19,14 @@ public:
 	std::vector<std::vector<sm::vec2>> GetPolygons() const;
 
 	void SetSeed(float seed) { m_seed = seed; }
+	void SetDensityCenter(const sm::vec2& center) { m_density_center = center; }
 
 private:
 	struct Node
 	{
-		Node(const std::vector<sm::vec2>& poly, float max_len);
+		Node(const std::vector<sm::vec2>& poly, float max_len, const sm::vec2& density_center);
 
-		void Clip(const sm::vec2& p0, const sm::vec2& p1, float max_len);
+		void Clip(const sm::vec2& p0, const sm::vec2& p1, float max_len, const sm::vec2& density_center);
 
 		std::vector<sm::vec2> poly;
 
@@ -40,6 +41,8 @@ private:
 	std::shared_ptr<Node> m_root;
 
 	float m_seed = 0.0f;
+
+	sm::vec2 m_density_center;
 
 }; // ParcelsOBB
 

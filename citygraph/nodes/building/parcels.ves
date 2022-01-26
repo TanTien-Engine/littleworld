@@ -1,12 +1,13 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER2
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "citygraph.utility" for Utility
 import "citygraph.variant" for VAR_TYPE_BLOCK, VarBlock
 import "citygen" for ParcelsOBB, ParcelsSS
 import "maths.vector" for Vector3
+import "graphics" for Graphics
 
 class Parcels is Node
 {
@@ -15,7 +16,8 @@ class Parcels is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "blocks", VAR_TYPE_ARRAY),
+			Pin(this, "blocks",  VAR_TYPE_ARRAY),
+			Pin(this, "density", VAR_TYPE_NUMBER2),
 		]
 		this.exports = [
 			Pin(this, "blocks", VAR_TYPE_ARRAY),
@@ -41,11 +43,22 @@ class Parcels is Node
 		var max_len = this.query_param("max_len").value
 		var seed = this.query_param("seed").value
 
+		var v_density = Blueprint.calc_input_value(this, 1)
+
 		for (var block in blocks)
 		{
 			var parcels = ParcelsOBB.init(block.value.poly)
-//			var parcels = ParcelsSS.init(block.value.poly)			
+//			var parcels = ParcelsSS.init(block.value.poly)
+
+			if (v_density) 
+			{
+				var w = Graphics.get_width()
+				var h = Graphics.get_height()
+				var p = v_density.value
+				parcels.set_density_center([ p.x / w + 0.5, p.y / h + 0.5 ])
+			}
 			parcels.set_seed(seed)
+
 			parcels.build(max_len)
 
 			var polygons = parcels.get_polygons()

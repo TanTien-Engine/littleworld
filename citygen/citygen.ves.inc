@@ -29,6 +29,7 @@ foreign class ParcelsOBB
 	foreign get_polygons()
 
 	foreign set_seed(seed)
+	foreign set_density_center(center)
 }
 
 foreign class ParcelsSS
@@ -40,6 +41,7 @@ foreign class ParcelsSS
 	foreign get_polygons()
 
 	foreign set_seed(seed)
+	foreign set_density_center(center)
 }
 
 foreign class GeometryTools
