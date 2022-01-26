@@ -13,10 +13,11 @@ class AreaSelector is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "polys", VAR_TYPE_ARRAY),
+			Pin(this, "blocks", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
-			Pin(this, "polys", VAR_TYPE_ARRAY),
+			Pin(this, "selected", VAR_TYPE_ARRAY),
+			Pin(this, "others",   VAR_TYPE_ARRAY),
 		]
 
 		this.params.add(NodeParam("num", 1, {  "integer" : true, "region" : 10 }))
@@ -28,11 +29,15 @@ class AreaSelector is Node
 	{
 		var v_polys = Blueprint.calc_input_value(this, 0)
 		var all_polys = Utility.list_flatten(v_polys)
-		var sel_polys = this.select_polygons(all_polys)
-		return Variant(sel_polys)
+		if (idx == 0) {
+			return Variant(this.select_polygons(all_polys, true))
+		} else if (idx == 1) {
+			return Variant(this.select_polygons(all_polys, false))
+		}
+		return nil
 	}
 
-	select_polygons(src_polys)
+	select_polygons(src_polys, out_sel)
 	{
 		var num = this.query_param("num").value
 		if (src_polys.count < num) {
@@ -51,8 +56,17 @@ class AreaSelector is Node
 		poly_area.sort(poly_area_cmp)
 
 		var polys = []
-		for (var i in 0..num) {
-			polys.add(poly_area[i][0])
+		if (out_sel)
+		{
+			for (var i in 0..num) {
+				polys.add(poly_area[i][0])
+			}
+		}
+		else
+		{
+			for (var i in num..poly_area.count) {
+				polys.add(poly_area[i][0])
+			}
 		}
 		return polys
 	}

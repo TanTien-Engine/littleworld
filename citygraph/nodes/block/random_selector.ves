@@ -13,10 +13,11 @@ class RandomSelector is Node
 		super.init()
 	
 		this.imports = [
-			Pin(this, "polys", VAR_TYPE_ARRAY),
+			Pin(this, "blocks", VAR_TYPE_ARRAY),
 		]
 		this.exports = [
-			Pin(this, "polys", VAR_TYPE_ARRAY),
+			Pin(this, "selected", VAR_TYPE_ARRAY),
+			Pin(this, "others",   VAR_TYPE_ARRAY),
 		]
 
 		this.params.add(NodeParam("num", 1, {  "integer" : true, "region" : 10 }))
@@ -29,10 +30,15 @@ class RandomSelector is Node
 	{
 		var v_polys = Blueprint.calc_input_value(this, 0)
 		var all_polys = Utility.list_flatten(v_polys)
-		return Variant(this.select_polygons(all_polys))
+		if (idx == 0) {
+			return Variant(this.select_polygons(all_polys, true))
+		} else if (idx == 1) {
+			return Variant(this.select_polygons(all_polys, false))
+		}
+		return nil
 	}
 
-	select_polygons(src_polys)
+	select_polygons(src_polys, out_sel)
 	{
 		var num = this.query_param("num").value
 		if (src_polys.count < num) {
@@ -41,10 +47,18 @@ class RandomSelector is Node
 
 		var seed = this.query_param("seed").value
 		var random = Random.init(seed * 65535)
-		var polys = []
+
+		var selected = List.filled(src_polys.value.count, false)
 		for (var i in 0..num) {
 			var idx = random.int(src_polys.value.count)
-			polys.add(src_polys.value[idx])
+			selected[idx] = true
+		}
+
+		var polys = []
+		for (var i in 0..selected.count) {
+			if ((selected[i] and out_sel) or (!selected[i] and !out_sel)) {
+				polys.add(src_polys.value[i])
+			}
 		}
 		return polys
 	}
