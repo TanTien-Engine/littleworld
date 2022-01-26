@@ -27,75 +27,63 @@ node5.value = 0
 
 _editor.add_node(node5, -24.372258504097, -126.22818167543)
 
-var node6 = ::blueprint::nodes::number::Number()
+var node6 = ::blueprint::nodes::multiply::Multiply()
 
-node6.value = 0.5
+_editor.add_node(node6, 264.2198318865, 96.797045966182)
 
-_editor.add_node(node6, -30.910187644697, 143.87707038024)
+var node7 = ::blueprint::nodes::pi::Pi()
 
-var node7 = ::blueprint::nodes::multiply::Multiply()
+_editor.add_node(node7, 110.6598074725, 53.677061835322)
 
-_editor.add_node(node7, 264.2198318865, 96.797045966182)
+var node8 = ::rendergraph::nodes::texture::Texture()
+node8.query_param("unif_name").value = "perlin_perm2d_tex"
+node8.gamma_correction = false
+node8.init_texture("../../../../tantien/assets/textures/noise/perlin_perm2d.png")
 
-var node8 = ::blueprint::nodes::pi::Pi()
+_editor.add_node(node8, -548.92590332031, -66.624420166016)
 
-_editor.add_node(node8, 110.6598074725, 53.677061835322)
+var node9 = ::rendergraph::nodes::texture::Texture()
+node9.query_param("unif_name").value = "perlin_grad2d_tex"
+node9.gamma_correction = false
+node9.init_texture("../../../../tantien/assets/textures/noise/perlin_grad2d.png")
 
-var node9 = ::blueprint::nodes::subtract::Subtract()
+_editor.add_node(node9, -333.92593383789, -67.624420166016)
 
-_editor.add_node(node9, 111.6065275897, 169.18460197203)
+var node10 = ::blueprint::nodes::input::Input()
 
-var node10 = ::rendergraph::nodes::texture::Texture()
-node10.query_param("unif_name").value = "perlin_perm2d_tex"
-node10.gamma_correction = false
-node10.init_texture("../../../../tantien/assets/textures/noise/perlin_perm2d.png")
+node10.var_name = "tensor"
+node10.var_type = "num4"
 
-_editor.add_node(node10, -548.92590332031, -66.624420166016)
+_editor.add_node(node10, 265.26256353205, 169.86322021484)
 
-var node11 = ::rendergraph::nodes::texture::Texture()
-node11.query_param("unif_name").value = "perlin_grad2d_tex"
-node11.gamma_correction = false
-node11.init_texture("../../../../tantien/assets/textures/noise/perlin_grad2d.png")
+var node11 = ::blueprint::nodes::output::Output()
 
-_editor.add_node(node11, -333.92593383789, -67.624420166016)
+node11.var_name = "tensor"
+node11.var_type = "num4"
 
-var node12 = ::blueprint::nodes::input::Input()
+_editor.add_node(node11, 566.17165860263, 130.31773792614)
 
-node12.var_name = "tensor"
-node12.var_type = "num4"
+var node12 = ::shadergraph::nodes::tex_coord::TexCoord()
 
-_editor.add_node(node12, 265.26256353205, 169.86322021484)
+_editor.add_node(node12, -442.92098452013, 128.96827027526)
 
-var node13 = ::blueprint::nodes::output::Output()
+var node13 = ::blueprint::nodes::property::Property()
 
-node13.var_name = "tensor"
-node13.var_type = "num4"
+node13.var_name = "seed"
+node13.var_type = "num"
 
-_editor.add_node(node13, 566.17165860263, 130.31773792614)
+_editor.add_node(node13, -307.82647094727, 31.236505126953)
 
-var node14 = ::shadergraph::nodes::tex_coord::TexCoord()
-
-_editor.add_node(node14, -442.92098452013, 128.96827027526)
-
-var node15 = ::blueprint::nodes::property::Property()
-
-node15.var_name = "seed"
-node15.var_type = "num"
-
-_editor.add_node(node15, -307.82647094727, 31.236505126953)
-
-Blueprint.connect(node14, "uv", node1, "a")
+Blueprint.connect(node12, "uv", node1, "a")
 Blueprint.connect(node2, "v", node1, "b")
 Blueprint.connect(node1, "v", node0, "p")
-Blueprint.connect(node15, "var", node0, "seed")
-Blueprint.connect(node10, "tex", node0, "perlin_perm2d_tex")
-Blueprint.connect(node11, "tex", node0, "perlin_grad2d_tex")
-Blueprint.connect(node0, "ret", node9, "a")
-Blueprint.connect(node6, "v", node9, "b")
-Blueprint.connect(node9, "v", node7, "a")
-Blueprint.connect(node8, "pi/2", node7, "b")
-Blueprint.connect(node12, "var", node3, "tensor")
-Blueprint.connect(node7, "v", node3, "angle")
-Blueprint.connect(node3, "ret", node13, "var")
+Blueprint.connect(node13, "var", node0, "seed")
+Blueprint.connect(node8, "tex", node0, "perlin_perm2d_tex")
+Blueprint.connect(node9, "tex", node0, "perlin_grad2d_tex")
+Blueprint.connect(node0, "ret", node6, "a")
+Blueprint.connect(node7, "pi/2", node6, "b")
+Blueprint.connect(node10, "var", node3, "tensor")
+Blueprint.connect(node6, "v", node3, "angle")
+Blueprint.connect(node3, "ret", node11, "var")
 Blueprint.connect(node0, "ret", node4, "a")
 Blueprint.connect(node5, "v", node4, "b")
