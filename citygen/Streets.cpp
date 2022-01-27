@@ -4,6 +4,7 @@
 #include "KMeans.h"
 #include "RotatingCalipers.h"
 #include "Math.h"
+#include "Chaikin.h"
 
 #include <sm/SM_DouglasPeucker.h>
 #include <SM_Calc.h>
@@ -211,18 +212,22 @@ std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, const sm::rect& reg
 		std::copy(f.begin(), f.end(), std::back_inserter(points));
 	}
 
-	std::vector<sm::vec2> path;
-	sm::douglas_peucker(points, 0.5f, path);
+	points = sm::douglas_peucker(points, 0.5f);
+	for (int i = 0; i < 3; ++i)
+	{
+		points = smooth_chaikin(points, 3);
+		points = sm::douglas_peucker(points, 0.5f);
+	}
 
 	// to 0-1
 	auto w = m_tf->GetWidth();
 	auto h = m_tf->GetHeight();
-	for (auto& p : path) {
+	for (auto& p : points) {
 		p.x /= w;
 		p.y /= h;
 	}
 
-	return path;
+	return points;
 }
 
 std::vector<sm::vec2> Streets::Travel(const sm::ivec2& p, const sm::rect& region, bool major, bool forward, bool* is_loop) const
