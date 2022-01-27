@@ -14,6 +14,7 @@
 //#define BILINEAR_SAMPLING
 #define TRAVEL_STOP_CHECK
 //#define USE_EIGENVECTORS
+#define PATH_SMOOTH
 
 #ifdef USE_EIGENVECTORS
 #include <Eigen/Dense>
@@ -213,11 +214,13 @@ std::vector<sm::vec2> Streets::BuildPath(const sm::ivec2& p, const sm::rect& reg
 	}
 
 	points = sm::douglas_peucker(points, 0.5f);
+#ifdef PATH_SMOOTH
 	for (int i = 0; i < 3; ++i)
 	{
 		points = smooth_chaikin(points, 3);
 		points = sm::douglas_peucker(points, 0.5f);
 	}
+#endif // PATH_SMOOTH
 
 	// to 0-1
 	auto w = m_tf->GetWidth();
