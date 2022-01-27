@@ -54,7 +54,7 @@ void return_polygon(const std::vector<std::vector<sm::vec2>>& polygon)
     {
         auto poly = std::make_shared<gs::Polygon2D>();
         poly->SetVertices(polygon[0]);
-        for (int i = 1, n = polygon.size(); i < n; ++i) {
+        for (size_t i = 1, n = polygon.size(); i < n; ++i) {
             poly->AddHole(polygon[i]);
         }
 

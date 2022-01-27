@@ -16,7 +16,7 @@ std::vector<sm::vec2> smooth_chaikin(const std::vector<sm::vec2>& polyline, size
 		std::vector<sm::vec2> curr;
 
 		curr.push_back(prev.front());
-		for (int j = 1, m = prev.size() - 1; j < m; ++j)
+		for (size_t j = 1, m = prev.size() - 1; j < m; ++j)
 		{
 			curr.push_back(prev[j - 1] * 0.25f + prev[j] * 0.75f);
 			curr.push_back(prev[j + 1] * 0.25f + prev[j] * 0.75f);
