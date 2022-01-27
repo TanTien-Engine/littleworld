@@ -1,6 +1,8 @@
 #include "Graph.h"
+#include "Math.h"
 
 #include <SM_Calc.h>
+#include <SM_DouglasPeucker.h>
 
 namespace citygen
 {
@@ -215,8 +217,11 @@ std::vector<std::vector<sm::vec2>> Graph::GetPolygons() const
 				curr = curr->next;
 			} while (curr != first);
 
-			assert(block.size() >= 3);
-			polys.push_back(block);
+			block = Math::RemoveDuplicatedPos(block);
+//			block = sm::douglas_peucker(block, 0.0001f);
+			if (block.size() > 2) {
+				polys.push_back(block);
+			}
 		}
 	}
 

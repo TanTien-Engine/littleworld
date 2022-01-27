@@ -302,7 +302,22 @@ void w_GeometryTools_polyline_offset()
     //auto vertices = sm::douglas_peucker(polygon->GetVertices(), POLYLINE_SIMPLIFY_PRECISION);
 
     auto polylines = sm::polyline_offset(vertices, distance, is_closed);
-    return_polygon(polylines);
+
+    if (!is_closed) 
+    {
+        assert(polylines.size() <= 1);
+        return return_polygon(polylines);
+    }
+    else
+    {
+        for (auto& poly : polylines) {
+            if (poly.size() > 2) {
+                return return_polygon({ poly });
+            }
+        }
+    }
+
+    return_polygon({});
 }
 
 void w_GeometryTools_polyline_expand()

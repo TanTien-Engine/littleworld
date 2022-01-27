@@ -1,5 +1,6 @@
 #include "ParcelsOBB.h"
 #include "RotatingCalipers.h"
+#include "Math.h"
 
 #include <SM_Calc.h>
 #include <SM_Polyline.h>
@@ -132,6 +133,8 @@ void ParcelsOBB::Node::Clip(const sm::vec2& p0, const sm::vec2& p1, float max_le
 		}
 	}
 
+	poly0 = Math::RemoveDuplicatedPos(poly0);
+	poly1 = Math::RemoveDuplicatedPos(poly1);
 	if (poly0.size() > 2 && poly1.size() > 2)
 	{
 		children[0] = std::make_shared<Node>(poly0, max_len, density_center);
