@@ -44,6 +44,13 @@ foreign class ParcelsSS
 	foreign set_density_center(center)
 }
 
+foreign class Heightfield
+{
+	init(texture) {}
+
+	foreign get_height(x, y)
+}
+
 foreign class GeometryTools
 {
 	foreign static polyline_offset(polyline, distance, is_closed)
@@ -57,6 +64,8 @@ foreign class GeometryTools
 
 	foreign static polygon_extrude_face(polygon, distance)
 	foreign static polygon_extrude_skeleton(polygon, distance)
+
+	foreign static polytope_add_height(polytope, heightfield)
 }
 
 );

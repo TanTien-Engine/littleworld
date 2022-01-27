@@ -4,6 +4,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant, VAR_TYPE_PORT, VAR_TYPE_ARRAY
 import "blueprint.input_proxy" for InputProxy
 import "blueprint.variant_proxy" for VariantProxy
+import "rendergraph.variant" for VAR_TYPE_TEXTURE
 import "geograph.variant" for VAR_TYPE_GEO, VarGeo
 import "geograph.brush" for Brush
 import "geograph.nodes.draw_geometry" for DrawGeometry
@@ -13,7 +14,7 @@ import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, RIVER_COLOR, CO
 import "maths.vector" for Vector3
 import "geometry" for Polyline3D
 import "graphics" for Graphics
-import "citygen" for GeometryTools
+import "citygen" for GeometryTools, Heightfield
 import "math" for Math
 
 class DrawMap3d is Node
@@ -24,7 +25,8 @@ class DrawMap3d is Node
 	
 		this.imports = [
 			Pin(this, "prev", VAR_TYPE_PORT),
-			Pin(this, "objs", VAR_TYPE_ARRAY)
+			Pin(this, "objs", VAR_TYPE_ARRAY),
+			Pin(this, "hf",   VAR_TYPE_TEXTURE)
 		]
 		this.exports = [
 			Pin(this, "next", VAR_TYPE_PORT)
@@ -46,6 +48,8 @@ class DrawMap3d is Node
 		Blueprint.connect(this.draw_model_node.op_node, "mat", this.draw_shape_node, "mat")
 
 		this.need_rebuild = false
+
+		this.heightfield = nil
 	}
 
 	on_pin_dirty(pin)
@@ -55,6 +59,10 @@ class DrawMap3d is Node
 			this.draw_model_node.on_pin_dirty(this.draw_model_node.imports[1])
 
 			this.need_rebuild = true
+		}
+		else if (pin == this.imports[2])
+		{
+			this.heightfield = nil
 		}
 	}
 
@@ -111,6 +119,15 @@ class DrawMap3d is Node
 		this.v_shapes.value.clear()
 
 		var v_objs = Blueprint.calc_input_value(this, 1)
+
+		if (!this.heightfield)
+		{
+			var v_hf = Blueprint.calc_input_value(this, 2)
+			if (v_hf) {
+				this.heightfield = Heightfield.init(v_hf.value.tex)
+			}
+		}
+
 		this.build_streets(v_objs)
 	}
 
@@ -186,6 +203,11 @@ class DrawMap3d is Node
 		}
 		else if (v_objs.type == VAR_TYPE_GEO)
 		{
+			if (v_objs.type == VAR_TYPE_GEO and v_objs.value.shape is Brush and this.heightfield) {
+				for (var poly in v_objs.value.shape.polys) {
+					GeometryTools.polytope_add_height(poly, this.heightfield)
+				}
+			}
 			this.v_models.value.add(v_objs)
 		}
 	}
@@ -223,6 +245,9 @@ class DrawMap3d is Node
 			if (polygon)
 			{
 				var polytope = GeometryTools.polygon_extrude_face(polygon, height)
+				if (this.heightfield) {
+					GeometryTools.polytope_add_height(polytope, this.heightfield)				
+				}
 
 				var brush = Brush([ polytope ])
 				brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))
@@ -238,6 +263,9 @@ class DrawMap3d is Node
 	build_block_model(poly, color)
 	{
 		var polytope = GeometryTools.polygon_extrude_face(poly, -0.001)
+		if (this.heightfield) {
+			GeometryTools.polytope_add_height(polytope, this.heightfield)
+		}
 
 		var brush = Brush([ polytope ])
 		brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))

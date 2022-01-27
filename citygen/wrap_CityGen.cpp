@@ -9,11 +9,14 @@
 #include "modules/script/Proxy.h"
 #include "modules/script/TransHelper.h"
 #include "modules/graphics/Graphics.h"
+#include "modules/render/Render.h"
 
 #include <unirender/Texture.h>
+#include <unirender/TextureUtility.h>
 #include <geoshape/Polygon2D.h>
 #include <geoshape/Polyline2D.h>
 #include <polymesh3/Polytope.h>
+#include <heightfield/HeightField.h>
 #include <SM_Polyline.h>
 #include <SM_Test.h>
 #include <SM_DouglasPeucker.h>
@@ -290,6 +293,55 @@ void w_ParcelsSS_set_density_center()
 {
 }
 
+void w_Heightfield_allocate()
+{
+    auto tex = ((tt::Proxy<ur::Texture>*)ves_toforeign(1))->obj;
+
+    auto w = tex->GetWidth();
+    auto h = tex->GetHeight();
+    auto f = tex->GetFormat();
+
+    auto hf = std::make_shared<hf::HeightField>(w, h);
+
+    int sz = ur::TextureUtility::RequiredSizeInBytes(w, h, f, 4);
+    auto pixels = (uint8_t*)tex->WriteToMemory(sz);
+
+    std::vector<int32_t> heights(w * h, 0);
+    for (int i = 0, n = w * h; i < n; ++i) {
+        heights[i] = pixels[i * 3];
+    }
+    hf->SetValues(heights);
+
+    auto proxy = (tt::Proxy<hf::HeightField>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<hf::HeightField>));
+    proxy->obj = hf;
+}
+
+int w_Heightfield_finalize(void* data)
+{
+    auto proxy = (tt::Proxy<hf::HeightField>*)(data);
+    proxy->~Proxy();
+    return sizeof(tt::Proxy<hf::HeightField>);
+}
+
+static float get_heightfield_value(const hf::HeightField& hf, float x, float y)
+{
+    const float fx = std::min(1.0f, std::max(0.0f, x));
+    const float fy = std::min(1.0f, std::max(0.0f, y));
+    const size_t ix = std::min(hf.Width() - 1, (size_t)(std::floor(fx * hf.Width())));
+    const size_t iy = std::min(hf.Height() - 1, (size_t)(std::floor(fy * hf.Height())));
+    const float h = hf.Get(*tt::Render::Instance()->Device(), ix, iy) / 255.0f / 10.0f;
+    return h;
+}
+
+void w_Heightfield_get_height()
+{
+    auto hf = ((tt::Proxy<hf::HeightField>*)ves_toforeign(0))->obj;
+    float x = (float)ves_tonumber(1);
+    float y = (float)ves_tonumber(2);
+    float h = get_heightfield_value(*hf, x, y);
+    ves_set_number(0, h);
+}
+
 static const float POLYLINE_SIMPLIFY_PRECISION = 0.0001f;
 
 void w_GeometryTools_polyline_offset()
@@ -409,6 +461,19 @@ void w_GeometryTools_polygon_extrude_skeleton()
     ves_pop(1);
 }
 
+void w_GeometryTools_polytope_add_height()
+{
+    auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+    auto hf = ((tt::Proxy<hf::HeightField>*)ves_toforeign(2))->obj;
+
+    auto& pts = poly->Points();
+    for (auto& p : pts) {
+        const float h = get_heightfield_value(*hf, p->pos.x, p->pos.z);
+        p->pos.y += h;
+    }
+    poly->SetTopoDirty();
+}
+
 }
 
 namespace citygen
@@ -436,6 +501,8 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "ParcelsSS.set_seed(_)") == 0) return w_ParcelsSS_set_seed;
     if (strcmp(signature, "ParcelsSS.set_density_center(_)") == 0) return w_ParcelsSS_set_density_center;
 
+    if (strcmp(signature, "Heightfield.get_height(_,_)") == 0) return w_Heightfield_get_height;
+
     if (strcmp(signature, "static GeometryTools.polyline_offset(_,_,_)") == 0) return w_GeometryTools_polyline_offset;
     if (strcmp(signature, "static GeometryTools.polyline_expand(_,_)") == 0) return w_GeometryTools_polyline_expand;
     if (strcmp(signature, "static GeometryTools.shape_l(_,_,_,_)") == 0) return w_GeometryTools_shape_l;
@@ -444,6 +511,7 @@ VesselForeignMethodFn CityGenBindMethod(const char* signature)
     if (strcmp(signature, "static GeometryTools.is_counterclockwise(_)") == 0) return w_GeometryTools_is_counterclockwise;
     if (strcmp(signature, "static GeometryTools.polygon_extrude_face(_,_)") == 0) return w_GeometryTools_polygon_extrude_face;
     if (strcmp(signature, "static GeometryTools.polygon_extrude_skeleton(_,_)") == 0) return w_GeometryTools_polygon_extrude_skeleton;
+    if (strcmp(signature, "static GeometryTools.polytope_add_height(_,_)") == 0) return w_GeometryTools_polytope_add_height;
 
 	return nullptr;
 }
@@ -468,6 +536,13 @@ void CityGenBindClass(const char* class_name, VesselForeignClassMethods* methods
     {
         methods->allocate = w_ParcelsSS_allocate;
         methods->finalize = w_ParcelsSS_finalize;
+        return;
+    }
+
+    if (strcmp(class_name, "Heightfield") == 0)
+    {
+        methods->allocate = w_Heightfield_allocate;
+        methods->finalize = w_Heightfield_finalize;
         return;
     }
 }
