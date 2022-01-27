@@ -290,13 +290,18 @@ void w_ParcelsSS_set_density_center()
 {
 }
 
+static const float POLYLINE_SIMPLIFY_PRECISION = 0.0001f;
+
 void w_GeometryTools_polyline_offset()
 {
     auto polygon = ((tt::Proxy<gs::Polygon2D>*)ves_toforeign(1))->obj;
     float distance = (float)ves_tonumber(2);
     bool is_closed = ves_toboolean(3);
 
-    auto polylines = sm::polyline_offset(polygon->GetVertices(), distance, is_closed);
+    auto& vertices = polygon->GetVertices();
+    //auto vertices = sm::douglas_peucker(polygon->GetVertices(), POLYLINE_SIMPLIFY_PRECISION);
+
+    auto polylines = sm::polyline_offset(vertices, distance, is_closed);
     return_polygon(polylines);
 }
 
@@ -306,14 +311,14 @@ void w_GeometryTools_polyline_expand()
     float offset = (float)ves_tonumber(2);
 
     auto& vertices = polyline->GetVertices();
+    //auto vertices = sm::douglas_peucker(polyline->GetVertices(), POLYLINE_SIMPLIFY_PRECISION);
+
     bool is_closed = vertices.size() > 1 && vertices.front() == vertices.back();
     auto polylines = sm::polyline_expand(vertices, offset, is_closed);
 
     // fixme: build brush bug, simplify first
     for (auto& poly : polylines) {
-        std::vector<sm::vec2> pts;
-        sm::douglas_peucker(poly, 0.0001f, pts);
-        poly = pts;
+        poly = sm::douglas_peucker(poly, POLYLINE_SIMPLIFY_PRECISION);
     }
 
     return_polygon(polylines);
