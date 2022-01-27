@@ -12,7 +12,7 @@
 #include <map>
 
 //#define BILINEAR_SAMPLING
-//#define TRAVEL_STOP_CHECK
+#define TRAVEL_STOP_CHECK
 //#define USE_EIGENVECTORS
 
 #ifdef USE_EIGENVECTORS
