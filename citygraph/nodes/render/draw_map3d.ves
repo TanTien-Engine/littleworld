@@ -12,7 +12,7 @@ import "editor.node_cache" for NODE_CACHE
 import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK, BLOCK_TYPE_COMMON, BLOCK_TYPE_PARK, ROAD_TYPE_MAJOR, ROAD_TYPE_MINOR, ROAD_TYPE_TINY, ROAD_TYPE_RIVER
 import "citygraph.style" for MAJOR_ROAD_COLOR, MINOR_ROAD_COLOR, RIVER_COLOR, COMMON_BLOCK_COLOR, GREEN_BLOCK_COLOR
 import "maths.vector" for Vector3
-import "geometry" for Polyline3D
+import "geometry" for Polyline3D, PolyPoint, PolyFace, Polytope
 import "graphics" for Graphics
 import "citygen" for GeometryTools, Heightfield
 import "math" for Math
@@ -127,6 +127,9 @@ class DrawMap3d is Node
 				this.heightfield = Heightfield.init(v_hf.value.tex)
 			}
 		}
+
+		this.build_ground_mdoel(GREEN_BLOCK_COLOR)
+		this.build_grids_mdoel()
 
 		this.build_streets(v_objs)
 	}
@@ -274,5 +277,95 @@ class DrawMap3d is Node
 		geo.shape = brush
 
 		this.v_models.value.add(Variant(VAR_TYPE_GEO, geo))
+	}
+
+	build_ground_mdoel(color)
+	{
+		var num = 64
+
+		var points = []
+		for (var iy in 0..num+1) {
+			for (var ix in 0..num+1) {
+				var x = ix / num
+				var z = iy / num
+				var y = - 0.01
+				if (this.heightfield) {
+					y = y + this.heightfield.get_height(x, z)
+				}
+				points.add(PolyPoint.init([ x, y, z ]))
+			}
+		}
+
+		var faces = []
+		for (var iy in 0..num) {
+			for (var ix in 0..num) {
+				var face = []
+				face.add(iy * (num + 1) + ix)
+				face.add(iy * (num + 1) + ix + 1)
+				face.add((iy + 1) * (num + 1) + ix + 1)
+				face.add((iy + 1) * (num + 1) + ix)
+				faces.add(PolyFace.init(face, []))
+			}
+		}		
+
+		var polytope = Polytope.init(points, faces)
+
+		var brush = Brush([ polytope ])
+		brush.color = Vector3(Math.floor(255 * color.x), Math.floor(255 * color.y), Math.floor(255 * color.z))		
+
+		var geo = VarGeo()
+		geo.shape = brush
+		this.v_models.value.add(Variant(VAR_TYPE_GEO, geo))		
+	}
+
+	build_grids_mdoel()
+	{
+		var num = 64
+		var line_w = 0.001
+
+		var points = []
+		for (var iy in 0..num+1) {
+			for (var ix in 0..num+1) {
+				var x = ix / num
+				var z = iy / num
+				var y =  - 0.01 + 0.001
+				if (this.heightfield) {
+					y = y + this.heightfield.get_height(x, z)			
+				}
+				points.add(PolyPoint.init([ x, y, z ]))
+				points.add(PolyPoint.init([ x + line_w, y, z ]))
+				points.add(PolyPoint.init([ x, y, z + line_w ]))
+			}
+		}
+
+		var faces = []
+		for (var iy in 0..num) 
+		{
+			for (var ix in 0..num) 
+			{
+				var face_x = []
+				face_x.add((iy * (num + 1) + ix) * 3)
+				face_x.add((iy * (num + 1) + ix + 1) * 3)
+				face_x.add((iy * (num + 1) + ix + 1) * 3 + 2)
+				face_x.add((iy * (num + 1) + ix) * 3 + 2)
+				faces.add(PolyFace.init(face_x, []))
+
+				var face_y = []
+				face_y.add((iy * (num + 1) + ix) * 3)
+				face_y.add((iy * (num + 1) + ix) * 3 + 1)
+				face_y.add(((iy + 1) * (num + 1) + ix) * 3 + 1)
+				face_y.add(((iy + 1) * (num + 1) + ix) * 3)
+				faces.add(PolyFace.init(face_y, []))				
+			}
+		}
+
+		var polytope = Polytope.init(points, faces)
+
+		var brush = Brush([ polytope ])
+		brush.color = Vector3(0, 0, 0)		
+
+		var geo = VarGeo()
+		geo.shape = brush
+		this.v_models.value.add(Variant(VAR_TYPE_GEO, geo))		
 	}
 }
