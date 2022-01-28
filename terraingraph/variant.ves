@@ -5,5 +5,6 @@ class VarHeightfield
 	init()
 	{
 		this.tex = nil
+		this.sampler = nil
 	}
 }
