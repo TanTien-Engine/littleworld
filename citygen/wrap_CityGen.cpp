@@ -17,6 +17,7 @@
 #include <geoshape/Polyline2D.h>
 #include <polymesh3/Polytope.h>
 #include <heightfield/HeightField.h>
+#include <heightfield/Utility.h>
 #include <SM_Polyline.h>
 #include <SM_Test.h>
 #include <SM_DouglasPeucker.h>
@@ -307,8 +308,20 @@ void w_Heightfield_allocate()
     auto pixels = (uint8_t*)tex->WriteToMemory(sz);
 
     std::vector<int32_t> heights(w * h, 0);
-    for (int i = 0, n = w * h; i < n; ++i) {
-        heights[i] = pixels[i * 3];
+    if (f == ur::TextureFormat::R16F)
+    {
+        auto pixels2 = (unsigned short*)(pixels);
+        for (int i = 0, n = w * h; i < n; ++i) 
+        {
+            float h = hf::Utility::HeightShortToFloat(pixels2[i]);
+            heights[i] = (h + 1.0f) * 0.5f * 255.0f;
+        }
+    }
+    else if (f == ur::TextureFormat::RGB)
+    {
+        for (int i = 0, n = w * h; i < n; ++i) {
+            heights[i] = pixels[i * 3];
+        }
     }
     hf->SetValues(heights);
 
