@@ -53,7 +53,8 @@ void main()
     {
         float blend = pow(1.0 - dist / r, 2.0);
         vec2 uv = pos / float(textureSize(brush_tex, 0));
-        base.r += blend * force * texture(brush_tex, uv).r;
+//        base.r += blend * force * texture(brush_tex, uv).r;
+        base.r += blend * force;
     }
 
     imageStore(out_tex, pos, base);

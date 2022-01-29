@@ -1,0 +1,191 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant
+import "blueprint.variant_proxy" for VariantProxy
+import "blueprint.input_proxy" for InputProxy
+import "blueprint.field_proxy" for FieldProxy
+import "rendergraph.variant" for VarTexture, VAR_TYPE_TEXTURE
+import "rendergraph.nodes.shader" for Shader
+import "rendergraph.nodes.compute" for Compute
+import "rendergraph.drawlist" for Drawlist
+import "maths.vector" for Vector2
+import "render" for Texture2D
+import "graphics" for Graphics
+import "math" for Math
+
+var DARWLIST = nil
+var SHADER   = nil
+var COMPUTE  = nil
+
+var CS = "
+#version 430
+
+#define LOCAL_SIZE 32
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE, local_size_z = 1) in;
+
+layout(binding = 0, rgba16f) writeonly uniform image2D out_tex;
+
+uniform sampler2D in_tex;
+
+uniform UBO
+{
+	vec2 brush_pos;
+	float angle;
+
+//	float radius;
+//	float force;
+};
+
+void main()
+{
+	ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+
+    vec4 base = texelFetch(in_tex, pos, 0);
+
+    const vec2 tex_coord = pos / float(textureSize(in_tex, 0));
+    float dist = distance(tex_coord, brush_pos);
+//    float r = radius * 0.5;
+	float r = 0.01;
+    if (dist < r) 
+    {
+        float blend = pow(1.0 - dist / r, 2.0);
+
+		float c = cos(angle * 2);
+		float s = sin(angle * 2);
+
+		vec4 tensor;
+		tensor.x = c;
+		tensor.y = s;
+		tensor.z = s;
+		tensor.w = -c;		
+
+		base = tensor;
+    }
+
+    imageStore(out_tex, pos, base);
+}
+"	
+
+var TENSORFIELD_SIZE = 1024
+
+class Brush is Node
+{
+	init()
+	{
+		super.init()
+	
+		this.imports = [
+			Pin(this, "tf", VAR_TYPE_TEXTURE),
+		]
+		this.exports = [
+			Pin(this, "tf", VAR_TYPE_TEXTURE),
+		]
+
+		this.layout()
+
+		this.tf_tex = nil
+
+		this.curr_pos = Vector2(0, 0)
+		this.angle = 1.57
+
+		this.draw_count = 0
+	}
+
+	calc_value(idx)
+	{
+		var ret = VarTexture()
+		ret.tex = this.tf_tex
+		return Variant(VAR_TYPE_TEXTURE, ret)
+	}
+
+	render_gen()
+	{
+		if (SHADER) {
+			SHADER.render_gen()
+		}
+		if (COMPUTE) {
+			COMPUTE.render_gen()
+		}
+	}
+
+	render_run()
+	{
+		if (!this.tf_tex) {
+			this.tf_tex = Texture2D.init(TENSORFIELD_SIZE, TENSORFIELD_SIZE, "rgba16f")
+		}
+		if (!DARWLIST) 
+		{
+			var shader = Shader()
+			shader.cs = CS
+			shader.render_gen()
+
+			var compute = Compute()
+			compute.num_groups = [ TENSORFIELD_SIZE / 32, TENSORFIELD_SIZE / 32, 1 ]
+
+			Blueprint.connect(shader, "out", compute, "shader")
+
+			DARWLIST = Drawlist([compute])
+
+			SHADER = shader
+			COMPUTE = compute
+		}
+	}
+
+	on_mouse_pressed(x, y, btn) 
+	{
+		this.update_brush_pos(x, y)
+		this.brush()
+	}
+
+	on_mouse_moved(x, y, btn) 
+	{
+		this.update_brush_pos(x, y)
+	}
+
+	on_mouse_dragged(x, y, btn) 
+	{
+		this.update_brush_pos(x, y)
+		this.brush()
+	}
+
+	bind(shader)
+	{
+		if (this.draw_count == 0) {
+			Blueprint.connect(InputProxy(this, 0), 0, shader, "in_tex")
+		} else {
+			Blueprint.connect(VariantProxy(this.tf_tex), 0, shader, "in_tex")
+		}
+		Blueprint.connect(VariantProxy(this.tf_tex), 0, shader, "out_tex")
+
+		Blueprint.connect(FieldProxy(this, "curr_pos"), "out", shader, "brush_pos")
+		Blueprint.connect(FieldProxy(this, "angle"), "out", shader, "angle")		
+	}
+
+	update_brush_pos(x, y)
+	{
+		var w = Graphics.get_width()
+		var h = Graphics.get_height()
+
+		var px = x / w
+		var py = 1.0 - y / h
+
+		this.angle = Math.atan2(py - this.curr_pos.y, px - this.curr_pos.x)
+		this.curr_pos.x = px
+		this.curr_pos.y = py
+	}	
+
+	brush()
+	{
+		COMPUTE.need_rebuild = true
+		this.bind(SHADER)
+		DARWLIST.run()
+
+//		NodeHelper.make_node_dirty(this)
+
+		Blueprint.send_pin_dirty_root(this.exports[0])
+
+		this.draw_count = this.draw_count + 1
+	}
+}
