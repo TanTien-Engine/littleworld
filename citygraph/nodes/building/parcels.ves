@@ -23,6 +23,7 @@ class Parcels is Node
 			Pin(this, "blocks", VAR_TYPE_ARRAY),
 		]
 
+		this.params.add(NodeParam("type", "obb", { "combo" : [ "obb", "ss" ] }))
 		this.params.add(NodeParam("max_len", 0.1, { "region" : 0.2 }))
 		this.params.add(NodeParam("seed", 0))
 
@@ -40,6 +41,7 @@ class Parcels is Node
 	{
 		var ret = []
 
+		var type = this.query_param("type").value
 		var max_len = this.query_param("max_len").value
 		var seed = this.query_param("seed").value
 
@@ -47,8 +49,12 @@ class Parcels is Node
 
 		for (var block in blocks)
 		{
-			var parcels = ParcelsOBB.init(block.value.poly)
-//			var parcels = ParcelsSS.init(block.value.poly)
+			var parcels = nil
+			if (type == "obb") {
+				parcels = ParcelsOBB.init(block.value.poly)
+			} else if (type == "ss") {
+				parcels = ParcelsSS.init(block.value.poly)
+			}
 
 			if (v_density) 
 			{
