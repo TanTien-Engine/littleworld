@@ -1,0 +1,104 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -542.98290267082, 305.06685693474)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node1, -156.56520484531, 250.57894057321)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "../../assets/blueprints/tensorfield/tensor_transform.ves")
+
+_editor.add_node(node2, 165.13715877211, 443.07917921875)
+
+var node3 = ::rendergraph::nodes::texture::Texture()
+node3.query_param("unif_name").value = "u_tex"
+node3.gamma_correction = false
+node3.init_texture("../../assets/textures/ibfv/WhiteNoiseDithering.png")
+node3.set_sampler("nearest_repeat")
+
+_editor.add_node(node3, -101.00141421639, 608.95029295644)
+
+var node4 = ::blueprint::nodes::number2::Number2()
+
+node4.value.set(0.5, 0.5)
+
+_editor.add_node(node4, -539.3743000475, 186.58215123964)
+
+var node5 = ::citygraph::nodes::tensor::wedge::Wedge()
+
+_editor.add_node(node5, -355.07253972459, 365.77843169614)
+
+var node6 = ::citygraph::nodes::street::streamlines::Streamlines()
+node6.query_param("num").value = 10
+
+_editor.add_node(node6, 218.49498864746, 291.18893310547)
+
+var node7 = ::citygraph::nodes::tensor::regular::Regular()
+
+_editor.add_node(node7, -354.59659135932, 442.4112545368)
+
+var node8 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node8, 360.72613256139, 506.74715687879)
+
+var node9 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node9, 358.46492529297, 303.32147900391)
+
+var node10 = ::citygraph::nodes::tensor::trisector::Trisector()
+
+_editor.add_node(node10, -354.5859660449, 298.15479310605)
+
+var node11 = ::citygraph::nodes::tensor::radiate::Radiate()
+
+_editor.add_node(node11, -353.32854760884, 232.69350373163)
+
+var node12 = ::citygraph::nodes::tensor::center::Center()
+
+_editor.add_node(node12, -351.97988008862, 167.06979193569)
+
+var node13 = ::citygraph::nodes::tensor::saddle::Saddle()
+
+_editor.add_node(node13, -349.68086658825, 100.42157537287)
+
+var node14 = ::citygraph::nodes::street::streets::Streets()
+node14.query_param("num").value = 10
+node14.query_param("seed").value = 0.44294163584709
+node14.query_param("ortho").value = true
+node14.query_param("type").value = "default"
+
+_editor.add_node(node14, -81.864749899391, 76.082314935901)
+
+var node15 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node15, 66.317093251355, 105.17319905788)
+
+var node16 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
+
+_editor.add_node(node16, 202.87161928562, 125.74595407386)
+
+Blueprint.connect(node0, "uv", node13, "st")
+Blueprint.connect(node4, "v2", node13, "pos")
+Blueprint.connect(node0, "uv", node12, "st")
+Blueprint.connect(node4, "v2", node12, "pos")
+Blueprint.connect(node12, "ret", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node14, "tensor")
+Blueprint.connect(node14, "streets", node15, "in0")
+Blueprint.connect(node14, "blocks", node15, "in1")
+Blueprint.connect(node15, "list", node16, "objs")
+Blueprint.connect(node1, "tensor_field", node6, "tf")
+Blueprint.connect(node6, "tex", node9, "value")
+Blueprint.connect(node1, "next", node2, "prev")
+Blueprint.connect(node3, "tex", node2, "base_texture")
+Blueprint.connect(node1, "tensor_field", node2, "tensor_field")
+Blueprint.connect(node2, "tex", node8, "value")
+Blueprint.connect(node0, "uv", node11, "st")
+Blueprint.connect(node4, "v2", node11, "pos")
+Blueprint.connect(node0, "uv", node10, "uv")
+Blueprint.connect(node4, "v2", node10, "pos")
+Blueprint.connect(node0, "uv", node7, "st")
+Blueprint.connect(node0, "uv", node7, "pos")
+Blueprint.connect(node0, "uv", node5, "uv")
+Blueprint.connect(node4, "v2", node5, "pos")

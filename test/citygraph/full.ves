@@ -1,0 +1,81 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -923.854689281, 462.4979733177)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node1, -445.23119286488, 481.17188857191)
+
+var node2 = ::blueprint::nodes::number2::Number2()
+
+node2.value.set(0.86365562677383, 0.39698892831802)
+
+_editor.add_node(node2, -922.7290151332, 394.30053830648)
+
+var node3 = ::citygraph::nodes::tensor::center::Center()
+
+_editor.add_node(node3, -776.65304344039, 429.09547436536)
+
+var node4 = ::citygraph::nodes::tensor::regular::Regular()
+
+_editor.add_node(node4, -777.73444835569, 508.56785579041)
+
+var node5 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node5, -631.55435750921, 479.95127240964)
+
+var node6 = ::blueprint::nodes::number2::Number2()
+
+node6.value.set(0, 0.51223009824753)
+
+_editor.add_node(node6, -928.1251777856, 531.28391086937)
+
+var node7 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
+
+_editor.add_node(node7, -43.278488679461, 497.86536218734)
+
+var node8 = ::citygraph::nodes::street::streets::Streets()
+node8.query_param("num").value = 2
+node8.query_param("seed").value = 0
+node8.query_param("ortho").value = true
+node8.query_param("type").value = "default"
+
+_editor.add_node(node8, -651.34021484375, 319.65379394531)
+
+var node9 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node9, -102.22021484375, 350.56384277344)
+
+var node10 = ::citygraph::nodes::block::random_selector::RandomSelector()
+node10.query_param("num").value = 2
+node10.query_param("seed").value = 0.48577982187271
+
+_editor.add_node(node10, -524.84017822266, 209.65379394531)
+
+var node11 = ::citygraph::nodes::building::parcels::Parcels()
+node11.query_param("type").value = "obb"
+node11.query_param("max_len").value = 0.045578140765429
+node11.query_param("seed").value = 0
+
+_editor.add_node(node11, -370.51016601562, 197.22379394531)
+
+var node12 = ::citygraph::nodes::block::offset::Offset()
+node12.query_param("distance").value = 0.0014124449808151
+
+_editor.add_node(node12, -218.71200838956, 224.19561212713)
+
+Blueprint.connect(node0, "uv", node4, "st")
+Blueprint.connect(node6, "v2", node4, "pos")
+Blueprint.connect(node0, "uv", node3, "st")
+Blueprint.connect(node2, "v2", node3, "pos")
+Blueprint.connect(node4, "ret", node5, "a")
+Blueprint.connect(node3, "ret", node5, "b")
+Blueprint.connect(node5, "v", node1, "tensor")
+Blueprint.connect(node1, "tensor_field", node8, "tensor")
+Blueprint.connect(node8, "blocks", node10, "blocks")
+Blueprint.connect(node10, "selected", node11, "blocks")
+Blueprint.connect(node11, "blocks", node12, "blocks")
+Blueprint.connect(node8, "streets", node9, "in0")
+Blueprint.connect(node12, "blocks", node9, "in1")
+Blueprint.connect(node9, "list", node7, "objs")

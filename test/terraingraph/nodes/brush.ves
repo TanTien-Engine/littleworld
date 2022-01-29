@@ -1,0 +1,42 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(1.7517183135571, 2.06898812862, 1.3134398144329)
+node0.cam.yaw = -142.9
+node0.cam.pitch = -44.8
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.20281676948071
+
+_editor.add_node(node0, 166.60565479071, 257.49417526404)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../../assets/blueprints/render/draw_terrain_gray.ves")
+
+_editor.add_node(node1, 358.9173326088, 372.0657670776)
+
+var node2 = ::rendergraph::nodes::pass::Pass()
+
+node2.once = false
+
+_editor.add_node(node2, 572.88479060867, 410.96678004956)
+
+var node3 = ::terraingraph::nodes::brush::Brush()
+
+node3.radius = 0.1
+node3.force = 0.1
+
+_editor.add_node(node3, -98.4097222388, 162.62604825325)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.init_texture(1024, 1024, "r16f")
+
+_editor.add_node(node4, -267.76586620285, 59.418899853759)
+
+Blueprint.connect(node1, "next", node2, "do")
+Blueprint.connect(node0, "this", node3, "cam")
+Blueprint.connect(node3, "out", node1, "tes_heightmap")
+Blueprint.connect(node0, "this", node1, "view_cam")
+Blueprint.connect(node3, "pos", node1, "fs.mouse_pos")
+Blueprint.connect(node3, "raduis", node1, "fs.draw_radius")

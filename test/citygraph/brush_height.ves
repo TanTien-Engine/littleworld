@@ -1,0 +1,151 @@
+var node0 = ::shadergraph::nodes::tex_coord::TexCoord()
+
+_editor.add_node(node0, -745.78380255234, 388.67955014655)
+
+var node1 = ::citygraph::nodes::tensor::regular::Regular()
+
+_editor.add_node(node1, -586.55164427162, 424.16020947876)
+
+var node2 = ::blueprint::nodes::number2::Number2()
+
+node2.value.set(0.65404188632965, 0.33181965351105)
+
+_editor.add_node(node2, -742.86377104042, 459.0465384916)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
+
+_editor.add_node(node3, -242.58452328046, 415.55139684553)
+
+var node4 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node4, 456.68937944086, -60.556768429708)
+
+var node5 = ::citygraph::nodes::street::streets::Streets()
+node5.query_param("num").value = 10
+node5.query_param("seed").value = 1
+node5.query_param("ortho").value = true
+node5.query_param("type").value = "major"
+
+_editor.add_node(node5, -215.54464765279, -87.915880044783)
+
+var node6 = ::citygraph::nodes::building::parcels::Parcels()
+node6.query_param("max_len").value = 0.064538471400738
+node6.query_param("seed").value = 0
+
+_editor.add_node(node6, 133.4576902195, -134.37229019535)
+
+var node7 = ::citygraph::nodes::block::offset::Offset()
+node7.query_param("distance").value = 0.0038073696196079
+
+_editor.add_node(node7, 291.61881837295, -113.95200384626)
+
+var node8 = ::citygraph::nodes::building::extrude::Extrude()
+node8.query_param("distance").value = 0
+node8.query_param("roof").value = false
+
+_editor.add_node(node8, 452.28011851001, -222.15061377215)
+
+var node9 = ::blueprint::nodes::random::Random()
+node9.query_param("seed").value = 0.092192582786083
+
+_editor.add_node(node9, 170.70266187971, -271.95944539032)
+
+var node10 = ::blueprint::nodes::number::Number()
+
+node10.value = 0.050289958715439
+
+_editor.add_node(node10, 38.473902512277, -282.14336845552)
+
+var node11 = ::blueprint::nodes::lazy_eval::LazyEval()
+
+_editor.add_node(node11, 307.34988527738, -254.1543996195)
+
+var node12 = ::citygraph::nodes::street::streamlines::Streamlines()
+node12.query_param("num").value = 10
+
+_editor.add_node(node12, -43.719665527342, 416.88635253906)
+
+var node13 = ::citygraph::nodes::tensor::heightmap::Heightmap()
+
+_editor.add_node(node13, -584.98181818182, 337.83636363636)
+
+var node14 = ::rendergraph::nodes::texture::Texture()
+node14.query_param("unif_name").value = "u_tex"
+node14.gamma_correction = false
+node14.init_texture("../../assets/textures/terrain/heightmap.png")
+
+_editor.add_node(node14, -789.84112989588, 282.78951256716)
+
+var node15 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node15, -432.88453921911, 408.88234012571)
+
+var node16 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node16, 96.567102050782, 421.77270507812)
+
+var node17 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node17, 594.8781202876, -171.57737607621)
+
+var node18 = ::citygraph::nodes::block::offset::Offset()
+node18.query_param("distance").value = 0.0050047715194523
+
+_editor.add_node(node18, -22.314014190464, -115.29734575412)
+
+var node19 = ::terraingraph::nodes::brush::Brush()
+
+node19.radius = 0.20000000298023
+node19.force = 1
+
+_editor.add_node(node19, -570.82809741211, -107.69553759766)
+
+var node20 = ::blueprint::nodes::subgraph::Subgraph()
+node20.load_from_file(_editor, "../../assets/blueprints/render/draw_terrain_gray.ves")
+
+_editor.add_node(node20, -201.242283583, 68.839384205349)
+
+var node21 = ::blueprint::nodes::camera3d::Camera3d()
+
+node21.cam.position.set(-0.80672087871653, 0.82039508179663, 1.6266850083659)
+node21.cam.yaw = -62.2
+node21.cam.pitch = -18.1
+node21.cam.zoom = 45
+node21.cam.update_vectors()
+node21.speed = 0.2094194740057
+
+_editor.add_node(node21, -558.31875, 40.394888305664)
+
+var node22 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
+
+_editor.add_node(node22, 44.865018920898, 129.69361035156)
+
+Blueprint.connect(node21, "this", node19, "cam")
+Blueprint.connect(node10, "v", node9, "max")
+Blueprint.connect(node9, "val", node11, "val")
+Blueprint.connect(node14, "tex", node13, "tex")
+Blueprint.connect(node0, "uv", node13, "st")
+Blueprint.connect(node0, "uv", node1, "st")
+Blueprint.connect(node2, "v2", node1, "pos")
+Blueprint.connect(node1, "ret", node15, "a")
+Blueprint.connect(node15, "v", node3, "tensor")
+Blueprint.connect(node3, "tensor_field", node12, "tf")
+Blueprint.connect(node12, "tex", node16, "value")
+Blueprint.connect(node3, "tensor_field", node5, "tensor")
+Blueprint.connect(node5, "blocks", node18, "blocks")
+Blueprint.connect(node18, "blocks", node6, "blocks")
+Blueprint.connect(node6, "blocks", node7, "blocks")
+Blueprint.connect(node7, "blocks", node8, "blocks")
+Blueprint.connect(node11, "pin", node8, "dist")
+Blueprint.connect(node5, "streets", node17, "in0")
+Blueprint.connect(node8, "boxes", node17, "in1")
+Blueprint.connect(node17, "list", node22, "objs")
+Blueprint.connect(node19, "out", node22, "hf")
+Blueprint.connect(node22, "next", node20, "prev")
+Blueprint.connect(node19, "out", node20, "tes_heightmap")
+Blueprint.connect(node21, "this", node20, "view_cam")
+Blueprint.connect(node19, "pos", node20, "fs.mouse_pos")
+Blueprint.connect(node19, "raduis", node20, "fs.draw_radius")
+Blueprint.connect(node5, "streets", node4, "in1")
+Blueprint.connect(node7, "blocks", node4, "in2")

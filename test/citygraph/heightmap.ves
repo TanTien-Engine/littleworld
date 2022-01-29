@@ -15,11 +15,11 @@ _editor.add_node(node2, -742.86377104042, 459.0465384916)
 var node3 = ::citygraph::nodes::render::draw_geo2d::DrawGeo2d()
 node3.query_param("faces").value = false
 
-_editor.add_node(node3, 431.36313328714, 362.78417226683)
+_editor.add_node(node3, 450.14600330968, 356.02233905872)
 
 var node4 = ::citygraph::nodes::render::draw_map2d::DrawMap2d()
 
-_editor.add_node(node4, 619.13572028772, 96.34240551992)
+_editor.add_node(node4, 568.55772028772, 97.67340551992)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
 node5.load_from_file(_editor, "../../assets/blueprints/tensorfield/gen_tensor_field.ves")
@@ -28,7 +28,7 @@ _editor.add_node(node5, -242.58452328046, 415.55139684553)
 
 var node6 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node6, 450.08937944086, -61.656768429708)
+_editor.add_node(node6, 456.68937944086, -60.556768429708)
 
 var node7 = ::citygraph::nodes::street::streets::Streets()
 node7.query_param("num").value = 10
@@ -51,7 +51,7 @@ _editor.add_node(node9, 291.61881837295, -113.95200384626)
 
 var node10 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
 
-_editor.add_node(node10, 678.15289383718, -22.976377218728)
+_editor.add_node(node10, 734.66852734992, -107.14551750703)
 
 var node11 = ::citygraph::nodes::building::extrude::Extrude()
 node11.query_param("distance").value = 0
