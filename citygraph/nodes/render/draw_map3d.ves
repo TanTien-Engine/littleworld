@@ -63,6 +63,8 @@ class DrawMap3d is Node
 		else if (pin == this.imports[2])
 		{
 			this.heightfield = nil
+
+			this.need_rebuild = true
 		}
 	}
 
