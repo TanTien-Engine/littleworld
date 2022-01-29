@@ -20,6 +20,7 @@ vec4 regular(vec2 st, vec2 pos, float angle)
 	tensor.w = -c;
 
 	return tensor / r;
+//	return tensor * exp(-r) / 100.0;
 }
 
 "

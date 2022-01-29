@@ -22,7 +22,9 @@ vec4 heightmap(sampler2D tex, vec2 st)
 	tensor.w = -c;
 
 	float len = sqrt(dx * dx + dy * dy);
-	return tensor * len;
+//	return tensor * len;
+
+	return tensor * len * 300;
 }
 
 "
