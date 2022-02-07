@@ -1,0 +1,46 @@
+import "maths.vector" for Vector3
+import "math" for Math
+
+class CoordTrans
+{
+	static geo2_to_pos3(ellipsoid, geo2)
+	{
+		var norm = this.calc_geodetic_surface_normal(geo2.x, geo2.y)
+
+		var pos = Vector3()
+
+		pos.x = ellipsoid.x * norm.x
+		pos.y = ellipsoid.y * norm.y
+		pos.z = ellipsoid.z * norm.z
+//		pos.normalize()
+
+		return pos
+	}
+
+	// from OpenGlobe
+	static calc_geodetic_surface_normal(longitude, latitude)
+	{
+		var c_latitude = Math.cos(latitude)
+
+		var norm = Vector3()
+
+		norm.x = c_latitude * Math.cos(longitude)
+		norm.z = c_latitude * Math.sin(longitude)
+		norm.y = Math.sin(latitude)
+
+		return norm
+	}
+
+	// from OpenGlobe
+	static scale_to_geocentric_surface(ellipsoid, pos)
+	{
+		var one_over_radii_squared = Vector3()
+		one_over_radii_squared.x = 1.0 / (ellipsoid.x * ellipsoid.x)
+		one_over_radii_squared.y = 1.0 / (ellipsoid.y * ellipsoid.y)
+		one_over_radii_squared.z = 1.0 / (ellipsoid.z * ellipsoid.z)
+
+		var beta = 1.0 / Math.sqrt(pos.x * pos.x * one_over_radii_squared.x + pos.y * pos.y * one_over_radii_squared.y + pos.z * pos.z * one_over_radii_squared.z)
+
+		return Vector3(pos.x * beta.x, pos.y * beta.y, pos.z * beta.z)
+	}
+}

@@ -126,7 +126,12 @@ void main()
     depth = depth + 0.001 * geo_idx;
     gDepth = vec3(depth);
 
-    gMain = ambient + diffuse + specular; 
+    if (fs_in.frag_col != vec3(1.0)) {
+    	gMain = fs_in.frag_col;
+    } else {
+    	gMain = ambient + diffuse + specular;
+    }
+
     gNormal = N;
 }
 "
@@ -140,7 +145,7 @@ var node6 = ::rendergraph::nodes::clear::Clear()
 node6.masks = [ "color", "depth" ]
 node6.values = { "color" : [ 0.5, 0.5, 0.5, 1 ] }
 
-_editor.add_node(node6, 996.66028898274, 225.89512574204)
+_editor.add_node(node6, 990.00528898274, 245.86012574204)
 
 var node7 = ::blueprint::nodes::perspective::Perspective()
 
@@ -156,7 +161,7 @@ var node8 = ::blueprint::nodes::proxy::Proxy()
 node8.real_name = "view_cam"
 node8.init_real_node(::blueprint::nodes::camera3d::Camera3d())
 
-_editor.add_node(node8, 402.06615286487, 48.85559416076)
+_editor.add_node(node8, 182.45115286487, 85.45809416076)
 
 var node9 = ::blueprint::nodes::number3::Number3()
 
@@ -166,7 +171,7 @@ _editor.add_node(node9, 99.017136713578, -122.99093408604)
 
 var node10 = ::blueprint::nodes::for_each::ForEach()
 
-_editor.add_node(node10, 1164.9441409146, 107.00451606488)
+_editor.add_node(node10, 1166.4082409146, 107.00451606488)
 
 var node11 = ::blueprint::nodes::is_null::IsNull()
 
@@ -183,7 +188,7 @@ _editor.add_node(node13, 783.1307712437, 32.615556424757)
 
 var node14 = ::blueprint::nodes::multiply::Multiply()
 
-_editor.add_node(node14, 583.27974385043, 110.02639030966)
+_editor.add_node(node14, 593.92774385043, 176.57639030966)
 
 var node15 = ::rendergraph::nodes::render_target::RenderTarget()
 
@@ -227,7 +232,7 @@ var node21 = ::rendergraph::nodes::pass::Pass()
 
 node21.once = false
 
-_editor.add_node(node21, 1436.8208839844, -147.05825367542)
+_editor.add_node(node21, 2139.5888839844, -202.96025367542)
 
 var node22 = ::rendergraph::nodes::draw::Draw()
 
@@ -638,6 +643,254 @@ node63.value = 3
 
 _editor.add_node(node63, -399.76329006827, 124.24425306656)
 
+var node64 = ::rendergraph::nodes::draw::Draw()
+
+node64.set_prim_type("patches")
+node64.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node64.skip = false
+
+_editor.add_node(node64, 2126.2970096961, 303.05405340251)
+
+var node65 = ::rendergraph::nodes::shader::Shader()
+
+node65.vs = "
+#version 330 core
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 texcoord;
+
+out vec3 TCS_IN_FragPos;
+out vec2 TCS_IN_TexCoord;
+
+void main()
+{
+    TCS_IN_FragPos = position.xzy;
+    TCS_IN_TexCoord = texcoord;
+}
+"
+node65.tcs = "
+#version 400 core
+
+layout(vertices = 3) out;
+
+in vec3 TCS_IN_FragPos[];
+in vec2 TCS_IN_TexCoord[];
+
+out vec3 TES_IN_FragPos[];
+out vec2 TES_IN_TexCoord[];
+
+uniform UBO_TCS
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;   
+
+    vec3 cam_pos;
+    int lod_level;  
+} tcs;
+
+void main()
+{
+    TES_IN_FragPos[gl_InvocationID] = TCS_IN_FragPos[gl_InvocationID];
+    TES_IN_TexCoord[gl_InvocationID] = TCS_IN_TexCoord[gl_InvocationID];
+
+    if (gl_InvocationID == 0)
+    {
+        vec4 curr_p = tcs.projection * tcs.view * tcs.model * vec4(TCS_IN_FragPos[0], 1.0);
+        float dist = length(tcs.cam_pos - curr_p.xyz);
+
+        int max_level = tcs.lod_level;
+        int curr_level = max_level;
+        for (int i = 0; i < max_level; ++i) {
+            if (dist < 0.01 * pow(2, i)) {
+                curr_level = i;
+                break;
+            }
+        }
+        float level = clamp(pow(2.0, (max_level - curr_level)), 1.0, float(gl_MaxTessGenLevel));
+        for (int i = 0; i < 3; ++i) {
+            gl_TessLevelOuter[i] = level;
+        }
+        gl_TessLevelInner[0] = level / 2;
+    }
+}
+"
+node65.tes = "
+#version 400 core
+
+layout(triangles, equal_spacing, ccw) in;
+
+in vec3 TES_IN_FragPos[];
+in vec2 TES_IN_TexCoord[];
+
+out VS_OUT {
+    float height;
+    vec3 fragpos;
+    vec2 texcoord;
+} vs_out;
+
+uniform UBO_TES
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;   
+
+    float height_scale;    
+} tes;
+
+uniform sampler2D tes_heightmap;
+
+vec2 interpolate_2d(vec2 v0, vec2 v1, vec2 v2)
+{
+    return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
+}
+
+vec3 interpolate_3d(vec3 v0, vec3 v1, vec3 v2)
+{
+    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+
+void main()
+{
+    vec4 pos = vec4(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]), 1.0);
+    vec2 texcoord = interpolate_2d(TES_IN_TexCoord[0],TES_IN_TexCoord[1],TES_IN_TexCoord[2]);
+
+    vs_out.texcoord = texcoord;
+
+    vs_out.height = texture(tes_heightmap, texcoord).r/* - 0.5*/;
+
+    pos.y = vs_out.height * tes.height_scale;
+    vs_out.fragpos = vec3(tes.model * pos);
+
+    gl_Position = tes.projection * tes.view * tes.model * pos;
+}
+"
+node65.gs = ""
+node65.fs = "
+#version 330 core
+//out vec4 FragColor;
+
+layout (location = 0) out vec3 gMain;
+layout (location = 1) out vec3 gDepth;
+layout (location = 2) out vec3 gNormal;
+
+in VS_OUT {
+    float height;
+    vec3 fragpos;
+    vec2 texcoord;
+} fs_in;
+
+uniform UBO_FS
+{
+    vec3 light_pos;
+    vec2 inv_res;
+
+    // brush
+    vec2 mouse_pos;
+    float draw_radius;
+} fs;
+
+uniform sampler2D fs_heightmap;
+
+float calc_height(vec2 texcoord)
+{
+    return texture(fs_heightmap, texcoord).r/* - 0.5*/;
+}
+
+vec3 ComputeNormalCentralDifference(vec2 position, float heightExaggeration)
+{
+    float leftHeight = calc_height(position - vec2(1.0, 0.0) * fs.inv_res) * heightExaggeration;
+    float rightHeight = calc_height(position + vec2(1.0, 0.0) * fs.inv_res) * heightExaggeration;
+    float bottomHeight = calc_height(position - vec2(0.0, 1.0) * fs.inv_res) * heightExaggeration;
+    float topHeight = calc_height(position + vec2(0.0, 1.0) * fs.inv_res) * heightExaggeration;
+    return normalize(vec3(leftHeight - rightHeight, 2.0, bottomHeight - topHeight));
+}
+
+float near = 0.01;
+float far = 100.0; 
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
+
+void main()
+{
+    vec3 pos = fs_in.fragpos;
+
+    vec3 N = ComputeNormalCentralDifference(fs_in.texcoord, 500);
+
+    vec3 light_dir = normalize(fs.light_pos - pos);
+    float diff = max(dot(N, light_dir), 0.0);
+    vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
+    vec3 final = diffuse;
+
+    //FragColor = vec4(N, 1.0);
+
+    //// debug lod
+    //vec4 pos_final = u_projection * u_view * vec4(fs_in.fragpos, 1.0);
+    //float dist = length(pos_final.xyz);
+    //const vec4 colors[9] = vec4[9](
+    //    vec4(1,0,0,1),
+    //    vec4(1,1,1,1),
+    //    vec4(0,0,0,1),
+    //    vec4(0,1,1,1),
+    //    vec4(1,0,1,1),
+    //    vec4(1,1,0,1),
+    //    vec4(0,0,1,1),
+    //    vec4(0,1,0,1),
+    //    vec4(1,0,0,1)
+    //);
+    //const int max_level = 7;
+    //int curr_level = max_level;
+    //for (int i = 0; i < max_level; ++i) {
+    //    if (dist < 0.01 * pow(2, i)) {
+    //        curr_level = i;
+    //        break;
+    //    }
+    //}
+    //FragColor = colors[curr_level];
+
+    float dist = length(pos - vec3(fs.mouse_pos.x, pos.y, fs.mouse_pos.y));
+    if (dist < fs.draw_radius) {
+        float blend = pow(1.0 - dist / fs.draw_radius, 1.0);
+        final.r += 0.6 * blend;
+    }
+
+//    FragColor = vec4(final, 1.0); 
+
+	gMain = final;
+//	gNormal = N;	
+
+    float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far to get depth in range [0,1] for visualization purposes
+//    gDepth = vec3(depth);	
+}
+"
+node65.cs = ""
+node65.render_gen()
+node65.set_uniform("tcs.lod_level", [ 13 ])
+node65.set_uniform("tes.height_scale", [ 0.11497599631548 ])
+node65.set_uniform("fs.light_pos", [ 0.33070474863052, 0.63070476055145, 0.53070473670959 ])
+node65.set_uniform("fs.inv_res", [ 0.0009765625, 0.0009765625 ])
+node65.set_uniform("fs.mouse_pos", [ 0, 0 ])
+node65.set_uniform("fs.draw_radius", [ 0 ])
+
+_editor.add_node(node65, 1718.3805144603, 182.98759113149)
+
+var node66 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node66.type = "grids"
+node66.layout = [ "position", "texture" ]
+node66.shape_params = { "grids_size" : 64 }
+
+_editor.add_node(node66, 1949.1636944219, 241.20400009087)
+
+var node67 = ::blueprint::nodes::input::Input()
+
+node67.var_name = "heightmap"
+node67.var_type = "texture"
+
+_editor.add_node(node67, 1498.9185260136, 337.99256164012)
+
 Blueprint.connect(node59, "v2", node62, "a")
 Blueprint.connect(node63, "v", node62, "b")
 Blueprint.connect(node52, "var", node53, "var")
@@ -675,7 +928,7 @@ Blueprint.connect(node32, "out", node30, "va")
 Blueprint.connect(node25, "next", node22, "prev")
 Blueprint.connect(node23, "out", node22, "shader")
 Blueprint.connect(node24, "out", node22, "va")
-Blueprint.connect(node10, "next", node21, "do")
+Blueprint.connect(node64, "next", node21, "do")
 Blueprint.connect(node15, "fbo", node21, "fbo")
 Blueprint.connect(node21, "next", node27, "prev")
 Blueprint.connect(node22, "next", node27, "do")
@@ -687,6 +940,13 @@ Blueprint.connect(node8, "zoom", node7, "fovy")
 Blueprint.connect(node54, "var", node51, "cond")
 Blueprint.connect(node46, "mat", node51, "true")
 Blueprint.connect(node7, "mat", node51, "false")
+Blueprint.connect(node51, "result", node65, "tcs.projection")
+Blueprint.connect(node8, "mat", node65, "tcs.view")
+Blueprint.connect(node8, "pos", node65, "tcs.cam_pos")
+Blueprint.connect(node51, "result", node65, "tes.projection")
+Blueprint.connect(node8, "mat", node65, "tes.view")
+Blueprint.connect(node67, "var", node65, "tes_heightmap")
+Blueprint.connect(node67, "var", node65, "fs_heightmap")
 Blueprint.connect(node51, "result", node14, "a")
 Blueprint.connect(node8, "mat", node14, "b")
 Blueprint.connect(node10, "out", node13, "geos")
@@ -694,6 +954,9 @@ Blueprint.connect(node14, "v", node13, "mat")
 Blueprint.connect(node6, "next", node10, "prev")
 Blueprint.connect(node3, "var", node10, "in")
 Blueprint.connect(node12, "next", node10, "do")
+Blueprint.connect(node10, "next", node64, "prev")
+Blueprint.connect(node65, "out", node64, "shader")
+Blueprint.connect(node66, "out", node64, "va")
 Blueprint.connect(node10, "out", node0, "brush")
 Blueprint.connect(node0, "inst_mats", node43, "in")
 Blueprint.connect(node43, "out", node44, "in")

@@ -1,0 +1,3 @@
+var VAR_TYPE_ELLIPSOID   = "ellipsoid"
+var VAR_TYPE_GEODETIC_2D = "geo2d"
+var VAR_TYPE_GEODETIC_3D = "geo3d"

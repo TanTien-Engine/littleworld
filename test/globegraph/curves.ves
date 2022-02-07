@@ -1,0 +1,69 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(1.314027287165, 1.7905617264174, -2.4774375526238)
+node0.cam.yaw = -238.8
+node0.cam.pitch = -34.1
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.21428571641445
+
+_editor.add_node(node0, -426.8, -280.9)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/render/draw_geos_deferred.ves")
+
+_editor.add_node(node1, -100, -20.2)
+
+var node2 = ::geograph::nodes::plane::Plane()
+node2.query_param("ori").value.set(0, 0, 0)
+node2.query_param("dir").value.set(0, 1, 0)
+
+_editor.add_node(node2, -441.43634033203, -12.443237304688)
+
+var node3 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node3, -290.74815961724, 94.32160667668)
+
+var node4 = ::globegraph::nodes::ellipsoid::Ellipsoid()
+node4.query_param("semimajor_axis").value = 0.63444417715073
+
+_editor.add_node(node4, -537.1, 149)
+
+var node5 = ::blueprint::nodes::number3::Number3()
+
+node5.value.set(0.44999998807907, 0.4277777671814, 0.37222221493721)
+
+_editor.add_node(node5, -877.40909090909, -249.13636363636)
+
+var node6 = ::geograph::nodes::line3d::Line3d()
+node6.query_param("p0").value.set(0, 0, 0)
+node6.query_param("p1").value.set(1, 1, 1)
+
+_editor.add_node(node6, -706.73181152344, 98.867980957031)
+
+var node7 = ::globegraph::nodes::geodetic2d::Geodetic2d()
+node7.query_param("longitude").value = 0
+node7.query_param("latitude").value = 180
+
+_editor.add_node(node7, -683.90648304333, -101.40477683327)
+
+var node8 = ::globegraph::nodes::curve::Curve()
+
+_editor.add_node(node8, -489.0826446281, -127.26446280992)
+
+var node9 = ::globegraph::nodes::geodetic2d::Geodetic2d()
+node9.query_param("longitude").value = 0
+node9.query_param("latitude").value = 100.14538574219
+
+_editor.add_node(node9, -718.07266486151, -248.91414046963)
+
+Blueprint.connect(node4, "ellipsoid", node9, "ellipsoid")
+Blueprint.connect(node4, "ellipsoid", node7, "ellipsoid")
+Blueprint.connect(node4, "ellipsoid", node8, "ellipsoid")
+Blueprint.connect(node7, "geo2d", node8, "start")
+Blueprint.connect(node9, "geo2d", node8, "stop")
+Blueprint.connect(node4, "geo", node3, "in0")
+Blueprint.connect(node2, "geo", node3, "in1")
+Blueprint.connect(node8, "geo", node3, "in2")
+Blueprint.connect(node3, "list", node1, "geos")
+Blueprint.connect(node0, "this", node1, "view_cam")

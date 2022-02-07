@@ -1,0 +1,118 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "globegraph.variant" for VAR_TYPE_ELLIPSOID, VAR_TYPE_GEODETIC_2D
+import "globegraph.coord_trans" for CoordTrans
+import "maths.vector" for Vector3
+import "math" for Math
+import "geometry" for Polyline3D
+
+class Curve is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "ellipsoid", VAR_TYPE_ELLIPSOID),		
+			Pin(this, "start",     VAR_TYPE_GEODETIC_2D),
+			Pin(this, "stop",      VAR_TYPE_GEODETIC_2D),			
+		]
+		this.exports = [
+			Pin(this, "geo", VAR_TYPE_ARRAY),
+		]
+
+		this.layout()
+
+		this.granularity = Math.radians(5.0)
+	}
+
+	calc_value(idx)
+	{
+		var v_ellipsoid = Blueprint.calc_input_value(this, 0)
+		if (!v_ellipsoid) {
+			return nil
+		}
+
+		var v_start = Blueprint.calc_input_value(this, 1)
+		var v_stop = Blueprint.calc_input_value(this, 2)
+		if (!v_start or !v_stop) {
+			return nil
+		}
+
+		var start = CoordTrans.geo2_to_pos3(v_ellipsoid.value, v_start.value)
+		var stop = CoordTrans.geo2_to_pos3(v_ellipsoid.value, v_stop.value)
+
+		var geos = []
+		var pts = []
+
+		var norm = start.cross(stop)
+		norm.normalize()
+
+		var theta = this.calc_angle_between(start, stop)
+		var num = Math.max(Math.floor(theta / this.granularity) - 1, 0)
+
+		geos.add(Variant(start))
+		pts.add(start.x)
+		pts.add(start.y)
+		pts.add(start.z)
+
+		for (var i = 1; i <= num; i = i + 1)
+		{
+			var phi = i * this.granularity
+			var pos = this.calc_rotate_around_axis(start, norm, phi)
+			var geo_pos = CoordTrans.scale_to_geocentric_surface(v_ellipsoid.value, pos)
+			geos.add(Variant(geo_pos))
+			pts.add(geo_pos.x)
+			pts.add(geo_pos.y)
+			pts.add(geo_pos.z)			
+		}
+
+		geos.add(Variant(stop))
+		pts.add(stop.x)
+		pts.add(stop.y)
+		pts.add(stop.z)
+
+		var geo = VarGeo()
+		geo.shape = Polyline3D.init()
+		geo.shape.set_vertices(pts)
+
+		geos.add(geo)
+
+		return Variant(geos)
+	}
+
+	calc_angle_between(start, stop)
+	{
+		var v0 = Vector3(start)
+		v0.normalize()
+
+		var v1 = Vector3(stop)
+		v1.normalize()
+
+		return Math.acos(v0.dot(v1))
+	}
+
+	// from OpenGlobe
+	calc_rotate_around_axis(pos, axis, theta)
+	{
+        var u = axis.x
+        var v = axis.y
+        var w = axis.z
+
+        var cos_theta = Math.cos(theta)
+        var sin_theta = Math.sin(theta)
+
+        var ms = axis.x * axis.x + axis.y * axis.y + axis.z * axis.z
+        var m = Math.sqrt(ms)
+
+        var x = ((u * (u * pos.x + v * pos.y + w * pos.z)) + (((pos.x * (v * v + w * w)) - (u * (v * pos.y + w * pos.z))) * cos_theta) + (m * ((-w * pos.y) + (v * pos.z)) * sin_theta)) / ms
+        var y = ((v * (u * pos.x + v * pos.y + w * pos.z)) + (((pos.y * (u * u + w * w)) - (v * (u * pos.x + w * pos.z))) * cos_theta) + (m * ((w * pos.x) - (u * pos.z)) * sin_theta)) / ms
+        var z = ((w * (u * pos.x + v * pos.y + w * pos.z)) + (((pos.z * (u * u + v * v)) - (w * (u * pos.x + v * pos.y))) * cos_theta) + (m * (-(v * pos.x) + (u * pos.y)) * sin_theta)) / ms
+
+        return Vector3(x, y, z)
+	}
+}

@@ -1,0 +1,51 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER3
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "globegraph.variant" for VAR_TYPE_ELLIPSOID, VAR_TYPE_GEODETIC_2D
+import "globegraph.coord_trans" for CoordTrans
+import "maths.vector" for Vector2
+import "math" for Math
+
+class Geodetic2d is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "ellipsoid", VAR_TYPE_ELLIPSOID),
+		]
+		this.exports = [
+			Pin(this, "pos3",  VAR_TYPE_NUMBER3),
+			Pin(this, "geo2d", VAR_TYPE_GEODETIC_2D),
+		]
+
+		this.params.add(NodeParam("longitude", 0, { "region" : 360 }))
+		this.params.add(NodeParam("latitude", 90, { "region" : 180 }))
+
+		this.layout()		
+	}
+
+	calc_value(idx)
+	{
+		var longitude = Math.radians(this.query_param("longitude").value)
+		var latitude = Math.radians(this.query_param("latitude").value - 90)
+
+		if (idx == 0)
+		{
+			var v_ellipsoid = Blueprint.calc_input_value(this, 0)
+			if (v_ellipsoid) {
+				var pos = CoordTrans.geo2_to_pos3(v_ellipsoid.value, Vector2(longitude, latitude))
+				return Variant(pos)
+			}
+		}
+		else if (idx == 1)
+		{
+			return Variant(VAR_TYPE_GEODETIC_2D, Vector2(longitude, latitude))
+		}
+
+		return nil
+	}
+}

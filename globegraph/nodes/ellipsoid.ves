@@ -1,0 +1,50 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER3
+import "blueprint.node_param" for NodeParam
+import "geograph.variant" for VAR_TYPE_GEO, VarGeo
+import "geograph.surface" for Surface
+import "globegraph.variant" for VAR_TYPE_ELLIPSOID
+import "geometry" for Ellipsoid as tt_Ellipsoid
+import "maths.vector" for Vector3
+
+class Ellipsoid is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "geo",       VAR_TYPE_GEO),
+			Pin(this, "ellipsoid", VAR_TYPE_ELLIPSOID),
+		]
+
+		this.params.add(NodeParam("semimajor_axis", 1.0))
+
+		this.layout()
+
+		this.radius = Vector3(1, 1, 1)
+	}
+
+	calc_value(idx)
+	{
+		var radius = Vector3(this.radius)
+		radius.y = this.query_param("semimajor_axis").value
+
+		if (idx == 0)
+		{
+			var surface = Surface()
+			surface.surface = tt_Ellipsoid.init(radius.to_list())
+
+			var geo = VarGeo()
+			geo.shape = surface
+			return Variant(VAR_TYPE_GEO, geo)
+		}
+		else if (idx == 1)
+		{
+			return Variant(VAR_TYPE_ELLIPSOID, radius)
+		}
+
+		return nil
+	}
+}

@@ -39,6 +39,7 @@ class DrawMap3d is Node
 		this.draw_model_node = NODE_CACHE.fetch("../littleworld/assets/blueprints/render/9_edit_draw.ves", nil)
 //		Blueprint.connect(InputProxy(this, 1), 0, this.draw_model_node, "list")
 		Blueprint.connect(VariantProxy(this.v_models), 0, this.draw_model_node, "list")
+		Blueprint.connect(InputProxy(this, 2), 0, this.draw_model_node, "heightmap")
 
 		this.draw_shape_node = DrawGeometry()
 
