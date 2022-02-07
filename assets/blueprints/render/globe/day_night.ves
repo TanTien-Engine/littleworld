@@ -1,0 +1,200 @@
+var node0 = ::geograph::nodes::brush_to_gltf::BrushToGltf()
+
+_editor.add_node(node0, 117.89374624271, -447.3615635722)
+
+var node1 = ::blueprint::nodes::fetch::Fetch()
+node1.index = "node0"
+
+_editor.add_node(node1, 392.94665298061, -444.41422180588)
+
+var node2 = ::blueprint::nodes::fetch::Fetch()
+node2.index = "va"
+
+_editor.add_node(node2, 618.05559502537, -442.00253665044)
+
+var node3 = ::blueprint::nodes::input::Input()
+
+node3.var_name = "geos"
+node3.var_type = "array"
+
+_editor.add_node(node3, 1000.0138585934, 109.41430090309)
+
+var node4 = ::rendergraph::nodes::draw::Draw()
+
+node4.set_prim_type("triangles")
+node4.render_state = { "stencil_test" : false, "stencil_func" : "always", "stencil_mask" : 255, "cull" : "disable", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node4.skip = false
+
+_editor.add_node(node4, 861.57653086844, -303.63265940253)
+
+var node5 = ::rendergraph::nodes::shader::Shader()
+
+node5.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexcoord;
+
+out VS_OUT {
+	vec3 Normal;
+    vec3 frag_pos;
+    vec2 texcoord;
+} vs_out;
+
+uniform UBO
+{
+	mat4 model;
+	mat4 view;
+	mat4 projection;
+};
+
+void main()
+{
+	vs_out.Normal = mat3(transpose(inverse(model))) * aNormal; 
+	vs_out.frag_pos = vec3(model * vec4(aPos, 1.0));
+	vs_out.texcoord = aTexcoord;
+    gl_Position = projection * view * model * vec4(aPos, 1.0);
+}
+"
+node5.tcs = ""
+node5.tes = ""
+node5.gs = ""
+node5.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+	vec3 Normal;
+    vec3 frag_pos;
+    vec2 texcoord;
+} fs_in;
+
+uniform UBO
+{
+	vec3 light_pos;
+	vec3 cam_pos;
+};
+
+uniform sampler2D day_tex;
+uniform sampler2D night_tex;
+uniform sampler2D normal_tex;
+uniform sampler2D cloud_tex;
+
+void main()
+{
+	vec2 uv = vec2(fs_in.texcoord.y, 1.0 - fs_in.texcoord.x);
+
+	// ambient
+	vec3 ambient = vec3(0.25);
+
+	// diffuse
+	const vec3 LIGHT_POS = vec3(-5.0, -5.0, 10);
+	vec3 light_dir = normalize(light_pos - fs_in.frag_pos);
+    float diff = max(dot(fs_in.Normal, light_dir), 0.0);
+//    vec3 diffuse = diff * vec3(1.0);
+    vec3 diffuse = diff * texture(day_tex, fs_in.texcoord).rgb;
+
+    // specular
+    vec3 view_dir = normalize(cam_pos - fs_in.frag_pos);
+    vec3 halfway_dir = normalize(light_dir + view_dir);  
+    float spec = pow(max(dot(fs_in.Normal, halfway_dir), 0.0), 32.0);
+    vec3 specular = spec * vec3(1.0);
+
+//    FragColor = vec4(ambient + diffuse + specular, 1.0); 
+
+    float n_dot_l = dot(fs_in.Normal, light_dir);
+
+	vec3 day_col = texture(day_tex, uv).rgb;
+	vec3 night_col = texture(night_tex, uv).rgb;	
+	vec3 cloud_col = texture(cloud_tex, uv).rgb * 0.5;
+
+	float d = smoothstep(-0.2, 0.2, n_dot_l);
+
+//	vec3 base_col = n_dot_l > 0 ? day_col : night_col;
+	vec3 base_col = d * day_col + (1 - d) * night_col;
+	FragColor = vec4(base_col + cloud_col, 1.0);
+}
+"
+node5.cs = ""
+node5.render_gen()
+
+_editor.add_node(node5, 603.95493901509, -125.15217235732)
+
+var node6 = ::rendergraph::nodes::clear::Clear()
+
+node6.masks = [ "depth" ]
+node6.values = { "color" : [ 0.5, 0.5, 0.5, 1 ] }
+
+_editor.add_node(node6, 996.66028898274, 225.89512574204)
+
+var node7 = ::blueprint::nodes::perspective::Perspective()
+
+node7.fovy = 45
+node7.aspect = 0
+node7.znear = 0.1
+node7.zfar = 100
+
+_editor.add_node(node7, 413.60400748731, -99.260075321102)
+
+var node8 = ::blueprint::nodes::proxy::Proxy()
+
+node8.real_name = "view_cam"
+node8.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node8, 409.76615286487, 48.85559416076)
+
+var node9 = ::blueprint::nodes::number3::Number3()
+
+node9.value.set(100, 0, 0)
+
+_editor.add_node(node9, 412.51009621452, -222.35700607071)
+
+var node10 = ::blueprint::nodes::for_each::ForEach()
+
+_editor.add_node(node10, 1164.9441409146, 107.00451606488)
+
+var node11 = ::rendergraph::nodes::texture::Texture()
+node11.query_param("unif_name").value = "u_tex"
+node11.gamma_correction = false
+node11.init_texture("../../../textures/globe/2k_earth_daymap.jpg")
+
+_editor.add_node(node11, -272.79161105345, 258.02546438442)
+
+var node12 = ::rendergraph::nodes::texture::Texture()
+node12.query_param("unif_name").value = "u_tex"
+node12.gamma_correction = false
+node12.init_texture("../../../textures/globe/2k_earth_clouds.jpg")
+
+_editor.add_node(node12, -271.2039936327, -285.40341134205)
+
+var node13 = ::rendergraph::nodes::texture::Texture()
+node13.query_param("unif_name").value = "u_tex"
+node13.gamma_correction = false
+node13.init_texture("../../../textures/globe/2k_earth_nightmap.jpg")
+
+_editor.add_node(node13, -265.1064133819, 14.625215075442)
+
+var node14 = ::blueprint::nodes::input::Input()
+
+node14.var_name = "model"
+node14.var_type = "mat4"
+
+_editor.add_node(node14, 127.71195983887, 283.94540405273)
+
+Blueprint.connect(node8, "zoom", node7, "fovy")
+Blueprint.connect(node14, "var", node5, "model")
+Blueprint.connect(node8, "mat", node5, "view")
+Blueprint.connect(node7, "mat", node5, "projection")
+Blueprint.connect(node9, "v3", node5, "light_pos")
+Blueprint.connect(node8, "pos", node5, "cam_pos")
+Blueprint.connect(node11, "tex", node5, "day_tex")
+Blueprint.connect(node13, "tex", node5, "night_tex")
+Blueprint.connect(node12, "tex", node5, "cloud_tex")
+Blueprint.connect(node6, "next", node10, "prev")
+Blueprint.connect(node3, "var", node10, "in")
+Blueprint.connect(node4, "next", node10, "do")
+Blueprint.connect(node10, "out", node0, "brush")
+Blueprint.connect(node0, "gltf", node1, "items")
+Blueprint.connect(node1, "item", node2, "items")
+Blueprint.connect(node5, "out", node4, "shader")
+Blueprint.connect(node2, "item", node4, "va")

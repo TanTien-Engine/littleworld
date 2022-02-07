@@ -1,0 +1,29 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../assets/blueprints/render/globe/day_night.ves")
+
+_editor.add_node(node0, 152.65545075783, -17.532669775413)
+
+var node1 = ::globegraph::nodes::ellipsoid::Ellipsoid()
+node1.query_param("semimajor_axis").value = 1
+
+_editor.add_node(node1, -96.761833208114, 94.497370398197)
+
+var node2 = ::blueprint::nodes::camera3d::Camera3d()
+
+node2.cam.position.set(0.29262913154935, 0.043443683560721, 3.1997517612259)
+node2.cam.yaw = -95.2
+node2.cam.pitch = 0.2
+node2.cam.zoom = 45
+node2.cam.update_vectors()
+node2.speed = 0.20575845241547
+
+_editor.add_node(node2, -91.80617778844, -52.834805913477)
+
+var node3 = ::blueprint::nodes::orbit_camera::OrbitCamera()
+node3.query_param("speed").value = 0.47280272841454
+
+_editor.add_node(node3, -89.552242654504, -180.55831498763)
+
+Blueprint.connect(node1, "geo", node0, "geos")
+Blueprint.connect(node2, "this", node0, "view_cam")
+Blueprint.connect(node3, "mat", node0, "model")
