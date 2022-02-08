@@ -1,0 +1,29 @@
+var node0 = ::globegraph::nodes::ellipsoid::Ellipsoid()
+node0.query_param("semimajor_axis").value = 1
+
+_editor.add_node(node0, -96.761833208114, 94.497370398197)
+
+var node1 = ::blueprint::nodes::camera3d::Camera3d()
+
+node1.cam.position.set(0.91397163449333, 0.34872035838239, 1.0357779335564)
+node1.cam.yaw = -132.1
+node1.cam.pitch = -8.9
+node1.cam.zoom = 45
+node1.cam.update_vectors()
+node1.speed = 0.041472733020782
+
+_editor.add_node(node1, -91.80617778844, -52.834805913477)
+
+var node2 = ::blueprint::nodes::orbit_camera::OrbitCamera()
+node2.query_param("speed").value = 0.23845927417278
+
+_editor.add_node(node2, -90.461333563595, -181.55831498763)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../assets/blueprints/render/globe/tessellator.ves")
+
+_editor.add_node(node3, 179.17658381506, -37.396738921211)
+
+Blueprint.connect(node0, "geo", node3, "geos")
+Blueprint.connect(node1, "this", node3, "view_cam")
+Blueprint.connect(node2, "mat", node3, "model")

@@ -1,0 +1,315 @@
+var node0 = ::geograph::nodes::brush_to_gltf::BrushToGltf()
+
+_editor.add_node(node0, 117.89374624271, -447.3615635722)
+
+var node1 = ::blueprint::nodes::fetch::Fetch()
+node1.index = "node0"
+
+_editor.add_node(node1, 392.94665298061, -444.41422180588)
+
+var node2 = ::blueprint::nodes::fetch::Fetch()
+node2.index = "va"
+
+_editor.add_node(node2, 618.05559502537, -442.00253665044)
+
+var node3 = ::blueprint::nodes::input::Input()
+
+node3.var_name = "geos"
+node3.var_type = "array"
+
+_editor.add_node(node3, 1000.0138585934, 109.41430090309)
+
+var node4 = ::rendergraph::nodes::draw::Draw()
+
+node4.set_prim_type("patches")
+node4.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "disable", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node4.skip = false
+
+_editor.add_node(node4, 861.57653086844, -303.63265940253)
+
+var node5 = ::rendergraph::nodes::shader::Shader()
+
+node5.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+out vec3 TCS_IN_FragPos;
+
+void main()
+{
+    TCS_IN_FragPos = aPos;
+}
+"
+node5.tcs = "
+#version 400 core
+
+layout(vertices = 3) out;
+
+in vec3 TCS_IN_FragPos[];
+
+out vec3 TES_IN_FragPos[];
+
+uniform UBO_TCS
+{
+    mat4 model;   
+
+    vec3 cam_pos;
+    int lod_level;
+} tcs;
+
+void main()
+{
+    TES_IN_FragPos[gl_InvocationID] = TCS_IN_FragPos[gl_InvocationID];
+
+    if (gl_InvocationID == 0)
+    {
+    	vec3 pos = normalize(TCS_IN_FragPos[0]);
+        vec3 world_pos = (tcs.model * vec4(pos, 1.0)).xyz;
+
+        float dist = pow(length(tcs.cam_pos - world_pos), 2);
+
+        int max_level = tcs.lod_level;
+        int curr_level = max_level;
+        for (int i = 0; i < max_level; ++i) {
+            if (dist < 0.05 * pow(2, i)) {
+                curr_level = i;
+                break;
+            }
+        }
+        float level = clamp(pow(2.0, (max_level - curr_level)), 1.0, float(gl_MaxTessGenLevel));
+        for (int i = 0; i < 3; ++i) {
+            gl_TessLevelOuter[i] = level;
+        }
+        gl_TessLevelInner[0] = level / 2;
+    }
+}
+"
+node5.tes = "
+#version 400 core
+
+layout(triangles, equal_spacing, ccw) in;
+
+in vec3 TES_IN_FragPos[];
+
+out VS_OUT {
+	vec3 world_pos;
+	vec3 cam_pos;
+	
+	vec3 light_dir;
+	vec3 view_dir;
+
+	mat4 model_mat;
+} vs_out;
+
+uniform UBO_TES
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;
+
+	vec3 light_pos;
+	vec3 cam_pos;    
+} tes;
+
+vec3 interpolate_3d(vec3 v0, vec3 v1, vec3 v2)
+{
+    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+
+void main()
+{
+	vs_out.model_mat = tes.model;
+	vs_out.cam_pos = tes.cam_pos;	
+
+	vs_out.world_pos = normalize(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]));
+
+	vs_out.light_dir = normalize(tes.light_pos - vs_out.world_pos);
+	vs_out.view_dir  = normalize(tes.cam_pos - vs_out.world_pos);	
+
+    gl_Position = tes.projection * tes.view * tes.model * vec4(vs_out.world_pos, 1.0);
+}
+"
+node5.gs = ""
+node5.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+	vec3 world_pos;
+	vec3 cam_pos;
+
+	vec3 light_dir;
+	vec3 view_dir;
+
+	mat4 model_mat;
+} fs_in;
+
+uniform UBO
+{
+	vec4 diffuse_specular_ambient_shininess;
+};
+
+uniform sampler2D earth_tex;
+
+// from OpenGlobe
+
+float LightIntensity(vec3 normal, vec3 toLight, vec3 toEye, vec4 diffuseSpecularAmbientShininess)
+{
+    vec3 toReflectedLight = reflect(-toLight, normal);
+
+    float diffuse = max(dot(toLight, normal), 0.0);
+    float specular = max(dot(toReflectedLight, toEye), 0.0);
+    specular = pow(specular, diffuseSpecularAmbientShininess.w);
+
+    return (diffuseSpecularAmbientShininess.x * diffuse) +
+            (diffuseSpecularAmbientShininess.y * specular) +
+            diffuseSpecularAmbientShininess.z;
+}
+
+vec3 GeodeticSurfaceNormal(vec3 positionOnEllipsoid, vec3 oneOverEllipsoidRadiiSquared)
+{
+    return normalize(positionOnEllipsoid * oneOverEllipsoidRadiiSquared);
+}
+
+vec2 ComputeTextureCoordinates(vec3 normal)
+{
+    return vec2(atan(normal.x, normal.z) / (2 * 3.14159) + 0.5, asin(normal.y) / 3.14159 + 0.5);
+}
+
+void main()
+{
+    vec3 normal = GeodeticSurfaceNormal(fs_in.world_pos, vec3(1));
+    vec2 tex_coord = ComputeTextureCoordinates(normal);
+    normal = mat3(fs_in.model_mat) * normal;
+
+    const vec2 grid_line_width = vec2(1.0);
+
+    float dist = length(fs_in.cam_pos);
+    vec2 grid_resolution = vec2(dist * 0.01);
+
+    vec2 dist_to_line = mod(tex_coord, grid_resolution);
+    vec2 dx = abs(dFdx(tex_coord));
+    vec2 dy = abs(dFdy(tex_coord));
+    vec2 dF = vec2(max(dx.s, dy.s), max(dx.t, dy.t)) * grid_line_width;
+
+    if (any(lessThan(dist_to_line, dF)))
+    {
+        FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+    else
+    {
+		float intensity = LightIntensity(normal, fs_in.light_dir, fs_in.view_dir, diffuse_specular_ambient_shininess);
+		vec3 col = texture(earth_tex, tex_coord).rgb * intensity;
+		FragColor = vec4(col, 1.0);
+    }
+}
+"
+node5.cs = ""
+node5.render_gen()
+
+_editor.add_node(node5, 603.95493901509, -125.15217235732)
+
+var node6 = ::rendergraph::nodes::clear::Clear()
+
+node6.masks = [ "depth" ]
+node6.values = { "color" : [ 0.5, 0.5, 0.5, 1 ] }
+
+_editor.add_node(node6, 996.66028898274, 225.89512574204)
+
+var node7 = ::blueprint::nodes::perspective::Perspective()
+
+node7.fovy = 45
+node7.aspect = 0
+node7.znear = 0.1
+node7.zfar = 100
+
+_editor.add_node(node7, 413.60400748731, -99.260075321102)
+
+var node8 = ::blueprint::nodes::proxy::Proxy()
+
+node8.real_name = "view_cam"
+node8.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node8, 409.76615286487, 48.85559416076)
+
+var node9 = ::blueprint::nodes::for_each::ForEach()
+
+_editor.add_node(node9, 1164.9441409146, 107.00451606488)
+
+var node10 = ::blueprint::nodes::input::Input()
+
+node10.var_name = "model"
+node10.var_type = "mat4"
+
+_editor.add_node(node10, 416.90195983887, 229.49540405273)
+
+var node11 = ::rendergraph::nodes::texture::Texture()
+node11.query_param("unif_name").value = "u_tex"
+node11.gamma_correction = false
+node11.init_texture("../../../textures/globe/NaturalEarth/NE2_50M_SR_W.jpg")
+
+_editor.add_node(node11, 153.81032910156, -26.210243603516)
+
+var node12 = ::blueprint::nodes::number4::Number4()
+
+node12.value.set(0.65, 0.25, 0.1, 12)
+
+_editor.add_node(node12, 180.94563406952, -275.7322081889)
+
+var node13 = ::blueprint::nodes::number2::Number2()
+
+node13.value.set(0.1, 0.1)
+
+_editor.add_node(node13, 407.34296776638, -218.81778773789)
+
+var node14 = ::blueprint::nodes::number2::Number2()
+
+node14.value.set(1, 1)
+
+_editor.add_node(node14, 408.35636077242, -309.61293649693)
+
+var node15 = ::blueprint::nodes::number3::Number3()
+
+node15.value.set(0, 0, 1)
+
+_editor.add_node(node15, 265.8581185416, 170.74611571317)
+
+var node16 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node16, 411.66091366943, 163.06332827209)
+
+var node17 = ::blueprint::nodes::integer::Integer()
+
+node17.value = 4
+
+_editor.add_node(node17, 250.11299492062, 81.642234401227)
+
+var node18 = ::blueprint::nodes::integer::Integer()
+
+node18.value = 10
+
+_editor.add_node(node18, 115.67587280273, 150.29739379883)
+
+Blueprint.connect(node15, "v3", node16, "a")
+Blueprint.connect(node17, "v", node16, "b")
+Blueprint.connect(node8, "zoom", node7, "fovy")
+Blueprint.connect(node10, "var", node5, "tcs.model")
+Blueprint.connect(node8, "pos", node5, "tcs.cam_pos")
+Blueprint.connect(node18, "v", node5, "tcs.lod_level")
+Blueprint.connect(node7, "mat", node5, "tes.projection")
+Blueprint.connect(node8, "mat", node5, "tes.view")
+Blueprint.connect(node10, "var", node5, "tes.model")
+Blueprint.connect(node8, "pos", node5, "tes.light_pos")
+Blueprint.connect(node8, "pos", node5, "tes.cam_pos")
+Blueprint.connect(node12, "v4", node5, "diffuse_specular_ambient_shininess")
+Blueprint.connect(node13, "v2", node5, "grid_resolution")
+Blueprint.connect(node14, "v2", node5, "grid_line_width")
+Blueprint.connect(node11, "tex", node5, "earth_tex")
+Blueprint.connect(node6, "next", node9, "prev")
+Blueprint.connect(node3, "var", node9, "in")
+Blueprint.connect(node4, "next", node9, "do")
+Blueprint.connect(node9, "out", node0, "brush")
+Blueprint.connect(node0, "gltf", node1, "items")
+Blueprint.connect(node1, "item", node2, "items")
+Blueprint.connect(node5, "out", node4, "shader")
+Blueprint.connect(node2, "item", node4, "va")
