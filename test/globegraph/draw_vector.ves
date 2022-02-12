@@ -6,9 +6,9 @@ _editor.add_node(node0, -54.519770247934, -143.7090785124)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(1.3684694279178, 1.4587493467791, -0.38510245519573)
-node1.cam.yaw = -227.6
-node1.cam.pitch = -37.4
+node1.cam.position.set(1.5199226166678, 2.0722612475087, -1.6130741642202)
+node1.cam.yaw = -241.6
+node1.cam.pitch = -33.9
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.055572837591171
@@ -95,6 +95,11 @@ node15.load_from_file(_editor, "../../assets/blueprints/render/vector/draw_polyg
 
 _editor.add_node(node15, 800.52768066406, -202.16817932129)
 
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "../../assets/blueprints/render/vector/draw_wireframe.ves")
+
+_editor.add_node(node16, 804.42145996094, -333.57778320313)
+
 Blueprint.connect(node11, "geo", node13, "in0")
 Blueprint.connect(node12, "geo", node13, "in1")
 Blueprint.connect(node9, "v3", node7, "p0")
@@ -103,6 +108,8 @@ Blueprint.connect(node3, "v3", node0, "p0")
 Blueprint.connect(node2, "v3", node0, "p1")
 Blueprint.connect(node0, "geo", node10, "in0")
 Blueprint.connect(node7, "geo", node10, "in1")
+Blueprint.connect(node4, "geo", node16, "geos")
+Blueprint.connect(node1, "this", node16, "view_cam")
 Blueprint.connect(node14, "geo", node15, "geos")
 Blueprint.connect(node1, "this", node15, "view_cam")
 Blueprint.connect(node4, "geo", node6, "geos")
