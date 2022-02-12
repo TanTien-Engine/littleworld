@@ -37,7 +37,7 @@ node4.query_param("offset_z").value = true
 _editor.add_node(node4, 75.200054021388, -481.61499873161)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "../../assets/blueprints/render/vector/draw_line.ves")
+node5.load_from_file(_editor, "../../assets/blueprints/render/vector/draw_polyline.ves")
 
 _editor.add_node(node5, 801.14568359375, -87.475766878995)
 
