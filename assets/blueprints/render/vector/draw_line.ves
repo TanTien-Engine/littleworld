@@ -1,0 +1,234 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "geos"
+node0.var_type = "array"
+
+_editor.add_node(node0, 434.42494950249, 228.71711908491)
+
+var node1 = ::rendergraph::nodes::draw::Draw()
+
+node1.set_prim_type("lines")
+node1.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "disable", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "lequal", "clip_plane" : false }
+node1.skip = false
+
+_editor.add_node(node1, 1181.3038035957, -181.81447758435)
+
+var node2 = ::rendergraph::nodes::shader::Shader()
+
+node2.vs = "
+#version 330 core
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec4 color;
+
+out VS_OUT {
+    vec3 color;
+    mat4 mvp_mat;
+} vs_out;
+
+uniform UBO
+{
+    mat4 model;
+    mat4 view;
+    mat4 projection;
+};
+
+void main()
+{
+    vs_out.color = color.rgb;
+    vs_out.mvp_mat = projection * view * model;
+
+    gl_Position = vec4(position, 1.0);
+}
+"
+node2.tcs = ""
+node2.tes = ""
+node2.gs = "
+
+layout(lines) in;
+layout(triangle_strip, max_vertices = 4) out;
+
+in VS_OUT {
+    vec3 color;
+    mat4 mvp_mat;
+} gs_in[];
+
+out GS_OUT {
+    vec3 color;
+} gs_out;
+
+uniform UBO
+{
+    mat4 viewport_trans;
+    mat4 viewport_ortho;
+
+    float z_near;
+
+    float fill_dist;
+};
+
+vec4 model_to_clip_coords(vec4 v)
+{
+    return gs_in[0].mvp_mat * v;
+}
+
+vec4 clip_to_window_coords(vec4 v)
+{
+    v.xyz /= v.w;                                    // normalized device coordinates
+    v.xyz = (viewport_trans * vec4(v.xyz, 1.0)).xyz; // window coordinates
+    return v;
+}
+
+void clip_line_seg_to_near_plane(out vec4 clip0, out vec4 clip1, out bool culled)
+{
+    vec4 model0 = gl_in[0].gl_Position;
+    vec4 model1 = gl_in[1].gl_Position;
+    clip0 = model_to_clip_coords(model0);
+    clip1 = model_to_clip_coords(model1);
+    culled = false;
+
+    float dist0 = clip0.z - z_near;
+    float dist1 = clip1.z - z_near;
+
+    if (dist0 * dist1 < 0)
+    {
+        float t = dist0 / (dist0 - dist1);
+        vec3 modelv = vec3(model0) + t * (vec3(model1) - vec3(model0));
+        vec4 clipv = model_to_clip_coords(vec4(modelv, 1));
+        if (dist0 < 0.0) {
+            clip0 = clipv;
+        } else {
+            clip1 = clipv;
+        }
+    }
+    else if (dist0 < 0)
+    {
+        culled = true;
+    }
+}
+
+void main()
+{
+    vec4 c0, c1;
+    bool culled;
+    clip_line_seg_to_near_plane(c0, c1, culled);
+    if (culled) {
+        return;
+    }
+
+    vec4 w0 = clip_to_window_coords(c0);
+    vec4 w1 = clip_to_window_coords(c1);
+
+    vec2 direction = w1.xy - w0.xy;
+    vec2 normal = normalize(vec2(direction.y, -direction.x));
+
+    vec4 v0 = vec4(w0.xy - (normal * fill_dist), -w0.z, 1.0);
+    vec4 v1 = vec4(w1.xy - (normal * fill_dist), -w1.z, 1.0);
+    vec4 v2 = vec4(w0.xy + (normal * fill_dist), -w0.z, 1.0);
+    vec4 v3 = vec4(w1.xy + (normal * fill_dist), -w1.z, 1.0);
+
+    gs_out.color = gs_in[0].color;
+    gl_Position = viewport_ortho * v0;
+    EmitVertex();
+
+    gs_out.color = gs_in[1].color;
+    gl_Position = viewport_ortho * v1;
+    EmitVertex();
+
+    gs_out.color = gs_in[0].color;
+    gl_Position = viewport_ortho * v2;
+    EmitVertex();
+
+    gs_out.color = gs_in[1].color;
+    gl_Position = viewport_ortho * v3;
+    EmitVertex();
+}
+
+"
+node2.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in GS_OUT {
+    vec3 color;
+} fs_in;
+
+uniform UBO
+{
+	vec3 light_pos;
+	vec3 cam_pos;
+};
+
+void main()
+{
+    FragColor = vec4(fs_in.color, 1.0);
+}
+"
+node2.cs = ""
+node2.render_gen()
+
+_editor.add_node(node2, 712.21940182501, -248.70589136558)
+
+var node3 = ::blueprint::nodes::perspective::Perspective()
+
+node3.fovy = 45
+node3.aspect = 0
+node3.znear = 0.1
+node3.zfar = 100
+
+_editor.add_node(node3, 407.81888352037, -114.96255465994)
+
+var node4 = ::blueprint::nodes::proxy::Proxy()
+
+node4.real_name = "view_cam"
+node4.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node4, 409.76615286487, 48.85559416076)
+
+var node5 = ::blueprint::nodes::number3::Number3()
+
+node5.value.set(5.9766573905945, 5.6433238983154, 5.3099908828735)
+
+_editor.add_node(node5, 416.7905415393, -428.80123802209)
+
+var node6 = ::globegraph::nodes::vector_data::VectorData()
+
+_editor.add_node(node6, 666.14853804154, 149.49830832742)
+
+var node7 = ::blueprint::nodes::cache::Cache()
+node7.query_param("disable").value = false
+
+_editor.add_node(node7, 799.39184570313, 119.20050048828)
+
+var node8 = ::blueprint::nodes::viewport::Viewport()
+
+_editor.add_node(node8, 413.10631189267, -255.4001381614)
+
+var node9 = ::rendergraph::nodes::clear::Clear()
+
+node9.masks = [  ]
+node9.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node9, 812.69677734375, 264.71234130859)
+
+var node10 = ::blueprint::nodes::integer::Integer()
+
+node10.value = 3
+
+_editor.add_node(node10, 410.2480135831, -332.79022494229)
+
+Blueprint.connect(node4, "zoom", node3, "fovy")
+Blueprint.connect(node3, "znear", node8, "znear")
+Blueprint.connect(node3, "zfar", node8, "zfar")
+Blueprint.connect(node4, "mat", node2, "view")
+Blueprint.connect(node3, "mat", node2, "projection")
+Blueprint.connect(node8, "trans", node2, "viewport_trans")
+Blueprint.connect(node8, "ortho", node2, "viewport_ortho")
+Blueprint.connect(node3, "znear", node2, "z_near")
+Blueprint.connect(node10, "v", node2, "fill_dist")
+Blueprint.connect(node5, "v3", node2, "light_pos")
+Blueprint.connect(node4, "pos", node2, "cam_pos")
+Blueprint.connect(node0, "var", node6, "geos")
+Blueprint.connect(node6, "va", node7, "var")
+Blueprint.connect(node9, "next", node1, "prev")
+Blueprint.connect(node2, "out", node1, "shader")
+Blueprint.connect(node7, "var", node1, "va")

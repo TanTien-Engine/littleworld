@@ -1,0 +1,52 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "rendergraph.variant" for VAR_TYPE_VERTEX_ARRAY
+import "geograph.variant" for VAR_TYPE_GEO
+import "globegen" for ShapeBatching
+
+class VectorData is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geos", VAR_TYPE_ARRAY),
+		]
+		this.exports = [
+			Pin(this, "va", VAR_TYPE_VERTEX_ARRAY),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geos = Blueprint.calc_input_value(this, 0)
+		if (!v_geos) {
+			return nil
+		}
+
+		var batch = ShapeBatching.init()
+		this.get_shape(v_geos, batch)
+
+		var va = batch.build_va()
+		return Variant(VAR_TYPE_VERTEX_ARRAY, va)
+	}
+
+	get_shape(v_geos, batch)
+	{
+		if (v_geos.value is List)
+		{
+			for (var item in v_geos.value) {
+				this.get_shape(item, batch)
+			}
+		}
+		else if (v_geos.type == VAR_TYPE_GEO)
+		{
+			batch.add(v_geos.value.shape, [255, 0, 0, 255])
+		}
+	}
+}

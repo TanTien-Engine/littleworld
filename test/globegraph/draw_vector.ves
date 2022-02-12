@@ -1,0 +1,81 @@
+var node0 = ::geograph::nodes::line3d::Line3d()
+node0.query_param("p0").value.set(0, 0, 0)
+node0.query_param("p1").value.set(1, 1, 1)
+
+_editor.add_node(node0, -54.519770247934, -143.7090785124)
+
+var node1 = ::blueprint::nodes::camera3d::Camera3d()
+
+node1.cam.position.set(-0.87314253170648, 1.5227429299539, 1.7039609420297)
+node1.cam.yaw = -50.5
+node1.cam.pitch = -36.4
+node1.cam.zoom = 45
+node1.cam.update_vectors()
+node1.speed = 0.055572837591171
+
+_editor.add_node(node1, -11.7802, 100.5215)
+
+var node2 = ::blueprint::nodes::number3::Number3()
+
+node2.value.set(0, 1, 0)
+
+_editor.add_node(node2, -215.00941870823, -170.0088666175)
+
+var node3 = ::blueprint::nodes::number3::Number3()
+
+node3.value.set(0, 0, 0)
+
+_editor.add_node(node3, -217.23257446289, -58.14109992981)
+
+var node4 = ::geograph::nodes::box::Box()
+node4.query_param("size").value.set(0.76526182889938, 1, 1)
+node4.query_param("pos").value.set(0, 0, 0)
+node4.query_param("offset_x").value = true
+node4.query_param("offset_y").value = true
+node4.query_param("offset_z").value = true
+
+_editor.add_node(node4, 75.200054021388, -481.61499873161)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "../../assets/blueprints/render/vector/draw_line.ves")
+
+_editor.add_node(node5, 801.14568359375, -88.384857788086)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "../../../tantien/assets/blueprints/geograph/draw_geos.ves")
+
+_editor.add_node(node6, 379.66323852539, -202.83193969727)
+
+var node7 = ::geograph::nodes::line3d::Line3d()
+node7.query_param("p0").value.set(0, 0, 0)
+node7.query_param("p1").value.set(1, 1, 1)
+
+_editor.add_node(node7, -265.41466130729, -425.0456675432)
+
+var node8 = ::blueprint::nodes::number3::Number3()
+
+node8.value.set(0, 0, 1)
+
+_editor.add_node(node8, -425.90430976758, -451.3454556483)
+
+var node9 = ::blueprint::nodes::number3::Number3()
+
+node9.value.set(0, 0, 0)
+
+_editor.add_node(node9, -428.12746552224, -339.47768896061)
+
+var node10 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node10, -94.778826936397, -415.32108912765)
+
+Blueprint.connect(node9, "v3", node7, "p0")
+Blueprint.connect(node8, "v3", node7, "p1")
+Blueprint.connect(node3, "v3", node0, "p0")
+Blueprint.connect(node2, "v3", node0, "p1")
+Blueprint.connect(node0, "geo", node10, "in0")
+Blueprint.connect(node7, "geo", node10, "in1")
+Blueprint.connect(node4, "geo", node6, "geos")
+Blueprint.connect(node1, "this", node6, "view_cam")
+Blueprint.connect(node6, "next", node5, "prev")
+Blueprint.connect(node10, "list", node5, "geos")
+Blueprint.connect(node1, "this", node5, "view_cam")
