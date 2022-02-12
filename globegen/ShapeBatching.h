@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-namespace gs { class Shape3D; }
+namespace gs { class Shape3D; class Line3D; class Polyline3D; class Polygon3D; }
 
 namespace globegen
 {
@@ -37,6 +37,11 @@ public:
 		Vertex*         vert_ptr = nullptr;
 		unsigned short* index_ptr = nullptr;
 	};
+
+private:
+	void AddLine(const gs::Line3D& line, uint32_t col);
+	void AddPolyline(const gs::Polyline3D& polyline, uint32_t col);
+	void AddPolygon(const gs::Polygon3D& polygon, uint32_t col);
 
 private:
 	Buffer m_buf;

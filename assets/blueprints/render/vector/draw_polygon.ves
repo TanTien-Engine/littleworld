@@ -1,0 +1,224 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "geos"
+node0.var_type = "array"
+
+_editor.add_node(node0, 434.42494950249, 228.71711908491)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec4 color;
+
+out VS_OUT {
+    vec3 color;
+
+    vec3 light_dir;
+    vec3 view_dir;    
+} vs_out;
+
+uniform UBO
+{
+    mat4 model;
+    mat4 view;
+    mat4 projection;
+
+    vec3 light_pos;
+    vec3 cam_pos;
+};
+
+void main()
+{
+    vs_out.color = color.rgb;
+
+    vs_out.light_dir = normalize(light_pos - position);
+    vs_out.view_dir  = normalize(cam_pos - position);   
+
+    gl_Position = projection * view * model * vec4(position, 1.0);
+}
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = "
+#version 330 core
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
+
+in VS_OUT {
+    vec3 color;
+
+    vec3 light_dir;
+    vec3 view_dir;
+} gs_in[];
+
+out GS_OUT {
+    vec3 color;
+
+    vec3 light_dir;
+    vec3 view_dir;
+
+    vec3 normal;
+} gs_out;
+
+vec4 explode(vec4 position, vec3 normal)
+{
+    vec3 direction = normal * 0.00001;
+    return position + vec4(direction, 0.0);
+}
+
+vec3 GetNormal()
+{
+    vec3 a = vec3(gl_in[0].gl_Position) - vec3(gl_in[1].gl_Position);
+    vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[1].gl_Position);
+    return normalize(cross(a, b));
+}
+
+void main() 
+{
+    vec3 normal = GetNormal();
+
+    gl_Position = explode(gl_in[0].gl_Position, normal);
+    gs_out.color = gs_in[0].color;
+    gs_out.light_dir = gs_in[0].light_dir;
+    gs_out.view_dir = gs_in[0].view_dir;
+    gs_out.normal = normal;
+    EmitVertex();
+
+    gl_Position = explode(gl_in[1].gl_Position, normal);
+    gs_out.color = gs_in[1].color;
+    gs_out.light_dir = gs_in[1].light_dir;
+    gs_out.view_dir = gs_in[1].view_dir;
+    gs_out.normal = normal;
+    EmitVertex();
+
+    gl_Position = explode(gl_in[2].gl_Position, normal);
+    gs_out.color = gs_in[2].color;
+    gs_out.light_dir = gs_in[2].light_dir;
+    gs_out.view_dir = gs_in[2].view_dir;
+    gs_out.normal = normal;
+    EmitVertex();
+
+    EndPrimitive();
+}
+"
+node1.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in GS_OUT {
+    vec3 color;
+
+    vec3 light_dir;
+    vec3 view_dir;
+
+    vec3 normal;
+} fs_in;
+
+uniform UBO
+{
+    vec4 diffuse_specular_ambient_shininess;
+};
+
+float LightIntensity(vec3 normal, vec3 toLight, vec3 toEye, vec4 diffuseSpecularAmbientShininess)
+{
+    vec3 toReflectedLight = reflect(-toLight, normal);
+
+    float diffuse = max(dot(toLight, normal), 0.0);
+
+    float specular = max(dot(toReflectedLight, toEye), 0.0);
+    specular = pow(specular, diffuseSpecularAmbientShininess.w);
+
+    return (diffuseSpecularAmbientShininess.x * diffuse) +
+            (diffuseSpecularAmbientShininess.y * specular) +
+            diffuseSpecularAmbientShininess.z;
+}
+
+void main()
+{
+    float intensity = LightIntensity(-fs_in.normal, fs_in.light_dir, fs_in.view_dir, diffuse_specular_ambient_shininess);
+//    FragColor = vec4(fs_in.color * intensity, 1.0);
+    FragColor = vec4(fs_in.color, 1.0);
+}
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, 712.21940182501, -248.70589136558)
+
+var node2 = ::blueprint::nodes::perspective::Perspective()
+
+node2.fovy = 45
+node2.aspect = 0
+node2.znear = 0.1
+node2.zfar = 100
+
+_editor.add_node(node2, 407.81888352037, -114.96255465994)
+
+var node3 = ::blueprint::nodes::proxy::Proxy()
+
+node3.real_name = "view_cam"
+node3.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node3, 409.76615286487, 48.85559416076)
+
+var node4 = ::blueprint::nodes::number3::Number3()
+
+node4.value.set(5.9766573905945, 5.6433238983154, 5.3099908828735)
+
+_editor.add_node(node4, 416.7905415393, -428.80123802209)
+
+var node5 = ::globegraph::nodes::vector_data::VectorData()
+
+_editor.add_node(node5, 666.14853804154, 149.49830832742)
+
+var node6 = ::blueprint::nodes::cache::Cache()
+node6.query_param("disable").value = false
+
+_editor.add_node(node6, 799.39184570313, 119.20050048828)
+
+var node7 = ::blueprint::nodes::viewport::Viewport()
+
+_editor.add_node(node7, 413.10631189267, -255.4001381614)
+
+var node8 = ::rendergraph::nodes::clear::Clear()
+
+node8.masks = [  ]
+node8.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node8, 812.69677734375, 264.71234130859)
+
+var node9 = ::blueprint::nodes::integer::Integer()
+
+node9.value = 3
+
+_editor.add_node(node9, 410.2480135831, -332.79022494229)
+
+var node10 = ::rendergraph::nodes::draw::Draw()
+
+node10.set_prim_type("triangles")
+node10.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "prim_restart" : true, "stencil_mask" : 255, "cull" : "disable", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "lequal", "clip_plane" : false }
+node10.skip = false
+
+_editor.add_node(node10, 1251.5320068359, -60.896575317383)
+
+var node11 = ::blueprint::nodes::number4::Number4()
+
+node11.value.set(0.65, 0.25, 0.1, 12)
+
+_editor.add_node(node11, 415.04906382812, -556.52191806641)
+
+Blueprint.connect(node3, "zoom", node2, "fovy")
+Blueprint.connect(node2, "znear", node7, "znear")
+Blueprint.connect(node2, "zfar", node7, "zfar")
+Blueprint.connect(node3, "mat", node1, "view")
+Blueprint.connect(node2, "mat", node1, "projection")
+Blueprint.connect(node4, "v3", node1, "light_pos")
+Blueprint.connect(node3, "pos", node1, "cam_pos")
+Blueprint.connect(node11, "v4", node1, "diffuse_specular_ambient_shininess")
+Blueprint.connect(node0, "var", node5, "geos")
+Blueprint.connect(node5, "va", node6, "var")
+Blueprint.connect(node8, "next", node10, "prev")
+Blueprint.connect(node1, "out", node10, "shader")
+Blueprint.connect(node6, "var", node10, "va")
