@@ -1,7 +1,7 @@
 var node0 = ::rendergraph::nodes::draw::Draw()
 
 node0.set_prim_type("patches")
-node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
 node0.skip = false
 
 _editor.add_node(node0, 558.8075282446, -339.48126638417)
@@ -226,53 +226,53 @@ node3.shape_params = { "grids_size" : 64 }
 
 _editor.add_node(node3, 381.67421297039, -401.33131969581)
 
-var node4 = ::blueprint::nodes::perspective::Perspective()
+var node4 = ::blueprint::nodes::input::Input()
 
-node4.fovy = 45
-node4.aspect = 0
-node4.znear = 0.025245843455195
-node4.zfar = 1000
+node4.var_name = "tes_heightmap"
+node4.var_type = "texture"
 
-_editor.add_node(node4, -44.721260070801, -167.46328735352)
+_editor.add_node(node4, -192.07851987472, -325.74191018398)
 
-var node5 = ::blueprint::nodes::input::Input()
+var node5 = ::blueprint::nodes::proxy::Proxy()
 
-node5.var_name = "tes_heightmap"
-node5.var_type = "texture"
+node5.real_name = "view_cam"
+node5.init_real_node(::blueprint::nodes::camera3d::Camera3d())
 
-_editor.add_node(node5, -192.07851987472, -325.74191018398)
+_editor.add_node(node5, -223.05257443076, -190.79010489722)
 
-var node6 = ::blueprint::nodes::proxy::Proxy()
+var node6 = ::blueprint::nodes::input::Input()
 
-node6.real_name = "view_cam"
-node6.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+node6.var_name = "fs.mouse_pos"
+node6.var_type = "num2"
 
-_editor.add_node(node6, -223.05257443076, -190.79010489722)
+_editor.add_node(node6, -191.297647651, -372.80012313566)
 
 var node7 = ::blueprint::nodes::input::Input()
 
-node7.var_name = "fs.mouse_pos"
-node7.var_type = "num2"
+node7.var_name = "fs.draw_radius"
+node7.var_type = "num"
 
-_editor.add_node(node7, -191.297647651, -372.80012313566)
+_editor.add_node(node7, -190.27132794413, -422.06332026702)
 
-var node8 = ::blueprint::nodes::input::Input()
+var node8 = ::blueprint::nodes::perspective::Perspective()
 
-node8.var_name = "fs.draw_radius"
-node8.var_type = "num"
+node8.fovy = 45
+node8.aspect = 0
+node8.znear = 0.1
+node8.zfar = 100
 
-_editor.add_node(node8, -190.27132794413, -422.06332026702)
+_editor.add_node(node8, -56.064343229619, -137.34481624658)
 
-Blueprint.connect(node6, "zoom", node4, "fovy")
-Blueprint.connect(node4, "mat", node1, "tcs.projection")
-Blueprint.connect(node6, "mat", node1, "tcs.view")
-Blueprint.connect(node6, "pos", node1, "tcs.cam_pos")
-Blueprint.connect(node4, "mat", node1, "tes.projection")
-Blueprint.connect(node6, "mat", node1, "tes.view")
-Blueprint.connect(node5, "var", node1, "tes_heightmap")
-Blueprint.connect(node7, "var", node1, "fs.mouse_pos")
-Blueprint.connect(node8, "var", node1, "fs.draw_radius")
-Blueprint.connect(node5, "var", node1, "fs_heightmap")
+Blueprint.connect(node5, "zoom", node8, "fovy")
+Blueprint.connect(node8, "mat", node1, "tcs.projection")
+Blueprint.connect(node5, "mat", node1, "tcs.view")
+Blueprint.connect(node5, "pos", node1, "tcs.cam_pos")
+Blueprint.connect(node8, "mat", node1, "tes.projection")
+Blueprint.connect(node5, "mat", node1, "tes.view")
+Blueprint.connect(node4, "var", node1, "tes_heightmap")
+Blueprint.connect(node6, "var", node1, "fs.mouse_pos")
+Blueprint.connect(node7, "var", node1, "fs.draw_radius")
+Blueprint.connect(node4, "var", node1, "fs_heightmap")
 Blueprint.connect(node2, "next", node0, "prev")
 Blueprint.connect(node1, "out", node0, "shader")
 Blueprint.connect(node3, "out", node0, "va")
