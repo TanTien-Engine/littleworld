@@ -1,0 +1,40 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(0.4045961949953, 0.48100165526747, 0.8886421400566)
+node0.cam.yaw = -486.4
+node0.cam.pitch = -37.7
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.055572837591171
+
+_editor.add_node(node0, -500.01330235797, 142.41632676848)
+
+var node1 = ::geograph::nodes::polyline3d::Polyline3d()
+node1.query_param("vertices").value = [ 0, 0, 0, 0.5, 0, 0.5, -0.5, 0, 0.5, -0.5, 0, -0.5 ]
+node1.query_param("closed").value = true
+
+_editor.add_node(node1, 53.9504175861, -103.49285338068)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "u_tex"
+node2.gamma_correction = false
+node2.init_texture("../../../gis/OpenGlobe/Data/Terrain/ps-e.lg.png")
+
+_editor.add_node(node2, -406.69454644977, -76.572868544024)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../assets/blueprints/render/vector/draw_polyline_on_terr_wall.ves")
+
+_editor.add_node(node3, 384.51159423073, 6.2798923868186)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../assets/blueprints/render/draw_terrain_gray_deferred.ves")
+
+_editor.add_node(node4, -128.37155504261, 242.48226793324)
+
+Blueprint.connect(node2, "tex", node4, "tes_heightmap")
+Blueprint.connect(node0, "this", node4, "view_cam")
+Blueprint.connect(node4, "next", node3, "prev")
+Blueprint.connect(node1, "geo", node3, "geos")
+Blueprint.connect(node0, "this", node3, "view_cam")
+Blueprint.connect(node4, "depth_tex", node3, "depth_tex")

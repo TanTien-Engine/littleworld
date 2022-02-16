@@ -1,0 +1,280 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "geos"
+node0.var_type = "array"
+
+_editor.add_node(node0, 434.42494950249, 228.71711908491)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec4 color;
+
+out VS_OUT {
+    vec3 color;
+    mat4 mvp_mat;
+} vs_out;
+
+uniform UBO
+{
+    mat4 model;
+    mat4 view;
+    mat4 projection;
+};
+
+void main()
+{
+    vs_out.color = color.rgb;
+    vs_out.mvp_mat = projection * view * model;
+
+    gl_Position = vec4(position, 1.0);
+}
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = "
+
+layout(lines) in;
+layout(triangle_strip, max_vertices = 4) out;
+
+in VS_OUT {
+    vec3 color;
+    mat4 mvp_mat;
+} gs_in[];
+
+out GS_OUT {
+    vec3 color;
+} gs_out;
+
+uniform UBO
+{
+    mat4 viewport_trans;
+    mat4 viewport_ortho;
+
+    float z_near;
+
+    float fill_dist;
+};
+
+vec4 model_to_clip_coords(vec4 v)
+{
+    return gs_in[0].mvp_mat * v;
+}
+
+vec4 clip_to_window_coords(vec4 v)
+{
+    v.xyz /= v.w;                                    // normalized device coordinates
+    v.xyz = (viewport_trans * vec4(v.xyz, 1.0)).xyz; // window coordinates
+    return v;
+}
+
+void clip_line_seg_to_near_plane(out vec4 clip0, out vec4 clip1, out bool culled)
+{
+    vec4 model0 = gl_in[0].gl_Position;
+    vec4 model1 = gl_in[1].gl_Position;
+    clip0 = model_to_clip_coords(model0);
+    clip1 = model_to_clip_coords(model1);
+    culled = false;
+
+    float dist0 = clip0.z - z_near;
+    float dist1 = clip1.z - z_near;
+
+    if (dist0 * dist1 < 0)
+    {
+        float t = dist0 / (dist0 - dist1);
+        vec3 modelv = vec3(model0) + t * (vec3(model1) - vec3(model0));
+        vec4 clipv = model_to_clip_coords(vec4(modelv, 1));
+        if (dist0 < 0.0) {
+            clip0 = clipv;
+        } else {
+            clip1 = clipv;
+        }
+    }
+    else if (dist0 < 0)
+    {
+        culled = true;
+    }
+}
+
+void main()
+{
+    gs_out.color = gs_in[0].color;
+    gl_Position = gs_in[0].mvp_mat * gl_in[0].gl_Position;
+    EmitVertex();
+
+    gs_out.color = gs_in[1].color;
+    gl_Position = gs_in[0].mvp_mat * gl_in[1].gl_Position;
+    EmitVertex();
+
+    gs_out.color = gs_in[0].color;
+    gl_Position = gs_in[0].mvp_mat * (gl_in[0].gl_Position + vec4(0, 0.1, 0, 0));
+    EmitVertex();
+
+    gs_out.color = gs_in[1].color;
+    gl_Position = gs_in[0].mvp_mat * (gl_in[1].gl_Position + vec4(0, 0.1, 0, 0));
+    EmitVertex();
+}
+
+"
+node1.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in GS_OUT {
+    vec3 color;
+} fs_in;
+
+uniform UBO
+{
+    vec2 viewport_size;
+};
+
+uniform sampler2D depth_tex;
+
+float near = 0.1;
+float far = 100.0; 
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));    
+}
+
+void main()
+{
+    vec2 dZ = vec2(dFdx(gl_FragCoord.z), dFdy(gl_FragCoord.z));
+    float z = gl_FragCoord.z;
+    vec2 uv = vec2(1.0 / viewport_size) * gl_FragCoord.xy;
+    float curr_depth = LinearizeDepth(gl_FragCoord.z) / far;
+    float depth = texture(depth_tex, uv).r;
+    if (curr_depth < depth) 
+    {
+        float upperLeft = textureOffset(depth_tex, uv, ivec2(-1.0, 1.0)).r;
+        float upperCenter = textureOffset(depth_tex, uv, ivec2(0.0, 1.0)).r;
+        float upperRight = textureOffset(depth_tex, uv, ivec2(1.0, 1.0)).r;
+        float left = textureOffset(depth_tex, uv, ivec2(-1.0, 0.0)).r;
+        float right = textureOffset(depth_tex, uv, ivec2(1.0, 0.0)).r;
+        float lowerLeft = textureOffset(depth_tex, uv, ivec2(-1.0, -1.0)).r;
+        float lowerCenter = textureOffset(depth_tex, uv, ivec2(0.0, -1.0)).r;
+        float lowerRight = textureOffset(depth_tex, uv, ivec2(1.0, -1.0)).r;
+
+        float upperLeftM = LinearizeDepth(z - dZ.x + dZ.y) / far;
+        float upperCenterM = LinearizeDepth(z + dZ.y) / far;
+        float upperRightM = LinearizeDepth(z + dZ.x + dZ.y) / far;
+        float leftM = LinearizeDepth(z - dZ.x) / far;
+        float rightM = LinearizeDepth(z + dZ.x) / far;
+        float lowerLeftM = LinearizeDepth(z - dZ.x - dZ.y) / far;
+        float lowerCenterM = LinearizeDepth(z - dZ.y) / far;
+        float lowerRightM = LinearizeDepth(z + dZ.x - dZ.y) / far;
+
+        if ((upperLeft < upperLeftM) ||
+            (upperCenter < upperCenterM) ||
+            (upperRight < upperRightM) ||
+            (left < leftM) ||
+            (right < rightM) ||
+            (lowerLeft < lowerLeftM) ||
+            (lowerCenter < lowerCenterM) ||
+            (lowerRight < lowerRightM))
+        {
+            FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+        }
+        else
+        {
+            discard;
+        }
+    } 
+    else 
+    {
+        discard;
+    }
+}
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, 712.21940182501, -248.70589136558)
+
+var node2 = ::blueprint::nodes::perspective::Perspective()
+
+node2.fovy = 45
+node2.aspect = 0
+node2.znear = 0.1
+node2.zfar = 100
+
+_editor.add_node(node2, 407.81888352037, -114.96255465994)
+
+var node3 = ::blueprint::nodes::proxy::Proxy()
+
+node3.real_name = "view_cam"
+node3.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node3, 409.76615286487, 48.85559416076)
+
+var node4 = ::blueprint::nodes::number3::Number3()
+
+node4.value.set(5.9766573905945, 5.6433238983154, 5.3099908828735)
+
+_editor.add_node(node4, 416.7905415393, -428.80123802209)
+
+var node5 = ::globegraph::nodes::vector_data::VectorData()
+
+_editor.add_node(node5, 666.14853804154, 149.49830832742)
+
+var node6 = ::blueprint::nodes::cache::Cache()
+node6.query_param("disable").value = false
+
+_editor.add_node(node6, 799.39184570313, 119.20050048828)
+
+var node7 = ::blueprint::nodes::viewport::Viewport()
+
+_editor.add_node(node7, 413.10631189267, -255.4001381614)
+
+var node8 = ::rendergraph::nodes::clear::Clear()
+
+node8.masks = [  ]
+node8.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node8, 812.69677734375, 264.71234130859)
+
+var node9 = ::blueprint::nodes::integer::Integer()
+
+node9.value = 3
+
+_editor.add_node(node9, 410.2480135831, -332.79022494229)
+
+var node10 = ::rendergraph::nodes::draw::Draw()
+
+node10.set_prim_type("line_strip")
+node10.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "prim_restart" : true, "stencil_mask" : 255, "cull" : "disable", "blend" : false, "stencil_ref" : 0, "depth_test" : false, "depth_func" : "less", "clip_plane" : false }
+node10.skip = false
+
+_editor.add_node(node10, 1251.5320068359, -60.896575317383)
+
+var node11 = ::blueprint::nodes::input::Input()
+
+node11.var_name = "depth_tex"
+node11.var_type = "texture"
+
+_editor.add_node(node11, 541.54173215756, -391.98414826196)
+
+var node12 = ::blueprint::nodes::viewport::Viewport()
+
+_editor.add_node(node12, 416.01995132812, -551.95230931152)
+
+Blueprint.connect(node3, "zoom", node2, "fovy")
+Blueprint.connect(node2, "znear", node7, "znear")
+Blueprint.connect(node2, "zfar", node7, "zfar")
+Blueprint.connect(node3, "mat", node1, "view")
+Blueprint.connect(node2, "mat", node1, "projection")
+Blueprint.connect(node7, "trans", node1, "viewport_trans")
+Blueprint.connect(node7, "ortho", node1, "viewport_ortho")
+Blueprint.connect(node2, "znear", node1, "z_near")
+Blueprint.connect(node9, "v", node1, "fill_dist")
+Blueprint.connect(node12, "size", node1, "viewport_size")
+Blueprint.connect(node11, "var", node1, "depth_tex")
+Blueprint.connect(node0, "var", node5, "geos")
+Blueprint.connect(node5, "va", node6, "var")
+Blueprint.connect(node8, "next", node10, "prev")
+Blueprint.connect(node1, "out", node10, "shader")
+Blueprint.connect(node6, "var", node10, "va")
