@@ -34,6 +34,7 @@ _editor.add_node(node4, 335.98710216175, 41.121994018555)
 
 Blueprint.connect(node2, "tex", node3, "tes_heightmap")
 Blueprint.connect(node0, "this", node3, "view_cam")
+Blueprint.connect(node0, "this", node1, "camera")
 Blueprint.connect(node3, "next", node4, "prev")
 Blueprint.connect(node1, "geo", node4, "geos")
 Blueprint.connect(node0, "this", node4, "view_cam")

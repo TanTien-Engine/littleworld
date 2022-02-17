@@ -37,6 +37,7 @@ node5.load_from_file(_editor, "../../assets/blueprints/render/vector/draw_polygo
 
 _editor.add_node(node5, 304.35098981445, 83.00046640625)
 
+Blueprint.connect(node0, "this", node4, "camera")
 Blueprint.connect(node2, "tex", node3, "tes_heightmap")
 Blueprint.connect(node0, "this", node3, "view_cam")
 Blueprint.connect(node3, "next", node5, "prev")
