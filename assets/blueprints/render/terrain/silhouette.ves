@@ -1,0 +1,489 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("patches")
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "disable", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 558.8075282446, -340.69126638417)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 texcoord;
+
+out vec3 TCS_IN_FragPos;
+out vec2 TCS_IN_TexCoord;
+
+void main()
+{
+    TCS_IN_FragPos = position.xzy;
+    TCS_IN_TexCoord = texcoord;
+}
+"
+node1.tcs = "
+#version 400 core
+
+layout(vertices = 3) out;
+
+in vec3 TCS_IN_FragPos[];
+in vec2 TCS_IN_TexCoord[];
+
+out vec3 TES_IN_FragPos[];
+out vec2 TES_IN_TexCoord[];
+
+uniform UBO_TCS
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;   
+
+    vec3 cam_pos;
+    int lod_level;  
+} tcs;
+
+void main()
+{
+    TES_IN_FragPos[gl_InvocationID] = TCS_IN_FragPos[gl_InvocationID];
+    TES_IN_TexCoord[gl_InvocationID] = TCS_IN_TexCoord[gl_InvocationID];
+
+    if (gl_InvocationID == 0)
+    {
+        vec4 curr_p = tcs.projection * tcs.view * tcs.model * vec4(TCS_IN_FragPos[0], 1.0);
+        float dist = length(tcs.cam_pos - curr_p.xyz);
+
+        int max_level = tcs.lod_level;
+        int curr_level = max_level;
+        for (int i = 0; i < max_level; ++i) {
+            if (dist < 0.01 * pow(2, i)) {
+                curr_level = i;
+                break;
+            }
+        }
+        float level = clamp(pow(2.0, (max_level - curr_level)), 1.0, float(gl_MaxTessGenLevel));
+        for (int i = 0; i < 3; ++i) {
+            gl_TessLevelOuter[i] = level;
+        }
+        gl_TessLevelInner[0] = level / 2;
+    }
+}
+"
+node1.tes = "
+#version 400 core
+
+layout(triangles, equal_spacing, ccw) in;
+
+in vec3 TES_IN_FragPos[];
+in vec2 TES_IN_TexCoord[];
+
+out VS_OUT {
+    float height;
+
+    vec3 light_dir;
+    vec3 view_dir;
+
+    vec3 normal;
+} vs_out;
+
+uniform UBO_TES
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;   
+
+    float height_scale;
+
+    vec3 light_pos;
+    vec3 cam_pos;
+} tes;
+
+uniform sampler2D tes_heightmap;
+
+vec2 interpolate_2d(vec2 v0, vec2 v1, vec2 v2)
+{
+    return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
+}
+
+vec3 interpolate_3d(vec3 v0, vec3 v1, vec3 v2)
+{
+    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+
+// from OpenGlobe
+
+vec3 ComputeNormalForwardDifference(vec2 uv, vec2 inv_res)
+{
+    vec3 pos   = vec3(uv.x,             texture(tes_heightmap, uv).r                            * tes.height_scale, uv.y);
+    vec3 right = vec3(uv.x + inv_res.x, texture(tes_heightmap, uv + inv_res * vec2(1.0, 0.0)).r * tes.height_scale, uv.y);
+    vec3 top   = vec3(uv.x,             texture(tes_heightmap, uv + inv_res * vec2(0.0, 1.0)).r * tes.height_scale, uv.y + inv_res.y);
+    return cross(top - pos, right - pos);
+}
+
+vec3 ComputeNormalCentralDifference(vec2 uv, vec2 inv_res)
+{
+    //
+    // Original unoptimized verion
+    //
+    //vec2 position = displacedPosition.xy;
+    //vec3 left = vec3(position - vec2(1.0, 0.0), texture(tes_heightmap, position - inv_res * vec2(1.0, 0.0)).r * tes.height_scale);
+    //vec3 right = vec3(position + vec2(1.0, 0.0), texture(tes_heightmap, position + inv_res * vec2(1.0, 0.0)).r * tes.height_scale);
+    //vec3 bottom = vec3(position - vec2(0.0, 1.0), texture(tes_heightmap, position - inv_res * vec2(0.0, 1.0)).r * tes.height_scale);
+    //vec3 top = vec3(position + vec2(0.0, 1.0), texture(tes_heightmap, position + inv_res * vec2(0.0, 1.0)).r * tes.height_scale);
+    //return cross(right - left, top - bottom);
+
+    vec2 position = uv;
+    float leftHeight = texture(tes_heightmap, position - inv_res * vec2(1.0, 0.0)).r * tes.height_scale;
+    float rightHeight = texture(tes_heightmap, position + inv_res * vec2(1.0, 0.0)).r * tes.height_scale;
+    float bottomHeight = texture(tes_heightmap, position - inv_res * vec2(0.0, 1.0)).r * tes.height_scale;
+    float topHeight = texture(tes_heightmap, position + inv_res * vec2(0.0, 1.0)).r * tes.height_scale;
+    return vec3(leftHeight - rightHeight, 2.0 * inv_res.x, bottomHeight - topHeight);
+}
+
+float SumElements(mat3 m)
+{
+    return 
+        m[0].x + m[0].y + m[0].z +
+        m[1].x + m[1].y + m[1].z +
+        m[2].x + m[2].y + m[2].z;
+}
+
+vec3 ComputeNormalSobelFilter(vec2 uv, vec2 inv_res)
+{
+    //
+    // Original unoptimized verion
+    //
+    //vec2 position = displacedPosition.xy;
+    //float upperLeft = texture(tes_heightmap, position + inv_res * vec2(-1.0, 1.0)).r * tes.height_scale;
+    //float upperCenter = texture(tes_heightmap, position + inv_res * vec2(0.0, 1.0)).r * tes.height_scale;
+    //float upperRight = texture(tes_heightmap, position + inv_res * vec2(1.0, 1.0)).r * tes.height_scale;
+    //float left = texture(tes_heightmap, position + inv_res * vec2(-1.0, 0.0)).r * tes.height_scale;
+    //float right = texture(tes_heightmap, position + inv_res * vec2(1.0, 0.0)).r * tes.height_scale;
+    //float lowerLeft = texture(tes_heightmap, position + inv_res * vec2(-1.0, -1.0)).r * tes.height_scale;
+    //float lowerCenter = texture(tes_heightmap, position + inv_res * vec2(0.0, -1.0)).r * tes.height_scale;
+    //float lowerRight = texture(tes_heightmap, position + inv_res * vec2(1.0, -1.0)).r * tes.height_scale;
+    //
+    //mat3 positions = mat3(
+    //    upperLeft, left, lowerLeft,
+    //    upperCenter, 0.0, lowerCenter,
+    //    upperRight, right, lowerRight);
+    //mat3 sobelX = mat3(
+    //    -1.0, -2.0, -1.0,
+    //     0.0,  0.0,  0.0,
+    //     1.0,  2.0,  1.0);
+    //mat3 sobelY = mat3(
+    //    -1.0, 0.0, 1.0,
+    //    -2.0, 0.0, 2.0,
+    //    -1.0, 0.0, 1.0);
+    //
+    //float x = SumElements(matrixCompMult(positions, sobelX));
+    //float y = SumElements(matrixCompMult(positions, sobelY));
+    //
+    //return vec3(-x, y, 1.0);
+
+    vec2 position = uv;
+    float upperLeft = texture(tes_heightmap, position + inv_res * vec2(-1.0, 1.0)).r * tes.height_scale;
+    float upperCenter = texture(tes_heightmap, position + inv_res * vec2(0.0, 1.0)).r * tes.height_scale;
+    float upperRight = texture(tes_heightmap, position + inv_res * vec2(1.0, 1.0)).r * tes.height_scale;
+    float left = texture(tes_heightmap, position + inv_res * vec2(-1.0, 0.0)).r * tes.height_scale;
+    float right = texture(tes_heightmap, position + inv_res * vec2(1.0, 0.0)).r * tes.height_scale;
+    float lowerLeft = texture(tes_heightmap, position + inv_res * vec2(-1.0, -1.0)).r * tes.height_scale;
+    float lowerCenter = texture(tes_heightmap, position + inv_res * vec2(0.0, -1.0)).r * tes.height_scale;
+    float lowerRight = texture(tes_heightmap, position + inv_res * vec2(1.0, -1.0)).r * tes.height_scale;
+
+    float x = upperRight + (2.0 * right) + lowerRight - upperLeft - (2.0 * left) - lowerLeft;
+    float y = lowerLeft + (2.0 * lowerCenter) + lowerRight - upperLeft - (2.0 * upperCenter) - upperRight;
+
+    return vec3(-x, 1.0 * inv_res.x, y);
+}
+
+void main()
+{
+    vec4 pos = vec4(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]), 1.0);
+    vec2 texcoord = interpolate_2d(TES_IN_TexCoord[0],TES_IN_TexCoord[1],TES_IN_TexCoord[2]);
+
+    float height = texture(tes_heightmap, texcoord).r/* - 0.5*/;
+    pos.y = height * tes.height_scale;
+
+    vec3 world_pos = vec3(tes.model * pos);
+
+    vs_out.height = height;
+
+    vs_out.light_dir = normalize(tes.light_pos - world_pos);
+    vs_out.view_dir  = normalize(tes.cam_pos - world_pos);   
+
+    vec2 inv_res = 1.0 / vec2(textureSize(tes_heightmap, 0));
+    vs_out.normal = normalize(ComputeNormalSobelFilter(texcoord, inv_res));
+
+    gl_Position = tes.projection * tes.view * tes.model * pos;
+}
+"
+node1.gs = "
+// from OpenGlobe
+
+layout(triangles) in;
+layout(triangle_strip, max_vertices = 8) out;
+
+uniform UBO
+{
+    mat4 viewport_trans;
+    mat4 viewport_ortho;
+
+    float z_near;
+
+    float fill_dist;
+};
+
+vec4 ClipToWindowCoordinates(vec4 v)
+{
+    v.xyz /= v.w;
+    return vec4((viewport_trans * vec4(v.xyz, 1.0)).xyz, 1.0);
+}
+
+void ClipLineSegmentToNearPlane(
+    vec4 clip0, 
+    vec4 clip1, 
+    out vec4 window0, 
+    out vec4 window1,
+    inout int numPositions)
+{
+    float distanceTo0 = clip0.z + z_near;
+    float distanceTo1 = clip1.z + z_near;
+    if ((distanceTo0 * distanceTo1) < 0.0)
+    {
+        float t = distanceTo0 / (distanceTo0 - distanceTo1);
+        vec4 clipV = clip0 + (t * (clip1 - clip0));
+        if (distanceTo0 < 0.0)
+        {
+            window0 = ClipToWindowCoordinates(clipV);
+            ++numPositions;
+        }
+        else
+        {
+            window0 = ClipToWindowCoordinates(clip0);
+            window1 = ClipToWindowCoordinates(clipV);
+            numPositions += 2;
+        }
+    }
+    else if (distanceTo0 >= 0.0)
+    {
+        window0 = ClipToWindowCoordinates(clip0);
+        ++numPositions;
+    }
+}
+
+void main()
+{
+    vec4 window[4];
+    int numPositions = 0;
+    bool lineSegmentAtLeastPartlyInFrontOfNearPlane;
+
+    ClipLineSegmentToNearPlane(gl_in[0].gl_Position, gl_in[1].gl_Position, window[numPositions], window[numPositions + 1],
+        numPositions);
+    ClipLineSegmentToNearPlane(gl_in[1].gl_Position, gl_in[2].gl_Position, window[numPositions], window[numPositions + 1],
+        numPositions);
+    ClipLineSegmentToNearPlane(gl_in[2].gl_Position, gl_in[0].gl_Position, window[numPositions], window[numPositions + 1],
+        numPositions);
+
+    if (numPositions > 0)
+    {
+        float area = 0.0;
+        int limit = numPositions - 1;
+        for (int i = 0; i < limit; ++i)
+        {
+            area += (window[i].x * window[i + 1].y) - (window[i + 1].x * window[i].y);
+        }
+        area += (window[limit].x * window[0].y) - (window[0].x * window[limit].y);
+
+        if (area < 0.0)
+        {
+            if (numPositions == 3)
+            {
+                vec2 v01 = normalize(window[1].xy - window[0].xy);
+                vec2 v12 = normalize(window[2].xy - window[1].xy);
+                vec2 v20 = normalize(window[0].xy - window[2].xy);
+
+                vec2 v0Expand = normalize(v20 - v01);
+                vec2 v1Expand = normalize(v01 - v12);
+                vec2 v2Expand = normalize(v12 - v20);
+
+                vec2 v01Expand = vec2(-v01.y, v01.x);
+                vec2 v12Expand = vec2(-v12.y, v12.x);
+                vec2 v20Expand = vec2(-v20.y, v20.x);
+                
+                vec4 v[6];
+                
+                float c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v0Expand, v20Expand))));
+                v[0] = vec4(window[0].xy + c * normalize(v0Expand + v20Expand), -window[0].z, 1.0);
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v0Expand, v01Expand))));
+                v[1] = vec4(window[0].xy + c * normalize(v0Expand + v01Expand), -window[0].z, 1.0);
+                
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v1Expand, v01Expand))));
+                v[2] = vec4(window[1].xy + c * normalize(v1Expand + v01Expand), -window[1].z, 1.0);
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v1Expand, v12Expand))));
+                v[3] = vec4(window[1].xy + c * normalize(v1Expand + v12Expand), -window[1].z, 1.0);
+                
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v2Expand, v12Expand))));
+                v[4] = vec4(window[2].xy + c * normalize(v2Expand + v12Expand), -window[2].z, 1.0);
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v2Expand, v20Expand))));
+                v[5] = vec4(window[2].xy + c * normalize(v2Expand + v20Expand), -window[2].z, 1.0);
+                
+                gl_Position = viewport_ortho * v[0];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[1];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[5];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[2];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[4];
+                EmitVertex();       
+                gl_Position = viewport_ortho * v[3];
+                EmitVertex();           
+            }
+            else // if (numPositions == 4)
+            {
+                vec2 v01 = normalize(window[1].xy - window[0].xy);
+                vec2 v12 = normalize(window[2].xy - window[1].xy);
+                vec2 v23 = normalize(window[3].xy - window[2].xy);
+                vec2 v30 = normalize(window[0].xy - window[3].xy);
+
+                vec2 v0Expand = normalize(v30 - v01);
+                vec2 v1Expand = normalize(v01 - v12);
+                vec2 v2Expand = normalize(v12 - v23);
+                vec2 v3Expand = normalize(v23 - v30);
+            
+                vec2 v01Expand = vec2(-v01.y, v01.x);
+                vec2 v12Expand = vec2(-v12.y, v12.x);
+                vec2 v23Expand = vec2(-v23.y, v23.x);
+                vec2 v30Expand = vec2(-v30.y, v30.x);
+
+                vec4 v[8];
+            
+                float c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v0Expand, v30Expand))));
+                v[0] = vec4(window[0].xy + c * normalize(v0Expand + v30Expand), -window[0].z, 1.0);
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v0Expand, v01Expand))));
+                v[1] = vec4(window[0].xy + c * normalize(v0Expand + v01Expand), -window[0].z, 1.0);
+                
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v1Expand, v01Expand))));
+                v[2] = vec4(window[1].xy + c * normalize(v1Expand + v01Expand), -window[1].z, 1.0);
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v1Expand, v12Expand))));
+                v[3] = vec4(window[1].xy + c * normalize(v1Expand + v12Expand), -window[1].z, 1.0);
+                 
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v2Expand, v12Expand))));
+                v[4] = vec4(window[2].xy + c * normalize(v2Expand + v12Expand), -window[2].z, 1.0);
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v2Expand, v23Expand))));
+                v[5] = vec4(window[2].xy + c * normalize(v2Expand + v23Expand), -window[2].z, 1.0);
+                
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v3Expand, v23Expand))));
+                v[6] = vec4(window[3].xy + c * normalize(v3Expand + v23Expand), -window[3].z, 1.0);
+                c = fill_dist / sqrt(0.5 * (1.0 + abs(dot(v3Expand, v30Expand))));
+                v[7] = vec4(window[3].xy + c * normalize(v3Expand + v30Expand), -window[3].z, 1.0);
+        
+                gl_Position = viewport_ortho * v[0];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[1];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[7];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[2];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[6];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[3];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[5];
+                EmitVertex();           
+                gl_Position = viewport_ortho * v[4];
+                EmitVertex();           
+            }
+        }
+    }
+}
+"
+node1.fs = "
+#version 330 core
+out vec4 FragColor;
+
+void main()
+{
+    FragColor = vec4(0.0, 0.0, 0.0, 1.0); 
+}
+"
+node1.cs = ""
+node1.render_gen()
+node1.set_uniform("tcs.lod_level", [ 14 ])
+
+_editor.add_node(node1, 157.79557543759, -355.9795922234)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "depth", "color" ]
+node2.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node2, 335.02348918957, -188.12587085987)
+
+var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node3.type = "grids"
+node3.layout = [ "position", "texture" ]
+node3.shape_params = { "grids_size" : 64 }
+
+_editor.add_node(node3, 381.67421297039, -401.33131969581)
+
+var node4 = ::blueprint::nodes::input::Input()
+
+node4.var_name = "tes_heightmap"
+node4.var_type = "texture"
+
+_editor.add_node(node4, -192.07851987472, -325.74191018398)
+
+var node5 = ::blueprint::nodes::proxy::Proxy()
+
+node5.real_name = "view_cam"
+node5.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node5, -223.87902071175, -190.79010489722)
+
+var node6 = ::blueprint::nodes::perspective::Perspective()
+
+node6.fovy = 45
+node6.aspect = 0
+node6.znear = 0.1
+node6.zfar = 100
+
+_editor.add_node(node6, -56.064343229619, -137.34481624658)
+
+var node7 = ::blueprint::nodes::number::Number()
+
+node7.value = 0.14926689863205
+
+_editor.add_node(node7, -173.43402099609, -23.62028503418)
+
+var node8 = ::blueprint::nodes::viewport::Viewport()
+
+_editor.add_node(node8, -86.718103027343, -411.11192626953)
+
+var node9 = ::blueprint::nodes::number::Number()
+
+node9.value = 1
+
+_editor.add_node(node9, -50.436923576662, -493.83391156496)
+
+Blueprint.connect(node5, "zoom", node6, "fovy")
+Blueprint.connect(node6, "mat", node1, "tcs.projection")
+Blueprint.connect(node5, "mat", node1, "tcs.view")
+Blueprint.connect(node5, "pos", node1, "tcs.cam_pos")
+Blueprint.connect(node6, "mat", node1, "tes.projection")
+Blueprint.connect(node5, "mat", node1, "tes.view")
+Blueprint.connect(node7, "v", node1, "tes.height_scale")
+Blueprint.connect(node5, "pos", node1, "tes.light_pos")
+Blueprint.connect(node5, "pos", node1, "tes.cam_pos")
+Blueprint.connect(node4, "var", node1, "tes_heightmap")
+Blueprint.connect(node8, "trans", node1, "viewport_trans")
+Blueprint.connect(node8, "ortho", node1, "viewport_ortho")
+Blueprint.connect(node6, "znear", node1, "z_near")
+Blueprint.connect(node9, "v", node1, "fill_dist")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node3, "out", node0, "va")
