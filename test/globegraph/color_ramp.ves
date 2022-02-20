@@ -1,0 +1,40 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(-0.23876459647907, 1.4147077662261, 0.56781061257778)
+node0.cam.yaw = -431
+node0.cam.pitch = -50.2
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.5
+
+_editor.add_node(node0, -104.38690363636, -234.14927181818)
+
+var node1 = ::rendergraph::nodes::texture::Texture()
+node1.query_param("unif_name").value = "u_tex"
+node1.gamma_correction = false
+node1.init_texture("../../assets/textures/terrain/ps-e.lg.png")
+
+_editor.add_node(node1, -297.85559082031, -40.689598083496)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "u_tex"
+node2.gamma_correction = false
+node2.init_texture("../../assets/textures/terrain/ColorRamp.jpg")
+
+_editor.add_node(node2, -292.09219622601, -410.17509110229)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../assets/blueprints/render/terrain/color_ramp_by_height.ves")
+
+_editor.add_node(node3, 214.4837199707, -167.18501586914)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.init_texture("../../../../OneDrive/asset/terrain/hgt/I44/N32E082.hgt")
+
+_editor.add_node(node4, -594.46995960582, -365.74826221813)
+
+Blueprint.connect(node4, "tex", node3, "tes_heightmap")
+Blueprint.connect(node0, "this", node3, "view_cam")
+Blueprint.connect(node2, "tex", node3, "color_ramp")
