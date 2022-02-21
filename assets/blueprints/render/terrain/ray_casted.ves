@@ -1,0 +1,328 @@
+var node0 = ::geograph::nodes::brush_to_gltf::BrushToGltf()
+node0.query_param("adjacencies").value = false
+
+_editor.add_node(node0, 117.89374624271, -447.3615635722)
+
+var node1 = ::blueprint::nodes::fetch::Fetch()
+node1.index = "node0"
+
+_editor.add_node(node1, 392.94665298061, -444.41422180588)
+
+var node2 = ::blueprint::nodes::fetch::Fetch()
+node2.index = "va"
+
+_editor.add_node(node2, 618.05559502537, -442.00253665044)
+
+var node3 = ::blueprint::nodes::input::Input()
+
+node3.var_name = "geos"
+node3.var_type = "array"
+
+_editor.add_node(node3, 1000.0138585934, 109.41430090309)
+
+var node4 = ::rendergraph::nodes::draw::Draw()
+
+node4.set_prim_type("triangles")
+node4.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "front", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "lequal", "clip_plane" : false }
+node4.skip = false
+
+_editor.add_node(node4, 860.89351741307, -303.63265940253)
+
+var node5 = ::rendergraph::nodes::shader::Shader()
+
+node5.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexcoord;
+
+out VS_OUT {
+    vec3 world_pos;
+    mat4 model_mat;
+    mat4x2 modelZToClipCoordinates;
+} vs_out;
+
+uniform UBO
+{
+	mat4 model;
+	mat4 view;
+	mat4 projection;
+};
+
+void main()
+{
+//	vs_out.world_pos = (model * vec4(aPos, 1.0)).xyz;
+	vs_out.world_pos = aPos.xyz;
+	vs_out.model_mat = model;
+
+	mat4x4 mvp = projection * view * model;
+	vs_out.modelZToClipCoordinates = mat4x2(mvp[2], mvp[3]);
+
+    gl_Position = mvp * vec4(aPos, 1.0);
+}
+"
+node5.tcs = ""
+node5.tes = ""
+node5.gs = ""
+node5.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+    vec3 world_pos;
+    mat4 model_mat;
+    mat4x2 modelZToClipCoordinates;
+} fs_in;
+
+uniform UBO
+{
+	vec3 cam_pos;
+
+    float height_scale;
+};
+
+uniform sampler2D height_map;
+
+const vec3 aabb_min = vec3(0.0);
+const vec3 aabb_max = vec3(1.0, 0.2, 1.0);
+
+// from OpenGlobe
+
+struct Intersection
+{
+    bool  Intersects;
+    vec3 IntersectionPoint;
+};
+
+bool PointInsideAxisAlignedBoundingBox(vec3 point, vec3 lowerLeft, vec3 upperRight)
+{
+    return all(greaterThanEqual(point, lowerLeft)) && all(lessThanEqual(point, upperRight));
+}
+
+void Swap(inout float left, inout float right)
+{
+    float temp = left;
+    left = right;
+    right = temp;
+}
+
+bool PlanePairTest(
+    float origin, 
+    float direction, 
+    float aabbLowerLeft, 
+    float aabbUpperRight,
+    inout float tNear,
+    inout float tFar)
+{
+    if (direction == 0.0)
+    {
+        //
+        // Ray is parallel to planes
+        //
+        if (origin < aabbLowerLeft || origin > aabbUpperRight)
+        {
+            return false;
+        }
+    }
+    else
+    {
+        //
+        // Compute the intersection distances of the planes
+        //
+        float oneOverDirection = 1.0 / direction;
+        float t1 = (aabbLowerLeft - origin) * oneOverDirection;
+        float t2 = (aabbUpperRight - origin) * oneOverDirection;
+
+        //
+        // Make t1 intersection with nearest plane
+        //
+        if (t1 > t2)
+        {
+            Swap(t1, t2);
+        }
+
+        //
+        // Track largest tNear and smallest tFar
+        //
+        tNear = max(t1, tNear);
+        tFar = min(t2, tFar);
+
+        //
+        // Missed box
+        //
+        if (tNear > tFar)
+        {
+            return false;
+        }
+
+        //
+        // Box is behind ray
+        //
+        if (tFar < 0.0)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+Intersection RayIntersectsAABB(vec3 origin, vec3 direction, vec3 aabbLowerLeft, vec3 aabbUpperRight)
+{
+    //
+    // Implementation of http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter3.htm
+    //
+
+    float tNear = 0.1;
+    float tFar = 100;
+
+    if (PlanePairTest(origin.x, direction.x, aabbLowerLeft.x, aabbUpperRight.x, tNear, tFar) &&
+        PlanePairTest(origin.y, direction.y, aabbLowerLeft.y, aabbUpperRight.y, tNear, tFar) &&
+        PlanePairTest(origin.z, direction.z, aabbLowerLeft.z, aabbUpperRight.z, tNear, tFar))
+    {
+        return Intersection(true, origin + (tNear * direction));
+    }
+
+    return Intersection(false, vec3(0.0));
+}
+
+float ComputeWorldPositionDepth(vec3 position, mat4x2 modelZToClipCoordinates)
+{ 
+    vec2 v = modelZToClipCoordinates * vec4(position, 1);   // clip coordinates
+    v.x /= v.y;                                             // normalized device coordinates
+    v.x = (v.x + 1.0) * 0.5;
+    return v.x;
+}
+
+bool StepRay(vec3 direction, inout vec3 texEntry, out vec3 intersectionPoint)
+{
+    float height = texture(height_map, texEntry.xz).r;
+    height *= height_scale;
+    
+    bool foundIntersection = false;
+
+    vec3 texExit = texEntry + direction / 1024.0;
+    if (texExit.y <= height)
+    {
+        foundIntersection = true;
+        intersectionPoint = texEntry;
+    }
+
+    texEntry = texExit;
+    return foundIntersection;
+}
+
+void main()
+{
+    vec3 ray_dir = normalize((fs_in.model_mat * vec4(fs_in.world_pos, 1.0)).xyz - cam_pos);
+
+    vec3 box_entry;
+    if (PointInsideAxisAlignedBoundingBox(cam_pos, aabb_min, aabb_max))
+    {
+        box_entry = cam_pos;
+    }
+    else
+    {
+        Intersection i = RayIntersectsAABB(cam_pos, ray_dir, aabb_min, aabb_max);
+        box_entry = i.IntersectionPoint;
+    }
+
+    bool foundIntersection = false;
+    vec3 texEntry = box_entry;
+    vec3 intersectionPoint;
+    int numberOfSteps = 0;
+
+    while (!foundIntersection && all(lessThan(texEntry.xz, aabb_max.xz)))
+    {
+        foundIntersection = StepRay(ray_dir, texEntry, intersectionPoint);
+        ++numberOfSteps;
+    }
+
+    if (foundIntersection)
+    {
+        gl_FragDepth = ComputeWorldPositionDepth(intersectionPoint, fs_in.modelZToClipCoordinates);
+
+        const float u_maximumHeight = 0.2;
+        const float u_minimumHeight = 0.0;
+        FragColor = vec4((intersectionPoint.y - u_minimumHeight) / (u_maximumHeight - u_minimumHeight), 0.0, 0.0, 1.0);
+    }
+    else
+    {
+        discard;
+    }
+}
+
+"
+node5.cs = ""
+node5.render_gen()
+
+_editor.add_node(node5, 684.86402992418, -72.424899630047)
+
+var node6 = ::rendergraph::nodes::clear::Clear()
+
+node6.masks = [ "depth", "color" ]
+node6.values = { "color" : [ 0.5, 0.5, 0.5, 1 ] }
+
+_editor.add_node(node6, 996.66028898274, 225.89512574204)
+
+var node7 = ::blueprint::nodes::perspective::Perspective()
+
+node7.fovy = 45
+node7.aspect = 0
+node7.znear = 0.1
+node7.zfar = 100
+
+_editor.add_node(node7, 413.60400748731, -99.260075321102)
+
+var node8 = ::blueprint::nodes::proxy::Proxy()
+
+node8.real_name = "view_cam"
+node8.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node8, 407.10415286487, 82.13059416076)
+
+var node9 = ::blueprint::nodes::for_each::ForEach()
+
+_editor.add_node(node9, 1164.9441409146, 107.00451606488)
+
+var node10 = ::blueprint::nodes::input::Input()
+
+node10.var_name = "model"
+node10.var_type = "mat4"
+
+_editor.add_node(node10, 127.71195983887, 283.94540405273)
+
+var node11 = ::blueprint::nodes::number4::Number4()
+
+node11.value.set(0.65, 0.25, 0.1, 12)
+
+_editor.add_node(node11, 408.33280979529, 271.02984059403)
+
+var node12 = ::blueprint::nodes::input::Input()
+
+node12.var_name = "height_map"
+node12.var_type = "texture"
+
+_editor.add_node(node12, 218.29609818892, -66.607939286666)
+
+var node13 = ::blueprint::nodes::number::Number()
+
+node13.value = 0.19657711684704
+
+_editor.add_node(node13, 225.30806510346, -212.10157075419)
+
+Blueprint.connect(node8, "zoom", node7, "fovy")
+Blueprint.connect(node10, "var", node5, "model")
+Blueprint.connect(node8, "mat", node5, "view")
+Blueprint.connect(node7, "mat", node5, "projection")
+Blueprint.connect(node8, "pos", node5, "cam_pos")
+Blueprint.connect(node13, "v", node5, "height_scale")
+Blueprint.connect(node12, "var", node5, "height_map")
+Blueprint.connect(node6, "next", node9, "prev")
+Blueprint.connect(node3, "var", node9, "in")
+Blueprint.connect(node4, "next", node9, "do")
+Blueprint.connect(node9, "out", node0, "brush")
+Blueprint.connect(node0, "gltf", node1, "items")
+Blueprint.connect(node1, "item", node2, "items")
+Blueprint.connect(node5, "out", node4, "shader")
+Blueprint.connect(node2, "item", node4, "va")

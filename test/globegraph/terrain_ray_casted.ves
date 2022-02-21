@@ -1,0 +1,35 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(1.1552440069214, 0.95151125003667, 1.1336113119977)
+node0.cam.yaw = -139.2
+node0.cam.pitch = -38.3
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.20575845241547
+
+_editor.add_node(node0, -31.40617778844, -282.53480591348)
+
+var node1 = ::geograph::nodes::box::Box()
+node1.query_param("size").value.set(1, 0.2, 1)
+node1.query_param("pos").value.set(0, 0, 0)
+node1.query_param("offset_x").value = true
+node1.query_param("offset_y").value = true
+node1.query_param("offset_z").value = true
+
+_editor.add_node(node1, -306.63313298272, -75.951314800902)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "u_tex"
+node2.gamma_correction = false
+node2.init_texture("../../assets/textures/terrain/ps-e.lg.png")
+
+_editor.add_node(node2, -229.2559967041, -391.2766418457)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../assets/blueprints/render/terrain/ray_casted.ves")
+
+_editor.add_node(node3, 186.82062200373, -69.822485628995)
+
+Blueprint.connect(node1, "geo", node3, "geos")
+Blueprint.connect(node0, "this", node3, "view_cam")
+Blueprint.connect(node2, "tex", node3, "height_map")
