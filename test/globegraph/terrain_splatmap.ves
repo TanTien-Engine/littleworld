@@ -1,0 +1,40 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(-1.708940678728, 1.1679355944583, -0.47290809241765)
+node0.cam.yaw = -332.9
+node0.cam.pitch = -40.7
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.20575845241547
+
+_editor.add_node(node0, -152.40617778844, -190.57480591348)
+
+var node1 = ::rendergraph::nodes::texture::Texture()
+node1.query_param("unif_name").value = "u_tex"
+node1.gamma_correction = false
+node1.init_texture("../../assets/textures/terrain/ps-e.lg.png")
+
+_editor.add_node(node1, -229.2559967041, -391.2766418457)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "../../../tantien/assets/blueprints/rendergraph/draw_terrain_splatmap.ves")
+node2.set_prop_value("tes.clip_plane", [ 0, 0, 0, 0 ])
+
+_editor.add_node(node2, 194.87, -326.37)
+
+var node3 = ::rendergraph::nodes::texture::Texture()
+node3.query_param("unif_name").value = "u_tex"
+node3.gamma_correction = false
+node3.init_texture("../../../../OneDrive/asset/terrain/hgt/G46/N27E095.hgt")
+
+_editor.add_node(node3, -162.66070556641, -780.21240234375)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.init_texture("../../../../OneDrive/asset/terrain/hgt/G46/N25E091.hgt")
+
+_editor.add_node(node4, -456.98851623535, -285.47114868164)
+
+Blueprint.connect(node4, "tex", node2, "tes_heightmap")
+Blueprint.connect(node0, "this", node2, "view_cam")

@@ -1,0 +1,45 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(-0.092682217167834, 1.8672876869854, 2.403925088564)
+node0.cam.yaw = -88.3
+node0.cam.pitch = -38.5
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.20575845241547
+
+_editor.add_node(node0, -295.94561464744, 112.19119080952)
+
+var node1 = ::rendergraph::nodes::texture::Texture()
+node1.query_param("unif_name").value = "u_tex"
+node1.gamma_correction = false
+node1.init_texture("../../assets/textures/globe/gebco_08_rev_elev_10800x5400.jpg")
+
+_editor.add_node(node1, -413.18618946793, -223.3205382146)
+
+var node2 = ::globegraph::nodes::vtex_builder::VtexBuilder()
+node2.query_param("out_path").value = "../../../tmp/test.vtex"
+
+_editor.add_node(node2, -241.38221432962, -2.8225872549696)
+
+var node3 = ::globegraph::nodes::virtual_texture::VirtualTexture()
+
+_editor.add_node(node3, -71.528925619835, 80.607438016529)
+
+var node4 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node4, 163, -83)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "../../assets/blueprints/render/terrain/gray_with_vtex.ves")
+
+_editor.add_node(node5, 147, 128)
+
+Blueprint.connect(node1, "tex", node2, "imgs")
+Blueprint.connect(node2, "path", node3, "filepath")
+Blueprint.connect(node1, "tex", node3, "heightmap")
+Blueprint.connect(node0, "this", node3, "cam")
+Blueprint.connect(node0, "this", node5, "view_cam")
+Blueprint.connect(node3, "page_table", node5, "u_page_table_tex")
+Blueprint.connect(node3, "tex_atlas", node5, "u_texture_atlas_tex")
+Blueprint.connect(node3, "feedback", node5, "u_feedback_tex")
+Blueprint.connect(node3, "tex_atlas", node4, "value")

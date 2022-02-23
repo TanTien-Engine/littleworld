@@ -1,8 +1,12 @@
 #include "wrap_GlobeGen.h"
 #include "ShapeBatching.h"
+#include "VTexBuilder.h"
+#include "VirtualTexture.h"
+#include "Camera3D.h"
 #include "modules/render/Render.h"
 #include "modules/script/Proxy.h"
 #include "modules/script/TransHelper.h"
+#include "modules/graphics/Graphics.h"
 
 #include <unirender/Device.h>
 #include <unirender/VertexArray.h>
@@ -76,6 +80,88 @@ void w_ShapeBatching_build_va()
     ves_pop(1);
 }
 
+void w_VirtualTexture_allocate()
+{
+    auto filepath = ves_tostring(1);
+    auto vtex_sz = (size_t)ves_tonumber(2);
+    auto tile_sz = (size_t)ves_tonumber(3);
+    auto border_sz = (size_t)ves_tonumber(4);
+
+    auto vtex = std::make_shared<globegen::VirtualTexture>(filepath, vtex_sz, tile_sz, border_sz);
+
+    auto proxy = (tt::Proxy<globegen::VirtualTexture>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<globegen::VirtualTexture>));
+    proxy->obj = vtex;
+}
+
+int w_VirtualTexture_finalize(void* data)
+{
+    auto proxy = (tt::Proxy<globegen::VirtualTexture>*)(data);
+    proxy->~Proxy();
+    return sizeof(tt::Proxy<globegen::VirtualTexture>);
+}
+
+void w_VirtualTexture_get_feedback_tex()
+{
+    auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
+
+    ves_pop(ves_argnum());
+
+    ves_pushnil();
+    ves_import_class("render", "Texture2D");
+    auto proxy = (tt::Proxy<ur::Texture>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<ur::Texture>));
+    proxy->obj = vtex->GetFeedbackTex();
+    ves_pop(1);
+}
+
+void w_VirtualTexture_get_atlas_tex()
+{
+    auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
+
+    ves_pop(ves_argnum());
+
+    ves_pushnil();
+    ves_import_class("render", "Texture2D");
+    auto proxy = (tt::Proxy<ur::Texture>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<ur::Texture>));
+    proxy->obj = vtex->GetAtlasTex();
+    ves_pop(1);
+}
+
+void w_VirtualTexture_get_page_table_tex()
+{
+    auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
+
+    ves_pop(ves_argnum());
+
+    ves_pushnil();
+    ves_import_class("render", "Texture2D");
+    auto proxy = (tt::Proxy<ur::Texture>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<ur::Texture>));
+    proxy->obj = vtex->GetTableTex();
+    ves_pop(1);
+}
+
+void w_VirtualTexture_update()
+{
+    auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
+
+    auto cam_info = tt::list_to_vec3_array(1);
+    auto cam = globegen::Camera3D(cam_info[0], cam_info[1], cam_info[2]);
+
+    auto heightmap = ((tt::Proxy<ur::Texture>*)ves_toforeign(2))->obj;
+
+    auto w = tt::Graphics::Instance()->GetWidth();
+    auto h = tt::Graphics::Instance()->GetHeight();
+    vtex->Update(cam, heightmap, { w, h });
+}
+
+void w_GlobeTools_build_vtex()
+{
+    auto src = ((tt::Proxy<ur::Texture>*)ves_toforeign(1))->obj;
+    auto dst = ves_tostring(2);
+    auto vtex_sz = (size_t)ves_tonumber(3);
+    auto tile_sz = (size_t)ves_tonumber(4);
+    globegen::VTexBuilder::FromTexture(src, dst, vtex_sz, tile_sz);
+}
+
 }
 
 namespace globegen
@@ -86,6 +172,13 @@ VesselForeignMethodFn GlobeGenBindMethod(const char* signature)
     if (strcmp(signature, "ShapeBatching.add(_,_)") == 0) return w_ShapeBatching_add;
     if (strcmp(signature, "ShapeBatching.build_va()") == 0) return w_ShapeBatching_build_va;
 
+    if (strcmp(signature, "VirtualTexture.get_feedback_tex()") == 0) return w_VirtualTexture_get_feedback_tex;
+    if (strcmp(signature, "VirtualTexture.get_atlas_tex()") == 0) return w_VirtualTexture_get_atlas_tex;
+    if (strcmp(signature, "VirtualTexture.get_page_table_tex()") == 0) return w_VirtualTexture_get_page_table_tex;
+    if (strcmp(signature, "VirtualTexture.update(_,_)") == 0) return w_VirtualTexture_update;
+
+    if (strcmp(signature, "static GlobeTools.build_vtex(_,_,_,_)") == 0) return w_GlobeTools_build_vtex;
+
     return nullptr;
 }
 
@@ -95,6 +188,13 @@ void GlobeGenBindClass(const char* class_name, VesselForeignClassMethods* method
     {
         methods->allocate = w_ShapeBatching_allocate;
         methods->finalize = w_ShapeBatching_finalize;
+        return;
+    }
+
+    if (strcmp(class_name, "VirtualTexture") == 0)
+    {
+        methods->allocate = w_VirtualTexture_allocate;
+        methods->finalize = w_VirtualTexture_finalize;
         return;
     }
 }

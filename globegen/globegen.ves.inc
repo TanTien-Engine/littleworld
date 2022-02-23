@@ -10,4 +10,21 @@ foreign class ShapeBatching
 	foreign build_va()
 }
 
+foreign class VirtualTexture
+{
+	init(filepath, vtex_sz, tile_sz, border_sz) {}
+
+	foreign get_feedback_tex()
+	foreign get_atlas_tex()
+	foreign get_page_table_tex()
+
+	// cam : [ pos.x, pos.y, pos.z, target.x, target.y, target.z, up.x, up.y, up.z ]
+	foreign update(cam_info, heightmap)
+}
+
+foreign class GlobeTools
+{
+	foreign static build_vtex(src, dst, vtex_sz, tile_sz)
+}
+
 );

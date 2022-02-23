@@ -1,0 +1,106 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_STRING, VAR_TYPE_NODE, VAR_TYPE_PORT
+import "rendergraph.variant" for VarTexture, VAR_TYPE_TEXTURE
+import "globegen" for VirtualTexture as gg_VirtualTexture
+import "filesystem" for Filesystem
+
+class VirtualTexture is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "prev",      VAR_TYPE_PORT),
+			Pin(this, "filepath",  VAR_TYPE_STRING),
+			Pin(this, "heightmap", VAR_TYPE_TEXTURE),
+			Pin(this, "cam",       VAR_TYPE_NODE),
+		]
+		this.exports = [
+			Pin(this, "next",       VAR_TYPE_PORT),
+			Pin(this, "feedback",   VAR_TYPE_TEXTURE),
+			Pin(this, "tex_atlas",  VAR_TYPE_TEXTURE),
+			Pin(this, "page_table", VAR_TYPE_TEXTURE),			
+		]
+
+		this.layout()
+
+		this.vtex = nil
+	}
+
+	calc_value(idx)
+	{
+		if (!this.vtex) {
+			this.build_vtex()
+		}
+
+		if (idx == 1) 
+		{
+			var v_tex = VarTexture()
+			v_tex.tex = this.vtex.get_feedback_tex()
+			return Variant(VAR_TYPE_TEXTURE, v_tex)
+		}
+		else if (idx == 2)
+		{
+			var v_tex = VarTexture()
+			v_tex.tex = this.vtex.get_atlas_tex()
+			return Variant(VAR_TYPE_TEXTURE, v_tex)		
+		}
+		else if (idx == 3)
+		{
+			var v_tex = VarTexture()
+			v_tex.tex = this.vtex.get_page_table_tex()
+			return Variant(VAR_TYPE_TEXTURE, v_tex)		
+		}
+
+		return nil
+	}
+
+	render_run()
+	{
+		if (!this.vtex) {
+			this.build_vtex()
+		}
+
+		if (!this.vtex) {
+			return
+		}
+
+		var v_heightmap = Blueprint.calc_input_value(this, 2)
+		var v_cam_node = Blueprint.calc_input_value(this, 3)
+		if (!v_heightmap or !v_cam_node) {
+			return
+		}
+
+		var cam = v_cam_node.value.cam
+
+		var cam_info = []
+
+		cam_info.add(cam.position.x)
+		cam_info.add(cam.position.y)
+		cam_info.add(cam.position.z)
+
+		cam_info.add(cam.position.x + cam.front.x)
+		cam_info.add(cam.position.y + cam.front.y)
+		cam_info.add(cam.position.z + cam.front.z)
+
+		cam_info.add(cam.up.x)
+		cam_info.add(cam.up.y)
+		cam_info.add(cam.up.z)
+
+		this.vtex.update(cam_info, v_heightmap.value.tex)
+	}
+
+	build_vtex()
+	{
+		var v_path = Blueprint.calc_input_value(this, 1)
+		if (!v_path) {
+			return nil
+		}
+
+		var full_path = Filesystem.get_absolute_path(v_path.value)
+		this.vtex = gg_VirtualTexture.init(full_path, 2048, 256, 0)
+	}
+}

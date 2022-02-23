@@ -1,0 +1,384 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("patches")
+node0.render_state = { "stencil_test" : false, "rasterization" : "line", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 558.8075282446, -339.48126638417)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec2 texcoord;
+
+out vec3 TCS_IN_FragPos;
+out vec2 TCS_IN_TexCoord;
+
+void main()
+{
+    TCS_IN_FragPos = position.xzy;
+    TCS_IN_TexCoord = texcoord;
+}
+"
+node1.tcs = "
+#version 400 core
+
+layout(vertices = 3) out;
+
+in vec3 TCS_IN_FragPos[];
+in vec2 TCS_IN_TexCoord[];
+
+out vec3 TES_IN_FragPos[];
+out vec2 TES_IN_TexCoord[];
+
+uniform UBO_TCS
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;   
+
+    vec3 cam_pos;
+    int lod_level;  
+} tcs;
+
+void main()
+{
+    TES_IN_FragPos[gl_InvocationID] = TCS_IN_FragPos[gl_InvocationID];
+    TES_IN_TexCoord[gl_InvocationID] = TCS_IN_TexCoord[gl_InvocationID];
+
+    if (gl_InvocationID == 0)
+    {
+        vec4 curr_p = tcs.projection * tcs.view * tcs.model * vec4(TCS_IN_FragPos[0], 1.0);
+        float dist = length(tcs.cam_pos - curr_p.xyz);
+
+        int max_level = tcs.lod_level;
+        int curr_level = max_level;
+        for (int i = 0; i < max_level; ++i) {
+            if (dist < 0.01 * pow(2, i)) {
+                curr_level = i;
+                break;
+            }
+        }
+        float level = clamp(pow(2.0, (max_level - curr_level)), 1.0, float(gl_MaxTessGenLevel));
+        for (int i = 0; i < 3; ++i) {
+            gl_TessLevelOuter[i] = level;
+        }
+        gl_TessLevelInner[0] = level / 2;
+    }
+}
+"
+node1.tes = "
+#version 400 core
+
+layout(triangles, equal_spacing, ccw) in;
+
+in vec3 TES_IN_FragPos[];
+in vec2 TES_IN_TexCoord[];
+
+out VS_OUT {
+    float height;
+    vec3 fragpos;
+    vec2 texcoord;
+} vs_out;
+
+uniform UBO_TES
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;   
+
+    float height_scale;
+
+    // vtex
+    vec2 u_page_table_size;
+    vec2 u_virt_tex_size;
+
+    float u_atlas_scale;
+
+    float u_border_scale;
+    float u_border_offset;
+
+} tes;
+
+uniform sampler2D u_feedback_tex;
+uniform sampler2D u_texture_atlas_tex;
+uniform sampler2D u_page_table_tex;
+
+vec2 interpolate_2d(vec2 v0, vec2 v1, vec2 v2)
+{
+    return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
+}
+
+vec3 interpolate_3d(vec3 v0, vec3 v1, vec3 v2)
+{
+    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+
+vec3 sample_table(vec2 uv, int mip)
+{
+    vec2 offset = fract(uv * tes.u_page_table_size) / tes.u_page_table_size;
+    return texelFetch(u_page_table_tex, ivec2((uv - offset) * tes.u_page_table_size * pow(0.5, mip)), mip).xyz;
+}
+
+vec4 sample_atlas(vec3 page, vec2 uv)
+{
+    float mipsize = exp2(floor(page.z * 255.0 + 0.5));
+
+    uv = fract(uv * tes.u_page_table_size / mipsize);
+    uv *= tes.u_border_scale;
+    uv += tes.u_border_offset;
+
+    vec2 offset = floor(page.xy * 255 + 0.5);
+
+    return texture(u_texture_atlas_tex, (offset + uv) * tes.u_atlas_scale);
+}
+
+float calc_mip_level(vec2 texcoord)
+{
+    ivec2 pos = ivec2(texcoord * 64);
+    float mip = texelFetch(u_feedback_tex, pos, 0).b * 255;
+    mip = clamp(mip, 0, log2(tes.u_page_table_size.x));
+    return mip;
+}
+
+vec4 bilinear_sample(vec2 texcoord)
+{
+    float mip = floor(calc_mip_level(texcoord));
+    mip = clamp(mip, 0, log2(tes.u_page_table_size.x));
+
+    vec3 page = sample_table(texcoord, int(mip));
+    return sample_atlas(page, texcoord);
+}
+
+float calc_height(vec2 texcoord)
+{
+    float h_base = bilinear_sample(texcoord).r;
+    return h_base;
+}
+
+void main()
+{
+    vec4 pos = vec4(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]), 1.0);
+    vec2 texcoord = interpolate_2d(TES_IN_TexCoord[0],TES_IN_TexCoord[1],TES_IN_TexCoord[2]);
+
+    vs_out.texcoord = texcoord;
+
+//    vs_out.height = texture(tes_heightmap, texcoord).r/* - 0.5*/;
+    vs_out.height = calc_height(texcoord);
+
+    pos.y = vs_out.height * tes.height_scale;
+    vs_out.fragpos = vec3(tes.model * pos);
+
+    gl_Position = tes.projection * tes.view * tes.model * pos;
+}
+"
+node1.gs = ""
+node1.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+    float height;
+    vec3 fragpos;
+    vec2 texcoord;
+} fs_in;
+
+uniform UBO_FS
+{
+    vec3 light_pos;
+    vec2 inv_res;
+
+    // brush
+    vec2 mouse_pos;
+    float draw_radius;
+} fs;
+
+//uniform sampler2D fs_heightmap;
+
+float calc_height(vec2 texcoord)
+{
+//    return texture(fs_heightmap, texcoord).r/* - 0.5*/;
+    return 0;
+}
+
+vec3 ComputeNormalCentralDifference(vec2 position, float heightExaggeration)
+{
+    float leftHeight = calc_height(position - vec2(1.0, 0.0) * fs.inv_res) * heightExaggeration;
+    float rightHeight = calc_height(position + vec2(1.0, 0.0) * fs.inv_res) * heightExaggeration;
+    float bottomHeight = calc_height(position - vec2(0.0, 1.0) * fs.inv_res) * heightExaggeration;
+    float topHeight = calc_height(position + vec2(0.0, 1.0) * fs.inv_res) * heightExaggeration;
+    return normalize(vec3(leftHeight - rightHeight, 2.0, bottomHeight - topHeight));
+}
+
+void main()
+{
+    vec3 pos = fs_in.fragpos;
+
+    vec3 N = ComputeNormalCentralDifference(fs_in.texcoord, 500);
+
+    vec3 light_dir = normalize(fs.light_pos - pos);
+    float diff = max(dot(N, light_dir), 0.0);
+    vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
+    vec3 final = diffuse;
+
+    //FragColor = vec4(N, 1.0);
+
+    //// debug lod
+    //vec4 pos_final = u_projection * u_view * vec4(fs_in.fragpos, 1.0);
+    //float dist = length(pos_final.xyz);
+    //const vec4 colors[9] = vec4[9](
+    //    vec4(1,0,0,1),
+    //    vec4(1,1,1,1),
+    //    vec4(0,0,0,1),
+    //    vec4(0,1,1,1),
+    //    vec4(1,0,1,1),
+    //    vec4(1,1,0,1),
+    //    vec4(0,0,1,1),
+    //    vec4(0,1,0,1),
+    //    vec4(1,0,0,1)
+    //);
+    //const int max_level = 7;
+    //int curr_level = max_level;
+    //for (int i = 0; i < max_level; ++i) {
+    //    if (dist < 0.01 * pow(2, i)) {
+    //        curr_level = i;
+    //        break;
+    //    }
+    //}
+    //FragColor = colors[curr_level];
+
+    float dist = length(pos - vec3(fs.mouse_pos.x, pos.y, fs.mouse_pos.y));
+    if (dist < fs.draw_radius) {
+        float blend = pow(1.0 - dist / fs.draw_radius, 1.0);
+        final.r += 0.6 * blend;
+    }
+
+    FragColor = vec4(final, 1.0); 
+}
+"
+node1.cs = ""
+node1.render_gen()
+node1.set_uniform("tcs.lod_level", [ 10 ])
+node1.set_uniform("tes.height_scale", [ 0.11497599631548 ])
+node1.set_uniform("fs.light_pos", [ 0.79082131385803, 3.7241544723511, 2.3908212184906 ])
+node1.set_uniform("fs.inv_res", [ 0.0009765625, 0.0009765625 ])
+
+_editor.add_node(node1, 157.79557543759, -355.9795922234)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "color", "depth" ]
+node2.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node2, 335.02348918957, -188.12587085987)
+
+var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node3.type = "grids"
+node3.layout = [ "position", "texture" ]
+node3.shape_params = { "grids_size" : 64 }
+
+_editor.add_node(node3, 381.67421297039, -401.33131969581)
+
+var node4 = ::blueprint::nodes::proxy::Proxy()
+
+node4.real_name = "view_cam"
+node4.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node4, -223.05257443076, -190.79010489722)
+
+var node5 = ::blueprint::nodes::input::Input()
+
+node5.var_name = "fs.mouse_pos"
+node5.var_type = "num2"
+
+_editor.add_node(node5, -89.644755089016, -522.38689999516)
+
+var node6 = ::blueprint::nodes::input::Input()
+
+node6.var_name = "fs.draw_radius"
+node6.var_type = "num"
+
+_editor.add_node(node6, -88.618435382146, -571.65009712652)
+
+var node7 = ::blueprint::nodes::perspective::Perspective()
+
+node7.fovy = 45
+node7.aspect = 0
+node7.znear = 0.1
+node7.zfar = 100
+
+_editor.add_node(node7, -56.064343229619, -137.34481624658)
+
+var node8 = ::blueprint::nodes::input::Input()
+
+node8.var_name = "u_page_table_tex"
+node8.var_type = "texture"
+
+_editor.add_node(node8, -407.30991180672, -112.52814351232)
+
+var node9 = ::blueprint::nodes::input::Input()
+
+node9.var_name = "u_texture_atlas_tex"
+node9.var_type = "texture"
+
+_editor.add_node(node9, -412.26856780249, -218.31328261194)
+
+var node10 = ::blueprint::nodes::input::Input()
+
+node10.var_name = "u_feedback_tex"
+node10.var_type = "texture"
+
+_editor.add_node(node10, -413.92148356792, -308.39591412505)
+
+var node11 = ::blueprint::nodes::number2::Number2()
+
+node11.value.set(8, 8)
+
+_editor.add_node(node11, -131.64273871487, -332.81739357734)
+
+var node12 = ::blueprint::nodes::number2::Number2()
+
+node12.value.set(2048, 2048)
+
+_editor.add_node(node12, -134.64799527026, -421.47252684263)
+
+var node13 = ::blueprint::nodes::number::Number()
+
+node13.value = 0.25
+
+_editor.add_node(node13, -342.76220700832, -404.19229382774)
+
+var node14 = ::blueprint::nodes::number::Number()
+
+node14.value = 1
+
+_editor.add_node(node14, -324.73065185547, -465.80010986328)
+
+var node15 = ::blueprint::nodes::number::Number()
+
+node15.value = 0
+
+_editor.add_node(node15, -281.90569045757, -533.41844737843)
+
+Blueprint.connect(node4, "zoom", node7, "fovy")
+Blueprint.connect(node7, "mat", node1, "tcs.projection")
+Blueprint.connect(node4, "mat", node1, "tcs.view")
+Blueprint.connect(node4, "pos", node1, "tcs.cam_pos")
+Blueprint.connect(node7, "mat", node1, "tes.projection")
+Blueprint.connect(node4, "mat", node1, "tes.view")
+Blueprint.connect(node11, "v2", node1, "tes.u_page_table_size")
+Blueprint.connect(node12, "v2", node1, "tes.u_virt_tex_size")
+Blueprint.connect(node13, "v", node1, "tes.u_atlas_scale")
+Blueprint.connect(node14, "v", node1, "tes.u_border_scale")
+Blueprint.connect(node15, "v", node1, "tes.u_border_offset")
+Blueprint.connect(node8, "var", node1, "u_page_table_tex")
+Blueprint.connect(node9, "var", node1, "u_texture_atlas_tex")
+Blueprint.connect(node10, "var", node1, "u_feedback_tex")
+Blueprint.connect(node5, "var", node1, "fs.mouse_pos")
+Blueprint.connect(node6, "var", node1, "fs.draw_radius")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node3, "out", node0, "va")
