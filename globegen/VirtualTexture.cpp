@@ -172,8 +172,6 @@ void VirtualTexture::Update(const Camera3D& cam, const std::shared_ptr<ur::Textu
 	}
 
 	m_table.Update();
-
-	m_atlas.DebugDraw();
 }
 
 std::shared_ptr<ur::Texture> VirtualTexture::LoadToTexture() const
@@ -337,9 +335,6 @@ FeedbackBuffer(const PageIndexer& page_idx, size_t vtex_sz, size_t tile_sz)
 	u_mip_sample_bias->SetValue(&m_mip_bias, 1);
 
 	m_requests.resize(m_indexer.GetPageCount(), 0);
-
-	ur::PrimitiveType prim_type;
-	m_debug_vao = tt::Model::Instance()->CreateShape(*dev, tt::ShapeType::Quad, ur::VertexLayoutType::PosTex, prim_type);
 }
 
 VirtualTexture::FeedbackBuffer::
@@ -444,8 +439,6 @@ Draw(const std::shared_ptr<ur::Texture>& heightmap, const sm::vec2& screen_sz)
 	ctx->SetFramebuffer(nullptr);
 	ctx->SetViewport(x, y, w, h);
 
-//	DebugDraw::Instance()->Draw(*m_tex, *m_debug_vao, 50.0f);
-
 	return ret;
 }
 
@@ -498,9 +491,6 @@ TextureAtlas(size_t atlas_sz, size_t page_sz, size_t border_sz)
 	m_tex = dev->CreateTexture(desc, pixels);
 
 	delete[] pixels;
-
-	ur::PrimitiveType prim_type;
-	m_debug_vao = tt::Model::Instance()->CreateShape(*dev, tt::ShapeType::Quad, ur::VertexLayoutType::PosTex, prim_type);
 }
 
 VirtualTexture::TextureAtlas::
@@ -513,12 +503,6 @@ UploadPage(const uint8_t* pixels, int x, int y)
 {
 	const size_t size = m_page_sz + m_border_sz * 2;
 	m_tex->Upload(pixels, x * size, y * size, size, size);
-}
-
-void VirtualTexture::TextureAtlas::
-DebugDraw() const
-{
-//	DebugDraw::Instance()->Draw(GetTexture(), *m_debug_vao, 1.0f);
 }
 
 //////////////////////////////////////////////////////////////////////////

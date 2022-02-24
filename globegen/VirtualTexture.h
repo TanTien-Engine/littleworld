@@ -109,8 +109,6 @@ private:
 
 		std::vector<int> m_requests;
 
-		std::shared_ptr<ur::VertexArray> m_debug_vao = nullptr;
-
 		float m_height_scale = 0.01f;
 		float m_world_scale = 1.0f;
 
@@ -127,8 +125,6 @@ private:
 		size_t GetPageSize() const { return m_page_sz + m_border_sz * 2; }
 		size_t GetPageCount() const { return m_page_count; }
 
-		void DebugDraw() const;
-
 		std::shared_ptr<ur::Texture> GetTexture() const { return m_tex; }
 
 	private:
@@ -137,8 +133,6 @@ private:
 		size_t m_page_count;
 
 		std::shared_ptr<ur::Texture> m_tex = nullptr;
-
-		std::shared_ptr<ur::VertexArray> m_debug_vao = nullptr;
 
 	}; // TextureAtlas
 
