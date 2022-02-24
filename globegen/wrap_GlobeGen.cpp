@@ -2,7 +2,7 @@
 #include "ShapeBatching.h"
 #include "VTexBuilder.h"
 #include "VirtualTexture.h"
-#include "Camera3D.h"
+
 #include "modules/render/Render.h"
 #include "modules/script/Proxy.h"
 #include "modules/script/TransHelper.h"
@@ -143,14 +143,13 @@ void w_VirtualTexture_update()
 {
     auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
 
-    auto cam_info = tt::list_to_vec3_array(1);
-    auto cam = globegen::Camera3D(cam_info[0], cam_info[1], cam_info[2]);
+    sm::mat4* vp_mat = (sm::mat4*)ves_toforeign(1);
 
     auto heightmap = ((tt::Proxy<ur::Texture>*)ves_toforeign(2))->obj;
 
     auto w = tt::Graphics::Instance()->GetWidth();
     auto h = tt::Graphics::Instance()->GetHeight();
-    vtex->Update(cam, heightmap, { w, h });
+    vtex->Update(heightmap, *vp_mat, { w, h });
 }
 
 void w_GlobeTools_build_vtex()

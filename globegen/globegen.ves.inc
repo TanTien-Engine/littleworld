@@ -18,8 +18,7 @@ foreign class VirtualTexture
 	foreign get_atlas_tex()
 	foreign get_page_table_tex()
 
-	// cam : [ pos.x, pos.y, pos.z, target.x, target.y, target.z, up.x, up.y, up.z ]
-	foreign update(cam_info, heightmap)
+	foreign update(vp_mat, heightmap)
 }
 
 foreign class GlobeTools

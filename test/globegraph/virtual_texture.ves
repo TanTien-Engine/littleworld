@@ -1,13 +1,13 @@
 var node0 = ::blueprint::nodes::camera3d::Camera3d()
 
 node0.cam.position.set(-0.092682217167834, 1.8672876869854, 2.403925088564)
-node0.cam.yaw = -88.3
-node0.cam.pitch = -38.5
+node0.cam.yaw = -87.7
+node0.cam.pitch = -39.9
 node0.cam.zoom = 45
 node0.cam.update_vectors()
-node0.speed = 0.20575845241547
+node0.speed = 0.36404114961624
 
-_editor.add_node(node0, -295.94561464744, 112.19119080952)
+_editor.add_node(node0, -619.1152938174, 67.024752848877)
 
 var node1 = ::rendergraph::nodes::texture::Texture()
 node1.query_param("unif_name").value = "u_tex"
@@ -23,7 +23,7 @@ _editor.add_node(node2, -241.38221432962, -2.8225872549696)
 
 var node3 = ::globegraph::nodes::virtual_texture::VirtualTexture()
 
-_editor.add_node(node3, -71.528925619835, 80.607438016529)
+_editor.add_node(node3, -56.005892543356, -58.478938348722)
 
 var node4 = ::blueprint::nodes::print::Print()
 
@@ -34,10 +34,26 @@ node5.load_from_file(_editor, "../../assets/blueprints/render/terrain/gray_with_
 
 _editor.add_node(node5, 147, 128)
 
+var node6 = ::blueprint::nodes::perspective::Perspective()
+
+node6.fovy = 45
+node6.aspect = 0
+node6.znear = 0.1
+node6.zfar = 100
+
+_editor.add_node(node6, -380.83671616259, 169.13042748488)
+
+var node7 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node7, -234.71219675793, 66.452386438454)
+
 Blueprint.connect(node1, "tex", node2, "imgs")
+Blueprint.connect(node0, "zoom", node6, "fovy")
+Blueprint.connect(node6, "mat", node7, "a")
+Blueprint.connect(node0, "mat", node7, "b")
 Blueprint.connect(node2, "path", node3, "filepath")
 Blueprint.connect(node1, "tex", node3, "heightmap")
-Blueprint.connect(node0, "this", node3, "cam")
+Blueprint.connect(node7, "v", node3, "vp_mat")
 Blueprint.connect(node0, "this", node5, "view_cam")
 Blueprint.connect(node3, "page_table", node5, "u_page_table_tex")
 Blueprint.connect(node3, "tex_atlas", node5, "u_texture_atlas_tex")

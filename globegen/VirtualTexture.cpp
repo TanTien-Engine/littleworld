@@ -1,5 +1,4 @@
 #include "VirtualTexture.h"
-#include "Camera3D.h"
 
 #include "modules/model/Model.h"
 #include "modules/render/Render.h"
@@ -39,9 +38,7 @@ layout (location = 1) in vec2 texcoord;
 
 uniform UBO
 {
-	mat4 u_projection;
-	mat4 u_view;
-	mat4 u_model;
+	mat4 view_proj_mat;
 
 	float u_height_scale;
 	float u_world_scale;
@@ -62,7 +59,7 @@ void main()
 //	pos.xy *= u_world_scale;
 //	pos.z = texture(u_heightmap, texcoord).r * u_height_scale;
 
-	gl_Position = u_projection * u_view * u_model * pos;
+	gl_Position = view_proj_mat * pos;
 }
 
 )";
@@ -130,9 +127,10 @@ VirtualTexture::VirtualTexture(const char* filepath, size_t vtex_sz, size_t tile
 	m_file.open(filepath, std::ios::in | std::ios::binary);
 }
 
-void VirtualTexture::Update(const Camera3D& cam, const std::shared_ptr<ur::Texture>& heightmap, const sm::vec2& screen_sz)
+void VirtualTexture::Update(const std::shared_ptr<ur::Texture>& heightmap, 
+	                        const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
 {
-	auto requests = m_feedback_buf.Update(cam, heightmap, screen_sz);
+	auto requests = m_feedback_buf.Update(heightmap, view_proj_mat, screen_sz);
 
 	m_toload.clear();
 	int touched = 0;
@@ -343,10 +341,10 @@ VirtualTexture::FeedbackBuffer::
 	delete[] m_buf;
 }
 
-std::vector<int> VirtualTexture::FeedbackBuffer::Update(const Camera3D& cam, 
-	const std::shared_ptr<ur::Texture>& heightmap, const sm::vec2& screen_sz)
+std::vector<int> VirtualTexture::FeedbackBuffer::Update(const std::shared_ptr<ur::Texture>& heightmap, 
+	const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
 {
-	Update(cam, screen_sz);
+	Update(view_proj_mat, screen_sz);
 	return Draw(heightmap, screen_sz);
 }
 
@@ -370,22 +368,11 @@ void VirtualTexture::FeedbackBuffer::SetWorldSize(float height_scale, float worl
 }
 
 void VirtualTexture::FeedbackBuffer::
-Update(const Camera3D& cam, const sm::vec2& screen_sz)
+Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
 {
-	auto u_model = m_shader->QueryUniform("u_model");
-	assert(u_model);
-	sm::mat4 model = sm::mat4();
-	u_model->SetValue(model.x, 16);
-
-	auto u_view = m_shader->QueryUniform("u_view");
-	assert(u_view);
-	auto view = cam.GetViewMat();
-	u_view->SetValue(view.x, 16);
-
-	auto u_projection = m_shader->QueryUniform("u_projection");
-	assert(u_projection);
-	sm::mat4 projection = sm::mat4::Perspective(cam.GetAngleOfView(), cam.GetAspect(), cam.GetNear(), cam.GetFar());
-	u_projection->SetValue(projection.x, 16);
+	auto u_view_proj_mat = m_shader->QueryUniform("view_proj_mat");
+	assert(u_view_proj_mat);
+	u_view_proj_mat->SetValue(view_proj_mat.x, 16);
 
 	//auto u_inv_res = m_shader->QueryUniform("u_inv_res");
 	//assert(u_inv_res);
