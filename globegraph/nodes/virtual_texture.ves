@@ -14,12 +14,10 @@ class VirtualTexture is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "prev",      VAR_TYPE_PORT),
 			Pin(this, "filepath",  VAR_TYPE_STRING),
 			Pin(this, "vp_mat",    VAR_TYPE_MATRIX4),
 		]
 		this.exports = [
-			Pin(this, "next",       VAR_TYPE_PORT),
 			Pin(this, "feedback",   VAR_TYPE_TEXTURE),
 			Pin(this, "tex_atlas",  VAR_TYPE_TEXTURE),
 			Pin(this, "page_table", VAR_TYPE_TEXTURE),
@@ -37,25 +35,25 @@ class VirtualTexture is Node
 			this.build_vtex()
 		}
 
-		if (idx == 1) 
+		if (idx == 0) 
 		{
 			var v_tex = VarTexture()
 			v_tex.tex = this.vtex.get_feedback_tex()
 			return Variant(VAR_TYPE_TEXTURE, v_tex)
 		}
-		else if (idx == 2)
+		else if (idx == 1)
 		{
 			var v_tex = VarTexture()
 			v_tex.tex = this.vtex.get_atlas_tex()
 			return Variant(VAR_TYPE_TEXTURE, v_tex)		
 		}
-		else if (idx == 3)
+		else if (idx == 2)
 		{
 			var v_tex = VarTexture()
 			v_tex.tex = this.vtex.get_page_table_tex()
 			return Variant(VAR_TYPE_TEXTURE, v_tex)		
 		}
-		else if (idx == 4)
+		else if (idx == 3)
 		{
 			var size = this.vtex.get_size()
 			var v4 = Vector4(size[0], size[1], size[2], size[3])
@@ -75,15 +73,18 @@ class VirtualTexture is Node
 			return
 		}
 
-		var v_vp_mat = Blueprint.calc_input_value(this, 2)
-		if (v_vp_mat) {
+		var v_vp_mat = Blueprint.calc_input_value(this, 1)
+		if (v_vp_mat) 
+		{
+			System.print("++ vtex up 0")
+			System.traceback()
 			this.vtex.update(v_vp_mat.value)
 		}
 	}
 
 	build_vtex()
 	{
-		var v_path = Blueprint.calc_input_value(this, 1)
+		var v_path = Blueprint.calc_input_value(this, 0)
 		if (!v_path) {
 			return nil
 		}
