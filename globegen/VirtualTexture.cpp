@@ -29,6 +29,8 @@ const int ATLAS_SIZE = 1024;
 const int FEEDBACK_SIZE = 64;
 const int MIP_SAMPLE_BIAS = 3;
 
+const int BYTES_PER_PIXEL = 2;	// R16F
+
 const char* feedback_vs = R"(
 
 #version 330 core
@@ -1044,7 +1046,7 @@ TileDataFile(size_t tile_sz, size_t border_sz, std::fstream& file)
 	: m_file(file)
 {
 	const size_t size = tile_sz + border_sz * 2;
-	m_tile_file_sz = size * size * 4;
+	m_tile_file_sz = size * size * BYTES_PER_PIXEL;
 }
 
 void VirtualTexture::TileDataFile::

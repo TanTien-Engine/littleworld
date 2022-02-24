@@ -109,7 +109,8 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 				copy2tmp(x, y, tile_num);
 
 				auto tile_data = (uint8_t*)tile_tex->WriteToMemory(tile_data_sz);
-				file.write(reinterpret_cast<const char*>(tile_data), tile_sz * tile_sz * 4);
+				file.write(reinterpret_cast<const char*>(tile_data), tile_data_sz);
+
 				delete[] tile_data;
 			}
 		}
