@@ -785,7 +785,7 @@ Request(const Page& page)
 		return false;
 	} else {
 		m_file.ReadPage(m_indexer.CalcPageIdx(page), m_tile_buf);
-		CopyBorder(m_tile_buf);
+		//CopyBorder(m_tile_buf);
 		LoadComplete(page, m_tile_buf);
 		return true;
 	}

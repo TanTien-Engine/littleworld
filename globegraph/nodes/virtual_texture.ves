@@ -101,6 +101,6 @@ class VirtualTexture is Node
 		}
 
 		var full_path = Filesystem.get_absolute_path(v_path.value)
-		this.vtex = gg_VirtualTexture.init(full_path, 2048, 256, 0)
+		this.vtex = gg_VirtualTexture.init(full_path, 2048, 256, 1)
 	}
 }

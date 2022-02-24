@@ -1,10 +1,10 @@
 var node0 = ::rendergraph::nodes::draw::Draw()
 
 node0.set_prim_type("patches")
-node0.render_state = { "stencil_test" : false, "rasterization" : "line", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
 node0.skip = false
 
-_editor.add_node(node0, 558.8075282446, -339.48126638417)
+_editor.add_node(node0, 558.8075282446, -338.72995158327)
 
 var node1 = ::rendergraph::nodes::shader::Shader()
 
@@ -50,7 +50,7 @@ void main()
 
     if (gl_InvocationID == 0)
     {
-        vec4 curr_p = tcs.projection * tcs.view * tcs.model * vec4(TCS_IN_FragPos[0], 1.0);
+        vec4 curr_p = tcs.model * vec4(TCS_IN_FragPos[0], 1.0);
         float dist = length(tcs.cam_pos - curr_p.xyz);
 
         int max_level = tcs.lod_level;
@@ -193,14 +193,66 @@ uniform UBO_FS
     // brush
     vec2 mouse_pos;
     float draw_radius;
+
+    vec2 u_page_table_size;
+    vec2 u_virt_tex_size;
+
+    float u_atlas_scale;
+
+    float u_border_scale;
+    float u_border_offset;
 } fs;
 
-//uniform sampler2D fs_heightmap;
+uniform sampler2D fs_page_table_tex;
+uniform sampler2D fs_texture_atlas_tex;
+
+vec3 sample_table(vec2 uv, int mip)
+{
+    vec2 offset = fract(uv * fs.u_page_table_size) / fs.u_page_table_size;
+    return texelFetch(fs_page_table_tex, ivec2((uv - offset) * fs.u_page_table_size * pow(0.5, mip)), mip).xyz;
+}
+
+vec4 sample_atlas(vec3 page, vec2 uv)
+{
+    float mipsize = exp2(floor(page.z * 255.0 + 0.5));
+
+    uv = fract(uv * fs.u_page_table_size / mipsize);
+    uv *= fs.u_border_scale;
+    uv += fs.u_border_offset;
+
+    vec2 offset = floor(page.xy * 255 + 0.5);
+
+    return texture(fs_texture_atlas_tex, (offset + uv) * fs.u_atlas_scale);
+}
+
+float tex_mip_level(vec2 coord, vec2 tex_size)
+{
+   vec2 dx_scaled, dy_scaled;
+   vec2 coord_scaled = coord * tex_size;
+
+   dx_scaled = dFdx(coord_scaled);
+   dy_scaled = dFdy(coord_scaled);
+
+   vec2 dtex = dx_scaled*dx_scaled + dy_scaled*dy_scaled;
+   float min_delta = max(dtex.x,dtex.y);
+   float miplevel = max(0.5 * log2(min_delta), 0.0);
+
+   return miplevel;
+}
+
+vec4 bilinear_sample(vec2 texcoord)
+{
+    float mip = floor(tex_mip_level(texcoord, fs.u_virt_tex_size));
+    mip = clamp(mip, 0, log2(fs.u_page_table_size.x));
+
+    vec3 page = sample_table(texcoord, int(mip));
+    return sample_atlas(page, texcoord);
+}
 
 float calc_height(vec2 texcoord)
 {
-//    return texture(fs_heightmap, texcoord).r/* - 0.5*/;
-    return 0;
+    float h_base = bilinear_sample(texcoord).r;
+    return h_base;
 }
 
 vec3 ComputeNormalCentralDifference(vec2 position, float heightExaggeration)
@@ -347,19 +399,19 @@ _editor.add_node(node12, -134.64799527026, -421.47252684263)
 
 var node13 = ::blueprint::nodes::number::Number()
 
-node13.value = 0.25
+node13.value = (256.0 + 1.0 * 2) / 1024.0
 
 _editor.add_node(node13, -342.76220700832, -404.19229382774)
 
 var node14 = ::blueprint::nodes::number::Number()
 
-node14.value = 1
+node14.value = 256.0 / (256.0 + 1.0 * 2)
 
 _editor.add_node(node14, -324.73065185547, -465.80010986328)
 
 var node15 = ::blueprint::nodes::number::Number()
 
-node15.value = 0
+node15.value = 1.0 / (256.0 + 1.0 * 2)
 
 _editor.add_node(node15, -281.90569045757, -533.41844737843)
 
@@ -379,6 +431,13 @@ Blueprint.connect(node9, "var", node1, "u_texture_atlas_tex")
 Blueprint.connect(node10, "var", node1, "u_feedback_tex")
 Blueprint.connect(node5, "var", node1, "fs.mouse_pos")
 Blueprint.connect(node6, "var", node1, "fs.draw_radius")
+Blueprint.connect(node11, "v2", node1, "fs.u_page_table_size")
+Blueprint.connect(node12, "v2", node1, "fs.u_virt_tex_size")
+Blueprint.connect(node13, "v", node1, "fs.u_atlas_scale")
+Blueprint.connect(node14, "v", node1, "fs.u_border_scale")
+Blueprint.connect(node15, "v", node1, "fs.u_border_offset")
+Blueprint.connect(node8, "var", node1, "fs_page_table_tex")
+Blueprint.connect(node9, "var", node1, "fs_texture_atlas_tex")
 Blueprint.connect(node2, "next", node0, "prev")
 Blueprint.connect(node1, "out", node0, "shader")
 Blueprint.connect(node3, "out", node0, "va")
