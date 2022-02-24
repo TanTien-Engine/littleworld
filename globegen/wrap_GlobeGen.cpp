@@ -143,13 +143,11 @@ void w_VirtualTexture_update()
 {
     auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
 
-    sm::mat4* vp_mat = (sm::mat4*)ves_toforeign(1);
-
-    auto heightmap = ((tt::Proxy<ur::Texture>*)ves_toforeign(2))->obj;
+    sm::mat4* vp_mat = (sm::mat4*)ves_toforeign(1);;
 
     auto w = tt::Graphics::Instance()->GetWidth();
     auto h = tt::Graphics::Instance()->GetHeight();
-    vtex->Update(heightmap, *vp_mat, { w, h });
+    vtex->Update(*vp_mat, { w, h });
 }
 
 void w_GlobeTools_build_vtex()
@@ -175,7 +173,7 @@ VesselForeignMethodFn GlobeGenBindMethod(const char* signature)
     if (strcmp(signature, "VirtualTexture.get_feedback_tex()") == 0) return w_VirtualTexture_get_feedback_tex;
     if (strcmp(signature, "VirtualTexture.get_atlas_tex()") == 0) return w_VirtualTexture_get_atlas_tex;
     if (strcmp(signature, "VirtualTexture.get_page_table_tex()") == 0) return w_VirtualTexture_get_page_table_tex;
-    if (strcmp(signature, "VirtualTexture.update(_,_)") == 0) return w_VirtualTexture_update;
+    if (strcmp(signature, "VirtualTexture.update(_)") == 0) return w_VirtualTexture_update;
 
     if (strcmp(signature, "static GlobeTools.build_vtex(_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex;
 

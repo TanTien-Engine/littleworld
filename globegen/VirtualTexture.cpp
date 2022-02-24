@@ -39,13 +39,7 @@ layout (location = 1) in vec2 texcoord;
 uniform UBO
 {
 	mat4 view_proj_mat;
-
-	float u_height_scale;
-	float u_world_scale;
-	//vec2 u_inv_res;
 };
-
-uniform sampler2D u_heightmap;
 
 out VS_OUT {
     vec2 texcoord;
@@ -54,12 +48,7 @@ out VS_OUT {
 void main()
 {
 	vs_out.texcoord = texcoord;
-
-	vec4 pos = vec4(position.xzy, 1.0);
-//	pos.xy *= u_world_scale;
-//	pos.z = texture(u_heightmap, texcoord).r * u_height_scale;
-
-	gl_Position = view_proj_mat * pos;
+	gl_Position = view_proj_mat * vec4(position.xzy, 1.0);
 }
 
 )";
@@ -127,10 +116,9 @@ VirtualTexture::VirtualTexture(const char* filepath, size_t vtex_sz, size_t tile
 	m_file.open(filepath, std::ios::in | std::ios::binary);
 }
 
-void VirtualTexture::Update(const std::shared_ptr<ur::Texture>& heightmap, 
-	                        const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
+void VirtualTexture::Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
 {
-	auto requests = m_feedback_buf.Update(heightmap, view_proj_mat, screen_sz);
+	auto requests = m_feedback_buf.Update(view_proj_mat, screen_sz);
 
 	m_toload.clear();
 	int touched = 0;
@@ -341,11 +329,14 @@ VirtualTexture::FeedbackBuffer::
 	delete[] m_buf;
 }
 
-std::vector<int> VirtualTexture::FeedbackBuffer::Update(const std::shared_ptr<ur::Texture>& heightmap, 
-	const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
+std::vector<int> VirtualTexture::FeedbackBuffer::Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
 {
-	Update(view_proj_mat, screen_sz);
-	return Draw(heightmap, screen_sz);
+	// prepare
+	auto u_view_proj_mat = m_shader->QueryUniform("view_proj_mat");
+	assert(u_view_proj_mat);
+	u_view_proj_mat->SetValue(view_proj_mat.x, 16);
+
+	return Draw(screen_sz);
 }
 
 void VirtualTexture::FeedbackBuffer::DecreaseMipBias()
@@ -367,28 +358,8 @@ void VirtualTexture::FeedbackBuffer::SetWorldSize(float height_scale, float worl
 	m_world_scale = world_scale;
 }
 
-void VirtualTexture::FeedbackBuffer::
-Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
-{
-	auto u_view_proj_mat = m_shader->QueryUniform("view_proj_mat");
-	assert(u_view_proj_mat);
-	u_view_proj_mat->SetValue(view_proj_mat.x, 16);
-
-	//auto u_inv_res = m_shader->QueryUniform("u_inv_res");
-	//assert(u_inv_res);
-	//u_inv_res->SetValue(sm::vec2(1.0f / 2048 / m_world_scale, 1.0f / 2048 / m_world_scale).xy, 2);
-
-	//auto u_height_scale = m_shader->QueryUniform("u_height_scale");
-	//assert(u_height_scale);
-	//u_height_scale->SetValue(&m_height_scale, 1);
-
-	//auto u_world_scale = m_shader->QueryUniform("u_world_scale");
-	//assert(u_world_scale);
-	//u_world_scale->SetValue(&m_world_scale, 1);
-}
-
 std::vector<int> VirtualTexture::FeedbackBuffer::
-Draw(const std::shared_ptr<ur::Texture>& heightmap, const sm::vec2& screen_sz)
+Draw(const sm::vec2& screen_sz)
 {
 	auto ctx = tt::Render::Instance()->Context();
 
@@ -411,11 +382,6 @@ Draw(const std::shared_ptr<ur::Texture>& heightmap, const sm::vec2& screen_sz)
 
 	ds.program = m_shader;
 	ds.vertex_array = m_feedback_vao;
-
-	int slot = ds.program->QueryTexSlot("u_heightmap");
-	if (slot >= 0) {
-		ctx->SetTexture(slot, heightmap);
-	}
 
 	ctx->Draw(ur::PrimitiveType::Triangles, ds, nullptr);
 

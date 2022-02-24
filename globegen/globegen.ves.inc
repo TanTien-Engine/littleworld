@@ -18,7 +18,7 @@ foreign class VirtualTexture
 	foreign get_atlas_tex()
 	foreign get_page_table_tex()
 
-	foreign update(vp_mat, heightmap)
+	foreign update(vp_mat)
 }
 
 foreign class GlobeTools

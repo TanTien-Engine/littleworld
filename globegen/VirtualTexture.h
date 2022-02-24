@@ -20,8 +20,7 @@ class VirtualTexture
 public:
 	VirtualTexture(const char* filepath, size_t vtex_sz, size_t tile_sz, size_t border_sz);
 
-	void Update(const std::shared_ptr<ur::Texture>& heightmap, 
-		const sm::mat4& view_proj_mat, const sm::vec2& screen_sz);
+	void Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz);
 
 	std::shared_ptr<ur::Texture> LoadToTexture() const;
 
@@ -77,8 +76,8 @@ private:
 			size_t vtex_sz, size_t tile_sz);
 		~FeedbackBuffer();
 
-		std::vector<int> Update(const std::shared_ptr<ur::Texture>& heightmap, 
-			const sm::mat4& view_proj_mat, const sm::vec2& screen_sz);
+		std::vector<int> Update(const sm::mat4& view_proj_mat, 
+			const sm::vec2& screen_sz);
 
 		void DecreaseMipBias();
 
@@ -87,8 +86,7 @@ private:
 		void SetWorldSize(float height_scale, float world_scale);
 
 	private:
-		void Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz);
-		std::vector<int> Draw(const std::shared_ptr<ur::Texture>& heightmap, const sm::vec2& screen_sz);
+		std::vector<int> Draw(const sm::vec2& screen_sz);
 
 		void Download();
 
