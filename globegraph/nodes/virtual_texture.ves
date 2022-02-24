@@ -1,8 +1,9 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.blueprint" for Blueprint
-import "blueprint.variant" for Variant, VAR_TYPE_STRING, VAR_TYPE_NODE, VAR_TYPE_PORT, VAR_TYPE_MATRIX4
+import "blueprint.variant" for Variant, VAR_TYPE_STRING, VAR_TYPE_NODE, VAR_TYPE_PORT, VAR_TYPE_MATRIX4, VAR_TYPE_NUMBER4
 import "rendergraph.variant" for VarTexture, VAR_TYPE_TEXTURE
+import "maths.vector" for Vector4
 import "globegen" for VirtualTexture as gg_VirtualTexture
 import "filesystem" for Filesystem
 
@@ -21,7 +22,8 @@ class VirtualTexture is Node
 			Pin(this, "next",       VAR_TYPE_PORT),
 			Pin(this, "feedback",   VAR_TYPE_TEXTURE),
 			Pin(this, "tex_atlas",  VAR_TYPE_TEXTURE),
-			Pin(this, "page_table", VAR_TYPE_TEXTURE),			
+			Pin(this, "page_table", VAR_TYPE_TEXTURE),
+			Pin(this, "size",       VAR_TYPE_NUMBER4),
 		]
 
 		this.layout()
@@ -53,6 +55,12 @@ class VirtualTexture is Node
 			v_tex.tex = this.vtex.get_page_table_tex()
 			return Variant(VAR_TYPE_TEXTURE, v_tex)		
 		}
+		else if (idx == 4)
+		{
+			var size = this.vtex.get_size()
+			var v4 = Vector4(size[0], size[1], size[2], size[3])
+			return Variant(v4)
+		}
 
 		return nil
 	}
@@ -81,6 +89,6 @@ class VirtualTexture is Node
 		}
 
 		var full_path = Filesystem.get_absolute_path(v_path.value)
-		this.vtex = gg_VirtualTexture.init(full_path, 2048, 256, 1)
+		this.vtex = gg_VirtualTexture.init(full_path)
 	}
 }

@@ -92,11 +92,8 @@ uniform UBO_TES
     float height_scale;
 
     // vtex
-    vec2 u_page_table_size;
-    vec2 u_virt_tex_size;
-
+    vec2  u_page_table_size;
     float u_atlas_scale;
-
     float u_border_scale;
     float u_border_offset;
 
@@ -385,57 +382,218 @@ node10.var_type = "texture"
 
 _editor.add_node(node10, -413.92148356792, -308.39591412505)
 
-var node11 = ::blueprint::nodes::number2::Number2()
+var node11 = ::blueprint::nodes::input::Input()
 
-node11.value.set(8, 8)
+node11.var_name = "vtex_size"
+node11.var_type = "num4"
 
-_editor.add_node(node11, -131.64273871487, -332.81739357734)
+_editor.add_node(node11, -1386.87050625, 388.42472099609)
 
-var node12 = ::blueprint::nodes::number2::Number2()
+var node12 = ::blueprint::nodes::split::Split()
 
-node12.value.set(2048, 2048)
+_editor.add_node(node12, -1245.2482561612, 358.59770017756)
 
-_editor.add_node(node12, -134.64799527026, -421.47252684263)
+var node13 = ::blueprint::nodes::store::Store()
 
-var node13 = ::blueprint::nodes::number::Number()
+node13.var_name = "vtex_w"
 
-node13.value = (256.0 + 1.0 * 2) / 1024.0
+_editor.add_node(node13, -1102.7118842019, 416.77947951882)
 
-_editor.add_node(node13, -342.76220700832, -404.19229382774)
+var node14 = ::blueprint::nodes::store::Store()
 
-var node14 = ::blueprint::nodes::number::Number()
+node14.var_name = "vtex_h"
 
-node14.value = 256.0 / (256.0 + 1.0 * 2)
+_editor.add_node(node14, -962.71188142756, 416.77950171342)
 
-_editor.add_node(node14, -324.73065185547, -465.80010986328)
+var node15 = ::blueprint::nodes::store::Store()
 
-var node15 = ::blueprint::nodes::number::Number()
+node15.var_name = "tile_sz"
 
-node15.value = 1.0 / (256.0 + 1.0 * 2)
+_editor.add_node(node15, -1104.5300632457, 346.77952390803)
 
-_editor.add_node(node15, -281.90569045757, -533.41844737843)
+var node16 = ::blueprint::nodes::store::Store()
 
+node16.var_name = "border_sz"
+
+_editor.add_node(node16, -959.07547340199, 346.32495625888)
+
+var node17 = ::blueprint::nodes::load::Load()
+
+node17.var_name = "vtex_w"
+
+_editor.add_node(node17, -1335.4371859687, 238.67901822273)
+
+var node18 = ::blueprint::nodes::load::Load()
+
+node18.var_name = "vtex_h"
+
+_editor.add_node(node18, -1335.4371789068, 192.3980443942)
+
+var node19 = ::blueprint::nodes::combine::Combine()
+
+_editor.add_node(node19, -1187.5032973836, 170.08397589157)
+
+var node20 = ::blueprint::nodes::store::Store()
+
+node20.var_name = "vtex_sz"
+
+_editor.add_node(node20, -1048.5606279874, 181.34251773793)
+
+var node21 = ::blueprint::nodes::load::Load()
+
+node21.var_name = "vtex_sz"
+
+_editor.add_node(node21, -57.64682172378, -298.19807063331)
+
+var node22 = ::blueprint::nodes::load::Load()
+
+node22.var_name = "tile_sz"
+
+_editor.add_node(node22, -1272.8259783922, 39.981682433981)
+
+var node23 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node23, -1139.7681043905, 13.53540219888)
+
+var node24 = ::blueprint::nodes::load::Load()
+
+node24.var_name = "border_sz"
+
+_editor.add_node(node24, -1402.578038644, 1.1387097494825)
+
+var node25 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node25, -1273.6524261234, -21.175331514317)
+
+var node26 = ::blueprint::nodes::integer::Integer()
+
+node26.value = 2
+
+_editor.add_node(node26, -1403.4044508765, -60.018297136896)
+
+var node27 = ::blueprint::nodes::store::Store()
+
+node27.var_name = "tile_sz_with_border"
+
+_editor.add_node(node27, -1005.0573744605, 12.708964430023)
+
+var node28 = ::blueprint::nodes::load::Load()
+
+node28.var_name = "tile_sz"
+
+_editor.add_node(node28, -518.99795725943, -755.03736412244)
+
+var node29 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node29, -382.68852078185, -672.50245026208)
+
+var node30 = ::blueprint::nodes::load::Load()
+
+node30.var_name = "tile_sz_with_border"
+
+_editor.add_node(node30, -523.31797668753, -699.09242997218)
+
+var node31 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node31, -373.40074016577, -783.2798116445)
+
+var node32 = ::blueprint::nodes::load::Load()
+
+node32.var_name = "tile_sz_with_border"
+
+_editor.add_node(node32, -519.81701199255, -806.00531742455)
+
+var node33 = ::blueprint::nodes::load::Load()
+
+node33.var_name = "border_sz"
+
+_editor.add_node(node33, -526.0697959003, -650.18039651738)
+
+var node34 = ::blueprint::nodes::load::Load()
+
+node34.var_name = "vtex_sz"
+
+_editor.add_node(node34, -536.55341430664, -541.08205688477)
+
+var node35 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node35, -397.40341674805, -567.70204589844)
+
+var node36 = ::blueprint::nodes::load::Load()
+
+node36.var_name = "tile_sz"
+
+_editor.add_node(node36, -532.00324021043, -593.03955320239)
+
+var node37 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node37, -398.80017674805, -438.61685589844)
+
+var node38 = ::blueprint::nodes::number::Number()
+
+node38.value = 1024
+
+_editor.add_node(node38, -535.87137939453, -482.6292980957)
+
+var node39 = ::blueprint::nodes::load::Load()
+
+node39.var_name = "tile_sz_with_border"
+
+_editor.add_node(node39, -536.51660109843, -419.46684975225)
+
+Blueprint.connect(node11, "var", node12, "xyzw")
+Blueprint.connect(node12, "w", node16, "var")
+Blueprint.connect(node16, "var", node33, "var")
+Blueprint.connect(node16, "var", node24, "var")
+Blueprint.connect(node24, "var", node25, "a")
+Blueprint.connect(node26, "v", node25, "b")
+Blueprint.connect(node12, "z", node15, "var")
+Blueprint.connect(node15, "var", node36, "var")
+Blueprint.connect(node15, "var", node28, "var")
+Blueprint.connect(node15, "var", node22, "var")
+Blueprint.connect(node22, "var", node23, "a")
+Blueprint.connect(node25, "v", node23, "b")
+Blueprint.connect(node23, "v", node27, "var")
+Blueprint.connect(node27, "var", node39, "var")
+Blueprint.connect(node39, "var", node37, "a")
+Blueprint.connect(node38, "v", node37, "b")
+Blueprint.connect(node27, "var", node32, "var")
+Blueprint.connect(node28, "var", node31, "a")
+Blueprint.connect(node32, "var", node31, "b")
+Blueprint.connect(node27, "var", node30, "var")
+Blueprint.connect(node33, "var", node29, "a")
+Blueprint.connect(node30, "var", node29, "b")
+Blueprint.connect(node12, "y", node14, "var")
+Blueprint.connect(node14, "var", node18, "var")
+Blueprint.connect(node12, "x", node13, "var")
+Blueprint.connect(node13, "var", node17, "var")
+Blueprint.connect(node17, "var", node19, "x")
+Blueprint.connect(node18, "var", node19, "y")
+Blueprint.connect(node19, "xy", node20, "var")
+Blueprint.connect(node20, "var", node34, "var")
+Blueprint.connect(node34, "var", node35, "a")
+Blueprint.connect(node36, "var", node35, "b")
+Blueprint.connect(node20, "var", node21, "var")
 Blueprint.connect(node4, "zoom", node7, "fovy")
 Blueprint.connect(node7, "mat", node1, "tcs.projection")
 Blueprint.connect(node4, "mat", node1, "tcs.view")
 Blueprint.connect(node4, "pos", node1, "tcs.cam_pos")
 Blueprint.connect(node7, "mat", node1, "tes.projection")
 Blueprint.connect(node4, "mat", node1, "tes.view")
-Blueprint.connect(node11, "v2", node1, "tes.u_page_table_size")
-Blueprint.connect(node12, "v2", node1, "tes.u_virt_tex_size")
-Blueprint.connect(node13, "v", node1, "tes.u_atlas_scale")
-Blueprint.connect(node14, "v", node1, "tes.u_border_scale")
-Blueprint.connect(node15, "v", node1, "tes.u_border_offset")
+Blueprint.connect(node35, "v", node1, "tes.u_page_table_size")
+Blueprint.connect(node37, "v", node1, "tes.u_atlas_scale")
+Blueprint.connect(node31, "v", node1, "tes.u_border_scale")
+Blueprint.connect(node29, "v", node1, "tes.u_border_offset")
 Blueprint.connect(node8, "var", node1, "u_page_table_tex")
 Blueprint.connect(node9, "var", node1, "u_texture_atlas_tex")
 Blueprint.connect(node10, "var", node1, "u_feedback_tex")
 Blueprint.connect(node5, "var", node1, "fs.mouse_pos")
 Blueprint.connect(node6, "var", node1, "fs.draw_radius")
-Blueprint.connect(node11, "v2", node1, "fs.u_page_table_size")
-Blueprint.connect(node12, "v2", node1, "fs.u_virt_tex_size")
-Blueprint.connect(node13, "v", node1, "fs.u_atlas_scale")
-Blueprint.connect(node14, "v", node1, "fs.u_border_scale")
-Blueprint.connect(node15, "v", node1, "fs.u_border_offset")
+Blueprint.connect(node35, "v", node1, "fs.u_page_table_size")
+Blueprint.connect(node21, "var", node1, "fs.u_virt_tex_size")
+Blueprint.connect(node37, "v", node1, "fs.u_atlas_scale")
+Blueprint.connect(node31, "v", node1, "fs.u_border_scale")
+Blueprint.connect(node29, "v", node1, "fs.u_border_offset")
 Blueprint.connect(node8, "var", node1, "fs_page_table_tex")
 Blueprint.connect(node9, "var", node1, "fs_texture_atlas_tex")
 Blueprint.connect(node2, "next", node0, "prev")

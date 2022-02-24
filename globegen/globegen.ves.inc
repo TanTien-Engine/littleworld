@@ -12,11 +12,14 @@ foreign class ShapeBatching
 
 foreign class VirtualTexture
 {
-	init(filepath, vtex_sz, tile_sz, border_sz) {}
+	init(filepath) {}
 
 	foreign get_feedback_tex()
 	foreign get_atlas_tex()
 	foreign get_page_table_tex()
+
+	// [ vtex_w, vtex_h, tile_sz, border_sz ]
+	foreign get_size()
 
 	foreign update(vp_mat)
 }

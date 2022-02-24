@@ -83,11 +83,8 @@ void w_ShapeBatching_build_va()
 void w_VirtualTexture_allocate()
 {
     auto filepath = ves_tostring(1);
-    auto vtex_sz = (size_t)ves_tonumber(2);
-    auto tile_sz = (size_t)ves_tonumber(3);
-    auto border_sz = (size_t)ves_tonumber(4);
 
-    auto vtex = std::make_shared<globegen::VirtualTexture>(filepath, vtex_sz, tile_sz, border_sz);
+    auto vtex = std::make_shared<globegen::VirtualTexture>(filepath);
 
     auto proxy = (tt::Proxy<globegen::VirtualTexture>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<globegen::VirtualTexture>));
     proxy->obj = vtex;
@@ -139,6 +136,16 @@ void w_VirtualTexture_get_page_table_tex()
     ves_pop(1);
 }
 
+void w_VirtualTexture_get_size()
+{
+    auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
+
+    auto& sz = vtex->GetSize();
+
+    std::vector<size_t> ret = { sz.vtex_width, sz.vtex_height, sz.tile_size, sz.border_size };
+    tt::return_list(ret);
+}
+
 void w_VirtualTexture_update()
 {
     auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
@@ -173,6 +180,7 @@ VesselForeignMethodFn GlobeGenBindMethod(const char* signature)
     if (strcmp(signature, "VirtualTexture.get_feedback_tex()") == 0) return w_VirtualTexture_get_feedback_tex;
     if (strcmp(signature, "VirtualTexture.get_atlas_tex()") == 0) return w_VirtualTexture_get_atlas_tex;
     if (strcmp(signature, "VirtualTexture.get_page_table_tex()") == 0) return w_VirtualTexture_get_page_table_tex;
+    if (strcmp(signature, "VirtualTexture.get_size()") == 0) return w_VirtualTexture_get_size;
     if (strcmp(signature, "VirtualTexture.update(_)") == 0) return w_VirtualTexture_update;
 
     if (strcmp(signature, "static GlobeTools.build_vtex(_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex;

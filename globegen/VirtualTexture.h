@@ -1,5 +1,7 @@
 #pragma once
 
+#include "VTexInfo.h"
+
 #include <SM_Vector.h>
 #include <SM_Matrix.h>
 
@@ -18,23 +20,18 @@ namespace globegen
 class VirtualTexture
 {
 public:
-	VirtualTexture(const char* filepath, size_t vtex_sz, size_t tile_sz, size_t border_sz);
+	VirtualTexture(const char* filepath);
 
 	void Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz);
 
-	std::shared_ptr<ur::Texture> LoadToTexture() const;
+	//std::shared_ptr<ur::Texture> LoadToTexture() const;
 
-	auto GetTableTex() const { return m_table.GetTexture(); }
-	auto GetAtlasTex() const { return m_atlas.GetTexture(); }
-	size_t GetVTexSize() const { return m_vtex_sz; }
-	size_t GetTileSize() const { return m_tile_sz; }
-	size_t GetBorderSize() const { return m_border_sz; }
+	auto GetTableTex() const { return m_table->GetTexture(); }
+	auto GetAtlasTex() const { return m_atlas->GetTexture(); }
 
-	auto GetFeedbackTex() const { return m_feedback_buf.GetTexture(); }
+	auto GetFeedbackTex() const { return m_feedback_buf->GetTexture(); }
 
-	void SetWorldSize(float height_scale, float world_scale);
-
-	bool IsHeightMap() const;
+	auto& GetSize() const { return m_info; }
 
 private:
 	struct Page
@@ -52,7 +49,7 @@ private:
 	class PageIndexer
 	{
 	public:
-		PageIndexer(size_t vtex_sz, size_t tile_sz);
+		PageIndexer(const VTexInfo& info);
 
 		int CalcPageIdx(const Page& page) const;
 		const Page& QueryPageByIdx(size_t idx) const;
@@ -73,7 +70,7 @@ private:
 	{
 	public:
 		FeedbackBuffer(const PageIndexer& page_idx,
-			size_t vtex_sz, size_t tile_sz);
+			const VTexInfo& info);
 		~FeedbackBuffer();
 
 		std::vector<int> Update(const sm::mat4& view_proj_mat, 
@@ -82,8 +79,6 @@ private:
 		void DecreaseMipBias();
 
 		std::shared_ptr<ur::Texture> GetTexture() const { return m_tex; }
-
-		void SetWorldSize(float height_scale, float world_scale);
 
 	private:
 		std::vector<int> Draw(const sm::vec2& screen_sz);
@@ -215,7 +210,7 @@ private:
 	class TileDataFile
 	{
 	public:
-		TileDataFile(size_t tile_sz, size_t border_sz, std::fstream& file);
+		TileDataFile(const VTexInfo& info, std::fstream& file);
 
 		void ReadPage(int index, uint8_t* data) const;
 		void WritePage(int index, const uint8_t* data);
@@ -304,20 +299,19 @@ private:
 	}; // PageCache
 
 private:
-	size_t m_vtex_sz = 0;
-	size_t m_tile_sz = 0;
-	size_t m_border_sz = 0;
-
-	PageIndexer m_indexer;
-	FeedbackBuffer m_feedback_buf;
-
 	mutable std::fstream m_file;
-	TileDataFile m_tiles_file;
 
-	TextureAtlas m_atlas;
-	PageTable m_table;
+	VTexInfo m_info;
 
-	PageCache m_cache;
+	std::shared_ptr<PageIndexer>    m_indexer = nullptr;
+	std::shared_ptr<FeedbackBuffer> m_feedback_buf = nullptr;
+
+	std::shared_ptr<TileDataFile> m_tiles_file = nullptr;
+
+	std::shared_ptr<TextureAtlas> m_atlas = nullptr;
+	std::shared_ptr<PageTable>    m_table = nullptr;
+
+	std::shared_ptr<PageCache> m_cache = nullptr;
 
 	std::vector<PageWithCount> m_toload;
 

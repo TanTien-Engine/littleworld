@@ -16,8 +16,6 @@
 
 #include <algorithm>
 
-#define VTEX_HEIGHTMAP
-
 namespace
 {
 
@@ -27,8 +25,6 @@ const int ATLAS_SIZE = 1024;
 
 const int FEEDBACK_SIZE = 64;
 const int MIP_SAMPLE_BIAS = 3;
-
-const int BYTES_PER_PIXEL = 2;	// R16F
 
 const char* feedback_vs = R"(
 
@@ -102,23 +98,24 @@ void main()
 namespace globegen
 {
 
-VirtualTexture::VirtualTexture(const char* filepath, size_t vtex_sz, size_t tile_sz, size_t border_sz)
-	: m_vtex_sz(vtex_sz)
-	, m_tile_sz(tile_sz)
-	, m_border_sz(border_sz)
-	, m_indexer(vtex_sz, tile_sz)
-	, m_feedback_buf(m_indexer, vtex_sz, tile_sz)
-	, m_tiles_file(tile_sz, border_sz, m_file)
-	, m_atlas(ATLAS_SIZE, tile_sz, border_sz)
-	, m_table(vtex_sz / tile_sz, vtex_sz / tile_sz)
-	, m_cache(m_atlas, m_table, m_indexer, m_tiles_file)
+VirtualTexture::VirtualTexture(const char* filepath)
 {
 	m_file.open(filepath, std::ios::in | std::ios::binary);
+
+	m_file.seekg(0, std::ios_base::beg);
+	m_file.read(reinterpret_cast<char*>(&m_info), sizeof(m_info));
+
+	m_indexer = std::make_shared<PageIndexer>(m_info);
+	m_feedback_buf = std::make_shared<FeedbackBuffer>(*m_indexer, m_info);
+	m_tiles_file = std::make_shared<TileDataFile>(m_info, m_file);
+	m_atlas = std::make_shared<TextureAtlas>(ATLAS_SIZE, m_info.tile_size, m_info.border_size);
+	m_table = std::make_shared<PageTable>(m_info.vtex_width / m_info.tile_size, m_info.vtex_height / m_info.tile_size);
+	m_cache = std::make_shared<PageCache>(*m_atlas, *m_table, *m_indexer, *m_tiles_file);
 }
 
 void VirtualTexture::Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
 {
-	auto requests = m_feedback_buf.Update(view_proj_mat, screen_sz);
+	auto requests = m_feedback_buf->Update(view_proj_mat, screen_sz);
 
 	m_toload.clear();
 	int touched = 0;
@@ -128,15 +125,15 @@ void VirtualTexture::Update(const sm::mat4& view_proj_mat, const sm::vec2& scree
 			continue;
 		}
 
-		auto& page = m_indexer.QueryPageByIdx(i);
-		if (!m_cache.Touch(page)) {
+		auto& page = m_indexer->QueryPageByIdx(i);
+		if (!m_cache->Touch(page)) {
 			m_toload.push_back(PageWithCount(page, requests[i]));
 		} else {
 			++touched;
 		}
 	}
 
-	size_t page_n = m_atlas.GetPageCount();
+	size_t page_n = m_atlas->GetPageCount();
 	if (touched < page_n * page_n)
 	{
 		std::sort(m_toload.begin(), m_toload.end(), [](const PageWithCount& p0, const PageWithCount& p1)->bool {
@@ -149,67 +146,53 @@ void VirtualTexture::Update(const sm::mat4& view_proj_mat, const sm::vec2& scree
 
 		int load_n = std::min((int)m_toload.size(), UPLOADS_PER_FRAME);
 		for (int i = 0; i < load_n; ++i) {
-			m_cache.Request(m_toload[i].page);
+			m_cache->Request(m_toload[i].page);
 		}
 	}
 	else
 	{
-		m_feedback_buf.DecreaseMipBias();
+		m_feedback_buf->DecreaseMipBias();
 	}
 
-	m_table.Update();
+	m_table->Update();
 }
 
-std::shared_ptr<ur::Texture> VirtualTexture::LoadToTexture() const
-{
-	const int LOD_LEVEL = 0;
-
-	auto dev = tt::Render::Instance()->Device();
-
-	const int tex_sz = m_vtex_sz >> LOD_LEVEL;
-
-	ur::TextureDescription desc;
-	desc.width = tex_sz;
-	desc.height = tex_sz;
-	desc.format = ur::TextureFormat::R16F;
-	auto tex = dev->CreateTexture(desc);
-
-	size_t data_sz = m_tile_sz * m_tile_sz * 4;
-	uint8_t* data = new uint8_t[data_sz];
-
-	int offset = 0;
-	for (int i = 0; i < LOD_LEVEL; ++i) {
-		offset += static_cast<int>(std::pow((m_vtex_sz / m_tile_sz) >> i, 2));
-	}
-
-	const int tile_num = (m_vtex_sz / m_tile_sz) >> LOD_LEVEL;
-	const size_t tile_sz = m_tile_sz << LOD_LEVEL;
-	for (int y = 0; y < tile_num; ++y) {
-		for (int x = 0; x < tile_num; ++x) {
-			m_file.seekg(static_cast<uint64_t>(data_sz) * (offset + y * tile_num + x));
-			m_file.read(reinterpret_cast<char*>(data), data_sz);
-			tex->Upload(data, x * m_tile_sz, y * m_tile_sz, m_tile_sz, m_tile_sz);
-		}
-	}
-
-	delete[] data;
-
-	return tex;
-}
-
-void VirtualTexture::SetWorldSize(float height_scale, float world_scale)
-{
-	m_feedback_buf.SetWorldSize(height_scale, world_scale);
-}
-
-bool VirtualTexture::IsHeightMap() const
-{
-#ifdef VTEX_HEIGHTMAP
-	return true;
-#else
-	return false;
-#endif // VTEX_HEIGHTMAP
-}
+//std::shared_ptr<ur::Texture> VirtualTexture::LoadToTexture() const
+//{
+//	const int LOD_LEVEL = 0;
+//
+//	auto dev = tt::Render::Instance()->Device();
+//
+//	const int tex_sz = m_vtex_sz >> LOD_LEVEL;
+//
+//	ur::TextureDescription desc;
+//	desc.width = tex_sz;
+//	desc.height = tex_sz;
+//	desc.format = ur::TextureFormat::R16F;
+//	auto tex = dev->CreateTexture(desc);
+//
+//	size_t data_sz = m_tile_sz * m_tile_sz * 4;
+//	uint8_t* data = new uint8_t[data_sz];
+//
+//	int offset = 0;
+//	for (int i = 0; i < LOD_LEVEL; ++i) {
+//		offset += static_cast<int>(std::pow((m_vtex_sz / m_tile_sz) >> i, 2));
+//	}
+//
+//	const int tile_num = (m_vtex_sz / m_tile_sz) >> LOD_LEVEL;
+//	const size_t tile_sz = m_tile_sz << LOD_LEVEL;
+//	for (int y = 0; y < tile_num; ++y) {
+//		for (int x = 0; x < tile_num; ++x) {
+//			m_file.seekg(static_cast<uint64_t>(data_sz) * (offset + y * tile_num + x));
+//			m_file.read(reinterpret_cast<char*>(data), data_sz);
+//			tex->Upload(data, x * m_tile_sz, y * m_tile_sz, m_tile_sz, m_tile_sz);
+//		}
+//	}
+//
+//	delete[] data;
+//
+//	return tex;
+//}
 
 //////////////////////////////////////////////////////////////////////////
 // struct VirtualTexture::Page
@@ -230,15 +213,15 @@ bool VirtualTexture::Page::operator == (const Page& p) const
 //////////////////////////////////////////////////////////////////////////
 
 VirtualTexture::PageIndexer::
-PageIndexer(size_t vtex_sz, size_t tile_sz)
+PageIndexer(const VTexInfo& info)
 {
-	m_mip_count = static_cast<int>(std::log2(vtex_sz / tile_sz)) + 1;
+	m_mip_count = static_cast<int>(std::log2(info.vtex_width / info.tile_size)) + 1;
 
 	m_sizes.resize(m_mip_count);
 	for (int i = 0; i < m_mip_count; ++i)
 	{
-		m_sizes[i].x = static_cast<int>(std::ceil((vtex_sz >> i) / static_cast<float>(tile_sz)));
-		m_sizes[i].y = static_cast<int>(std::ceil((vtex_sz >> i) / static_cast<float>(tile_sz)));
+		m_sizes[i].x = static_cast<int>(std::ceil((info.vtex_width  >> i) / static_cast<float>(info.tile_size)));
+		m_sizes[i].y = static_cast<int>(std::ceil((info.vtex_height >> i) / static_cast<float>(info.tile_size)));
 	}
 
 	m_offsets.resize(m_mip_count);
@@ -281,14 +264,14 @@ QueryPageByIdx(size_t idx) const
 //////////////////////////////////////////////////////////////////////////
 
 VirtualTexture::FeedbackBuffer::
-FeedbackBuffer(const PageIndexer& page_idx, size_t vtex_sz, size_t tile_sz)
+FeedbackBuffer(const PageIndexer& page_idx, const VTexInfo& info)
 	: m_indexer(page_idx)
 	, m_mip_bias(MIP_SAMPLE_BIAS)
 {
 	auto dev = tt::Render::Instance()->Device();
 	m_feedback_vao = tt::Model::Instance()->CreateGrids(*dev, ur::VertexLayoutType::PosTex, FEEDBACK_SIZE);
 
-	m_page_table_size = vtex_sz / tile_sz;
+	m_page_table_size = info.vtex_width / info.tile_size;
 
 	ur::TextureDescription desc;
 	desc.width = FEEDBACK_SIZE;
@@ -309,11 +292,11 @@ FeedbackBuffer(const PageIndexer& page_idx, size_t vtex_sz, size_t tile_sz)
 
 	auto u_page_table_size = m_shader->QueryUniform("u_page_table_size");
 	assert(u_page_table_size);
-	u_page_table_size->SetValue(sm::vec2(vtex_sz / tile_sz, vtex_sz / tile_sz).xy, 2);
+	u_page_table_size->SetValue(sm::vec2(info.vtex_width / info.tile_size, info.vtex_height / info.tile_size).xy, 2);
 
 	auto u_virt_tex_size = m_shader->QueryUniform("u_virt_tex_size");
 	assert(u_virt_tex_size);
-	u_virt_tex_size->SetValue(sm::vec2(vtex_sz, vtex_sz).xy, 2);
+	u_virt_tex_size->SetValue(sm::vec2(info.vtex_width, info.vtex_height).xy, 2);
 
 	auto u_mip_sample_bias = m_shader->QueryUniform("u_mip_sample_bias");
 	assert(u_mip_sample_bias);
@@ -350,12 +333,6 @@ void VirtualTexture::FeedbackBuffer::DecreaseMipBias()
 	assert(u_mip_sample_bias);
 	float bias = static_cast<float>(m_mip_bias);
 	u_mip_sample_bias->SetValue(&m_mip_bias, 1);
-}
-
-void VirtualTexture::FeedbackBuffer::SetWorldSize(float height_scale, float world_scale)
-{
-	m_height_scale = height_scale;
-	m_world_scale = world_scale;
 }
 
 std::vector<int> VirtualTexture::FeedbackBuffer::
@@ -979,11 +956,11 @@ Check()
 //////////////////////////////////////////////////////////////////////////
 
 VirtualTexture::TileDataFile::
-TileDataFile(size_t tile_sz, size_t border_sz, std::fstream& file)
+TileDataFile(const VTexInfo& info, std::fstream& file)
 	: m_file(file)
 {
-	const size_t size = tile_sz + border_sz * 2;
-	m_tile_file_sz = size * size * BYTES_PER_PIXEL;
+	const size_t size = info.tile_size + info.border_size * 2;
+	m_tile_file_sz = size * size * info.channels * info.bytes;
 }
 
 void VirtualTexture::TileDataFile::
@@ -993,7 +970,8 @@ ReadPage(int index, uint8_t* data) const
 
 	memset(data, 0xff, m_tile_file_sz);
 
-	m_file.seekg(static_cast<uint64_t>(m_tile_file_sz) * index);
+	const size_t header_size = sizeof(VTexInfo);
+	m_file.seekg(header_size + static_cast<uint64_t>(m_tile_file_sz) * index);
 	m_file.read(reinterpret_cast<char*>(data), m_tile_file_sz);
 }
 
@@ -1002,7 +980,8 @@ WritePage(int index, const uint8_t* data)
 {
 	//std::lock_guard<std::mutex> lock(m_mutex);
 
-	m_file.seekp(static_cast<uint64_t>(m_tile_file_sz) * index);
+	const size_t header_size = sizeof(VTexInfo);
+	m_file.seekp(header_size + static_cast<uint64_t>(m_tile_file_sz) * index);
 	m_file.write(reinterpret_cast<const char*>(data), m_tile_file_sz);
 }
 

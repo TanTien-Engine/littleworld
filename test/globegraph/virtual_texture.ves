@@ -19,7 +19,7 @@ _editor.add_node(node1, -413.18618946793, -223.3205382146)
 var node2 = ::globegraph::nodes::vtex_builder::VtexBuilder()
 node2.query_param("out_path").value = "../../../tmp/test.vtex"
 
-_editor.add_node(node2, -241.38221432962, -2.8225872549696)
+_editor.add_node(node2, -227.72194522232, -51.254450453584)
 
 var node3 = ::globegraph::nodes::virtual_texture::VirtualTexture()
 
@@ -27,12 +27,12 @@ _editor.add_node(node3, -56.005892543356, -58.478938348722)
 
 var node4 = ::blueprint::nodes::print::Print()
 
-_editor.add_node(node4, 163, -83)
+_editor.add_node(node4, 146.85604560046, -163.71977199769)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
 node5.load_from_file(_editor, "../../assets/blueprints/render/terrain/gray_with_vtex.ves")
 
-_editor.add_node(node5, 147, 128)
+_editor.add_node(node5, 197.29462716779, -20.400196211138)
 
 var node6 = ::blueprint::nodes::perspective::Perspective()
 
@@ -52,10 +52,10 @@ Blueprint.connect(node0, "zoom", node6, "fovy")
 Blueprint.connect(node6, "mat", node7, "a")
 Blueprint.connect(node0, "mat", node7, "b")
 Blueprint.connect(node2, "path", node3, "filepath")
-Blueprint.connect(node1, "tex", node3, "heightmap")
 Blueprint.connect(node7, "v", node3, "vp_mat")
 Blueprint.connect(node0, "this", node5, "view_cam")
 Blueprint.connect(node3, "page_table", node5, "u_page_table_tex")
 Blueprint.connect(node3, "tex_atlas", node5, "u_texture_atlas_tex")
 Blueprint.connect(node3, "feedback", node5, "u_feedback_tex")
+Blueprint.connect(node3, "size", node5, "vtex_size")
 Blueprint.connect(node3, "tex_atlas", node4, "value")

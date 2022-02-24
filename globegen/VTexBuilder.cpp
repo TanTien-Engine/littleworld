@@ -1,4 +1,5 @@
 #include "VTexBuilder.h"
+#include "VTexInfo.h"
 
 #include <modules/render/Render.h>
 
@@ -59,6 +60,15 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 {
 	std::fstream file;
 	file.open(dst_path, std::ios::out | std::ios::binary);
+
+	VTexInfo header;
+	header.vtex_width  = vtex_sz;
+	header.vtex_height = vtex_sz;
+	header.tile_size   = tile_sz;
+	header.border_size = border_sz;
+	header.channels    = 1;
+	header.bytes       = 2;
+	file.write(reinterpret_cast<const char*>(&header), sizeof(header));
 
 	auto dev = tt::Render::Instance()->Device();
 	auto ctx = tt::Render::Instance()->Context();
