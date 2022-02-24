@@ -107,9 +107,8 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 		dev->PopDebugGroup();
 	};
 
-//	uint8_t* tile_data = new uint8_t[tile_sz * tile_sz * 4];
-
 	auto tile_data_sz = ur::TextureUtility::RequiredSizeInBytes(tile_tex->GetWidth(), tile_tex->GetHeight(), tile_tex->GetFormat(), 4);
+	uint8_t* tile_data = new uint8_t[tile_data_sz];
 
 	size_t tile_num = vtex_sz / tile_sz;
 	//const int mip_count = std::log2(tile_num) + 1;
@@ -119,14 +118,14 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 			for (int x = 0; x < tile_num; ++x) {
 				copy2tmp(x, y, tile_num);
 
-				auto tile_data = (uint8_t*)tile_tex->WriteToMemory(tile_data_sz);
+				tile_tex->WriteToMemory(tile_data);
 				file.write(reinterpret_cast<const char*>(tile_data), tile_data_sz);
-
-				delete[] tile_data;
 			}
 		}
 		tile_num /= 2;
 	}
+
+	delete[] tile_data;
 
 	file.close();
 }
