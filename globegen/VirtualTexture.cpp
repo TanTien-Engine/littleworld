@@ -20,8 +20,7 @@ namespace
 {
 
 const int UPLOADS_PER_FRAME = 6;
-//const int ATLAS_SIZE = 512;
-const int ATLAS_SIZE = 1024;
+const int ATLAS_SIZE = 4096;
 
 const int FEEDBACK_SIZE = 64;
 const int MIP_SAMPLE_BIAS = 3;

@@ -42,7 +42,7 @@ class VtexBuilder is Node
 			return nil
 		}
 
-		GlobeTools.build_vtex(v_imgs.value.tex, full_path, 2048, 256, 1)
+		GlobeTools.build_vtex(v_imgs.value.tex, full_path, 4096 * 2, 4096 * 2, 256, 1)
 
 		return Variant(VAR_TYPE_STRING, out_path)
 	}

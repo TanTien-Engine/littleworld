@@ -1,13 +1,13 @@
 var node0 = ::blueprint::nodes::camera3d::Camera3d()
 
-node0.cam.position.set(0.21193542658688, 44.088630170809, 1.6250815807882)
-node0.cam.yaw = -90.3
-node0.cam.pitch = -88.5
+node0.cam.position.set(-330.30470814876, -998.66129010979, 169.62434221348)
+node0.cam.yaw = -477.7
+node0.cam.pitch = -23.2
 node0.cam.zoom = 45
 node0.cam.update_vectors()
-node0.speed = 0.31575840711594
+node0.speed = 5
 
-_editor.add_node(node0, -626.20620290831, 64.378834667059)
+_editor.add_node(node0, -625.10620290831, 62.178834667059)
 
 var node1 = ::rendergraph::nodes::texture::Texture()
 node1.query_param("unif_name").value = "u_tex"
@@ -38,10 +38,10 @@ var node6 = ::blueprint::nodes::perspective::Perspective()
 
 node6.fovy = 45
 node6.aspect = 0
-node6.znear = 0.1
-node6.zfar = 100
+node6.znear = 0.01
+node6.zfar = 10000
 
-_editor.add_node(node6, -380.83671616259, 169.13042748488)
+_editor.add_node(node6, -387.20035252623, 169.13042748488)
 
 var node7 = ::blueprint::nodes::multiply::Multiply()
 
@@ -53,7 +53,7 @@ _editor.add_node(node8, -489.79248608381, -70.84415531428)
 
 var node9 = ::blueprint::nodes::number3::Number3()
 
-node9.value.set(50, 50, 25)
+node9.value.set(1000, 1000, 500)
 
 _editor.add_node(node9, -623.42885526882, -79.93507550249)
 
@@ -69,7 +69,7 @@ Blueprint.connect(node0, "mat", node7, "b")
 Blueprint.connect(node7, "v", node10, "a")
 Blueprint.connect(node8, "mat", node10, "b")
 Blueprint.connect(node2, "path", node3, "filepath")
-Blueprint.connect(node7, "v", node3, "mvp_mat")
+Blueprint.connect(node10, "v", node3, "mvp_mat")
 Blueprint.connect(node0, "this", node5, "view_cam")
 Blueprint.connect(node3, "page_table", node5, "u_page_table_tex")
 Blueprint.connect(node3, "tex_atlas", node5, "u_texture_atlas_tex")

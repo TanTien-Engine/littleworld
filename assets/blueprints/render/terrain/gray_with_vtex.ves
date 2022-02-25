@@ -1,7 +1,7 @@
 var node0 = ::rendergraph::nodes::draw::Draw()
 
 node0.set_prim_type("patches")
-node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.render_state = { "stencil_test" : false, "rasterization" : "line", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
 node0.skip = false
 
 _editor.add_node(node0, 559.49054169997, -338.72995158327)
@@ -58,12 +58,29 @@ void main()
         for (int i = 0; i < max_level; ++i) 
         {
 //            if (dist < 1.2 * pow(i, 1.5)) 
-            if (dist < 5.0 * i) 
+            if (dist < 50.0 * i) 
             {
-                curr_level = i;
+//                curr_level = i;
                 break;
             }
         }
+
+        if (dist < 20) {
+            curr_level = 0;
+        } else if (dist < 50) {
+            curr_level = 1;
+        } else if (dist < 100) {
+            curr_level = 2;
+        } else if (dist < 200) {
+            curr_level = 3;
+        } else if (dist < 500) {
+            curr_level = 4;
+        } else if (dist < 1000) {
+            curr_level = 5;
+        } else {
+            curr_level = 6;
+        }
+
         float level = clamp(pow(2.0, (max_level - curr_level)), 1.0, float(gl_MaxTessGenLevel));
         for (int i = 0; i < 3; ++i) {
             gl_TessLevelOuter[i] = level;
@@ -313,7 +330,7 @@ void main()
 "
 node1.cs = ""
 node1.render_gen()
-node1.set_uniform("tcs.lod_level", [ 17 ])
+node1.set_uniform("tcs.lod_level", [ 6 ])
 node1.set_uniform("tes.height_scale", [ 0.02 ])
 node1.set_uniform("fs.light_pos", [ 0.79082131385803, 3.7241544723511, 2.3908212184906 ])
 node1.set_uniform("fs.inv_res", [ 0.0009765625, 0.0009765625 ])
@@ -360,8 +377,8 @@ var node7 = ::blueprint::nodes::perspective::Perspective()
 
 node7.fovy = 45
 node7.aspect = 0
-node7.znear = 0.1
-node7.zfar = 100
+node7.znear = 0.01
+node7.zfar = 10000
 
 _editor.add_node(node7, -301.69434322962, 70.77518375342)
 
@@ -535,7 +552,7 @@ _editor.add_node(node37, -398.80017674805, -438.61685589844)
 
 var node38 = ::blueprint::nodes::number::Number()
 
-node38.value = 1024
+node38.value = 4096
 
 _editor.add_node(node38, -535.87137939453, -482.6292980957)
 
@@ -551,7 +568,7 @@ _editor.add_node(node40, -338.04048262144, 343.29060384547)
 
 var node41 = ::blueprint::nodes::number3::Number3()
 
-node41.value.set(50, 50, 25)
+node41.value.set(1000, 1000, 500)
 
 _editor.add_node(node41, -480.81946817009, 332.38575911181)
 
@@ -592,9 +609,11 @@ Blueprint.connect(node20, "var", node21, "var")
 Blueprint.connect(node4, "zoom", node7, "fovy")
 Blueprint.connect(node7, "mat", node1, "tcs.projection")
 Blueprint.connect(node4, "mat", node1, "tcs.view")
+Blueprint.connect(node40, "mat", node1, "tcs.model")
 Blueprint.connect(node4, "pos", node1, "tcs.cam_pos")
 Blueprint.connect(node7, "mat", node1, "tes.projection")
 Blueprint.connect(node4, "mat", node1, "tes.view")
+Blueprint.connect(node40, "mat", node1, "tes.model")
 Blueprint.connect(node35, "v", node1, "tes.u_page_table_size")
 Blueprint.connect(node37, "v", node1, "tes.u_atlas_scale")
 Blueprint.connect(node31, "v", node1, "tes.u_border_scale")
