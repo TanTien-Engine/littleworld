@@ -34,7 +34,7 @@ layout (location = 1) in vec2 texcoord;
 
 uniform UBO
 {
-	mat4 view_proj_mat;
+	mat4 mvp_mat;
 };
 
 out VS_OUT {
@@ -44,7 +44,7 @@ out VS_OUT {
 void main()
 {
 	vs_out.texcoord = texcoord;
-	gl_Position = view_proj_mat * vec4(position.xzy, 1.0);
+	gl_Position = mvp_mat * vec4(position.xzy, 1.0);
 }
 
 )";
@@ -113,9 +113,9 @@ VirtualTexture::VirtualTexture(const char* filepath)
 	m_cache = std::make_shared<PageCache>(*m_atlas, *m_table, *m_indexer, *m_tiles_file);
 }
 
-void VirtualTexture::Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
+void VirtualTexture::Update(const sm::mat4& mvp_mat, const sm::vec2& screen_sz)
 {
-	auto requests = m_feedback_buf->Update(view_proj_mat, screen_sz);
+	auto requests = m_feedback_buf->Update(mvp_mat, screen_sz);
 
 	m_toload.clear();
 	int touched = 0;
@@ -312,12 +312,12 @@ VirtualTexture::FeedbackBuffer::
 	delete[] m_buf;
 }
 
-std::vector<int> VirtualTexture::FeedbackBuffer::Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz)
+std::vector<int> VirtualTexture::FeedbackBuffer::Update(const sm::mat4& mvp_mat, const sm::vec2& screen_sz)
 {
 	// prepare
-	auto u_view_proj_mat = m_shader->QueryUniform("view_proj_mat");
-	assert(u_view_proj_mat);
-	u_view_proj_mat->SetValue(view_proj_mat.x, 16);
+	auto u_mvp_mat = m_shader->QueryUniform("mvp_mat");
+	assert(u_mvp_mat);
+	u_mvp_mat->SetValue(mvp_mat.x, 16);
 
 	return Draw(screen_sz);
 }

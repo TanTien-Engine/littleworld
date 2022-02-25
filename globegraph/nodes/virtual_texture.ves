@@ -15,7 +15,7 @@ class VirtualTexture is Node
 
 		this.imports = [
 			Pin(this, "filepath",  VAR_TYPE_STRING),
-			Pin(this, "vp_mat",    VAR_TYPE_MATRIX4),
+			Pin(this, "mvp_mat",   VAR_TYPE_MATRIX4),
 		]
 		this.exports = [
 			Pin(this, "feedback",   VAR_TYPE_TEXTURE),
@@ -73,12 +73,9 @@ class VirtualTexture is Node
 			return
 		}
 
-		var v_vp_mat = Blueprint.calc_input_value(this, 1)
-		if (v_vp_mat) 
-		{
-			System.print("++ vtex up 0")
-			System.traceback()
-			this.vtex.update(v_vp_mat.value)
+		var v_mvp_mat = Blueprint.calc_input_value(this, 1)
+		if (v_mvp_mat) {
+			this.vtex.update(v_mvp_mat.value)
 		}
 	}
 

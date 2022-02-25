@@ -22,7 +22,7 @@ class VirtualTexture
 public:
 	VirtualTexture(const char* filepath);
 
-	void Update(const sm::mat4& view_proj_mat, const sm::vec2& screen_sz);
+	void Update(const sm::mat4& mvp_mat, const sm::vec2& screen_sz);
 
 	//std::shared_ptr<ur::Texture> LoadToTexture() const;
 
@@ -73,7 +73,7 @@ private:
 			const VTexInfo& info);
 		~FeedbackBuffer();
 
-		std::vector<int> Update(const sm::mat4& view_proj_mat, 
+		std::vector<int> Update(const sm::mat4& mvp_mat,
 			const sm::vec2& screen_sz);
 
 		void DecreaseMipBias();

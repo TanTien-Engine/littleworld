@@ -21,7 +21,7 @@ foreign class VirtualTexture
 	// [ vtex_w, vtex_h, tile_sz, border_sz ]
 	foreign get_size()
 
-	foreign update(vp_mat)
+	foreign update(mvp_mat)
 }
 
 foreign class GlobeTools

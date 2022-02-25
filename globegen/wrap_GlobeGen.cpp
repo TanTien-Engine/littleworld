@@ -150,11 +150,11 @@ void w_VirtualTexture_update()
 {
     auto vtex = ((tt::Proxy<globegen::VirtualTexture>*)ves_toforeign(0))->obj;
 
-    sm::mat4* vp_mat = (sm::mat4*)ves_toforeign(1);;
+    sm::mat4* mvp_mat = (sm::mat4*)ves_toforeign(1);;
 
     auto w = tt::Graphics::Instance()->GetWidth();
     auto h = tt::Graphics::Instance()->GetHeight();
-    vtex->Update(*vp_mat, { w, h });
+    vtex->Update(*mvp_mat, { w, h });
 }
 
 void w_GlobeTools_build_vtex()
