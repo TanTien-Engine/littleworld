@@ -412,8 +412,8 @@ TextureAtlas(size_t atlas_sz, size_t page_sz, size_t border_sz)
 {
 	auto dev = tt::Render::Instance()->Device();
 
-	uint8_t* pixels = new uint8_t[atlas_sz * atlas_sz * 4];
-	memset(pixels, 0, atlas_sz * atlas_sz * 4);
+	uint8_t* pixels = new uint8_t[atlas_sz * atlas_sz * 2];
+	memset(pixels, 0, atlas_sz * atlas_sz * 2);
 
 	ur::TextureDescription desc;
 	desc.width = atlas_sz;
