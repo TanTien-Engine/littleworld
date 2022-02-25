@@ -165,7 +165,7 @@ void main()
 //    vs_out.height = texture(tes_heightmap, texcoord).r/* - 0.5*/;
     vs_out.height = calc_height(texcoord);
 
-    pos.y = vs_out.height * tes.height_scale;
+    pos.y += vs_out.height * tes.height_scale;
     vs_out.fragpos = vec3(tes.model * pos);
 
     gl_Position = tes.projection * tes.view * tes.model * pos;
