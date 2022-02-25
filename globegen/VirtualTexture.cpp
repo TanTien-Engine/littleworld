@@ -82,11 +82,11 @@ float tex_mip_level(vec2 coord, vec2 tex_size)
 void main()
 {
 	float mip = floor(tex_mip_level(fs_in.texcoord, u_virt_tex_size) - u_mip_sample_bias);
-	mip = clamp(mip, 0.0, log2(u_page_table_size.x));
+	mip = clamp(mip, 0.0, log2(min(u_page_table_size.x, u_page_table_size.y)));
 
-	float times = u_page_table_size.x / exp2(mip);
+	vec2 times = u_page_table_size / exp2(mip);
 	vec2 offset = floor(fs_in.texcoord * times);
-	offset = clamp(offset, vec2(0.0, 0.0), vec2(times - 1.0, times - 1.0));
+	offset = clamp(offset, vec2(0.0, 0.0), times - vec2(1.0));
 
 	gl_FragColor = vec4(vec3(offset / 255.0, mip / 255.0), 1.0);
 }
@@ -215,7 +215,7 @@ bool VirtualTexture::Page::operator == (const Page& p) const
 VirtualTexture::PageIndexer::
 PageIndexer(const VTexInfo& info)
 {
-	m_mip_count = static_cast<int>(std::log2(info.vtex_width / info.tile_size)) + 1;
+	m_mip_count = static_cast<int>(std::log2(std::min(info.vtex_width, info.vtex_height) / info.tile_size)) + 1;
 
 	m_sizes.resize(m_mip_count);
 	for (int i = 0; i < m_mip_count; ++i)
@@ -271,7 +271,7 @@ FeedbackBuffer(const PageIndexer& page_idx, const VTexInfo& info)
 	auto dev = tt::Render::Instance()->Device();
 	m_feedback_vao = tt::Model::Instance()->CreateGrids(*dev, ur::VertexLayoutType::PosTex, FEEDBACK_SIZE);
 
-	m_page_table_size = info.vtex_width / info.tile_size;
+	m_page_table_size = sm::ivec2(info.vtex_width, info.vtex_height) / info.tile_size;
 
 	ur::TextureDescription desc;
 	desc.width = FEEDBACK_SIZE;
@@ -378,7 +378,7 @@ Download()
 	auto dev = tt::Render::Instance()->Device();
 	dev->ReadPixels(m_buf, ur::TextureFormat::RGBA8, 0, 0, FEEDBACK_SIZE, FEEDBACK_SIZE);
 
-    int page_table_size_log2 = static_cast<int>(std::log2(m_page_table_size));
+    int page_table_size_log2 = static_cast<int>(std::log2(std::min(m_page_table_size.x, m_page_table_size.y)));
 	for (int i = 0, n = FEEDBACK_SIZE * FEEDBACK_SIZE; i < n; ++i)
 	{
 		if (m_buf[i * 4 + 3] == 255)
@@ -386,6 +386,7 @@ Download()
 			int x = static_cast<int>(m_buf[i * 4]);
 			int y = static_cast<int>(m_buf[i * 4 + 1]);
 			int mip = static_cast<int>(m_buf[i * 4 + 2]);
+
 			int count = page_table_size_log2 - mip + 1;
 			for (int j = 0; j < count; ++j)
 			{

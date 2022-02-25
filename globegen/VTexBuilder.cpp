@@ -56,14 +56,14 @@ namespace globegen
 {
 
 void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const char* dst_path,
-	                          size_t vtex_sz, size_t tile_sz, size_t border_sz)
+	                          size_t vtex_w, size_t vtex_h, size_t tile_sz, size_t border_sz)
 {
 	std::fstream file;
 	file.open(dst_path, std::ios::out | std::ios::binary);
 
 	VTexInfo header;
-	header.vtex_width  = vtex_sz;
-	header.vtex_height = vtex_sz;
+	header.vtex_width  = vtex_w;
+	header.vtex_height = vtex_h;
 	header.tile_size   = tile_sz;
 	header.border_size = border_sz;
 	header.channels    = 1;
@@ -93,7 +93,7 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 	int out_tex = prog->QueryImgSlot("out_tex");
 	ctx->SetImage(out_tex, tile_tex, ur::AccessType::WriteOnly);
 
-	std::function copy2tmp = [&](int x, int y, size_t tile_num)
+	std::function copy2tmp = [&](int x, int y, int tile_w, int tile_h)
 	{
 		dev->PushDebugGroup("Copy");
 
@@ -103,10 +103,10 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 
 		auto u_region = prog->QueryUniform("src_region");
 		float region[4] = {
-			static_cast<float>(x) / tile_num,
-			static_cast<float>(x + 1) / tile_num,
-			static_cast<float>(y) / tile_num,
-			static_cast<float>(y + 1) / tile_num
+			static_cast<float>(x) / tile_w,
+			static_cast<float>(x + 1) / tile_w,
+			static_cast<float>(y) / tile_h,
+			static_cast<float>(y + 1) / tile_h
 		};
 		u_region->SetValue(region, 4);
 
@@ -120,19 +120,23 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 	auto tile_data_sz = ur::TextureUtility::RequiredSizeInBytes(tile_tex->GetWidth(), tile_tex->GetHeight(), tile_tex->GetFormat(), 4);
 	uint8_t* tile_data = new uint8_t[tile_data_sz];
 
-	size_t tile_num = vtex_sz / tile_sz;
+//	size_t tile_num = std::min(vtex_w, vtex_h) / tile_sz;
+	size_t tile_w = vtex_w / tile_sz;
+	size_t tile_h = vtex_h / tile_sz;
+
 	//const int mip_count = std::log2(tile_num) + 1;
-	while (tile_num > 0)
+	while (tile_w > 0 && tile_h > 0)
 	{
-		for (int y = 0; y < tile_num; ++y) {
-			for (int x = 0; x < tile_num; ++x) {
-				copy2tmp(x, y, tile_num);
+		for (int y = 0; y < tile_h; ++y) {
+			for (int x = 0; x < tile_w; ++x) {
+				copy2tmp(x, y, tile_w, tile_h);
 
 				tile_tex->WriteToMemory(tile_data);
 				file.write(reinterpret_cast<const char*>(tile_data), tile_data_sz);
 			}
 		}
-		tile_num /= 2;
+		tile_w /= 2;
+		tile_h /= 2;
 	}
 
 	delete[] tile_data;

@@ -161,10 +161,11 @@ void w_GlobeTools_build_vtex()
 {
     auto src = ((tt::Proxy<ur::Texture>*)ves_toforeign(1))->obj;
     auto dst = ves_tostring(2);
-    auto vtex_sz   = (size_t)ves_tonumber(3);
-    auto tile_sz   = (size_t)ves_tonumber(4);
-    auto border_sz = (size_t)ves_tonumber(5);
-    globegen::VTexBuilder::FromTexture(src, dst, vtex_sz, tile_sz, border_sz);
+    auto vtex_w    = (size_t)ves_tonumber(3);
+    auto vtex_h    = (size_t)ves_tonumber(4);
+    auto tile_sz   = (size_t)ves_tonumber(5);
+    auto border_sz = (size_t)ves_tonumber(6);
+    globegen::VTexBuilder::FromTexture(src, dst, vtex_w, vtex_h, tile_sz, border_sz);
 }
 
 }
@@ -183,7 +184,7 @@ VesselForeignMethodFn GlobeGenBindMethod(const char* signature)
     if (strcmp(signature, "VirtualTexture.get_size()") == 0) return w_VirtualTexture_get_size;
     if (strcmp(signature, "VirtualTexture.update(_)") == 0) return w_VirtualTexture_update;
 
-    if (strcmp(signature, "static GlobeTools.build_vtex(_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex;
+    if (strcmp(signature, "static GlobeTools.build_vtex(_,_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex;
 
     return nullptr;
 }

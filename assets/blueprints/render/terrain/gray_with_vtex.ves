@@ -4,7 +4,7 @@ node0.set_prim_type("patches")
 node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
 node0.skip = false
 
-_editor.add_node(node0, 558.8075282446, -338.72995158327)
+_editor.add_node(node0, 559.49054169997, -338.72995158327)
 
 var node1 = ::rendergraph::nodes::shader::Shader()
 
@@ -55,8 +55,11 @@ void main()
 
         int max_level = tcs.lod_level;
         int curr_level = max_level;
-        for (int i = 0; i < max_level; ++i) {
-            if (dist < 0.01 * pow(2, i)) {
+        for (int i = 0; i < max_level; ++i) 
+        {
+//            if (dist < 1.2 * pow(i, 1.5)) 
+            if (dist < 5.0 * i) 
+            {
                 curr_level = i;
                 break;
             }
@@ -136,14 +139,14 @@ float calc_mip_level(vec2 texcoord)
 {
     ivec2 pos = ivec2(texcoord * 64);
     float mip = texelFetch(u_feedback_tex, pos, 0).b * 255;
-    mip = clamp(mip, 0, log2(tes.u_page_table_size.x));
+    mip = clamp(mip, 0, log2(min(tes.u_page_table_size.x, tes.u_page_table_size.y)));
     return mip;
 }
 
 vec4 bilinear_sample(vec2 texcoord)
 {
     float mip = floor(calc_mip_level(texcoord));
-    mip = clamp(mip, 0, log2(tes.u_page_table_size.x));
+    mip = clamp(mip, 0, log2(min(tes.u_page_table_size.x, tes.u_page_table_size.y)));
 
     vec3 page = sample_table(texcoord, int(mip));
     return sample_atlas(page, texcoord);
@@ -159,6 +162,7 @@ void main()
 {
     vec4 pos = vec4(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]), 1.0);
     vec2 texcoord = interpolate_2d(TES_IN_TexCoord[0],TES_IN_TexCoord[1],TES_IN_TexCoord[2]);
+    texcoord = vec2(texcoord.x, 1.0 - texcoord.y);
 
     vs_out.texcoord = texcoord;
 
@@ -240,7 +244,7 @@ float tex_mip_level(vec2 coord, vec2 tex_size)
 vec4 bilinear_sample(vec2 texcoord)
 {
     float mip = floor(tex_mip_level(texcoord, fs.u_virt_tex_size));
-    mip = clamp(mip, 0, log2(fs.u_page_table_size.x));
+    mip = clamp(mip, 0, log2(min(fs.u_page_table_size.x, fs.u_page_table_size.y)));
 
     vec3 page = sample_table(texcoord, int(mip));
     return sample_atlas(page, texcoord);
@@ -309,8 +313,8 @@ void main()
 "
 node1.cs = ""
 node1.render_gen()
-node1.set_uniform("tcs.lod_level", [ 10 ])
-node1.set_uniform("tes.height_scale", [ 0.11497599631548 ])
+node1.set_uniform("tcs.lod_level", [ 17 ])
+node1.set_uniform("tes.height_scale", [ 0.02 ])
 node1.set_uniform("fs.light_pos", [ 0.79082131385803, 3.7241544723511, 2.3908212184906 ])
 node1.set_uniform("fs.inv_res", [ 0.0009765625, 0.0009765625 ])
 
@@ -336,7 +340,7 @@ var node4 = ::blueprint::nodes::proxy::Proxy()
 node4.real_name = "view_cam"
 node4.init_real_node(::blueprint::nodes::camera3d::Camera3d())
 
-_editor.add_node(node4, -223.05257443076, -190.79010489722)
+_editor.add_node(node4, -483.20257443076, 193.98989510278)
 
 var node5 = ::blueprint::nodes::input::Input()
 
@@ -359,7 +363,7 @@ node7.aspect = 0
 node7.znear = 0.1
 node7.zfar = 100
 
-_editor.add_node(node7, -56.064343229619, -137.34481624658)
+_editor.add_node(node7, -301.69434322962, 70.77518375342)
 
 var node8 = ::blueprint::nodes::input::Input()
 
@@ -541,6 +545,17 @@ node39.var_name = "tile_sz_with_border"
 
 _editor.add_node(node39, -536.51660109843, -419.46684975225)
 
+var node40 = ::blueprint::nodes::matrix::Matrix()
+
+_editor.add_node(node40, -338.04048262144, 343.29060384547)
+
+var node41 = ::blueprint::nodes::number3::Number3()
+
+node41.value.set(50, 50, 25)
+
+_editor.add_node(node41, -480.81946817009, 332.38575911181)
+
+Blueprint.connect(node41, "v3", node40, "scaling")
 Blueprint.connect(node11, "var", node12, "xyzw")
 Blueprint.connect(node12, "w", node16, "var")
 Blueprint.connect(node16, "var", node33, "var")

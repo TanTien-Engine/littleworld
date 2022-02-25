@@ -88,7 +88,7 @@ private:
 	private:
 		const PageIndexer& m_indexer;
 
-		size_t m_page_table_size = 0;
+		sm::ivec2 m_page_table_size;
 
 		std::shared_ptr<ur::Texture>       m_tex = nullptr;
 		std::shared_ptr<ur::Framebuffer>   m_fbo = nullptr;

@@ -1,13 +1,13 @@
 var node0 = ::blueprint::nodes::camera3d::Camera3d()
 
-node0.cam.position.set(-0.092682217167834, 1.8672876869854, 2.403925088564)
-node0.cam.yaw = -87.7
-node0.cam.pitch = -39.9
+node0.cam.position.set(0.21193542658688, 44.088630170809, 1.6250815807882)
+node0.cam.yaw = -90.3
+node0.cam.pitch = -88.5
 node0.cam.zoom = 45
 node0.cam.update_vectors()
-node0.speed = 0.36404114961624
+node0.speed = 0.31575840711594
 
-_editor.add_node(node0, -619.1152938174, 67.024752848877)
+_editor.add_node(node0, -626.20620290831, 64.378834667059)
 
 var node1 = ::rendergraph::nodes::texture::Texture()
 node1.query_param("unif_name").value = "u_tex"
@@ -27,7 +27,7 @@ _editor.add_node(node3, -56.005892543356, -58.478938348722)
 
 var node4 = ::blueprint::nodes::print::Print()
 
-_editor.add_node(node4, 146.85604560046, -163.71977199769)
+_editor.add_node(node4, 156.44414906947, -232.20854673131)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
 node5.load_from_file(_editor, "../../assets/blueprints/render/terrain/gray_with_vtex.ves")
@@ -47,12 +47,29 @@ var node7 = ::blueprint::nodes::multiply::Multiply()
 
 _editor.add_node(node7, -234.71219675793, 66.452386438454)
 
+var node8 = ::blueprint::nodes::matrix::Matrix()
+
+_editor.add_node(node8, -489.79248608381, -70.84415531428)
+
+var node9 = ::blueprint::nodes::number3::Number3()
+
+node9.value.set(50, 50, 25)
+
+_editor.add_node(node9, -623.42885526882, -79.93507550249)
+
+var node10 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node10, -20.974700927734, 102.99081420898)
+
+Blueprint.connect(node9, "v3", node8, "scaling")
 Blueprint.connect(node1, "tex", node2, "imgs")
 Blueprint.connect(node0, "zoom", node6, "fovy")
 Blueprint.connect(node6, "mat", node7, "a")
 Blueprint.connect(node0, "mat", node7, "b")
+Blueprint.connect(node7, "v", node10, "a")
+Blueprint.connect(node8, "mat", node10, "b")
 Blueprint.connect(node2, "path", node3, "filepath")
-Blueprint.connect(node7, "v", node3, "vp_mat")
+Blueprint.connect(node7, "v", node3, "mvp_mat")
 Blueprint.connect(node0, "this", node5, "view_cam")
 Blueprint.connect(node3, "page_table", node5, "u_page_table_tex")
 Blueprint.connect(node3, "tex_atlas", node5, "u_texture_atlas_tex")
