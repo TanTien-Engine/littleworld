@@ -14,9 +14,9 @@ struct VTexInfo
     size_t channels = 0;
     size_t bytes    = 0;
 
-	int PageSize() const { return tile_size + 2 * border_size; }
-	int PageTableWidth() const { return vtex_width / tile_size; }
-    int PageTableHeight() const { return vtex_height / tile_size; }
+    size_t PageSize() const { return tile_size + 2 * border_size; }
+    size_t PageTableWidth() const { return vtex_width / tile_size; }
+    size_t PageTableHeight() const { return vtex_height / tile_size; }
 
 }; // VTexInfo
 
