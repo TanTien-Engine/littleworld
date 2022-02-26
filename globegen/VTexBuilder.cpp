@@ -76,7 +76,7 @@ void main()
     uv = src_region.xz + uv * (src_region.yw - src_region.xz);
 
 	vec4 rgba;
-	if (src_region.x < 0.5) {
+	if (uv.x < 0.5) {
 		uv.x *= 2;
 		rgba = texture(in_tex0, uv);
 	} else {
