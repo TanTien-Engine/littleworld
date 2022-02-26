@@ -1,25 +1,25 @@
 var node0 = ::blueprint::nodes::camera3d::Camera3d()
 
-node0.cam.position.set(-330.30470814876, -998.66129010979, 169.62434221348)
-node0.cam.yaw = -477.7
-node0.cam.pitch = -23.2
+node0.cam.position.set(1342.4977253251, -1954.5573656996, 259.2895119409)
+node0.cam.yaw = -633
+node0.cam.pitch = -83.8
 node0.cam.zoom = 45
 node0.cam.update_vectors()
 node0.speed = 5
 
-_editor.add_node(node0, -625.10620290831, 62.178834667059)
+_editor.add_node(node0, -624.27975662732, 66.219755990118)
 
 var node1 = ::rendergraph::nodes::texture::Texture()
 node1.query_param("unif_name").value = "u_tex"
 node1.gamma_correction = false
 node1.init_texture("../../assets/textures/globe/gebco_08_rev_elev_10800x5400.jpg")
 
-_editor.add_node(node1, -413.18618946793, -223.3205382146)
+_editor.add_node(node1, -440.12156136876, -253.87020763609)
 
 var node2 = ::globegraph::nodes::vtex_builder::VtexBuilder()
 node2.query_param("out_path").value = "../../../tmp/test.vtex"
 
-_editor.add_node(node2, -227.72194522232, -51.254450453584)
+_editor.add_node(node2, -254.8401270405, -94.539574420522)
 
 var node3 = ::globegraph::nodes::virtual_texture::VirtualTexture()
 
@@ -53,7 +53,7 @@ _editor.add_node(node8, -489.79248608381, -70.84415531428)
 
 var node9 = ::blueprint::nodes::number3::Number3()
 
-node9.value.set(1000, 1000, 500)
+node9.value.set(2000, 2000, 1000)
 
 _editor.add_node(node9, -623.42885526882, -79.93507550249)
 
@@ -61,8 +61,13 @@ var node10 = ::blueprint::nodes::multiply::Multiply()
 
 _editor.add_node(node10, -20.974700927734, 102.99081420898)
 
+var node11 = ::globegraph::nodes::split_image::SplitImage()
+node11.query_param("src_path").value = "../../../tmp/gebco_08_rev_elev_21600x10800.png"
+
+_editor.add_node(node11, -404.22269036512, -159.05417956442)
+
+Blueprint.connect(node11, "imgs", node2, "imgs")
 Blueprint.connect(node9, "v3", node8, "scaling")
-Blueprint.connect(node1, "tex", node2, "imgs")
 Blueprint.connect(node0, "zoom", node6, "fovy")
 Blueprint.connect(node6, "mat", node7, "a")
 Blueprint.connect(node0, "mat", node7, "b")

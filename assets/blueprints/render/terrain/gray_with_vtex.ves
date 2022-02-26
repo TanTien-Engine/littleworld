@@ -1,7 +1,7 @@
 var node0 = ::rendergraph::nodes::draw::Draw()
 
 node0.set_prim_type("patches")
-node0.render_state = { "stencil_test" : false, "rasterization" : "line", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
 node0.skip = false
 
 _editor.add_node(node0, 559.49054169997, -338.72995158327)
@@ -179,7 +179,6 @@ void main()
 {
     vec4 pos = vec4(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]), 1.0);
     vec2 texcoord = interpolate_2d(TES_IN_TexCoord[0],TES_IN_TexCoord[1],TES_IN_TexCoord[2]);
-    texcoord = vec2(texcoord.x, 1.0 - texcoord.y);
 
     vs_out.texcoord = texcoord;
 
@@ -219,6 +218,8 @@ uniform UBO_FS
 
     float u_border_scale;
     float u_border_offset;
+
+    float height_scale;
 } fs;
 
 uniform sampler2D fs_page_table_tex;
@@ -282,11 +283,69 @@ vec3 ComputeNormalCentralDifference(vec2 position, float heightExaggeration)
     return normalize(vec3(leftHeight - rightHeight, 2.0, bottomHeight - topHeight));
 }
 
+float SumElements(mat3 m)
+{
+    return 
+        m[0].x + m[0].y + m[0].z +
+        m[1].x + m[1].y + m[1].z +
+        m[2].x + m[2].y + m[2].z;
+}
+
+vec3 ComputeNormalSobelFilter(vec2 uv, vec2 inv_res)
+{
+    //
+    // Original unoptimized verion
+    //
+    //vec2 position = displacedPosition.xy;
+    //float upperLeft = calc_height(position + inv_res * vec2(-1.0, 1.0)) * fs.height_scale;
+    //float upperCenter = calc_height(position + inv_res * vec2(0.0, 1.0)) * fs.height_scale;
+    //float upperRight = calc_height(position + inv_res * vec2(1.0, 1.0)) * fs.height_scale;
+    //float left = calc_height(position + inv_res * vec2(-1.0, 0.0)) * fs.height_scale;
+    //float right = calc_height(position + inv_res * vec2(1.0, 0.0)) * fs.height_scale;
+    //float lowerLeft = calc_height(position + inv_res * vec2(-1.0, -1.0)) * fs.height_scale;
+    //float lowerCenter = calc_height(position + inv_res * vec2(0.0, -1.0)) * fs.height_scale;
+    //float lowerRight = calc_height(position + inv_res * vec2(1.0, -1.0)) * fs.height_scale;
+    //
+    //mat3 positions = mat3(
+    //    upperLeft, left, lowerLeft,
+    //    upperCenter, 0.0, lowerCenter,
+    //    upperRight, right, lowerRight);
+    //mat3 sobelX = mat3(
+    //    -1.0, -2.0, -1.0,
+    //     0.0,  0.0,  0.0,
+    //     1.0,  2.0,  1.0);
+    //mat3 sobelY = mat3(
+    //    -1.0, 0.0, 1.0,
+    //    -2.0, 0.0, 2.0,
+    //    -1.0, 0.0, 1.0);
+    //
+    //float x = SumElements(matrixCompMult(positions, sobelX));
+    //float y = SumElements(matrixCompMult(positions, sobelY));
+    //
+    //return vec3(-x, y, 1.0);
+
+    vec2 position = uv;
+    float upperLeft = calc_height(position + inv_res * vec2(-1.0, 1.0)) * fs.height_scale;
+    float upperCenter = calc_height(position + inv_res * vec2(0.0, 1.0)) * fs.height_scale;
+    float upperRight = calc_height(position + inv_res * vec2(1.0, 1.0)) * fs.height_scale;
+    float left = calc_height(position + inv_res * vec2(-1.0, 0.0)) * fs.height_scale;
+    float right = calc_height(position + inv_res * vec2(1.0, 0.0)) * fs.height_scale;
+    float lowerLeft = calc_height(position + inv_res * vec2(-1.0, -1.0)) * fs.height_scale;
+    float lowerCenter = calc_height(position + inv_res * vec2(0.0, -1.0)) * fs.height_scale;
+    float lowerRight = calc_height(position + inv_res * vec2(1.0, -1.0)) * fs.height_scale;
+
+    float x = upperRight + (2.0 * right) + lowerRight - upperLeft - (2.0 * left) - lowerLeft;
+    float y = lowerLeft + (2.0 * lowerCenter) + lowerRight - upperLeft - (2.0 * upperCenter) - upperRight;
+
+    return vec3(-x, 1.0 * inv_res.x, y);
+}
+
 void main()
 {
     vec3 pos = fs_in.fragpos;
 
     vec3 N = ComputeNormalCentralDifference(fs_in.texcoord, 500);
+//    vec3 N = normalize(ComputeNormalSobelFilter(fs_in.texcoord, fs.inv_res));
 
     vec3 light_dir = normalize(fs.light_pos - pos);
     float diff = max(dot(N, light_dir), 0.0);
@@ -331,9 +390,9 @@ void main()
 node1.cs = ""
 node1.render_gen()
 node1.set_uniform("tcs.lod_level", [ 6 ])
-node1.set_uniform("tes.height_scale", [ 0.02 ])
-node1.set_uniform("fs.light_pos", [ 0.79082131385803, 3.7241544723511, 2.3908212184906 ])
-node1.set_uniform("fs.inv_res", [ 0.0009765625, 0.0009765625 ])
+node1.set_uniform("tes.height_scale", [ 0.001 ])
+node1.set_uniform("fs.inv_res", [ 0.1/4096, 0.1/4096 ])
+node1.set_uniform("fs.height_scale", [ 0.001 ])
 
 _editor.add_node(node1, 157.79557543759, -355.9795922234)
 
@@ -348,7 +407,7 @@ var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
 
 node3.type = "grids"
 node3.layout = [ "position", "texture" ]
-node3.shape_params = { "grids_size" : 64 }
+node3.shape_params = { "grids_size" : 512 }
 
 _editor.add_node(node3, 381.67421297039, -401.33131969581)
 
@@ -568,7 +627,7 @@ _editor.add_node(node40, -338.04048262144, 343.29060384547)
 
 var node41 = ::blueprint::nodes::number3::Number3()
 
-node41.value.set(1000, 1000, 500)
+node41.value.set(2000, 2000, 1000)
 
 _editor.add_node(node41, -480.81946817009, 332.38575911181)
 
@@ -621,6 +680,7 @@ Blueprint.connect(node29, "v", node1, "tes.u_border_offset")
 Blueprint.connect(node8, "var", node1, "u_page_table_tex")
 Blueprint.connect(node9, "var", node1, "u_texture_atlas_tex")
 Blueprint.connect(node10, "var", node1, "u_feedback_tex")
+Blueprint.connect(node4, "pos", node1, "fs.light_pos")
 Blueprint.connect(node5, "var", node1, "fs.mouse_pos")
 Blueprint.connect(node6, "var", node1, "fs.draw_radius")
 Blueprint.connect(node35, "v", node1, "fs.u_page_table_size")
