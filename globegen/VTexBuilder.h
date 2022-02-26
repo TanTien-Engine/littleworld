@@ -13,6 +13,10 @@ public:
 	static void FromTexture(const std::shared_ptr<ur::Texture>& src_tex,
 		const char* dst_path, size_t vtex_w, size_t vtex_h, size_t tile_sz, size_t border_sz);
 
+	static void FromTexture(const std::shared_ptr<ur::Texture>& src_tex_left,
+		const std::shared_ptr<ur::Texture>& src_tex_right,
+		const char* dst_path, size_t vtex_w, size_t vtex_h, size_t tile_sz, size_t border_sz);
+
 }; // VTexBuilder
 
 }

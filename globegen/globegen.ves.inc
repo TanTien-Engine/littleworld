@@ -27,6 +27,9 @@ foreign class VirtualTexture
 foreign class GlobeTools
 {
 	foreign static build_vtex(src, dst, vtex_w, vtex_h, tile_sz, border_sz)
+	foreign static build_vtex2(src0, src1, dst, vtex_w, vtex_h, tile_sz, border_sz)
+
+	foreign static split_image(src, num_x, num_y)
 }
 
 );

@@ -1,0 +1,32 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.node_param" for NodeParam
+import "globegen" for GlobeTools
+
+class SplitImage is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "imgs", VAR_TYPE_ARRAY),
+		]
+
+		this.params.add(NodeParam("src_path", ""))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var src_path = this.query_param("src_path").value
+		if (src_path == "") {
+			return nil
+		}
+
+		var textures = GlobeTools.split_image(src_path, 2, 1)
+		return Variant(textures)
+	}
+}
