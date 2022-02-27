@@ -208,6 +208,7 @@ void w_GlobeTools_split_image()
 
     auto src_img = std::make_shared<prim::Bitmap<uint8_t>>(width, height, 1);
     memcpy(src_img->GetPixels(), pixels, sizeof(uint8_t) * width * height);
+    free(pixels);
     std::vector<std::shared_ptr<prim::Bitmap<uint8_t>>> dst_imgs;
     globegen::ImageTools::Split<uint8_t>(dst_imgs, *src_img, width / num_x, height / num_y, false);
 
