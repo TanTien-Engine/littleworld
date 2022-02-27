@@ -72,4 +72,47 @@ void ImageTools::Split(std::vector<std::shared_ptr<prim::Bitmap<T>>>& dst,
     }
 }
 
+template <typename T>
+std::shared_ptr<prim::Bitmap<T>> ImageTools::MergeHori(const prim::Bitmap<T>& left, const prim::Bitmap<T>& right)
+{
+    auto w0 = left.Width();
+    auto h0 = left.Height();
+    auto c0 = left.Channels();
+
+    auto w1 = right.Width();
+    auto h1 = right.Height();
+    auto c1 = right.Channels();
+
+    if (h0 != h1 || c0 != c1) {
+        return nullptr;
+    }
+
+    auto ret = std::make_shared<prim::Bitmap<T>>(w0 + w1, h0, c0);
+    auto dst_pixels = ret->GetPixels();
+
+    auto l_pixels = left.GetPixels();
+    for (size_t y = 0; y < h0; ++y) {
+        for (size_t x = 0; x < w0; ++x) {
+            for (size_t i = 0; i < c0; ++i) {
+                auto s_idx = (y * w0 + x) * c0 + i;
+                auto d_idx = (y * (w0 + w1) + x) * c0 + i;
+                dst_pixels[d_idx] = l_pixels[s_idx];
+            }
+        }
+    }
+
+    auto r_pixels = right.GetPixels();
+    for (size_t y = 0; y < h0; ++y) {
+        for (size_t x = 0; x < w1; ++x) {
+            for (size_t i = 0; i < c0; ++i) {
+                auto s_idx = (y * w1 + x) * c0 + i;
+                auto d_idx = (y * (w0 + w1) + x + w0) * c0 + i;
+                dst_pixels[d_idx] = r_pixels[s_idx];
+            }
+        }
+    }
+
+    return ret;
+}
+
 }
