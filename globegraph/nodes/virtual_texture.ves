@@ -34,6 +34,9 @@ class VirtualTexture is Node
 		if (!this.vtex) {
 			this.build_vtex()
 		}
+		if (!this.vtex) {
+			return nil
+		}
 
 		if (idx == 0) 
 		{
@@ -68,7 +71,6 @@ class VirtualTexture is Node
 		if (!this.vtex) {
 			this.build_vtex()
 		}
-
 		if (!this.vtex) {
 			return
 		}
@@ -82,11 +84,9 @@ class VirtualTexture is Node
 	build_vtex()
 	{
 		var v_path = Blueprint.calc_input_value(this, 0)
-		if (!v_path) {
-			return nil
+		if (v_path) {
+			var full_path = Filesystem.get_absolute_path(v_path.value)
+			this.vtex = gg_VirtualTexture.init(full_path)
 		}
-
-		var full_path = Filesystem.get_absolute_path(v_path.value)
-		this.vtex = gg_VirtualTexture.init(full_path)
 	}
 }
