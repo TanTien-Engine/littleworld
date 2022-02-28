@@ -42,6 +42,8 @@ class VtexBuilder is Node
 			return nil
 		}
 
+		//GlobeTools.prepare_dem15("D:/projects/gis/dem15/img", full_path)
+
 		if (v_imgs.type == VAR_TYPE_ARRAY) {
 			GlobeTools.build_vtex2(v_imgs.value[0].value.tex, v_imgs.value[1].value.tex, full_path, 4096, 4096, 256, 1)
 		} else {

@@ -17,6 +17,8 @@ public:
 		const std::shared_ptr<ur::Texture>& src_tex_right,
 		const char* dst_path, size_t vtex_w, size_t vtex_h, size_t tile_sz, size_t border_sz);
 
+	static void PrepareDem15(const char* src_dir, const char* dst_path);
+
 }; // VTexBuilder
 
 }

@@ -1,5 +1,6 @@
 #include "VTexBuilder.h"
 #include "VTexInfo.h"
+#include "ImageTools.h"
 
 #include <modules/render/Render.h>
 
@@ -11,6 +12,10 @@
 #include <unirender/Uniform.h>
 #include <unirender/Texture.h>
 #include <unirender/TextureUtility.h>
+#include <gimg/gimg_import.h>
+#include <gimg/gimg_export.h>
+#include <gimg/gimg_typedef.h>
+#include <SM_Vector.h>
 
 #include <functional>
 #include <fstream>
@@ -272,6 +277,93 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex_left,
 	delete[] tile_data;
 
 	file.close();
+}
+
+void VTexBuilder::PrepareDem15(const char* src_dir, const char* dst_path)
+{
+	typedef prim::Bitmap<uint16_t> Image;
+
+	auto load_image = [&](const sm::ivec2& pos) -> std::shared_ptr<Image>
+	{
+		auto filename = std::to_string(pos.y) + "_" + std::to_string(pos.x) + ".tif";
+		auto filepath = std::string(src_dir) + "\\" + filename;
+
+		int width = 0, height = 0;
+		int format = 0;
+		uint16_t* pixels = (uint16_t*)gimg_import(filepath.c_str(), &width, &height, &format);
+		assert(format == GPF_R16);
+
+		auto img = std::make_shared<Image>(width, height, 1);
+		memcpy(img->GetPixels(), pixels, width * height * 2);
+		free(pixels);
+
+		return img;
+	};
+
+	auto img3to2 = [&](const sm::ivec2 img3[3]) -> std::pair<std::shared_ptr<Image>, std::shared_ptr<Image>>
+	{
+		auto img0 = load_image(img3[0]);
+		auto img1 = load_image(img3[1]);
+		auto img2 = load_image(img3[2]);
+
+		std::vector<std::shared_ptr<Image>> mid_imgs;
+		size_t h_width = static_cast<size_t>(std::ceilf(img1->Width() * 0.5f));
+		globegen::ImageTools::Split<uint16_t>(mid_imgs, *img1, h_width, img1->Height(), false);
+
+		auto left  = globegen::ImageTools::MergeHori<uint16_t>(*img0, *mid_imgs[0]);
+		auto right = globegen::ImageTools::MergeHori<uint16_t>(*mid_imgs[1], *img2);
+
+		return std::make_pair(left, right);
+	};
+
+	auto img1to4 = [&](const std::shared_ptr<Image>& img) -> std::vector<std::shared_ptr<Image>>
+	{
+		std::vector<std::shared_ptr<Image>> ret;
+		size_t h_width = static_cast<size_t>(std::ceilf(img->Width() * 0.5f));
+		size_t h_height = static_cast<size_t>(std::ceilf(img->Height() * 0.5f));
+		globegen::ImageTools::Split<uint16_t>(ret, *img, h_width, h_height, false);
+		return ret;
+	};
+
+	for (int grid_y = 0; grid_y < 4; ++grid_y)
+	{
+		for (int grid_x = 0; grid_x < 2; ++grid_x)
+		{
+			sm::ivec2 img3[3] = { sm::ivec2(grid_x * 3, grid_y), sm::ivec2(grid_x * 3 + 1, grid_y), sm::ivec2(grid_x * 3 + 2, grid_y) };
+			auto img2 = img3to2(img3);
+
+			auto img_l = img2.first;
+			auto img_r = img2.second;
+
+			auto img_l_4 = img1to4(img2.first);
+			for (int i = 0; i < 4; ++i) 
+			{
+				int x = i % 2;
+				int y = 1 - i / 2;
+				int dst_x = grid_x * 4 + x;
+				int dst_y = grid_y * 2 + y;
+				std::string filename = std::to_string(dst_y) + "_" + std::to_string(dst_x);
+				auto filepath = "D:/projects/gis/dem15/new/" + filename + ".tif";
+
+				auto img = img_l_4[i];
+				gimg_export(filepath.c_str(), (uint8_t*)img->GetPixels(), img->Width(), img->Height(), GPF_R16, 0);
+			}
+
+			auto img_r_4 = img1to4(img2.second);
+			for (int i = 0; i < 4; ++i)
+			{
+				int x = i % 2;
+				int y = 1 - i / 2;
+				int dst_x = grid_x * 4 + 2 + x;
+				int dst_y = grid_y * 2 + y;
+				std::string filename = std::to_string(dst_y) + "_" + std::to_string(dst_x);
+				auto filepath = "D:/projects/gis/dem15/new/" + filename + ".tif";
+
+				auto img = img_r_4[i];
+				gimg_export(filepath.c_str(), (uint8_t*)img->GetPixels(), img->Width(), img->Height(), GPF_R16, 0);
+			}
+		}
+	}
 }
 
 }
