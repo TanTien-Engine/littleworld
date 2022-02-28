@@ -192,6 +192,13 @@ void w_GlobeTools_prepare_dem15()
     globegen::VTexBuilder::PrepareDem15(src, dst);
 }
 
+void w_GlobeTools_merge_dem15()
+{
+    auto src = ves_tostring(1);
+    auto dst = ves_tostring(2);
+    globegen::VTexBuilder::MergeDem15(src, dst);
+}
+
 void w_GlobeTools_build_vtex_tiles()
 {
     auto src        = ves_tostring(1);
@@ -272,6 +279,7 @@ VesselForeignMethodFn GlobeGenBindMethod(const char* signature)
     if (strcmp(signature, "static GlobeTools.build_vtex(_,_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex;
     if (strcmp(signature, "static GlobeTools.build_vtex2(_,_,_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex2;
     if (strcmp(signature, "static GlobeTools.prepare_dem15(_,_)") == 0) return w_GlobeTools_prepare_dem15;
+    if (strcmp(signature, "static GlobeTools.merge_dem15(_,_)") == 0) return w_GlobeTools_merge_dem15;
     if (strcmp(signature, "static GlobeTools.build_vtex_tiles(_,_,_,_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex_tiles;
     if (strcmp(signature, "static GlobeTools.split_image(_,_,_)") == 0) return w_GlobeTools_split_image;
 

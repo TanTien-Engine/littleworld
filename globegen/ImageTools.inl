@@ -115,4 +115,42 @@ std::shared_ptr<prim::Bitmap<T>> ImageTools::MergeHori(const prim::Bitmap<T>& le
     return ret;
 }
 
+template <typename T>
+void ImageTools::Copy(const std::shared_ptr<prim::Bitmap<T>>& dst, 
+                      const std::shared_ptr<prim::Bitmap<T>>& src,
+                      const sm::ivec2& pos)
+{
+    if (dst->Channels() != src->Channels()) {
+        return;
+    }
+
+    int dw = dst->Width();
+    int dh = dst->Height();
+    int sw = src->Width();
+    int sh = src->Height();
+
+    if (pos.x >= dw || pos.y >= dh) {
+        return;
+    }
+
+    auto dp = dst->GetPixels();
+    auto sp = src->GetPixels();
+
+    auto c = dst->Channels();
+
+    int xmin = pos.x;
+    int ymin = pos.y;
+    int xmax = std::min(xmin + sw, dw);
+    int ymax = std::min(ymin + sh, dh);
+    for (int y = ymin; y < ymax; ++y) {
+        for (int x = xmin; x < xmax; ++x) {
+            for (int z = 0; z < c; ++z) {
+                uint64_t s = (y - ymin) * sw + (x - xmin);
+                uint64_t d = y * dw + x;
+                dp[d * c + z] = sp[s * c + z];
+            }
+        }
+    }
+}
+
 }

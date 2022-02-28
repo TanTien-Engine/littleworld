@@ -39,12 +39,12 @@ class VtexBuilder is Node
 		}
 
 //		GlobeTools.prepare_dem15("D:/projects/gis/dem15/img", full_out_path)
+//		GlobeTools.merge_dem15("D:/projects/gis/dem15/new", "D:/projects/gis/dem15/merge.tif")
 
 		var src_path = this.query_param("src_path").value
 		if (src_path != "") {
 			var full_src_path = Filesystem.get_absolute_path(src_path)
 			GlobeTools.build_vtex_tiles(full_src_path, 8, 8, full_out_path, 1024 * 64, 1024 * 64, 256, 1)
-//			GlobeTools.build_vtex_tiles(full_src_path, 8, 8, full_out_path, 1024 * 4, 1024 * 4, 256, 1)
 		} else {
 			return nil
 		}

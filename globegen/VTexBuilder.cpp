@@ -93,6 +93,79 @@ void main()
 
 )";
 
+typedef prim::Bitmap<uint16_t> Image;
+
+std::string calc_tile_filepath(const char* dir_path, const sm::ivec2& pos)
+{
+	auto filename = std::to_string(pos.y) + "_" + std::to_string(pos.x) + ".tif";
+	auto filepath = std::string(dir_path) + "\\" + filename;
+	return filepath;
+}
+
+std::shared_ptr<Image> load_image(const char* dir_path, const sm::ivec2& pos)
+{
+	auto filepath = calc_tile_filepath(dir_path, pos);
+
+	int width = 0, height = 0;
+	int format = 0;
+	uint16_t* pixels = (uint16_t*)gimg_import(filepath.c_str(), &width, &height, &format);
+	assert(format == GPF_R16);
+
+	auto img = std::make_shared<Image>(width, height, 1);
+	memcpy(img->GetPixels(), pixels, width * height * 2);
+	free(pixels);
+
+	return img;
+}
+
+std::shared_ptr<ur::Texture> load_texture(const char* filepath)
+{
+	int width = 0, height = 0;
+	int format = 0;
+	uint16_t* pixels = (uint16_t*)gimg_import(filepath, &width, &height, &format);
+	assert(format == GPF_R16);
+
+	ur::TextureFormat tf;
+	if (format == GPF_R16) {
+		tf = ur::TextureFormat::R16;
+	} else if (format == GPF_RED) {
+		tf = ur::TextureFormat::RED;
+	}
+	size_t buf_sz = ur::TextureUtility::RequiredSizeInBytes(width, height, tf, 1);
+	auto ret = tt::Render::Instance()->Device()->CreateTexture(width, height, tf, pixels, buf_sz, false);
+	free(pixels);
+	return ret;
+}
+
+void copy2tile(const std::shared_ptr<ur::ShaderProgram>& prog, 
+	           const std::shared_ptr<ur::Texture>& tile_tex,
+	           int x, int y, int tile_w, int tile_h)
+{
+	auto dev = tt::Render::Instance()->Device();
+	auto ctx = tt::Render::Instance()->Context();
+
+	dev->PushDebugGroup("Copy");
+
+	ur::DrawState ds;
+
+	ds.program = prog;
+
+	auto u_region = prog->QueryUniform("src_region");
+	float region[4] = {
+		static_cast<float>(x) / tile_w,
+		static_cast<float>(x + 1) / tile_w,
+		static_cast<float>(y) / tile_h,
+		static_cast<float>(y + 1) / tile_h
+	};
+	u_region->SetValue(region, 4);
+
+	ctx->Compute(ds, tile_tex->GetWidth() / 32 + 1, tile_tex->GetHeight() / 32 + 1, 1);
+
+	ctx->SetMemoryBarrier({ ur::BarrierType::ShaderImageAccess });
+
+	dev->PopDebugGroup();
+}
+
 }
 
 namespace globegen
@@ -136,30 +209,6 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 	int out_tex = prog->QueryImgSlot("out_tex");
 	ctx->SetImage(out_tex, tile_tex, ur::AccessType::WriteOnly);
 
-	std::function copy2tmp = [&](int x, int y, int tile_w, int tile_h)
-	{
-		dev->PushDebugGroup("Copy");
-
-		ur::DrawState ds;
-
-		ds.program = prog;
-
-		auto u_region = prog->QueryUniform("src_region");
-		float region[4] = {
-			static_cast<float>(x) / tile_w,
-			static_cast<float>(x + 1) / tile_w,
-			static_cast<float>(y) / tile_h,
-			static_cast<float>(y + 1) / tile_h
-		};
-		u_region->SetValue(region, 4);
-
-		ctx->Compute(ds, tile_tex->GetWidth() / 32 + 1, tile_tex->GetHeight() / 32 + 1, 1);
-
-		ctx->SetMemoryBarrier({ ur::BarrierType::ShaderImageAccess });
-
-		dev->PopDebugGroup();
-	};
-
 	auto tile_data_sz = ur::TextureUtility::RequiredSizeInBytes(tile_tex->GetWidth(), tile_tex->GetHeight(), tile_tex->GetFormat(), 4);
 	uint8_t* tile_data = new uint8_t[tile_data_sz];
 
@@ -172,7 +221,7 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex, const
 	{
 		for (int y = 0; y < tile_h; ++y) {
 			for (int x = 0; x < tile_w; ++x) {
-				copy2tmp(x, y, tile_w, tile_h);
+				copy2tile(prog, tile_tex, x, y, tile_w, tile_h);
 
 				tile_tex->WriteToMemory(tile_data);
 				file.write(reinterpret_cast<const char*>(tile_data), tile_data_sz);
@@ -228,30 +277,6 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex_left,
 	int out_tex = prog->QueryImgSlot("out_tex");
 	ctx->SetImage(out_tex, tile_tex, ur::AccessType::WriteOnly);
 
-	std::function copy2tmp = [&](int x, int y, int tile_w, int tile_h)
-	{
-		dev->PushDebugGroup("Copy");
-
-		ur::DrawState ds;
-
-		ds.program = prog;
-
-		auto u_region = prog->QueryUniform("src_region");
-		float region[4] = {
-			static_cast<float>(x) / tile_w,
-			static_cast<float>(x + 1) / tile_w,
-			static_cast<float>(y) / tile_h,
-			static_cast<float>(y + 1) / tile_h
-		};
-		u_region->SetValue(region, 4);
-
-		ctx->Compute(ds, tile_tex->GetWidth() / 32 + 1, tile_tex->GetHeight() / 32 + 1, 1);
-
-		ctx->SetMemoryBarrier({ ur::BarrierType::ShaderImageAccess });
-
-		dev->PopDebugGroup();
-	};
-
 	auto tile_data_sz = ur::TextureUtility::RequiredSizeInBytes(tile_tex->GetWidth(), tile_tex->GetHeight(), tile_tex->GetFormat(), 4);
 	uint8_t* tile_data = new uint8_t[tile_data_sz];
 
@@ -264,7 +289,7 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex_left,
 	{
 		for (int y = 0; y < tile_h; ++y) {
 			for (int x = 0; x < tile_w; ++x) {
-				copy2tmp(x, y, tile_w, tile_h);
+				copy2tile(prog, tile_tex, x, y, tile_w, tile_h);
 
 				tile_tex->WriteToMemory(tile_data);
 				file.write(reinterpret_cast<const char*>(tile_data), tile_data_sz);
@@ -281,30 +306,11 @@ void VTexBuilder::FromTexture(const std::shared_ptr<ur::Texture>& src_tex_left,
 
 void VTexBuilder::PrepareDem15(const char* src_dir, const char* dst_path)
 {
-	typedef prim::Bitmap<uint16_t> Image;
-
-	auto load_image = [&](const sm::ivec2& pos) -> std::shared_ptr<Image>
-	{
-		auto filename = std::to_string(pos.y) + "_" + std::to_string(pos.x) + ".tif";
-		auto filepath = std::string(src_dir) + "\\" + filename;
-
-		int width = 0, height = 0;
-		int format = 0;
-		uint16_t* pixels = (uint16_t*)gimg_import(filepath.c_str(), &width, &height, &format);
-		assert(format == GPF_R16);
-
-		auto img = std::make_shared<Image>(width, height, 1);
-		memcpy(img->GetPixels(), pixels, width * height * 2);
-		free(pixels);
-
-		return img;
-	};
-
 	auto img3to2 = [&](const sm::ivec2 img3[3]) -> std::pair<std::shared_ptr<Image>, std::shared_ptr<Image>>
 	{
-		auto img0 = load_image(img3[0]);
-		auto img1 = load_image(img3[1]);
-		auto img2 = load_image(img3[2]);
+		auto img0 = load_image(src_dir, img3[0]);
+		auto img1 = load_image(src_dir, img3[1]);
+		auto img2 = load_image(src_dir, img3[2]);
 
 		std::vector<std::shared_ptr<Image>> mid_imgs;
 		size_t h_width = static_cast<size_t>(std::ceilf(img1->Width() * 0.5f));
@@ -342,11 +348,10 @@ void VTexBuilder::PrepareDem15(const char* src_dir, const char* dst_path)
 				int y = 1 - i / 2;
 				int dst_x = grid_x * 4 + x;
 				int dst_y = grid_y * 2 + y;
-				std::string filename = std::to_string(dst_y) + "_" + std::to_string(dst_x);
-				auto filepath = "D:/projects/gis/dem15/new/" + filename + ".tif";
+				auto filepath = calc_tile_filepath("D:/projects/gis/dem15/new", sm::ivec2(dst_x, dst_y));
 
 				auto img = img_l_4[i];
-				gimg_export(filepath.c_str(), (uint8_t*)img->GetPixels(), img->Width(), img->Height(), GPF_R16, 0);
+				gimg_export(filepath.c_str(), (uint8_t*)img->GetPixels(), img->Width(), img->Height(), GPF_R16, 1);
 			}
 
 			auto img_r_4 = img1to4(img2.second);
@@ -356,14 +361,56 @@ void VTexBuilder::PrepareDem15(const char* src_dir, const char* dst_path)
 				int y = 1 - i / 2;
 				int dst_x = grid_x * 4 + 2 + x;
 				int dst_y = grid_y * 2 + y;
-				std::string filename = std::to_string(dst_y) + "_" + std::to_string(dst_x);
-				auto filepath = "D:/projects/gis/dem15/new/" + filename + ".tif";
+				auto filepath = calc_tile_filepath("D:/projects/gis/dem15/new", sm::ivec2(dst_x, dst_y));
 
 				auto img = img_r_4[i];
-				gimg_export(filepath.c_str(), (uint8_t*)img->GetPixels(), img->Width(), img->Height(), GPF_R16, 0);
+				gimg_export(filepath.c_str(), (uint8_t*)img->GetPixels(), img->Width(), img->Height(), GPF_R16, 1);
 			}
 		}
 	}
+}
+
+void VTexBuilder::MergeDem15(const char* src_dir, const char* dst_path)
+{
+	const int tile_sz = 2048;
+	const int tile_num = 8;
+
+	auto dev = tt::Render::Instance()->Device();
+	auto ctx = tt::Render::Instance()->Context();
+
+	ur::TextureDescription desc_tile;
+	desc_tile.width = tile_sz;
+	desc_tile.height = tile_sz;
+	desc_tile.format = ur::TextureFormat::R16F;
+	auto tile_tex = dev->CreateTexture(desc_tile);
+
+	ur::TextureDescription desc_tot;
+	desc_tot.width = tile_sz * tile_num;
+	desc_tot.height = tile_sz * tile_num;
+	desc_tot.format = ur::TextureFormat::R16F;
+	auto tot_tex = dev->CreateTexture(desc_tot);
+
+	auto prog = dev->CreateShaderProgram(copy_cs);
+	int out_tex = prog->QueryImgSlot("out_tex");
+	ctx->SetImage(out_tex, tile_tex, ur::AccessType::WriteOnly);
+
+	auto full = std::make_shared<prim::Bitmap<uint16_t>>(tot_tex->GetWidth(), tot_tex->GetHeight(), 1);
+	auto tile = std::make_shared<prim::Bitmap<uint16_t>>(tile_tex->GetWidth(), tile_tex->GetHeight(), 1);
+	for (int y = 0; y < tile_num; ++y) {
+		for (int x = 0; x < tile_num; ++x) {
+			auto filepath = calc_tile_filepath(src_dir, sm::ivec2(x, y));
+			auto tex = load_texture(filepath.c_str());
+			int in_tex = prog->QueryTexSlot("in_tex");
+			ctx->SetTexture(in_tex, tex);
+
+			copy2tile(prog, tile_tex, 0, 0, 1, 1);
+			tile_tex->WriteToMemory(tile->GetPixels());
+
+			ImageTools::Copy(full, tile, sm::ivec2(x * tile_sz, y * tile_sz));
+		}
+	}
+
+	gimg_export(dst_path, (uint8_t*)full->GetPixels(), full->Width(), full->Height(), GPF_R16, 0);
 }
 
 void VTexBuilder::FromTiles(const char* src_dir, int tile_num_x, int tile_num_y,
@@ -401,30 +448,6 @@ void VTexBuilder::FromTiles(const char* src_dir, int tile_num_x, int tile_num_y,
 	int out_tex = prog->QueryImgSlot("out_tex");
 	ctx->SetImage(out_tex, tile_tex, ur::AccessType::WriteOnly);
 
-	std::function copy2tmp = [&](int x, int y, int tile_w, int tile_h)
-	{
-		dev->PushDebugGroup("Copy");
-
-		ur::DrawState ds;
-
-		ds.program = prog;
-
-		auto u_region = prog->QueryUniform("src_region");
-		float region[4] = {
-			static_cast<float>(x) / tile_w,
-			static_cast<float>(x + 1) / tile_w,
-			static_cast<float>(y) / tile_h,
-			static_cast<float>(y + 1) / tile_h
-		};
-		u_region->SetValue(region, 4);
-
-		ctx->Compute(ds, tile_tex->GetWidth() / 32 + 1, tile_tex->GetHeight() / 32 + 1, 1);
-
-		ctx->SetMemoryBarrier({ ur::BarrierType::ShaderImageAccess });
-
-		dev->PopDebugGroup();
-	};
-
 	auto tile_data_sz = ur::TextureUtility::RequiredSizeInBytes(tile_tex->GetWidth(), tile_tex->GetHeight(), tile_tex->GetFormat(), 4);
 	uint8_t* tile_data = new uint8_t[tile_data_sz];
 
@@ -432,20 +455,10 @@ void VTexBuilder::FromTiles(const char* src_dir, int tile_num_x, int tile_num_y,
 	{
 		for (int tile_y = 0; tile_y < tile_num_y; ++tile_y)
 		{
-			std::string filename = std::to_string(tile_y) + "_" + std::to_string(tile_x);
-			auto filepath = std::string(src_dir) + "\\" + filename + ".tif";
-
+			auto filepath = calc_tile_filepath(src_dir, sm::ivec2(tile_x, tile_y));
 			printf("pack %s\n", filepath.c_str());
 
-			int width = 0, height = 0;
-			int format = 0;
-			uint16_t* pixels = (uint16_t*)gimg_import(filepath.c_str(), &width, &height, &format);
-			assert(format == GPF_R16);
-
-			auto tf = ur::TextureFormat::R16;
-			size_t buf_sz = ur::TextureUtility::RequiredSizeInBytes(width, height, tf, 1);
-			auto tex = tt::Render::Instance()->Device()->CreateTexture(width, height, tf, pixels, buf_sz, false);
-
+			auto tex = load_texture(filepath.c_str());
 			int in_tex = prog->QueryTexSlot("in_tex");
 			ctx->SetTexture(in_tex, tex);
 
@@ -457,7 +470,7 @@ void VTexBuilder::FromTiles(const char* src_dir, int tile_num_x, int tile_num_y,
 			{
 				for (int y = 0; y < tile_h; ++y) {
 					for (int x = 0; x < tile_w; ++x) {
-						copy2tmp(x, y, tile_w, tile_h);
+						copy2tile(prog, tile_tex, x, y, tile_w, tile_h);
 						tile_tex->WriteToMemory(tile_data);
 
 						int xx = tile_w * tile_x + x;
@@ -477,15 +490,7 @@ void VTexBuilder::FromTiles(const char* src_dir, int tile_num_x, int tile_num_y,
 		}
 	}
 
-	int width = 0, height = 0;
-	int format = 0;
-	uint8_t* pixels = gimg_import("D:/projects/tmp/gebco_08_rev_elev_10800x5400.jpg", &width, &height, &format);
-	assert(format == GPF_RED);
-
-	auto tf = ur::TextureFormat::RED;
-	size_t buf_sz = ur::TextureUtility::RequiredSizeInBytes(width, height, tf, 1);
-	auto tex = tt::Render::Instance()->Device()->CreateTexture(width, height, tf, pixels, buf_sz, false);
-
+	auto tex = load_texture("D:/projects/gis/dem15/merge.tif");
 	int in_tex = prog->QueryTexSlot("in_tex");
 	ctx->SetTexture(in_tex, tex);
 
@@ -511,7 +516,7 @@ void VTexBuilder::FromTiles(const char* src_dir, int tile_num_x, int tile_num_y,
 	{
 		for (int y = 0; y < tile_h; ++y) {
 			for (int x = 0; x < tile_w; ++x) {
-				copy2tmp(x, y, tile_w, tile_h);
+				copy2tile(prog, tile_tex, x, y, tile_w, tile_h);
 				tile_tex->WriteToMemory(tile_data);
 				file.write(reinterpret_cast<const char*>(tile_data), tile_data_sz);
 			}

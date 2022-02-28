@@ -1,6 +1,7 @@
 #pragma once
 
 #include <primitive/Bitmap.h>
+#include <SM_Vector.h>
 
 #include <memory>
 
@@ -20,6 +21,10 @@ public:
 
 	template <typename T>
 	static std::shared_ptr<prim::Bitmap<T>> MergeHori(const prim::Bitmap<T>& left, const prim::Bitmap<T>& right);
+
+	template <typename T>
+	static void Copy(const std::shared_ptr<prim::Bitmap<T>>& dst, 
+		const std::shared_ptr<prim::Bitmap<T>>& src, const sm::ivec2& pos);
 
 }; // ImageTools
 
