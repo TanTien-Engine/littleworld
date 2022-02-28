@@ -1,0 +1,25 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(0.31753239814606, 0.076137831540928, -0.99943936224649)
+node0.cam.yaw = 69.3
+node0.cam.pitch = -37.1
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 0.019468035548925
+
+_editor.add_node(node0, 374.85446, -267.37479)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../assets/blueprints/render/terrain/gray_hgt.ves")
+
+_editor.add_node(node1, 460.55303677646, -31.033977161754)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "u_tex"
+node2.gamma_correction = false
+node2.init_texture("../../../gis/dem15/new/5_6.tif")
+
+_editor.add_node(node2, 126.20702362061, -120.17248535156)
+
+Blueprint.connect(node2, "tex", node1, "tes_heightmap")
+Blueprint.connect(node0, "this", node1, "view_cam")

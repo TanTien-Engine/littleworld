@@ -970,7 +970,7 @@ ReadPage(int index, uint8_t* data) const
 
 	memset(data, 0xff, m_tile_file_sz);
 
-	const size_t header_size = sizeof(VTexInfo);
+	const uint64_t header_size = sizeof(VTexInfo);
 	m_file.seekg(header_size + static_cast<uint64_t>(m_tile_file_sz) * index);
 	m_file.read(reinterpret_cast<char*>(data), m_tile_file_sz);
 }
@@ -980,7 +980,7 @@ WritePage(int index, const uint8_t* data)
 {
 	//std::lock_guard<std::mutex> lock(m_mutex);
 
-	const size_t header_size = sizeof(VTexInfo);
+	const uint64_t header_size = sizeof(VTexInfo);
 	m_file.seekp(header_size + static_cast<uint64_t>(m_tile_file_sz) * index);
 	m_file.write(reinterpret_cast<const char*>(data), m_tile_file_sz);
 }

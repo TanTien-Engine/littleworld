@@ -192,6 +192,19 @@ void w_GlobeTools_prepare_dem15()
     globegen::VTexBuilder::PrepareDem15(src, dst);
 }
 
+void w_GlobeTools_build_vtex_tiles()
+{
+    auto src        = ves_tostring(1);
+    auto tile_num_x = (size_t)ves_tonumber(2);
+    auto tile_num_y = (size_t)ves_tonumber(3);
+    auto dst        = ves_tostring(4);
+    auto vtex_w     = (size_t)ves_tonumber(5);
+    auto vtex_h     = (size_t)ves_tonumber(6);
+    auto tile_sz    = (size_t)ves_tonumber(7);
+    auto border_sz  = (size_t)ves_tonumber(8);
+    globegen::VTexBuilder::FromTiles(src, tile_num_x, tile_num_y, dst, vtex_w, vtex_h, tile_sz, border_sz);
+}
+
 void w_GlobeTools_split_image()
 {
     auto filepath = ves_tostring(1);
@@ -259,6 +272,7 @@ VesselForeignMethodFn GlobeGenBindMethod(const char* signature)
     if (strcmp(signature, "static GlobeTools.build_vtex(_,_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex;
     if (strcmp(signature, "static GlobeTools.build_vtex2(_,_,_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex2;
     if (strcmp(signature, "static GlobeTools.prepare_dem15(_,_)") == 0) return w_GlobeTools_prepare_dem15;
+    if (strcmp(signature, "static GlobeTools.build_vtex_tiles(_,_,_,_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex_tiles;
     if (strcmp(signature, "static GlobeTools.split_image(_,_,_)") == 0) return w_GlobeTools_split_image;
 
     return nullptr;

@@ -21,6 +21,7 @@ class VtexBuilder is Node
 		]
 
 		this.params.add(NodeParam("out_path", ""))
+		this.params.add(NodeParam("src_path", ""))
 
 		this.layout()
 	}
@@ -32,23 +33,32 @@ class VtexBuilder is Node
 			return nil
 		}
 
-		var full_path = Filesystem.get_absolute_path(out_path)		
-		if (Filesystem.is_file_exists(full_path)) {
-			return Variant(VAR_TYPE_STRING, full_path)
+		var full_out_path = Filesystem.get_absolute_path(out_path)		
+		if (Filesystem.is_file_exists(full_out_path)) {
+			return Variant(VAR_TYPE_STRING, full_out_path)
 		}
 
-		var v_imgs = Blueprint.calc_input_value(this, 0)
-		if (!v_imgs) {
+//		GlobeTools.prepare_dem15("D:/projects/gis/dem15/img", full_out_path)
+
+		var src_path = this.query_param("src_path").value
+		if (src_path != "") {
+			var full_src_path = Filesystem.get_absolute_path(src_path)
+			GlobeTools.build_vtex_tiles(full_src_path, 8, 8, full_out_path, 1024 * 64, 1024 * 64, 256, 1)
+//			GlobeTools.build_vtex_tiles(full_src_path, 8, 8, full_out_path, 1024 * 4, 1024 * 4, 256, 1)
+		} else {
 			return nil
 		}
 
-		//GlobeTools.prepare_dem15("D:/projects/gis/dem15/img", full_path)
+		//var v_imgs = Blueprint.calc_input_value(this, 0)
+		//if (!v_imgs) {
+		//	return nil
+		//}
 
-		if (v_imgs.type == VAR_TYPE_ARRAY) {
-			GlobeTools.build_vtex2(v_imgs.value[0].value.tex, v_imgs.value[1].value.tex, full_path, 4096, 4096, 256, 1)
-		} else {
-			GlobeTools.build_vtex(v_imgs.value.tex, full_path, 4096, 4096, 256, 1)
-		}
+		//if (v_imgs.type == VAR_TYPE_ARRAY) {
+		//	GlobeTools.build_vtex2(v_imgs.value[0].value.tex, v_imgs.value[1].value.tex, full_out_path, 4096, 4096, 256, 1)
+		//} else {
+		//	GlobeTools.build_vtex(v_imgs.value.tex, full_out_path, 4096, 4096, 256, 1)
+		//}
 
 		return Variant(VAR_TYPE_STRING, out_path)
 	}

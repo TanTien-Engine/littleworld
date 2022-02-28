@@ -30,6 +30,7 @@ foreign class GlobeTools
 	foreign static build_vtex2(src0, src1, dst, vtex_w, vtex_h, tile_sz, border_sz)
 
 	foreign static prepare_dem15(src, dst)
+	foreign static build_vtex_tiles(src, tile_num_x, tile_num_y, dst, vtex_w, vtex_h, tile_sz, border_sz)
 
 	foreign static split_image(src, num_x, num_y)
 }

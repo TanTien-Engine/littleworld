@@ -172,6 +172,9 @@ vec4 bilinear_sample(vec2 texcoord)
 float calc_height(vec2 texcoord)
 {
     float h_base = bilinear_sample(texcoord).r;
+//    if (h_base > 0.1) {
+//        return 0;
+//    }
     return h_base;
 }
 
@@ -271,6 +274,9 @@ vec4 bilinear_sample(vec2 texcoord)
 float calc_height(vec2 texcoord)
 {
     float h_base = bilinear_sample(texcoord).r;
+//    if (h_base > 0.1) {
+//        return 0;
+//    }    
     return h_base;
 }
 
@@ -344,8 +350,8 @@ void main()
 {
     vec3 pos = fs_in.fragpos;
 
-    vec3 N = ComputeNormalCentralDifference(fs_in.texcoord, 500);
-//    vec3 N = normalize(ComputeNormalSobelFilter(fs_in.texcoord, fs.inv_res));
+//    vec3 N = ComputeNormalCentralDifference(fs_in.texcoord, 500);
+    vec3 N = normalize(ComputeNormalSobelFilter(fs_in.texcoord, fs.inv_res));
 
     vec3 light_dir = normalize(fs.light_pos - pos);
     float diff = max(dot(N, light_dir), 0.0);
@@ -390,8 +396,8 @@ void main()
 node1.cs = ""
 node1.render_gen()
 node1.set_uniform("tcs.lod_level", [ 6 ])
-node1.set_uniform("tes.height_scale", [ 0.001 ])
-node1.set_uniform("fs.inv_res", [ 0.1/4096, 0.1/4096 ])
+node1.set_uniform("tes.height_scale", [ 0.008 ])
+node1.set_uniform("fs.inv_res", [ 0.03/4096, 0.03/4096 ])
 node1.set_uniform("fs.height_scale", [ 0.001 ])
 
 _editor.add_node(node1, 157.79557543759, -355.9795922234)
@@ -407,7 +413,7 @@ var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
 
 node3.type = "grids"
 node3.layout = [ "position", "texture" ]
-node3.shape_params = { "grids_size" : 512 }
+node3.shape_params = { "grids_size" : 2048 }
 
 _editor.add_node(node3, 381.67421297039, -401.33131969581)
 

@@ -1,13 +1,13 @@
 var node0 = ::blueprint::nodes::camera3d::Camera3d()
 
-node0.cam.position.set(1342.4977253251, -1954.5573656996, 259.2895119409)
-node0.cam.yaw = -633
-node0.cam.pitch = -83.8
+node0.cam.position.set(1334.9587693221, -1980.545692872, 255.12898379618)
+node0.cam.yaw = -670
+node0.cam.pitch = -56.9
 node0.cam.zoom = 45
 node0.cam.update_vectors()
 node0.speed = 5
 
-_editor.add_node(node0, -624.27975662732, 66.219755990118)
+_editor.add_node(node0, -624.27975662732, 67.219755990118)
 
 var node1 = ::rendergraph::nodes::texture::Texture()
 node1.query_param("unif_name").value = "u_tex"
@@ -18,12 +18,13 @@ _editor.add_node(node1, -440.12156136876, -253.87020763609)
 
 var node2 = ::globegraph::nodes::vtex_builder::VtexBuilder()
 node2.query_param("out_path").value = "../../../tmp/test.vtex"
+node2.query_param("src_path").value = "../../../gis/dem15/new"
 
 _editor.add_node(node2, -254.8401270405, -94.539574420522)
 
 var node3 = ::globegraph::nodes::virtual_texture::VirtualTexture()
 
-_editor.add_node(node3, -56.005892543356, -58.478938348722)
+_editor.add_node(node3, -90.551347088811, -123.02439289418)
 
 var node4 = ::blueprint::nodes::print::Print()
 
@@ -66,7 +67,6 @@ node11.query_param("src_path").value = "../../../tmp/gebco_08_rev_elev_21600x108
 
 _editor.add_node(node11, -404.22269036512, -159.05417956442)
 
-Blueprint.connect(node11, "imgs", node2, "imgs")
 Blueprint.connect(node9, "v3", node8, "scaling")
 Blueprint.connect(node0, "zoom", node6, "fovy")
 Blueprint.connect(node6, "mat", node7, "a")
