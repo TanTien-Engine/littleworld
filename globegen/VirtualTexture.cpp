@@ -42,7 +42,8 @@ out VS_OUT {
 
 void main()
 {
-	vs_out.texcoord = texcoord;
+	vs_out.texcoord = vec2(texcoord.x, 1.0 - texcoord.y);
+//	vs_out.texcoord = texcoord;
 	gl_Position = mvp_mat * vec4(position.xzy, 1.0);
 }
 

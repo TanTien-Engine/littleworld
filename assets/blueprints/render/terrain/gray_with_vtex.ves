@@ -181,7 +181,9 @@ float calc_height(vec2 texcoord)
 void main()
 {
     vec4 pos = vec4(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]), 1.0);
+
     vec2 texcoord = interpolate_2d(TES_IN_TexCoord[0],TES_IN_TexCoord[1],TES_IN_TexCoord[2]);
+    texcoord.y = 1.0 - texcoord.y;
 
     vs_out.texcoord = texcoord;
 
@@ -354,6 +356,7 @@ void main()
     vec3 N = normalize(ComputeNormalSobelFilter(fs_in.texcoord, fs.inv_res));
 
     vec3 light_dir = normalize(fs.light_pos - pos);
+    light_dir.z = -light_dir.z;
     float diff = max(dot(N, light_dir), 0.0);
     vec3 diffuse = diff * vec3(1.0, 1.0, 1.0);
     vec3 final = diffuse;
@@ -396,7 +399,7 @@ void main()
 node1.cs = ""
 node1.render_gen()
 node1.set_uniform("tcs.lod_level", [ 6 ])
-node1.set_uniform("tes.height_scale", [ 0.008 ])
+node1.set_uniform("tes.height_scale", [ 0.01 ])
 node1.set_uniform("fs.inv_res", [ 0.03/4096, 0.03/4096 ])
 node1.set_uniform("fs.height_scale", [ 0.001 ])
 
