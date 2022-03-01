@@ -17,10 +17,16 @@ namespace ur { class Texture; class Framebuffer; class ShaderProgram; class Vert
 namespace globegen
 {
 
+enum class VTexGeoType
+{
+	Plane,
+	Spherre,
+};
+
 class VirtualTexture
 {
 public:
-	VirtualTexture(const char* filepath);
+	VirtualTexture(const char* filepath, VTexGeoType geo_type);
 
 	void Update(const sm::mat4& mvp_mat, const sm::vec2& screen_sz);
 
@@ -70,7 +76,7 @@ private:
 	{
 	public:
 		FeedbackBuffer(const PageIndexer& page_idx,
-			const VTexInfo& info);
+			const VTexInfo& info, VTexGeoType geo_type);
 		~FeedbackBuffer();
 
 		std::vector<int> Update(const sm::mat4& mvp_mat,
@@ -300,6 +306,8 @@ private:
 
 private:
 	mutable std::fstream m_file;
+
+	VTexGeoType m_geo_type;
 
 	VTexInfo m_info;
 

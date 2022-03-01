@@ -20,12 +20,12 @@ namespace
 {
 
 const int UPLOADS_PER_FRAME = 6;
-const int ATLAS_SIZE = 4096;
+const int ATLAS_SIZE = 2064;
 
 const int FEEDBACK_SIZE = 64;
 const int MIP_SAMPLE_BIAS = 3;
 
-const char* feedback_vs = R"(
+const char* feedback_plane_vs = R"(
 
 #version 330 core
 layout (location = 0) in vec3 position;
@@ -43,8 +43,42 @@ out VS_OUT {
 void main()
 {
 	vs_out.texcoord = vec2(texcoord.x, 1.0 - texcoord.y);
-//	vs_out.texcoord = texcoord;
 	gl_Position = mvp_mat * vec4(position.xzy, 1.0);
+}
+
+)";
+
+const char* feedback_sphere_vs = R"(
+
+#version 330 core
+layout (location = 0) in vec3 position;
+
+uniform UBO
+{
+	mat4 mvp_mat;
+};
+
+out VS_OUT {
+    vec2 texcoord;
+} vs_out;
+
+vec3 GeodeticSurfaceNormal(vec3 positionOnEllipsoid, vec3 oneOverEllipsoidRadiiSquared)
+{
+    return normalize(positionOnEllipsoid * oneOverEllipsoidRadiiSquared);
+}
+
+vec2 ComputeTextureCoordinates(vec3 normal)
+{
+    return vec2(atan(normal.x, normal.z) / (2 * 3.14159) + 0.5, asin(normal.y) / 3.14159 + 0.5);
+}
+
+void main()
+{
+	vec3 normal = GeodeticSurfaceNormal(position, vec3(1));
+	vec2 tex_coord = ComputeTextureCoordinates(normal);
+	
+	vs_out.texcoord = tex_coord;
+	gl_Position = mvp_mat * vec4(position, 1.0);
 }
 
 )";
@@ -98,7 +132,8 @@ void main()
 namespace globegen
 {
 
-VirtualTexture::VirtualTexture(const char* filepath)
+VirtualTexture::VirtualTexture(const char* filepath, VTexGeoType geo_type)
+	: m_geo_type(geo_type)
 {
 	m_file.open(filepath, std::ios::in | std::ios::binary);
 
@@ -106,7 +141,7 @@ VirtualTexture::VirtualTexture(const char* filepath)
 	m_file.read(reinterpret_cast<char*>(&m_info), sizeof(m_info));
 
 	m_indexer = std::make_shared<PageIndexer>(m_info);
-	m_feedback_buf = std::make_shared<FeedbackBuffer>(*m_indexer, m_info);
+	m_feedback_buf = std::make_shared<FeedbackBuffer>(*m_indexer, m_info, geo_type);
 	m_tiles_file = std::make_shared<TileDataFile>(m_info, m_file);
 	m_atlas = std::make_shared<TextureAtlas>(ATLAS_SIZE, m_info.tile_size, m_info.border_size);
 	m_table = std::make_shared<PageTable>(m_info.vtex_width / m_info.tile_size, m_info.vtex_height / m_info.tile_size);
@@ -264,12 +299,29 @@ QueryPageByIdx(size_t idx) const
 //////////////////////////////////////////////////////////////////////////
 
 VirtualTexture::FeedbackBuffer::
-FeedbackBuffer(const PageIndexer& page_idx, const VTexInfo& info)
+FeedbackBuffer(const PageIndexer& page_idx, const VTexInfo& info, VTexGeoType geo_type)
 	: m_indexer(page_idx)
 	, m_mip_bias(MIP_SAMPLE_BIAS)
 {
 	auto dev = tt::Render::Instance()->Device();
-	m_feedback_vao = tt::Model::Instance()->CreateGrids(*dev, ur::VertexLayoutType::PosTex, FEEDBACK_SIZE);
+
+	const char* feedback_vs = nullptr;
+	switch (geo_type)
+	{
+	case VTexGeoType::Plane:		
+		m_feedback_vao = tt::Model::Instance()->CreateGrids(*dev, ur::VertexLayoutType::PosTex, FEEDBACK_SIZE);
+		feedback_vs = feedback_plane_vs;
+		break;
+	case VTexGeoType::Spherre:
+	{
+		ur::PrimitiveType prim_type;
+		m_feedback_vao = tt::Model::Instance()->CreateShape(*dev, tt::ShapeType::Sphere, ur::VertexLayoutType::PosTex, prim_type);
+		feedback_vs = feedback_sphere_vs;
+	}
+		break;
+	default:
+		assert(0);
+	}
 
 	m_page_table_size = sm::ivec2(info.vtex_width, info.vtex_height) / info.tile_size;
 

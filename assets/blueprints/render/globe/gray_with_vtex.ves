@@ -11,15 +11,12 @@ var node1 = ::rendergraph::nodes::shader::Shader()
 node1.vs = "
 #version 330 core
 layout (location = 0) in vec3 position;
-layout (location = 1) in vec2 texcoord;
 
 out vec3 TCS_IN_FragPos;
-out vec2 TCS_IN_TexCoord;
 
 void main()
 {
-    TCS_IN_FragPos = position.xzy;
-    TCS_IN_TexCoord = texcoord;
+    TCS_IN_FragPos = position;
 }
 "
 node1.tcs = "
@@ -28,10 +25,8 @@ node1.tcs = "
 layout(vertices = 3) out;
 
 in vec3 TCS_IN_FragPos[];
-in vec2 TCS_IN_TexCoord[];
 
 out vec3 TES_IN_FragPos[];
-out vec2 TES_IN_TexCoord[];
 
 uniform UBO_TCS
 {
@@ -46,36 +41,28 @@ uniform UBO_TCS
 void main()
 {
     TES_IN_FragPos[gl_InvocationID] = TCS_IN_FragPos[gl_InvocationID];
-    TES_IN_TexCoord[gl_InvocationID] = TCS_IN_TexCoord[gl_InvocationID];
 
     if (gl_InvocationID == 0)
     {
-        vec4 curr_p = tcs.model * vec4(TCS_IN_FragPos[0], 1.0);
-        float dist = length(tcs.cam_pos - curr_p.xyz);
+        vec3 pos = normalize(TCS_IN_FragPos[0]);
+        vec3 world_pos = (tcs.model * vec4(pos, 1.0)).xyz;
+
+//        float dist = pow(length(tcs.cam_pos - world_pos), 2);
+        float dist = length(tcs.cam_pos - world_pos);
 
         int max_level = tcs.lod_level;
         int curr_level = max_level;
-        for (int i = 0; i < max_level; ++i) 
-        {
-//            if (dist < 1.2 * pow(i, 1.5)) 
-            if (dist < 50.0 * i) 
-            {
-//                curr_level = i;
-                break;
-            }
-        }
-
-        if (dist < 20) {
+        if (dist < 100) {
             curr_level = 0;
-        } else if (dist < 50) {
-            curr_level = 1;
-        } else if (dist < 100) {
-            curr_level = 2;
         } else if (dist < 200) {
+            curr_level = 1;
+        } else if (dist < 400) {
+            curr_level = 2;
+        } else if (dist < 800) {
             curr_level = 3;
-        } else if (dist < 500) {
+        } else if (dist < 1500) {
             curr_level = 4;
-        } else if (dist < 1000) {
+        } else if (dist < 3000) {
             curr_level = 5;
         } else {
             curr_level = 6;
@@ -95,7 +82,6 @@ node1.tes = "
 layout(triangles, equal_spacing, ccw) in;
 
 in vec3 TES_IN_FragPos[];
-in vec2 TES_IN_TexCoord[];
 
 out VS_OUT {
     float height;
@@ -172,26 +158,37 @@ vec4 bilinear_sample(vec2 texcoord)
 float calc_height(vec2 texcoord)
 {
     float h_base = bilinear_sample(texcoord).r;
-//    if (h_base > 0.1) {
-//        return 0;
-//    }
+    if (h_base > 0.1) {
+        return 0;
+    }
     return h_base;
+}
+
+vec3 GeodeticSurfaceNormal(vec3 positionOnEllipsoid, vec3 oneOverEllipsoidRadiiSquared)
+{
+    return normalize(positionOnEllipsoid * oneOverEllipsoidRadiiSquared);
+}
+
+vec2 ComputeTextureCoordinates(vec3 normal)
+{
+    return vec2(atan(normal.x, normal.z) / (2 * 3.14159) + 0.5, asin(normal.y) / 3.14159 + 0.5);
 }
 
 void main()
 {
     vec4 pos = vec4(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]), 1.0);
 
-    vec2 texcoord = interpolate_2d(TES_IN_TexCoord[0],TES_IN_TexCoord[1],TES_IN_TexCoord[2]);
-    texcoord.y = 1.0 - texcoord.y;
+//    vs_out.fragpos = vec3(tes.model * pos);
+    vs_out.fragpos = pos.xyz;
 
-    vs_out.texcoord = texcoord;
+    vec3 normal = GeodeticSurfaceNormal(vs_out.fragpos, vec3(1));
+    vec2 tex_coord = ComputeTextureCoordinates(normal);
 
-//    vs_out.height = texture(tes_heightmap, texcoord).r/* - 0.5*/;
-    vs_out.height = calc_height(texcoord);
+    vs_out.texcoord = tex_coord;
 
-    pos.y += vs_out.height * tes.height_scale;
-    vs_out.fragpos = vec3(tes.model * pos);
+    vs_out.height = calc_height(tex_coord);
+//    pos.y += vs_out.height * tes.height_scale;
+    pos.xyz += normal * vs_out.height * tes.height_scale;
 
     gl_Position = tes.projection * tes.view * tes.model * pos;
 }
@@ -210,6 +207,8 @@ in VS_OUT {
 uniform UBO_FS
 {
     vec3 light_pos;
+    vec3 view_pos;
+
     vec2 inv_res;
 
     // brush
@@ -279,9 +278,9 @@ vec4 bilinear_sample(vec2 texcoord)
 float calc_height(vec2 texcoord)
 {
     float h_base = bilinear_sample(texcoord).r;
-//    if (h_base > 0.1) {
-//        return 0;
-//    }    
+    if (h_base > 0.1) {
+        return 0;
+    }    
     return h_base;
 }
 
@@ -356,6 +355,7 @@ float LightIntensity(vec3 normal, vec3 toLight, vec3 toEye, vec4 diffuseSpecular
     vec3 toReflectedLight = reflect(-toLight, normal);
 
     float diffuse = max(dot(toLight, normal), 0.0);
+
     float specular = max(dot(toReflectedLight, toEye), 0.0);
     specular = pow(specular, diffuseSpecularAmbientShininess.w);
 
@@ -368,14 +368,17 @@ void main()
 {
     vec3 pos = fs_in.fragpos;
 
-//    vec3 N = ComputeNormalCentralDifference(fs_in.texcoord, 500);
-    vec3 N = normalize(ComputeNormalSobelFilter(fs_in.texcoord, fs.inv_res));
+    vec3 N = normalize(fs_in.fragpos);
+    vec3 T = cross(N, vec3(0, 1, 0));
+    vec3 B = cross(N, T);
+    mat3 TBN = mat3(T, B, N);
+
+    vec3 normal = TBN * normalize(ComputeNormalSobelFilter(fs_in.texcoord, fs.inv_res));
 
     vec3 light_dir = normalize(fs.light_pos - pos);
-    light_dir.z = -light_dir.z;
-    vec3 view_dir = light_dir;
+    vec3 view_dir = normalize(fs.view_pos - pos);
 
-    float intensity = LightIntensity(N, light_dir, view_dir, fs.diffuse_specular_ambient_shininess);
+    float intensity = LightIntensity(normal, light_dir, view_dir, fs.diffuse_specular_ambient_shininess);
     vec3 final = intensity * vec3(1.0, 1.0, 1.0);
 
     //FragColor = vec4(N, 1.0);
@@ -415,12 +418,11 @@ void main()
 "
 node1.cs = ""
 node1.render_gen()
-node1.set_uniform("tcs.lod_level", [ 6 ])
-node1.set_uniform("tes.height_scale", [ 0.01 ])
-node1.set_uniform("fs.inv_res", [ 0.03/4096, 0.03/4096 ])
-node1.set_uniform("fs.height_scale", [ 0.01 ])
+node1.set_uniform("tes.height_scale", [ 0.05 ])
+node1.set_uniform("fs.inv_res", [ 0.05/4096, 0.05/4096 ])
+node1.set_uniform("fs.height_scale", [ 0.05 ])
 
-_editor.add_node(node1, 157.79557543759, -355.9795922234)
+_editor.add_node(node1, 153.40327543759, -355.9795922234)
 
 var node2 = ::rendergraph::nodes::clear::Clear()
 
@@ -431,8 +433,8 @@ _editor.add_node(node2, 335.02348918957, -188.12587085987)
 
 var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
 
-node3.type = "grids"
-node3.layout = [ "position", "texture" ]
+node3.type = "big_sphere"
+node3.layout = [ "position" ]
 node3.shape_params = { "grids_size" : 2048 }
 
 _editor.add_node(node3, 381.67421297039, -401.33131969581)
@@ -647,23 +649,31 @@ node39.var_name = "tile_sz_with_border"
 
 _editor.add_node(node39, -536.51660109843, -419.46684975225)
 
-var node40 = ::blueprint::nodes::matrix::Matrix()
+var node40 = ::blueprint::nodes::number4::Number4()
 
-_editor.add_node(node40, -338.04048262144, 343.29060384547)
+node40.value.set(0.65, 0.25, 0.1, 12)
+
+_editor.add_node(node40, -18.844078063965, -96.882011413574)
 
 var node41 = ::blueprint::nodes::number3::Number3()
 
-node41.value.set(2000, 2000, 1000)
+node41.value.set(0, 0, 10000)
 
-_editor.add_node(node41, -480.81946817009, 332.38575911181)
+_editor.add_node(node41, -103.73951721191, 145.52272033691)
 
-var node42 = ::blueprint::nodes::number4::Number4()
+var node42 = ::blueprint::nodes::integer::Integer()
 
-node42.value.set(0.65, 0.25, 0.1, 12)
+node42.value = 6
 
-_editor.add_node(node42, -18.844078063965, -96.882011413574)
+_editor.add_node(node42, -50.163913116455, 332.45596435547)
 
-Blueprint.connect(node41, "v3", node40, "scaling")
+var node43 = ::blueprint::nodes::input::Input()
+
+node43.var_name = "model_mat"
+node43.var_type = "mat4"
+
+_editor.add_node(node43, -238.97158325195, 433.33388671875)
+
 Blueprint.connect(node11, "var", node12, "xyzw")
 Blueprint.connect(node12, "w", node16, "var")
 Blueprint.connect(node16, "var", node33, "var")
@@ -700,11 +710,12 @@ Blueprint.connect(node20, "var", node21, "var")
 Blueprint.connect(node4, "zoom", node7, "fovy")
 Blueprint.connect(node7, "mat", node1, "tcs.projection")
 Blueprint.connect(node4, "mat", node1, "tcs.view")
-Blueprint.connect(node40, "mat", node1, "tcs.model")
+Blueprint.connect(node43, "var", node1, "tcs.model")
 Blueprint.connect(node4, "pos", node1, "tcs.cam_pos")
+Blueprint.connect(node42, "v", node1, "tcs.lod_level")
 Blueprint.connect(node7, "mat", node1, "tes.projection")
 Blueprint.connect(node4, "mat", node1, "tes.view")
-Blueprint.connect(node40, "mat", node1, "tes.model")
+Blueprint.connect(node43, "var", node1, "tes.model")
 Blueprint.connect(node35, "v", node1, "tes.u_page_table_size")
 Blueprint.connect(node37, "v", node1, "tes.u_atlas_scale")
 Blueprint.connect(node31, "v", node1, "tes.u_border_scale")
@@ -712,7 +723,8 @@ Blueprint.connect(node29, "v", node1, "tes.u_border_offset")
 Blueprint.connect(node8, "var", node1, "u_page_table_tex")
 Blueprint.connect(node9, "var", node1, "u_texture_atlas_tex")
 Blueprint.connect(node10, "var", node1, "u_feedback_tex")
-Blueprint.connect(node4, "pos", node1, "fs.light_pos")
+Blueprint.connect(node41, "v3", node1, "fs.light_pos")
+Blueprint.connect(node4, "pos", node1, "fs.view_pos")
 Blueprint.connect(node5, "var", node1, "fs.mouse_pos")
 Blueprint.connect(node6, "var", node1, "fs.draw_radius")
 Blueprint.connect(node35, "v", node1, "fs.u_page_table_size")
@@ -720,7 +732,7 @@ Blueprint.connect(node21, "var", node1, "fs.u_virt_tex_size")
 Blueprint.connect(node37, "v", node1, "fs.u_atlas_scale")
 Blueprint.connect(node31, "v", node1, "fs.u_border_scale")
 Blueprint.connect(node29, "v", node1, "fs.u_border_offset")
-Blueprint.connect(node42, "v4", node1, "fs.diffuse_specular_ambient_shininess")
+Blueprint.connect(node40, "v4", node1, "fs.diffuse_specular_ambient_shininess")
 Blueprint.connect(node8, "var", node1, "fs_page_table_tex")
 Blueprint.connect(node9, "var", node1, "fs_texture_atlas_tex")
 Blueprint.connect(node2, "next", node0, "prev")

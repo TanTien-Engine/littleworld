@@ -1,8 +1,8 @@
 var node0 = ::blueprint::nodes::camera3d::Camera3d()
 
-node0.cam.position.set(1334.9587693221, -1980.545692872, 255.12898379618)
-node0.cam.yaw = -670
-node0.cam.pitch = -56.9
+node0.cam.position.set(1339.48641718, -1979.9844641822, -248.77429909399)
+node0.cam.yaw = -794.9
+node0.cam.pitch = -55.7
 node0.cam.zoom = 45
 node0.cam.update_vectors()
 node0.speed = 5
@@ -80,4 +80,3 @@ Blueprint.connect(node3, "page_table", node5, "u_page_table_tex")
 Blueprint.connect(node3, "tex_atlas", node5, "u_texture_atlas_tex")
 Blueprint.connect(node3, "feedback", node5, "u_feedback_tex")
 Blueprint.connect(node3, "size", node5, "vtex_size")
-Blueprint.connect(node3, "tex_atlas", node4, "value")

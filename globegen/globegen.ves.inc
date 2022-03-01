@@ -12,7 +12,7 @@ foreign class ShapeBatching
 
 foreign class VirtualTexture
 {
-	init(filepath) {}
+	init(filepath, sphere) {}
 
 	foreign get_feedback_tex()
 	foreign get_atlas_tex()

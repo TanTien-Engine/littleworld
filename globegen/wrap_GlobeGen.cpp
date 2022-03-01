@@ -88,8 +88,14 @@ void w_ShapeBatching_build_va()
 void w_VirtualTexture_allocate()
 {
     auto filepath = ves_tostring(1);
+    auto sphere = ves_toboolean(2);
 
-    auto vtex = std::make_shared<globegen::VirtualTexture>(filepath);
+    globegen::VTexGeoType geo_type = globegen::VTexGeoType::Plane;
+    if (sphere) {
+        geo_type = globegen::VTexGeoType::Spherre;
+    }
+
+    auto vtex = std::make_shared<globegen::VirtualTexture>(filepath, geo_type);
 
     auto proxy = (tt::Proxy<globegen::VirtualTexture>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<globegen::VirtualTexture>));
     proxy->obj = vtex;
