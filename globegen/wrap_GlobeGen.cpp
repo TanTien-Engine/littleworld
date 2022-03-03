@@ -266,6 +266,124 @@ void w_GlobeTools_split_image()
     }
 }
 
+static const float Rg = 6360.0;
+
+sm::vec3 calc_cam_pos(float lon, float lat, float theta, float phi, float d)
+{
+    double co = cos(lon);
+    double so = sin(lon);
+    double ca = cos(lat);
+    double sa = sin(lat);
+    sm::vec3 po = sm::vec3(co * ca, so * ca, sa) * Rg;
+    sm::vec3 px = sm::vec3(-so, co, 0);
+    sm::vec3 py = sm::vec3(-co * sa, -so * sa, ca);
+    sm::vec3 pz = sm::vec3(co * ca, so * ca, sa);
+
+    double ct = cos(theta);
+    double st = sin(theta);
+    double cp = cos(phi);
+    double sp = sin(phi);
+    sm::vec3 cz = px * sp * st - py * cp * st + pz * ct;
+    sm::vec3 position = po + cz * d;
+
+    return position;
+}
+
+void w_GlobeTools_cam_view_mat()
+{
+    float lon = ves_tonumber(1);
+    float lat = ves_tonumber(2);
+    float theta = ves_tonumber(3);
+    float phi = ves_tonumber(4);
+    float d = ves_tonumber(5);
+
+    double co = cos(lon);
+    double so = sin(lon);
+    double ca = cos(lat);
+    double sa = sin(lat);
+    sm::vec3 po = sm::vec3(co * ca, so * ca, sa) * Rg;
+    sm::vec3 px = sm::vec3(-so, co, 0);
+    sm::vec3 py = sm::vec3(-co * sa, -so * sa, ca);
+    sm::vec3 pz = sm::vec3(co * ca, so * ca, sa);
+
+    double ct = cos(theta);
+    double st = sin(theta);
+    double cp = cos(phi);
+    double sp = sin(phi);
+    sm::vec3 cx = px * cp + py * sp;
+    sm::vec3 cy = -px * sp * ct + py * cp * ct + pz * st;
+    sm::vec3 cz = px * sp * st - py * cp * st + pz * ct;
+    sm::vec3 position = po + cz * d;
+
+    if (position.Length() < Rg + 0.01) 
+    {
+        auto length = sqrt(position.x * position.x + position.y * position.y + position.z * position.z);
+        auto invLength = (Rg + 0.01) / length;
+        position.x *= invLength;
+        position.y *= invLength;
+        position.z *= invLength;
+    }
+
+    float m[16] = {
+        cx.x, cx.y, cx.z, 0,
+        cy.x, cy.y, cy.z, 0,
+        cz.x, cz.y, cz.z, 0,
+        0, 0, 0, 1
+    };
+
+    sm::mat4 view;
+    memcpy(view.c, m, sizeof(m));
+    
+    view = view * sm::mat4::Translated(-position.x, -position.y, -position.z);
+
+    ves_pop(ves_argnum());
+
+    ves_pushnil();
+    ves_import_class("maths", "Matrix44");
+    sm::mat4* mat = (sm::mat4*)ves_set_newforeign(0, 1, sizeof(sm::mat4));
+    *mat = view;
+    ves_pop(1);
+}
+
+void w_GlobeTools_cam_proj_mat()
+{
+    float lon = ves_tonumber(1);
+    float lat = ves_tonumber(2);
+    float theta = ves_tonumber(3);
+    float phi = ves_tonumber(4);
+    float d = ves_tonumber(5);
+
+    auto position = calc_cam_pos(lon, lat, theta, phi, d);
+
+    float width  = tt::Graphics::Instance()->GetWidth();
+    float height = tt::Graphics::Instance()->GetHeight();
+
+    float h = position.Length() - Rg;
+    float vfov = 2.0 * atan(float(height) / float(width) * tan(80.0 / 180 * SM_PI / 2.0)) / SM_PI * 180;
+    sm::mat4 proj = sm::mat4::Perspective(vfov, float(width) / float(height), 0.1 * h, 1e5 * h);
+
+    ves_pop(ves_argnum());
+
+    ves_pushnil();
+    ves_import_class("maths", "Matrix44");
+    sm::mat4* mat = (sm::mat4*)ves_set_newforeign(0, 1, sizeof(sm::mat4));
+    *mat = proj;
+    ves_pop(1);
+}
+
+void w_GlobeTools_cam_position()
+{
+    float lon = ves_tonumber(1);
+    float lat = ves_tonumber(2);
+    float theta = ves_tonumber(3);
+    float phi = ves_tonumber(4);
+    float d = ves_tonumber(5);
+
+    auto p = calc_cam_pos(lon, lat, theta, phi, d);
+
+    tt::return_list(std::vector<float>{ p.x, p.y, p.z });
+}
+
 }
 
 namespace globegen
@@ -288,6 +406,9 @@ VesselForeignMethodFn GlobeGenBindMethod(const char* signature)
     if (strcmp(signature, "static GlobeTools.merge_dem15(_,_)") == 0) return w_GlobeTools_merge_dem15;
     if (strcmp(signature, "static GlobeTools.build_vtex_tiles(_,_,_,_,_,_,_,_)") == 0) return w_GlobeTools_build_vtex_tiles;
     if (strcmp(signature, "static GlobeTools.split_image(_,_,_)") == 0) return w_GlobeTools_split_image;
+    if (strcmp(signature, "static GlobeTools.cam_view_mat(_,_,_,_,_)") == 0) return w_GlobeTools_cam_view_mat;
+    if (strcmp(signature, "static GlobeTools.cam_proj_mat(_,_,_,_,_)") == 0) return w_GlobeTools_cam_proj_mat;
+    if (strcmp(signature, "static GlobeTools.cam_position(_,_,_,_,_)") == 0) return w_GlobeTools_cam_position;
 
     return nullptr;
 }

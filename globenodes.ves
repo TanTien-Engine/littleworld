@@ -1,6 +1,7 @@
 import "globegraph.nodes.*"
 
 var GLOBE_NODES = [
-Ellipsoid, Geodetic2d, Curve, VectorData,
+Ellipsoid, Geodetic2d, Curve, VectorData, 
 VtexBuilder, VirtualTexture, SplitImage,
+GlobeCamera,
 ]

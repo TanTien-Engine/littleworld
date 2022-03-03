@@ -1,0 +1,149 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("tri_strip")
+node0.render_state = { "blend" : false, "depth_test" : false, "depth_func" : "less", "cull" : "disable", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 261.90909090909, 136.5)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+void main()
+{
+	gl_Position = vec4(aPos, 1.0);
+}
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = "
+
+#version 330 core
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
+
+uniform UBO
+{
+	int layer;	
+};
+
+out GS_OUT {
+    int layer;
+} gs_out;
+
+void main() 
+{
+    gl_Position = gl_in[0].gl_Position;
+    gl_Layer = layer;
+    gs_out.layer = layer;
+    EmitVertex();
+
+    gl_Position = gl_in[1].gl_Position;
+    gl_Layer = layer;
+    gs_out.layer = layer;    
+    EmitVertex();
+
+    gl_Position = gl_in[2].gl_Position;
+    gl_Layer = layer;
+    gs_out.layer = layer;    
+    EmitVertex();
+
+    EndPrimitive();
+}
+"
+node1.fs = "
+#version 330 core
+
+#include \"common.glsl\"
+
+uniform sampler3D deltaSRSampler;
+uniform sampler3D deltaSMSampler;
+
+out vec4 FragColor;
+
+in GS_OUT {
+    int layer;
+} fs_in;
+
+void main() {
+    vec3 uvw = vec3(gl_FragCoord.xy, float(fs_in.layer) + 0.5) / vec3(ivec3(RES_MU_S * RES_NU, RES_MU, RES_R));
+    vec4 ray = texture(deltaSRSampler, uvw);
+    vec4 mie = texture(deltaSMSampler, uvw);
+    FragColor = vec4(ray.rgb, mie.r); // store only red component of single Mie scattering
+}
+
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, -133.83000138716, 223.10726162997)
+
+var node2 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node2.type = "quad"
+node2.layout = [ "position" ]
+node2.shape_params = {  }
+
+_editor.add_node(node2, 42.81818043102, 63.95451216264)
+
+var node3 = ::rendergraph::nodes::pass::Pass()
+
+node3.once = false
+
+_editor.add_node(node3, 410.24724922546, 187.83396770996)
+
+var node4 = ::rendergraph::nodes::pass::Pass()
+
+node4.once = true
+
+_editor.add_node(node4, 699.15576537917, -97.704650014042)
+
+var node5 = ::blueprint::nodes::loop::Loop()
+
+node5.start = 0
+node5.end = 32
+
+_editor.add_node(node5, 504.99423839997, -116.98412097707)
+
+var node6 = ::blueprint::nodes::input::Input()
+
+node6.var_name = "deltaSRSampler"
+node6.var_type = "texture"
+
+_editor.add_node(node6, -331.05996981534, 244.63815030185)
+
+var node7 = ::blueprint::nodes::input::Input()
+
+node7.var_name = "deltaSMSampler"
+node7.var_type = "texture"
+
+_editor.add_node(node7, -328.33271373402, 177.36547851562)
+
+var node8 = ::blueprint::nodes::input::Input()
+
+node8.var_name = "fbo"
+node8.var_type = "fbo"
+
+_editor.add_node(node8, 272.27112106449, -76.696201923465)
+
+var node9 = ::blueprint::nodes::input::Input()
+
+node9.var_name = "transmittanceSampler"
+node9.var_type = "texture"
+
+_editor.add_node(node9, -299.44088745117, 324.029296875)
+
+Blueprint.connect(node5, "index", node1, "layer")
+Blueprint.connect(node9, "var", node1, "transmittanceSampler")
+Blueprint.connect(node6, "var", node1, "deltaSRSampler")
+Blueprint.connect(node7, "var", node1, "deltaSMSampler")
+Blueprint.connect(node3, "next", node5, "do")
+Blueprint.connect(node5, "next", node4, "do")
+Blueprint.connect(node0, "next", node3, "do")
+Blueprint.connect(node8, "var", node3, "fbo")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node2, "out", node0, "va")

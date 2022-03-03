@@ -34,6 +34,10 @@ foreign class GlobeTools
 	foreign static build_vtex_tiles(src, tile_num_x, tile_num_y, dst, vtex_w, vtex_h, tile_sz, border_sz)
 
 	foreign static split_image(src, num_x, num_y)
+
+	foreign static cam_view_mat(lon, lat, theta, phi, d)
+	foreign static cam_proj_mat(lon, lat, theta, phi, d)
+	foreign static cam_position(lon, lat, theta, phi, d)
 }
 
 );

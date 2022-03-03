@@ -1,0 +1,325 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("tri_strip")
+node0.render_state = { "blend" : false, "depth_test" : false, "depth_func" : "less", "cull" : "disable", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 261.90909090909, 136.5)
+
+var node1 = ::rendergraph::nodes::clear::Clear()
+
+node1.masks = [ "color", "depth" ]
+node1.values = { "color" : [ 255, 255, 255, 255 ] }
+
+_editor.add_node(node1, 43.82090909091, 488.3854545455)
+
+var node2 = ::rendergraph::nodes::shader::Shader()
+node2.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node2.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+void main()
+{
+	gl_Position = vec4(aPos, 1.0);
+}
+"
+node2.tcs = ""
+node2.tes = ""
+node2.gs = "
+
+#version 330 core
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
+
+uniform UBO
+{
+	int layer;	
+};
+
+void main() 
+{
+    gl_Position = gl_in[0].gl_Position;
+    gl_Layer = layer;
+    EmitVertex();
+    gl_Position = gl_in[1].gl_Position;
+    gl_Layer = layer;
+    EmitVertex();
+    gl_Position = gl_in[2].gl_Position;
+    gl_Layer = layer;
+    EmitVertex();
+    EndPrimitive();
+}
+"
+node2.fs = "
+#version 330 core
+
+#include \"common.glsl\"
+
+uniform UBO
+{
+    float r;
+    vec4 dhdH;
+
+    float first;
+};
+
+uniform sampler2D deltaESampler;
+uniform sampler3D deltaSRSampler;
+uniform sampler3D deltaSMSampler;
+
+out vec4 FragColor;
+
+const float dphi = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+const float dtheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+
+void inscatter(float r, float mu, float muS, float nu, out vec3 raymie) {
+    r = clamp(r, Rg, Rt);
+    mu = clamp(mu, -1.0, 1.0);
+    muS = clamp(muS, -1.0, 1.0);
+    float var = sqrt(1.0 - mu * mu) * sqrt(1.0 - muS * muS);
+    nu = clamp(nu, muS * mu - var, muS * mu + var);
+
+    float cthetamin = -sqrt(1.0 - (Rg / r) * (Rg / r));
+
+    vec3 v = vec3(sqrt(1.0 - mu * mu), 0.0, mu);
+    float sx = v.x == 0.0 ? 0.0 : (nu - muS * mu) / v.x;
+    vec3 s = vec3(sx, sqrt(max(0.0, 1.0 - sx * sx - muS * muS)), muS);
+
+    raymie = vec3(0.0);
+
+    // integral over 4.PI around x with two nested loops over w directions (theta,phi) -- Eq (7)
+    for (int itheta = 0; itheta < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++itheta) {
+        float theta = (float(itheta) + 0.5) * dtheta;
+        float ctheta = cos(theta);
+
+        float greflectance = 0.0;
+        float dground = 0.0;
+        vec3 gtransp = vec3(0.0);
+        if (ctheta < cthetamin) { // if ground visible in direction w
+            // compute transparency gtransp between x and ground
+            greflectance = AVERAGE_GROUND_REFLECTANCE / M_PI;
+            dground = -r * ctheta - sqrt(r * r * (ctheta * ctheta - 1.0) + Rg * Rg);
+            gtransp = transmittance(Rg, -(r * ctheta + dground) / Rg, dground);
+        }
+
+        for (int iphi = 0; iphi < 2 * INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; ++iphi) {
+            float phi = (float(iphi) + 0.5) * dphi;
+            float dw = dtheta * dphi * sin(theta);
+            vec3 w = vec3(cos(phi) * sin(theta), sin(phi) * sin(theta), ctheta);
+
+            float nu1 = dot(s, w);
+            float nu2 = dot(v, w);
+            float pr2 = phaseFunctionR(nu2);
+            float pm2 = phaseFunctionM(nu2);
+
+            // compute irradiance received at ground in direction w (if ground visible) =deltaE
+            vec3 gnormal = (vec3(0.0, 0.0, r) + dground * w) / Rg;
+            vec3 girradiance = irradiance(deltaESampler, Rg, dot(gnormal, s));
+
+            vec3 raymie1; // light arriving at x from direction w
+
+            // first term = light reflected from the ground and attenuated before reaching x, =T.alpha/PI.deltaE
+            raymie1 = greflectance * girradiance * gtransp;
+
+            // second term = inscattered light, =deltaS
+            if (first == 1.0) {
+                // first iteration is special because Rayleigh and Mie were stored separately,
+                // without the phase functions factors; they must be reintroduced here
+                float pr1 = phaseFunctionR(nu1);
+                float pm1 = phaseFunctionM(nu1);
+                vec3 ray1 = texture4D(deltaSRSampler, r, w.z, muS, nu1).rgb;
+                vec3 mie1 = texture4D(deltaSMSampler, r, w.z, muS, nu1).rgb;
+                raymie1 += ray1 * pr1 + mie1 * pm1;
+            } else {
+                raymie1 += texture4D(deltaSRSampler, r, w.z, muS, nu1).rgb;
+            }
+
+            // light coming from direction w and scattered in direction v
+            // = light arriving at x from direction w (raymie1) * SUM(scattering coefficient * phaseFunction)
+            // see Eq (7)
+            raymie += raymie1 * (betaR * exp(-(r - Rg) / HR) * pr2 + betaMSca * exp(-(r - Rg) / HM) * pm2) * dw;
+        }
+    }
+
+    // output raymie = J[T.alpha/PI.deltaE + deltaS] (line 7 in algorithm 4.1)
+}
+
+void main() {
+    vec3 raymie;
+    float mu, muS, nu;
+    getMuMuSNu(r, dhdH, mu, muS, nu);
+    inscatter(r, mu, muS, nu, raymie);
+    FragColor.rgb = raymie;
+}
+
+"
+node2.cs = ""
+node2.render_gen()
+
+_editor.add_node(node2, -133.83000138716, 223.10726162997)
+
+var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node3.type = "quad"
+node3.layout = [ "position" ]
+node3.shape_params = {  }
+
+_editor.add_node(node3, 42.81818043102, 63.95451216264)
+
+var node4 = ::rendergraph::nodes::render_target::RenderTarget()
+
+_editor.add_node(node4, 45.54545177113, -106.04548783736)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "deltaJ"
+node5.gamma_correction = false
+node5.init_texture(256, 128, 32, "rgb16f")
+
+_editor.add_node(node5, -351.06272311124, -148.62448228871)
+
+var node6 = ::rendergraph::nodes::pass::Pass()
+
+node6.once = false
+
+_editor.add_node(node6, 410.24724922546, 187.83396770996)
+
+var node7 = ::blueprint::nodes::output::Output()
+
+node7.var_name = "deltaJ"
+node7.var_type = "texture"
+
+_editor.add_node(node7, -109.5932689098, -166.90494477983)
+
+var node8 = ::blueprint::nodes::input::Input()
+
+node8.var_name = "transmittanceSampler"
+node8.var_type = "texture"
+
+_editor.add_node(node8, -352.81143991655, 285.58716959225)
+
+var node9 = ::blueprint::nodes::custom::Custom()
+
+node9.code = "
+import \"math\" for Math
+import \"maths.vector\" for Vector4
+
+var r_list = []
+var dhdH_list = []
+
+var Rg = 6360.0
+var Rt = 6420.0
+var RL = 6421.0
+
+var RES_R = 32
+
+for (var layer in 0..RES_R) 
+{
+    var r = layer / (RES_R - 1.0)
+    r = r * r
+
+    var tmp = 0.0
+    if (layer == RES_R - 1) {
+    	tmp = -0.001
+    }
+    if (layer == 0) {
+    	tmp = 0.01
+    }
+    r = Math.sqrt(Rg * Rg + r * (Rt * Rt - Rg * Rg)) + tmp
+
+    r_list.add(r)
+
+    var dmin = Rt - r
+    var dmax = Math.sqrt(r * r - Rg * Rg) + Math.sqrt(Rt * Rt - Rg * Rg)
+    var dminp = r - Rg
+    var dmaxp = Math.sqrt(r * r - Rg * Rg)
+    var dhdH = Vector4(dmin, dmax, dminp, dmaxp)
+    dhdH_list.add(dhdH)
+}
+
+_editor.script_stack.clear()
+_editor.script_stack.add(r_list)
+_editor.script_stack.add(dhdH_list)
+"
+node9.init_ports(0, 2)
+node9.use_cache = false
+
+_editor.add_node(node9, -733.51446284544, 425.5519837015)
+
+var node10 = ::blueprint::nodes::fetch::Fetch()
+
+_editor.add_node(node10, -544.18202485646, 396.45350549888)
+
+var node11 = ::rendergraph::nodes::pass::Pass()
+
+node11.once = true
+
+_editor.add_node(node11, 699.15576537917, -97.704650014042)
+
+var node12 = ::blueprint::nodes::loop::Loop()
+
+node12.start = 0
+node12.end = 32
+
+_editor.add_node(node12, 504.99423839997, -116.98412097707)
+
+var node13 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node13, -268.63485162908, 491.04168146307)
+
+var node14 = ::blueprint::nodes::fetch::Fetch()
+
+_editor.add_node(node14, -541.73240802701, 286.06246868445)
+
+var node15 = ::blueprint::nodes::input::Input()
+
+node15.var_name = "deltaESampler"
+node15.var_type = "texture"
+
+_editor.add_node(node15, -430.131442245, 151.50182137345)
+
+var node16 = ::blueprint::nodes::input::Input()
+
+node16.var_name = "deltaSRSampler"
+node16.var_type = "texture"
+
+_editor.add_node(node16, -430.13144978253, 86.305080934229)
+
+var node17 = ::blueprint::nodes::input::Input()
+
+node17.var_name = "deltaSMSampler"
+node17.var_type = "texture"
+
+_editor.add_node(node17, -430.13142397644, 21.729281657121)
+
+var node18 = ::blueprint::nodes::input::Input()
+
+node18.var_name = "first"
+node18.var_type = "num"
+
+_editor.add_node(node18, -367.85791015625, 372.80505371094)
+
+Blueprint.connect(node6, "next", node12, "do")
+Blueprint.connect(node12, "next", node11, "do")
+Blueprint.connect(node9, "out1", node14, "items")
+Blueprint.connect(node12, "index", node14, "index")
+Blueprint.connect(node9, "out0", node10, "items")
+Blueprint.connect(node12, "index", node10, "index")
+Blueprint.connect(node9, "next", node1, "prev")
+Blueprint.connect(node12, "index", node2, "layer")
+Blueprint.connect(node10, "item", node2, "r")
+Blueprint.connect(node14, "item", node2, "dhdH")
+Blueprint.connect(node12, "index", node2, "layer")
+Blueprint.connect(node18, "var", node2, "first")
+Blueprint.connect(node8, "var", node2, "transmittanceSampler")
+Blueprint.connect(node15, "var", node2, "deltaESampler")
+Blueprint.connect(node16, "var", node2, "deltaSRSampler")
+Blueprint.connect(node17, "var", node2, "deltaSMSampler")
+Blueprint.connect(node0, "next", node6, "do")
+Blueprint.connect(node4, "fbo", node6, "fbo")
+Blueprint.connect(node5, "tex", node7, "var")
+Blueprint.connect(node5, "tex", node4, "col0")
+Blueprint.connect(node1, "next", node0, "prev")
+Blueprint.connect(node2, "out", node0, "shader")
+Blueprint.connect(node3, "out", node0, "va")

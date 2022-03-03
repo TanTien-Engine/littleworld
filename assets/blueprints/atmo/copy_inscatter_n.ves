@@ -1,0 +1,216 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("tri_strip")
+node0.render_state = { "blend" : true, "depth_test" : false, "depth_func" : "less", "cull" : "disable", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 261.90909090909, 136.5)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+void main()
+{
+	gl_Position = vec4(aPos, 1.0);
+}
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = "
+
+#version 330 core
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
+
+uniform UBO
+{
+	int layer;	
+};
+
+out GS_OUT {
+    int layer;
+} gs_out;
+
+void main() 
+{
+    gl_Position = gl_in[0].gl_Position;
+    gl_Layer = layer;
+    gs_out.layer = layer;
+    EmitVertex();
+
+    gl_Position = gl_in[1].gl_Position;
+    gl_Layer = layer;
+    gs_out.layer = layer;
+    EmitVertex();
+
+    gl_Position = gl_in[2].gl_Position;
+    gl_Layer = layer;
+    gs_out.layer = layer;
+    EmitVertex();
+
+    EndPrimitive();
+}
+"
+node1.fs = "
+#version 330 core
+
+#include \"common.glsl\"
+
+out vec4 FragColor;
+
+in GS_OUT {
+    int layer;
+} fs_in;
+
+uniform UBO
+{
+    float r;
+    vec4 dhdH;
+};
+
+uniform sampler3D deltaSSampler;
+
+void main() 
+{
+    float mu, muS, nu;
+    getMuMuSNu(r, dhdH, mu, muS, nu);
+    vec3 uvw = vec3(gl_FragCoord.xy, float(fs_in.layer) + 0.5) / vec3(ivec3(RES_MU_S * RES_NU, RES_MU, RES_R));
+    FragColor = vec4(texture(deltaSSampler, uvw).rgb / phaseFunctionR(nu), 0.0);
+}
+
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, -133.83000138716, 223.10726162997)
+
+var node2 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node2.type = "quad"
+node2.layout = [ "position" ]
+node2.shape_params = {  }
+
+_editor.add_node(node2, 42.81818043102, 63.95451216264)
+
+var node3 = ::rendergraph::nodes::pass::Pass()
+
+node3.once = false
+
+_editor.add_node(node3, 410.24724922546, 187.83396770996)
+
+var node4 = ::blueprint::nodes::input::Input()
+
+node4.var_name = "transmittanceSampler"
+node4.var_type = "texture"
+
+_editor.add_node(node4, -314.62962173473, 259.22353322861)
+
+var node5 = ::blueprint::nodes::custom::Custom()
+
+node5.code = "
+import \"math\" for Math
+import \"maths.vector\" for Vector4
+
+var r_list = []
+var dhdH_list = []
+
+var Rg = 6360.0
+var Rt = 6420.0
+var RL = 6421.0
+
+var RES_R = 32
+
+for (var layer in 0..RES_R) 
+{
+    var r = layer / (RES_R - 1.0)
+    r = r * r
+
+    var tmp = 0.0
+    if (layer == RES_R - 1) {
+    	tmp = -0.001
+    }
+    if (layer == 0) {
+    	tmp = 0.01
+    }
+    r = Math.sqrt(Rg * Rg + r * (Rt * Rt - Rg * Rg)) + tmp
+
+    r_list.add(r)
+
+    var dmin = Rt - r
+    var dmax = Math.sqrt(r * r - Rg * Rg) + Math.sqrt(Rt * Rt - Rg * Rg)
+    var dminp = r - Rg
+    var dmaxp = Math.sqrt(r * r - Rg * Rg)
+    var dhdH = Vector4(dmin, dmax, dminp, dmaxp)
+    dhdH_list.add(dhdH)
+}
+
+_editor.script_stack.clear()
+_editor.script_stack.add(r_list)
+_editor.script_stack.add(dhdH_list)
+"
+node5.init_ports(0, 2)
+node5.use_cache = false
+
+_editor.add_node(node5, -733.51446284544, 425.5519837015)
+
+var node6 = ::blueprint::nodes::fetch::Fetch()
+
+_editor.add_node(node6, -544.18202485646, 396.45350549888)
+
+var node7 = ::rendergraph::nodes::pass::Pass()
+
+node7.once = true
+
+_editor.add_node(node7, 699.15576537917, -97.704650014042)
+
+var node8 = ::blueprint::nodes::loop::Loop()
+
+node8.start = 0
+node8.end = 32
+
+_editor.add_node(node8, 504.99423839997, -116.98412097707)
+
+var node9 = ::blueprint::nodes::fetch::Fetch()
+
+_editor.add_node(node9, -541.73240802701, 286.06246868445)
+
+var node10 = ::blueprint::nodes::input::Input()
+
+node10.var_name = "deltaSSampler"
+node10.var_type = "texture"
+
+_editor.add_node(node10, -313.65135962116, 192.88795912561)
+
+var node11 = ::blueprint::nodes::input::Input()
+
+node11.var_name = "fbo"
+node11.var_type = "fbo"
+
+_editor.add_node(node11, 256.81770355225, -84.180926513672)
+
+var node12 = ::rendergraph::nodes::blending::Blending()
+node12.query_param("enable").value = true
+
+_editor.add_node(node12, 43.904214643516, -64.30963477125)
+
+Blueprint.connect(node3, "next", node8, "do")
+Blueprint.connect(node8, "next", node7, "do")
+Blueprint.connect(node5, "out1", node9, "items")
+Blueprint.connect(node8, "index", node9, "index")
+Blueprint.connect(node5, "out0", node6, "items")
+Blueprint.connect(node8, "index", node6, "index")
+Blueprint.connect(node8, "index", node1, "layer")
+Blueprint.connect(node6, "item", node1, "r")
+Blueprint.connect(node9, "item", node1, "dhdH")
+Blueprint.connect(node4, "var", node1, "transmittanceSampler")
+Blueprint.connect(node10, "var", node1, "deltaSSampler")
+Blueprint.connect(node0, "next", node3, "do")
+Blueprint.connect(node11, "var", node3, "fbo")
+Blueprint.connect(node5, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node2, "out", node0, "va")
+Blueprint.connect(node12, "rs", node0, "rs")

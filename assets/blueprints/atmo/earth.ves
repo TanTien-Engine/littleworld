@@ -1,0 +1,351 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("tri_strip")
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "lequal", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 1208.1635174131, -133.02265940253)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexcoord;
+
+out VS_OUT {
+    vec2 coords;
+    vec3 ray;
+    vec3 cam_pos;
+} vs_out;
+
+uniform UBO
+{
+	mat4 model;
+	mat4 view;
+	mat4 projection;
+};
+
+void main()
+{
+    vs_out.coords = aPos.xy * 0.5 + 0.5;
+    vs_out.ray = (inverse(view) * vec4((inverse(projection) * vec4(aPos, 1.0)).xyz, 0.0)).xyz;
+    vs_out.cam_pos = (inverse(view) * vec4(0, 0, 0, 1)).xyz;
+    gl_Position = vec4(aPos, 1.0);
+}
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = ""
+node1.fs = "
+#version 330 core
+
+#include \"common.glsl\"
+
+out vec4 FragColor;
+
+in VS_OUT {
+    vec2 coords;
+    vec3 ray;
+    vec3 cam_pos;
+} fs_in;
+
+uniform UBO
+{
+	vec3 cam_pos;
+	vec3 light_pos;
+
+	vec4 diffuse_specular_ambient_shininess;
+};
+
+const float ISun = 100.0;
+const float exposure = 0.4;
+
+uniform sampler2D reflectanceSampler;//ground reflectance texture
+uniform sampler2D irradianceSampler;//precomputed skylight irradiance (E table)
+uniform sampler3D inscatterSampler;//precomputed inscattered light (S table)
+
+
+//inscattered light along ray x+tv, when sun in direction s (=S[L]-T(x,x0)S[L]|x0)
+vec3 inscatter(inout vec3 x, inout float t, vec3 v, vec3 s, out float r, out float mu, out vec3 attenuation) {
+    vec3 result;
+    r = length(x);
+    mu = dot(x, v) / r;
+    float d = -r * mu - sqrt(r * r * (mu * mu - 1.0) + Rt * Rt);
+    if (d > 0.0) { // if x in space and ray intersects atmosphere
+        // move x to nearest intersection of ray with top atmosphere boundary
+        x += d * v;
+        t -= d;
+        mu = (r * mu + d) / Rt;
+        r = Rt;
+    }
+    if (r <= Rt) { // if ray intersects atmosphere
+        float nu = dot(v, s);
+        float muS = dot(x, s) / r;
+        float phaseR = phaseFunctionR(nu);
+        float phaseM = phaseFunctionM(nu);
+        vec4 inscatter = max(texture4D(inscatterSampler, r, mu, muS, nu), 0.0);
+        if (t > 0.0) {
+            vec3 x0 = x + t * v;
+            float r0 = length(x0);
+            float rMu0 = dot(x0, v);
+            float mu0 = rMu0 / r0;
+            float muS0 = dot(x0, s) / r0;
+#ifdef FIX
+            // avoids imprecision problems in transmittance computations based on textures
+            attenuation = analyticTransmittance(r, mu, t);
+#else
+            attenuation = transmittance(r, mu, v, x0);
+#endif
+            if (r0 > Rg + 0.01) {
+                // computes S[L]-T(x,x0)S[L]|x0
+                inscatter = max(inscatter - attenuation.rgbr * texture4D(inscatterSampler, r0, mu0, muS0, nu), 0.0);
+#ifdef FIX
+                // avoids imprecision problems near horizon by interpolating between two points above and below horizon
+                const float EPS = 0.004;
+                float muHoriz = -sqrt(1.0 - (Rg / r) * (Rg / r));
+                if (abs(mu - muHoriz) < EPS) {
+                    float a = ((mu - muHoriz) + EPS) / (2.0 * EPS);
+
+                    mu = muHoriz - EPS;
+                    r0 = sqrt(r * r + t * t + 2.0 * r * t * mu);
+                    mu0 = (r * mu + t) / r0;
+                    vec4 inScatter0 = texture4D(inscatterSampler, r, mu, muS, nu);
+                    vec4 inScatter1 = texture4D(inscatterSampler, r0, mu0, muS0, nu);
+                    vec4 inScatterA = max(inScatter0 - attenuation.rgbr * inScatter1, 0.0);
+
+                    mu = muHoriz + EPS;
+                    r0 = sqrt(r * r + t * t + 2.0 * r * t * mu);
+                    mu0 = (r * mu + t) / r0;
+                    inScatter0 = texture4D(inscatterSampler, r, mu, muS, nu);
+                    inScatter1 = texture4D(inscatterSampler, r0, mu0, muS0, nu);
+                    vec4 inScatterB = max(inScatter0 - attenuation.rgbr * inScatter1, 0.0);
+
+                    inscatter = mix(inScatterA, inScatterB, a);
+                }
+#endif
+            }
+        }
+#ifdef FIX
+        // avoids imprecision problems in Mie scattering when sun is below horizon
+        inscatter.w *= smoothstep(0.00, 0.02, muS);
+#endif
+        result = max(inscatter.rgb * phaseR + getMie(inscatter) * phaseM, 0.0);
+    } else { // x in space and ray looking in space
+        result = vec3(0.0);
+    }
+    return result * ISun;
+}
+
+//ground radiance at end of ray x+tv, when sun in direction s
+//attenuated bewteen ground and viewer (=R[L0]+R[L*])
+vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu, vec3 attenuation)
+{
+    vec3 result;
+    if (t > 0.0) { // if ray hits ground surface
+        // ground reflectance at end of ray, x0
+        vec3 x0 = x + t * v;
+        float r0 = length(x0);
+        vec3 n = x0 / r0;
+        vec2 coords = vec2(atan(n.y, n.x), acos(n.z)) * vec2(0.5, 1.0) / M_PI + vec2(0.5, 0.0);
+        vec4 reflectance = texture(reflectanceSampler, coords) * vec4(0.2, 0.2, 0.2, 1.0);
+        if (r0 > Rg + 0.01) {
+            reflectance = vec4(0.4, 0.4, 0.4, 0.0);
+        }
+
+        // direct sun light (radiance) reaching x0
+        float muS = dot(n, s);
+        vec3 sunLight = transmittanceWithShadow(r0, muS);
+
+        // precomputed sky light (irradiance) (=E[L*]) at x0
+        vec3 groundSkyLight = irradiance(irradianceSampler, r0, muS);
+
+        // light reflected at x0 (=(R[L0]+R[L*])/T(x,x0))
+        vec3 groundColor = reflectance.rgb * (max(muS, 0.0) * sunLight + groundSkyLight) * ISun / M_PI;
+
+        // water specular color due to sunLight
+        if (reflectance.w > 0.0) {
+            vec3 h = normalize(s - v);
+            float fresnel = 0.02 + 0.98 * pow(1.0 - dot(-v, h), 5.0);
+            float waterBrdf = fresnel * pow(max(dot(h, n), 0.0), 150.0);
+            groundColor += reflectance.w * max(waterBrdf, 0.0) * sunLight * ISun;
+        }
+
+        result = attenuation * groundColor; //=R[L0]+R[L*]
+    } else { // ray looking at the sky
+        result = vec3(0.0);
+    }
+    return result;
+}
+
+// direct sun light for ray x+tv, when sun in direction s (=L0)
+vec3 sunColor(vec3 x, float t, vec3 v, vec3 s, float r, float mu) {
+    if (t > 0.0) {
+        return vec3(0.0);
+    } else {
+        vec3 transmittance = r <= Rt ? transmittanceWithShadow(r, mu) : vec3(1.0); // T(x,xo)
+        float isun = step(cos(M_PI / 180.0), dot(v, s)) * ISun; // Lsun
+        return transmittance * isun; // Eq (9)
+    }
+}
+
+vec3 HDR(vec3 L) {
+    L = L * exposure;
+    L.r = L.r < 1.413 ? pow(L.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.r);
+    L.g = L.g < 1.413 ? pow(L.g * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.g);
+    L.b = L.b < 1.413 ? pow(L.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.b);
+    return L;
+}
+
+
+void main()
+{
+    vec3 s = light_pos;
+
+//    vec3 x = cam_pos;
+    vec3 x = fs_in.cam_pos;
+    vec3 v = normalize(fs_in.ray);
+
+    float r = length(x);
+    float mu = dot(x, v) / r;
+    float t = -r * mu - sqrt(r * r * (mu * mu - 1.0) + Rg * Rg);
+
+    vec3 g = x - vec3(0.0, 0.0, Rg + 10.0);
+    float a = v.x * v.x + v.y * v.y - v.z * v.z;
+    float b = 2.0 * (g.x * v.x + g.y * v.y - g.z * v.z);
+    float c = g.x * g.x + g.y * g.y - g.z * g.z;
+    float d = -(b + sqrt(b * b - 4.0 * a * c)) / (2.0 * a);
+    bool cone = d > 0.0 && abs(x.z + d * v.z - Rg) <= 10.0;
+
+    if (t > 0.0) {
+        if (cone && d < t) {
+            t = d;
+        }
+    } else if (cone) {
+        t = d;
+    }
+
+    vec3 attenuation;
+    vec3 inscatterColor = inscatter(x, t, v, s, r, mu, attenuation); //S[L]-T(x,xs)S[l]|xs
+    vec3 groundColor = groundColor(x, t, v, s, r, mu, attenuation); //R[L0]+R[L*]
+    vec3 sunColor = sunColor(x, t, v, s, r, mu); //L0
+    FragColor = vec4(HDR(sunColor + groundColor + inscatterColor), 1.0); // Eq (16)
+//    FragColor = vec4(HDR(sunColor + groundColor), 1.0); // Eq (16)
+//    FragColor = vec4(HDR(sunColor), 1.0);
+
+//    FragColor = texture(earth_tex, fs_in.coords);
+
+    //FragColor = texture(inscatterSampler,vec3(fs_in.coords,(s.x+1.0)/2.0));
+    //FragColor = vec4(texture(irradianceSampler,fs_in.coords).rgb*5.0, 1.0);
+    //FragColor = texture(transmittanceSampler,fs_in.coords);
+}
+
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, 684.86402992418, -72.424899630047)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "depth", "color" ]
+node2.values = { "color" : [ 0.5, 0.5, 0.5, 1 ] }
+
+_editor.add_node(node2, 996.66028898274, 225.89512574204)
+
+var node3 = ::blueprint::nodes::perspective::Perspective()
+
+node3.fovy = 45
+node3.aspect = 0
+node3.znear = 0.1
+node3.zfar = 100000
+
+_editor.add_node(node3, 413.60400748731, -99.260075321102)
+
+var node4 = ::blueprint::nodes::proxy::Proxy()
+
+node4.real_name = "view_cam"
+node4.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node4, 409.76615286487, 48.85559416076)
+
+var node5 = ::blueprint::nodes::input::Input()
+
+node5.var_name = "model"
+node5.var_type = "mat4"
+
+_editor.add_node(node5, 127.71195983887, 283.94540405273)
+
+var node6 = ::blueprint::nodes::number4::Number4()
+
+node6.value.set(0.65, 0.25, 0.1, 12)
+
+_editor.add_node(node6, 408.33280979529, 271.02984059403)
+
+var node7 = ::rendergraph::nodes::texture::Texture()
+node7.query_param("unif_name").value = "u_tex"
+node7.gamma_correction = false
+node7.init_texture("../../../../gis/PrecomputedAtmosphericScattering/earth.tiff")
+
+_editor.add_node(node7, 6.2763293457028, -177.58727783203)
+
+var node8 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node8.type = "quad"
+node8.layout = [ "position", "normal" ]
+node8.shape_params = {  }
+
+_editor.add_node(node8, 706.33246025391, -394.67463544922)
+
+var node9 = ::blueprint::nodes::input::Input()
+
+node9.var_name = "transmittanceSampler"
+node9.var_type = "texture"
+
+_editor.add_node(node9, -14.79170064581, 212.21883549733)
+
+var node10 = ::blueprint::nodes::input::Input()
+
+node10.var_name = "irradianceSampler"
+node10.var_type = "texture"
+
+_editor.add_node(node10, -13.379974365234, 123.92206226696)
+
+var node11 = ::blueprint::nodes::input::Input()
+
+node11.var_name = "inscatterSampler"
+node11.var_type = "texture"
+
+_editor.add_node(node11, -7.0163296786222, 4.831154563208)
+
+var node12 = ::blueprint::nodes::number3::Number3()
+
+node12.value.set(0, -1, 0)
+
+_editor.add_node(node12, 374.96071404071, -276.16663221879)
+
+var node13 = ::globegraph::nodes::globe_camera::GlobeCamera()
+node13.query_param("lon").value = 0.45415539736423
+node13.query_param("lat").value = 0.48080308612359
+node13.query_param("theta").value = 0.234
+node13.query_param("phi").value = 0.498
+node13.query_param("d").value = 7011.9
+
+_editor.add_node(node13, 227.61659644531, 153.44037156836)
+
+Blueprint.connect(node4, "zoom", node3, "fovy")
+Blueprint.connect(node5, "var", node1, "model")
+Blueprint.connect(node13, "view", node1, "view")
+Blueprint.connect(node13, "proj", node1, "projection")
+Blueprint.connect(node4, "pos", node1, "cam_pos")
+Blueprint.connect(node12, "v3", node1, "light_pos")
+Blueprint.connect(node6, "v4", node1, "diffuse_specular_ambient_shininess")
+Blueprint.connect(node9, "var", node1, "transmittanceSampler")
+Blueprint.connect(node11, "var", node1, "inscatterSampler")
+Blueprint.connect(node7, "tex", node1, "reflectanceSampler")
+Blueprint.connect(node10, "var", node1, "irradianceSampler")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node8, "out", node0, "va")

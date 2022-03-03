@@ -1,0 +1,105 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for VAR_TYPE_MATRIX4
+import "blueprint.node_param" for NodeParam
+import "maths.vector" for Vector2
+import "globegen" for GlobeTools
+import "gui" for MOUSE_LEFT, MOUSE_RIGHT
+import "math" for Math
+
+class GlobeCamera is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "view", VAR_TYPE_MATRIX4),
+			Pin(this, "proj", VAR_TYPE_MATRIX4),			
+		]
+
+		this.params.add(NodeParam("lon", 0))
+		this.params.add(NodeParam("lat", 0))
+		this.params.add(NodeParam("theta", 0))
+		this.params.add(NodeParam("phi", 0))
+		this.params.add(NodeParam("d", 6360.0))
+
+		this.layout()
+
+		this.last_pos = nil
+	}
+
+	calc_value(idx) 
+	{
+		var lon   = this.query_param("lon").value
+		var lat   = this.query_param("lat").value
+		var theta = this.query_param("theta").value
+		var phi   = this.query_param("phi").value
+		var d     = this.query_param("d").value
+
+		if (idx == 0) {
+			return GlobeTools.cam_view_mat(lon, lat, theta, phi, d)
+		} else if (idx == 1) {
+			return GlobeTools.cam_proj_mat(lon, lat, theta, phi, d)
+		} else {
+			return nil
+		}
+	}
+
+	on_key_pressed(key) 
+	{
+		if (key == "w") {
+			this.query_param("d").value = this.query_param("d").value * 1.05
+		} else if (key == "s") {
+			this.query_param("d").value = this.query_param("d").value / 1.05
+		}
+	}
+
+	on_mouse_pressed(x, y, btn) 
+	{
+		this.last_pos = Vector2(x, y) 
+	}
+
+	on_mouse_dragged(x, y, btn) 
+	{
+		if (btn == MOUSE_LEFT)
+		{
+			var theta = this.query_param("theta").value
+			var phi   = this.query_param("phi").value
+
+	    	phi = phi + (this.last_pos.x - x) / 500.0
+	    	theta = theta + (this.last_pos.y - y) / 500.0
+	        theta = Math.max(0.0, Math.min(Math.pi(), theta))
+
+	        this.query_param("theta").value = theta
+	        this.query_param("phi").value = phi	        
+
+	        this.last_pos.x = x
+	        this.last_pos.y = y
+		}
+		else if (btn == MOUSE_RIGHT)
+		{
+			var lon   = this.query_param("lon").value
+			var lat   = this.query_param("lat").value
+			var theta = this.query_param("theta").value
+			var phi   = this.query_param("phi").value
+			var d     = this.query_param("d").value
+
+			var Rg = 6360.0
+
+			var pos = GlobeTools.cam_position(lon, lat, theta, phi, d)
+			var len = Math.sqrt(pos[0] * pos[0] + pos[1] * pos[1] + pos[2] * pos[2])
+	    	var factor = len - Rg
+	    	factor = factor / Rg
+	    	lon = lon + (this.last_pos.x - x) / 400.0 * factor
+	    	lat = lat - (this.last_pos.y - y) / 400.0 * factor
+	        lat = Math.max(-Math.pi() / 2.0, Math.min(Math.pi() / 2.0, lat))
+
+	        this.query_param("lon").value = lon
+	        this.query_param("lat").value = lat
+
+	        this.last_pos.x = x
+	        this.last_pos.y = y
+		}
+	}	
+}
