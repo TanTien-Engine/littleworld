@@ -6,17 +6,10 @@ node0.skip = false
 
 _editor.add_node(node0, 261.90909090909, 136.5)
 
-var node1 = ::rendergraph::nodes::clear::Clear()
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = "../../shaders/atmo/"
 
-node1.masks = [ "color", "depth" ]
-node1.values = { "color" : [ 255, 255, 255, 255 ] }
-
-_editor.add_node(node1, 43.82090909091, 488.3854545455)
-
-var node2 = ::rendergraph::nodes::shader::Shader()
-node2.query_param("inc_dir").value = "../../shaders/atmo/"
-
-node2.vs = "
+node1.vs = "
 #version 330 core
 layout (location = 0) in vec3 aPos;
 
@@ -25,9 +18,9 @@ void main()
 	gl_Position = vec4(aPos, 1.0);
 }
 "
-node2.tcs = ""
-node2.tes = ""
-node2.gs = "
+node1.tcs = ""
+node1.tes = ""
+node1.gs = "
 
 #version 330 core
 layout (triangles) in;
@@ -52,7 +45,7 @@ void main()
     EndPrimitive();
 }
 "
-node2.fs = "
+node1.fs = "
 #version 330 core
 
 #include \"common.glsl\"
@@ -116,67 +109,67 @@ void main() {
 }
 
 "
-node2.cs = ""
-node2.render_gen()
+node1.cs = ""
+node1.render_gen()
 
-_editor.add_node(node2, -133.83000138716, 223.10726162997)
+_editor.add_node(node1, -133.83000138716, 223.10726162997)
 
-var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+var node2 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
 
-node3.type = "quad"
-node3.layout = [ "position" ]
-node3.shape_params = {  }
+node2.type = "quad"
+node2.layout = [ "position" ]
+node2.shape_params = {  }
 
-_editor.add_node(node3, 42.81818043102, 63.95451216264)
+_editor.add_node(node2, 42.81818043102, 63.95451216264)
 
-var node4 = ::rendergraph::nodes::render_target::RenderTarget()
+var node3 = ::rendergraph::nodes::render_target::RenderTarget()
 
-_editor.add_node(node4, 45.54545177113, -106.04548783736)
+_editor.add_node(node3, 45.54545177113, -106.04548783736)
 
-var node5 = ::rendergraph::nodes::texture::Texture()
-node5.query_param("unif_name").value = "deltaSR"
-node5.gamma_correction = false
-node5.init_texture(256, 128, 32, "rgb16f")
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "deltaSR"
+node4.gamma_correction = false
+node4.init_texture(256, 128, 32, "rgb16f")
 
-_editor.add_node(node5, -364.37272311124, -3.5454822887099)
+_editor.add_node(node4, -364.37272311124, -3.5454822887099)
 
-var node6 = ::rendergraph::nodes::pass::Pass()
+var node5 = ::rendergraph::nodes::pass::Pass()
 
-node6.once = false
+node5.once = false
 
-_editor.add_node(node6, 410.24724922546, 187.83396770996)
+_editor.add_node(node5, 410.24724922546, 187.83396770996)
 
-var node7 = ::blueprint::nodes::output::Output()
+var node6 = ::blueprint::nodes::output::Output()
 
-node7.var_name = "deltaSR"
+node6.var_name = "deltaSR"
+node6.var_type = "texture"
+
+_editor.add_node(node6, -97.6142689098, -104.34794477983)
+
+var node7 = ::blueprint::nodes::input::Input()
+
+node7.var_name = "transmittanceSampler"
 node7.var_type = "texture"
 
-_editor.add_node(node7, -97.6142689098, -104.34794477983)
+_editor.add_node(node7, -347.22314800902, 230.94609316304)
 
-var node8 = ::blueprint::nodes::input::Input()
+var node8 = ::rendergraph::nodes::texture::Texture()
+node8.query_param("unif_name").value = "deltaSM"
+node8.gamma_correction = false
+node8.init_texture(256, 128, 32, "rgb16f")
 
-node8.var_name = "transmittanceSampler"
-node8.var_type = "texture"
+_editor.add_node(node8, -372.17084716083, -250.53605055317)
 
-_editor.add_node(node8, -347.22314800902, 230.94609316304)
+var node9 = ::blueprint::nodes::output::Output()
 
-var node9 = ::rendergraph::nodes::texture::Texture()
-node9.query_param("unif_name").value = "deltaSM"
-node9.gamma_correction = false
-node9.init_texture(256, 128, 32, "rgb16f")
+node9.var_name = "deltaSM"
+node9.var_type = "texture"
 
-_editor.add_node(node9, -372.17084716083, -250.53605055317)
+_editor.add_node(node9, -97.311483868478, -246.8894221352)
 
-var node10 = ::blueprint::nodes::output::Output()
+var node10 = ::blueprint::nodes::custom::Custom()
 
-node10.var_name = "deltaSM"
-node10.var_type = "texture"
-
-_editor.add_node(node10, -97.311483868478, -246.8894221352)
-
-var node11 = ::blueprint::nodes::custom::Custom()
-
-node11.code = "
+node10.code = "
 import \"math\" for Math
 import \"maths.vector\" for Vector4
 
@@ -217,53 +210,52 @@ _editor.script_stack.clear()
 _editor.script_stack.add(r_list)
 _editor.script_stack.add(dhdH_list)
 "
-node11.init_ports(0, 2)
-node11.use_cache = false
+node10.init_ports(0, 2)
+node10.use_cache = false
 
-_editor.add_node(node11, -733.51446284544, 425.5519837015)
+_editor.add_node(node10, -733.51446284544, 425.5519837015)
 
-var node12 = ::blueprint::nodes::fetch::Fetch()
+var node11 = ::blueprint::nodes::fetch::Fetch()
 
-_editor.add_node(node12, -544.18202485646, 396.45350549888)
+_editor.add_node(node11, -544.18202485646, 396.45350549888)
 
-var node13 = ::rendergraph::nodes::pass::Pass()
+var node12 = ::rendergraph::nodes::pass::Pass()
 
-node13.once = true
+node12.once = true
 
-_editor.add_node(node13, 699.15576537917, -97.704650014042)
+_editor.add_node(node12, 699.15576537917, -97.704650014042)
 
-var node14 = ::blueprint::nodes::loop::Loop()
+var node13 = ::blueprint::nodes::loop::Loop()
 
-node14.start = 0
-node14.end = 32
+node13.start = 0
+node13.end = 32
 
-_editor.add_node(node14, 504.99423839997, -116.98412097707)
+_editor.add_node(node13, 504.99423839997, -116.98412097707)
 
-var node15 = ::blueprint::nodes::print::Print()
+var node14 = ::blueprint::nodes::print::Print()
 
-_editor.add_node(node15, -268.63485162908, 491.04168146307)
+_editor.add_node(node14, -268.63485162908, 491.04168146307)
 
-var node16 = ::blueprint::nodes::fetch::Fetch()
+var node15 = ::blueprint::nodes::fetch::Fetch()
 
-_editor.add_node(node16, -541.73240802701, 286.06246868445)
+_editor.add_node(node15, -541.73240802701, 286.06246868445)
 
-Blueprint.connect(node6, "next", node14, "do")
-Blueprint.connect(node14, "next", node13, "do")
-Blueprint.connect(node11, "out1", node16, "items")
-Blueprint.connect(node14, "index", node16, "index")
-Blueprint.connect(node11, "out0", node12, "items")
-Blueprint.connect(node14, "index", node12, "index")
-Blueprint.connect(node11, "next", node1, "prev")
-Blueprint.connect(node9, "tex", node10, "var")
-Blueprint.connect(node14, "index", node2, "layer")
-Blueprint.connect(node12, "item", node2, "r")
-Blueprint.connect(node16, "item", node2, "dhdH")
-Blueprint.connect(node8, "var", node2, "transmittanceSampler")
-Blueprint.connect(node0, "next", node6, "do")
-Blueprint.connect(node4, "fbo", node6, "fbo")
-Blueprint.connect(node5, "tex", node7, "var")
-Blueprint.connect(node5, "tex", node4, "col0")
-Blueprint.connect(node9, "tex", node4, "col1")
-Blueprint.connect(node1, "next", node0, "prev")
-Blueprint.connect(node2, "out", node0, "shader")
-Blueprint.connect(node3, "out", node0, "va")
+Blueprint.connect(node5, "next", node13, "do")
+Blueprint.connect(node13, "next", node12, "do")
+Blueprint.connect(node10, "out1", node15, "items")
+Blueprint.connect(node13, "index", node15, "index")
+Blueprint.connect(node10, "out0", node11, "items")
+Blueprint.connect(node13, "index", node11, "index")
+Blueprint.connect(node8, "tex", node9, "var")
+Blueprint.connect(node13, "index", node1, "layer")
+Blueprint.connect(node11, "item", node1, "r")
+Blueprint.connect(node15, "item", node1, "dhdH")
+Blueprint.connect(node7, "var", node1, "transmittanceSampler")
+Blueprint.connect(node0, "next", node5, "do")
+Blueprint.connect(node3, "fbo", node5, "fbo")
+Blueprint.connect(node4, "tex", node6, "var")
+Blueprint.connect(node4, "tex", node3, "col0")
+Blueprint.connect(node8, "tex", node3, "col1")
+Blueprint.connect(node10, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node2, "out", node0, "va")
