@@ -194,8 +194,10 @@ _editor.add_node(node11, 256.81770355225, -84.180926513672)
 
 var node12 = ::rendergraph::nodes::blending::Blending()
 node12.query_param("enable").value = true
+node12.query_param("src").value = "one"
+node12.query_param("dst").value = "one"
 
-_editor.add_node(node12, 43.904214643516, -64.30963477125)
+_editor.add_node(node12, 40.604214643516, -113.80963477125)
 
 Blueprint.connect(node3, "next", node8, "do")
 Blueprint.connect(node8, "next", node7, "do")

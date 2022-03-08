@@ -91,8 +91,10 @@ _editor.add_node(node7, 260.95935058594, -93.128280639651)
 
 var node8 = ::rendergraph::nodes::blending::Blending()
 node8.query_param("enable").value = true
+node8.query_param("src").value = "one"
+node8.query_param("dst").value = "one"
 
-_editor.add_node(node8, 32.146881103516, -122.91064453125)
+_editor.add_node(node8, 32.829894558881, -138.61995400465)
 
 Blueprint.connect(node6, "var", node1, "k")
 Blueprint.connect(node4, "var", node1, "transmittanceSampler")
