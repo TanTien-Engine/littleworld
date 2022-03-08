@@ -232,10 +232,6 @@ void main()
     vec3 groundColor = groundColor(x, t, v, s, r, mu, attenuation); //R[L0]+R[L*]
     vec3 sunColor = sunColor(x, t, v, s, r, mu); //L0
     FragColor = vec4(HDR(sunColor + groundColor + inscatterColor), 1.0); // Eq (16)
-//    FragColor = vec4(HDR(sunColor + groundColor), 1.0); // Eq (16)
-//    FragColor = vec4(HDR(sunColor), 1.0);
-
-//    FragColor = texture(earth_tex, fs_in.coords);
 
     //FragColor = texture(inscatterSampler,vec3(fs_in.coords,(s.x+1.0)/2.0));
     //FragColor = vec4(texture(irradianceSampler,fs_in.coords).rgb*5.0, 1.0);
@@ -321,14 +317,14 @@ node11.var_type = "texture"
 _editor.add_node(node11, -7.0163296786222, 4.831154563208)
 
 var node12 = ::globegraph::nodes::globe_camera::GlobeCamera()
-node12.query_param("lon").value = 0.65788075393663
-node12.query_param("lat").value = 0.80255390329757
-node12.query_param("theta").value = 0.026000000000001
-node12.query_param("phi").value = -1.134
-node12.query_param("d").value = 37.894895458443
-node12.query_param("l_dir").value.set(0.69258923556789, 0.085039265175279, -0.71630194342465)
+node12.query_param("lon").value = 0.87860146376918
+node12.query_param("lat").value = 1.3437606722863
+node12.query_param("theta").value = 1.568
+node12.query_param("phi").value = 0.658
+node12.query_param("d").value = 15306.098326275
+node12.query_param("l_dir").value.set(-0.0005709601396818, -0.013077137176769, 0.99991432757401)
 
-_editor.add_node(node12, 227.61659644531, 153.44037156836)
+_editor.add_node(node12, 197.61659644531, 82.44037156836)
 
 Blueprint.connect(node4, "zoom", node3, "fovy")
 Blueprint.connect(node5, "var", node1, "model")
