@@ -49,7 +49,8 @@ const vec3 betaR = vec3(5.8e-3, 1.35e-2, 3.31e-2);
 const float HM = 1.2;
 const vec3 betaMSca = vec3(4e-3);
 const vec3 betaMEx = betaMSca / 0.9;
-const float mieG = 0.8;
+//const float mieG = 0.8;
+const float mieG = 0.95;
 // CLEAR SKY
 /*const float HM = 1.2;
 const vec3 betaMSca = vec3(20e-3);
