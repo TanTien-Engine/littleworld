@@ -7,7 +7,7 @@ node0.skip = false
 _editor.add_node(node0, 1208.1635174131, -133.02265940253)
 
 var node1 = ::rendergraph::nodes::shader::Shader()
-node1.query_param("inc_dir").value = "../../shaders/atmo/"
+node1.query_param("inc_dir").value = "../../assets/shaders/atmo/"
 
 node1.vs = "
 #version 330 core
@@ -258,14 +258,14 @@ node3.aspect = 0
 node3.znear = 0.1
 node3.zfar = 100000
 
-_editor.add_node(node3, 411.12466864433, -107.52453813102)
+_editor.add_node(node3, 219.94466864433, -286.60453813102)
 
 var node4 = ::blueprint::nodes::proxy::Proxy()
 
 node4.real_name = "view_cam"
 node4.init_real_node(::blueprint::nodes::camera3d::Camera3d())
 
-_editor.add_node(node4, 409.76615286487, 48.85559416076)
+_editor.add_node(node4, 225.84615286487, -124.17440583924)
 
 var node5 = ::blueprint::nodes::input::Input()
 
@@ -283,60 +283,43 @@ _editor.add_node(node6, 408.33280979529, 271.02984059403)
 var node7 = ::rendergraph::nodes::texture::Texture()
 node7.query_param("unif_name").value = "u_tex"
 node7.gamma_correction = false
-node7.init_texture("../../../../gis/PrecomputedAtmosphericScattering/earth.tiff")
+node7.init_texture("../../../gis/PrecomputedAtmosphericScattering/earth.tiff")
 
 _editor.add_node(node7, 6.2763293457028, -177.58727783203)
 
 var node8 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
 
 node8.type = "quad"
-node8.layout = [ "position", "normal" ]
-node8.shape_params = {  }
+node8.layout = [ "position" ]
+node8.shape_params = { "grids_size" : 16 }
 
 _editor.add_node(node8, 706.33246025391, -394.67463544922)
 
-var node9 = ::blueprint::nodes::input::Input()
+var node9 = ::globegraph::nodes::globe_camera::GlobeCamera()
+node9.query_param("lon").value = 0.87860146376918
+node9.query_param("lat").value = 1.3437606722863
+node9.query_param("theta").value = 1.568
+node9.query_param("phi").value = 0.658
+node9.query_param("d").value = 15306.098326275
+node9.query_param("l_dir").value.set(-0.0005709601396818, -0.013077137176769, 0.99991432757401)
 
-node9.var_name = "transmittanceSampler"
-node9.var_type = "texture"
+_editor.add_node(node9, 197.61659644531, 82.44037156836)
 
-_editor.add_node(node9, -14.79170064581, 212.21883549733)
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "../../assets/blueprints/render/atmo/gen_atom_textures.ves")
 
-var node10 = ::blueprint::nodes::input::Input()
-
-node10.var_name = "irradianceSampler"
-node10.var_type = "texture"
-
-_editor.add_node(node10, -13.379974365234, 123.92206226696)
-
-var node11 = ::blueprint::nodes::input::Input()
-
-node11.var_name = "inscatterSampler"
-node11.var_type = "texture"
-
-_editor.add_node(node11, -7.0163296786222, 4.831154563208)
-
-var node12 = ::globegraph::nodes::globe_camera::GlobeCamera()
-node12.query_param("lon").value = 0.87860146376918
-node12.query_param("lat").value = 1.3437606722863
-node12.query_param("theta").value = 1.568
-node12.query_param("phi").value = 0.658
-node12.query_param("d").value = 15306.098326275
-node12.query_param("l_dir").value.set(-0.0005709601396818, -0.013077137176769, 0.99991432757401)
-
-_editor.add_node(node12, 197.61659644531, 82.44037156836)
+_editor.add_node(node10, 457.02553405762, -37.01760269165)
 
 Blueprint.connect(node4, "zoom", node3, "fovy")
 Blueprint.connect(node5, "var", node1, "model")
-Blueprint.connect(node12, "view", node1, "view")
-Blueprint.connect(node12, "proj", node1, "projection")
+Blueprint.connect(node9, "view", node1, "view")
+Blueprint.connect(node9, "proj", node1, "projection")
 Blueprint.connect(node4, "pos", node1, "cam_pos")
-Blueprint.connect(node12, "l_dir", node1, "light_pos")
+Blueprint.connect(node9, "l_dir", node1, "light_pos")
 Blueprint.connect(node6, "v4", node1, "diffuse_specular_ambient_shininess")
-Blueprint.connect(node9, "var", node1, "transmittanceSampler")
-Blueprint.connect(node11, "var", node1, "inscatterSampler")
+Blueprint.connect(node10, "inscatter", node1, "inscatterSampler")
 Blueprint.connect(node7, "tex", node1, "reflectanceSampler")
-Blueprint.connect(node10, "var", node1, "irradianceSampler")
+Blueprint.connect(node10, "irradiance", node1, "irradianceSampler")
 Blueprint.connect(node2, "next", node0, "prev")
 Blueprint.connect(node1, "out", node0, "shader")
 Blueprint.connect(node8, "out", node0, "va")

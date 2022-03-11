@@ -1,325 +1,278 @@
 var node0 = ::blueprint::nodes::subgraph::Subgraph()
-node0.load_from_file(_editor, "../../assets/blueprints/atmo/transmittance.ves")
+node0.load_from_file(_editor, "../../atmo/transmittance.ves")
 
-_editor.add_node(node0, -592.79130140499, 73.959994876029)
+_editor.add_node(node0, -739.17163234917, 252.92788121143)
 
 var node1 = ::blueprint::nodes::subgraph::Subgraph()
-node1.load_from_file(_editor, "../../assets/blueprints/atmo/irradiance1.ves")
+node1.load_from_file(_editor, "../../atmo/irradiance1.ves")
 
-_editor.add_node(node1, -286.42636489129, 224.96543622413)
+_editor.add_node(node1, -432.80669583546, 403.93332255953)
 
 var node2 = ::blueprint::nodes::subgraph::Subgraph()
-node2.load_from_file(_editor, "../../assets/blueprints/atmo/inscatter1.ves")
+node2.load_from_file(_editor, "../../atmo/inscatter1.ves")
 
-_editor.add_node(node2, -298.11029576229, -153.36176955022)
+_editor.add_node(node2, -444.49062670646, 25.606116785179)
 
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
-node3.load_from_file(_editor, "../../assets/blueprints/atmo/copy_irradiance.ves")
+node3.load_from_file(_editor, "../../atmo/copy_irradiance.ves")
 
-_editor.add_node(node3, 167.89510128318, 198.85852131844)
+_editor.add_node(node3, 21.514770339007, 377.82640765384)
 
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "../../assets/blueprints/atmo/copy_inscatter1.ves")
+node4.load_from_file(_editor, "../../atmo/copy_inscatter1.ves")
 
-_editor.add_node(node4, 295.93633157093, -161.13418669626)
+_editor.add_node(node4, 149.55600062676, 17.833699639139)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "../../assets/blueprints/atmo/inscatter_s.ves")
+node5.load_from_file(_editor, "../../atmo/inscatter_s.ves")
 
-_editor.add_node(node5, 1056.9845877546, 130.68646499052)
+_editor.add_node(node5, 910.60425681043, 309.65435132592)
 
 var node6 = ::blueprint::nodes::subgraph::Subgraph()
-node6.load_from_file(_editor, "../../assets/blueprints/atmo/irradiance_n.ves")
+node6.load_from_file(_editor, "../../atmo/irradiance_n.ves")
 
-_editor.add_node(node6, 1075.101434573, -169.5797262314)
+_editor.add_node(node6, 928.72110362883, 9.3881601039992)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
-node7.load_from_file(_editor, "../../assets/blueprints/atmo/inscatter_n.ves")
+node7.load_from_file(_editor, "../../atmo/inscatter_n.ves")
 
-_editor.add_node(node7, 1306.8208821634, 160.61452324145)
+_editor.add_node(node7, 1160.4405512192, 339.58240957685)
 
 var node8 = ::blueprint::nodes::number::Number()
 
 node8.value = 0
 
-_editor.add_node(node8, -45.64791640409, 174.45644038444)
+_editor.add_node(node8, -192.02824734826, 353.42432671984)
 
 var node9 = ::blueprint::nodes::subgraph::Subgraph()
-node9.load_from_file(_editor, "../../assets/blueprints/atmo/copy_irradiance.ves")
+node9.load_from_file(_editor, "../../atmo/copy_irradiance.ves")
 
-_editor.add_node(node9, 1354.720433725, -170.32411754415)
+_editor.add_node(node9, 1208.3401027808, 8.6437687912492)
 
 var node10 = ::blueprint::nodes::number::Number()
 
 node10.value = 1
 
-_editor.add_node(node10, 1121.6060047513, -337.0184958628)
+_editor.add_node(node10, 975.22567380713, -158.0506095274)
 
 var node11 = ::rendergraph::nodes::texture::Texture()
 node11.query_param("unif_name").value = "irradiance"
 node11.gamma_correction = false
 node11.init_texture(64, 16, "rgb16f")
 
-_editor.add_node(node11, -220.68315374909, 53.715572231249)
+_editor.add_node(node11, -367.06348469326, 232.68345856665)
 
 var node12 = ::rendergraph::nodes::texture::Texture()
 node12.query_param("unif_name").value = "inscatter"
 node12.gamma_correction = false
 node12.init_texture(256, 128, 32, "rgba16f")
 
-_editor.add_node(node12, -71.59581009899, -282.29902766975)
+_editor.add_node(node12, -217.97614104316, -103.33114133435)
 
 var node13 = ::rendergraph::nodes::render_target::RenderTarget()
 
-_editor.add_node(node13, -44.11002823029, -1.1549044018058)
+_editor.add_node(node13, -190.49035917446, 177.81298193359)
 
 var node14 = ::rendergraph::nodes::render_target::RenderTarget()
 
-_editor.add_node(node14, 108.89089808332, -354.65689026237)
+_editor.add_node(node14, -37.489432860853, -175.68900392697)
 
 var node15 = ::blueprint::nodes::store::Store()
 
 node15.var_name = "transmittance"
 
-_editor.add_node(node15, -545.41505501249, -5.1266916782358)
+_editor.add_node(node15, -550.11242951317, 229.15963980243)
 
 var node16 = ::blueprint::nodes::load::Load()
 
 node16.var_name = "transmittance"
 
-_editor.add_node(node16, -49.29801111419, 234.72101813926)
+_editor.add_node(node16, -195.67834205836, 413.68890447466)
 
 var node17 = ::blueprint::nodes::load::Load()
 
 node17.var_name = "transmittance"
 
-_editor.add_node(node17, 102.39482646208, -186.6946001334)
+_editor.add_node(node17, -43.985504482093, -7.7267137980008)
 
 var node18 = ::blueprint::nodes::load::Load()
 
 node18.var_name = "transmittance"
 
-_editor.add_node(node18, 853.55781465316, 233.76717440813)
+_editor.add_node(node18, 707.17748370899, 412.73506074353)
 
 var node19 = ::blueprint::nodes::load::Load()
 
 node19.var_name = "transmittance"
 
-_editor.add_node(node19, 853.96903130489, -127.80388017526)
+_editor.add_node(node19, 707.58870036072, 51.164006160139)
 
 var node20 = ::blueprint::nodes::load::Load()
 
 node20.var_name = "transmittance"
 
-_editor.add_node(node20, 1102.6763761501, 17.898017296801)
+_editor.add_node(node20, 956.29604520593, 196.8659036322)
 
 var node21 = ::blueprint::nodes::load::Load()
 
 node21.var_name = "transmittance"
 
-_editor.add_node(node21, 1125.0642073557, -271.6184963212)
+_editor.add_node(node21, 978.68387641153, -92.650609985801)
 
 var node22 = ::blueprint::nodes::subgraph::Subgraph()
-node22.load_from_file(_editor, "../../assets/blueprints/atmo/copy_inscatter_n.ves")
+node22.load_from_file(_editor, "../../atmo/copy_inscatter_n.ves")
 
-_editor.add_node(node22, 1558.2906242687, 145.25233958015)
+_editor.add_node(node22, 1411.9102933245, 324.22022591555)
 
 var node23 = ::blueprint::nodes::load::Load()
 
 node23.var_name = "transmittance"
 
-_editor.add_node(node23, 1347.5533735978, 77.311681459781)
+_editor.add_node(node23, 1201.1730426536, 256.27956779518)
 
 var node24 = ::blueprint::nodes::load::Load()
 
 node24.var_name = "deltaE"
 
-_editor.add_node(node24, 854.94964432757, 187.76205303883)
+_editor.add_node(node24, 708.5693133834, 366.72993937423)
 
 var node25 = ::blueprint::nodes::store::Store()
 
 node25.var_name = "deltaSR"
 
-_editor.add_node(node25, -245.71972353119, -247.66869409582)
+_editor.add_node(node25, -392.10005447536, -68.700807760421)
 
 var node26 = ::blueprint::nodes::store::Store()
 
 node26.var_name = "deltaSM"
 
-_editor.add_node(node26, -244.64616977719, -316.62327787659)
+_editor.add_node(node26, -391.02650072136, -137.65539154119)
 
 var node27 = ::blueprint::nodes::load::Load()
 
 node27.var_name = "deltaSR"
 
-_editor.add_node(node27, 853.92758478773, 141.39136029011)
+_editor.add_node(node27, 707.54725384356, 320.35924662551)
 
 var node28 = ::blueprint::nodes::load::Load()
 
 node28.var_name = "deltaSM"
 
-_editor.add_node(node28, 854.61058995138, 95.629463501801)
+_editor.add_node(node28, 708.23025900721, 274.5973498372)
 
 var node29 = ::blueprint::nodes::load::Load()
 
 node29.var_name = "deltaSR"
 
-_editor.add_node(node29, 854.45095547931, -170.61431432801)
+_editor.add_node(node29, 708.07062453514, 8.3535720073892)
 
 var node30 = ::blueprint::nodes::load::Load()
 
 node30.var_name = "deltaSM"
 
-_editor.add_node(node30, 854.56948671292, -213.5538414661)
+_editor.add_node(node30, 708.18915576875, -34.585955130701)
 
 var node31 = ::blueprint::nodes::store::Store()
 
 node31.var_name = "irradiance"
 
-_editor.add_node(node31, 86.20280276586, 36.027777448319)
+_editor.add_node(node31, -55.906065368396, 184.88593651099)
 
 var node32 = ::blueprint::nodes::store::Store()
 
 node32.var_name = "inscatter"
 
-_editor.add_node(node32, 237.02270023969, -317.69309072182)
+_editor.add_node(node32, 90.642369295517, -138.72520438642)
 
 var node33 = ::blueprint::nodes::load::Load()
 
 node33.var_name = "irradiance"
 
-_editor.add_node(node33, 1121.0640153884, -408.7206139969)
+_editor.add_node(node33, 974.68368444423, -229.7527276615)
 
 var node34 = ::blueprint::nodes::load::Load()
 
 node34.var_name = "inscatter"
 
-_editor.add_node(node34, 1348.9492835369, 31.908359829881)
+_editor.add_node(node34, 1202.5689525927, 210.87624616528)
 
 var node35 = ::blueprint::nodes::loop::Loop()
 
 node35.start = 0
 node35.end = 3
 
-_editor.add_node(node35, 1617.9286698862, -149.3373467824)
+_editor.add_node(node35, 1471.548338942, 29.630539552999)
 
 var node36 = ::blueprint::nodes::branch_f::BranchF()
 
-_editor.add_node(node36, 860.54839951484, -27.2214710277)
+_editor.add_node(node36, 714.16806857067, 151.7464153077)
 
 var node37 = ::blueprint::nodes::compare::Compare()
 
 node37.cmp = "equal"
 
-_editor.add_node(node37, 669.20474398836, 5.2425922552005)
+_editor.add_node(node37, 522.82441304419, 184.2104785906)
 
 var node38 = ::blueprint::nodes::number::Number()
 
 node38.value = 0
 
-_editor.add_node(node38, 524.0047622989, -5.7574016412995)
+_editor.add_node(node38, 377.62443135473, 173.2104846941)
 
 var node39 = ::blueprint::nodes::number::Number()
 
 node39.value = 1
 
-_editor.add_node(node39, 675.80472567781, -72.8573955377)
+_editor.add_node(node39, 529.42439473364, 106.1104907977)
 
 var node40 = ::blueprint::nodes::number::Number()
 
 node40.value = 0
 
-_editor.add_node(node40, 674.7047622989, -139.9574138483)
+_editor.add_node(node40, 528.32443135473, 39.010472487099)
 
-var node41 = ::blueprint::nodes::subgraph::Subgraph()
-node41.load_from_file(_editor, "../../assets/blueprints/atmo/earth.ves")
+var node41 = ::blueprint::nodes::commentary::Commentary()
 
-_editor.add_node(node41, 1574.2582638803, 504.968029754)
+node41.set_size(1278.46, 742.067)
+node41.title = "Multiple scattering"
 
-var node42 = ::blueprint::nodes::camera3d::Camera3d()
+_editor.add_node(node41, 926.03630918593, 486.00814923345)
 
-node42.cam.position.set(-6109.650030385, 509.36109831769, -16.634802581289)
-node42.cam.yaw = -183.3
-node42.cam.pitch = -82.2
-node42.cam.zoom = 45
-node42.cam.update_vectors()
-node42.speed = 100
+var node42 = ::blueprint::nodes::commentary::Commentary()
 
-_editor.add_node(node42, 1347.6784488003, 563.80521797172)
+node42.set_size(1144, 777)
+node42.title = "Prepare"
 
-var node43 = ::blueprint::nodes::load::Load()
+_editor.add_node(node42, -302.75953981136, 483.9101175561)
 
-node43.var_name = "transmittance"
+var node43 = ::blueprint::nodes::output::Output()
 
-_editor.add_node(node43, 1355.4313915604, 453.7306092746)
+node43.var_name = "irradiance"
+node43.var_type = "texture"
 
-var node44 = ::blueprint::nodes::commentary::Commentary()
+_editor.add_node(node43, -187.94826974732, 281.15924824314)
 
-node44.set_size(1278.46, 742.067)
-node44.title = "Multiple scattering"
+var node44 = ::blueprint::nodes::output::Output()
 
-_editor.add_node(node44, 1072.4166401301, 307.04026289805)
+node44.var_name = "inscatter"
+node44.var_type = "texture"
 
-var node45 = ::blueprint::nodes::commentary::Commentary()
+_editor.add_node(node44, -40.47561850253, -64.032959184127)
 
-node45.set_size(1144, 777)
-node45.title = "Prepare"
-
-_editor.add_node(node45, -156.37920886719, 304.9422312207)
-
-var node46 = ::blueprint::nodes::store::Store()
-
-node46.var_name = "irradiance_tex"
-
-_editor.add_node(node46, -45.15209150209, 106.97089554954)
-
-var node47 = ::blueprint::nodes::load::Load()
-
-node47.var_name = "irradiance_tex"
-
-_editor.add_node(node47, 1357.8371221189, 412.7678991672)
-
-var node48 = ::blueprint::nodes::store::Store()
-
-node48.var_name = "inscatter_tex"
-
-_editor.add_node(node48, 105.3053308131, -244.34854858665)
-
-var node49 = ::blueprint::nodes::load::Load()
-
-node49.var_name = "inscatter_tex"
-
-_editor.add_node(node49, 1358.7694451941, 365.91763033)
-
-var node50 = ::blueprint::nodes::subgraph::Subgraph()
-node50.load_from_file(_editor, "../../../tantien/assets/blueprints/rendergraph/draw_tex3_quad.ves")
-
-_editor.add_node(node50, 464.4481914789, 380.75066528008)
-
-var node51 = ::blueprint::nodes::number::Number()
-
-node51.value = 0
-
-_editor.add_node(node51, 261.31003904922, 356.02163489141)
-
-Blueprint.connect(node51, "v", node50, "layer")
 Blueprint.connect(node35, "index", node37, "a")
 Blueprint.connect(node38, "v", node37, "b")
 Blueprint.connect(node37, "out", node36, "cond")
 Blueprint.connect(node39, "v", node36, "true")
 Blueprint.connect(node40, "v", node36, "false")
-Blueprint.connect(node12, "tex", node48, "var")
-Blueprint.connect(node48, "var", node49, "var")
+Blueprint.connect(node12, "tex", node44, "var")
 Blueprint.connect(node12, "tex", node14, "col0")
 Blueprint.connect(node14, "fbo", node32, "var")
 Blueprint.connect(node32, "var", node34, "var")
-Blueprint.connect(node11, "tex", node46, "var")
-Blueprint.connect(node46, "var", node47, "var")
+Blueprint.connect(node11, "tex", node43, "var")
 Blueprint.connect(node11, "tex", node13, "col0")
 Blueprint.connect(node13, "fbo", node31, "var")
 Blueprint.connect(node31, "var", node33, "var")
 Blueprint.connect(node0, "transmittance", node15, "var")
-Blueprint.connect(node15, "var", node43, "var")
 Blueprint.connect(node15, "var", node23, "var")
 Blueprint.connect(node15, "var", node21, "var")
 Blueprint.connect(node15, "var", node20, "var")
@@ -371,8 +324,3 @@ Blueprint.connect(node14, "fbo", node4, "fbo")
 Blueprint.connect(node17, "var", node4, "transmittanceSampler")
 Blueprint.connect(node4, "next", node35, "prev")
 Blueprint.connect(node9, "next", node35, "do")
-Blueprint.connect(node35, "next", node41, "prev")
-Blueprint.connect(node42, "this", node41, "view_cam")
-Blueprint.connect(node43, "var", node41, "transmittanceSampler")
-Blueprint.connect(node47, "var", node41, "irradianceSampler")
-Blueprint.connect(node49, "var", node41, "inscatterSampler")
