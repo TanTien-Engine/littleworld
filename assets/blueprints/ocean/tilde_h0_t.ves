@@ -1,0 +1,250 @@
+var node0 = ::rendergraph::nodes::shader::Shader()
+node0.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node0.vs = ""
+node0.tcs = ""
+node0.tes = ""
+node0.gs = ""
+node0.fs = ""
+node0.cs = "
+#define LOCAL_SIZE 32
+#define M_PI 3.1415926535897932384626433832795
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE, local_size_z = 1) in;
+
+// ------------------------------------------------------------------
+// STRUCTURES -------------------------------------------------------
+// ------------------------------------------------------------------
+
+struct complex
+{
+    float real;
+    float im;
+};
+
+// ------------------------------------------------------------------
+
+complex mul(complex c0, complex c1)
+{
+    complex c;
+    c.real = c0.real * c1.real - c0.im * c1.im;
+    c.im   = c0.real * c1.im + c0.im * c1.real;
+    return c;
+}
+
+// ------------------------------------------------------------------
+
+complex add(complex c0, complex c1)
+{
+    complex c;
+    c.real = c0.real + c1.real;
+    c.im   = c0.im + c1.im;
+    return c;
+}
+
+// ------------------------------------------------------------------
+
+complex conjugate(complex c)
+{
+    complex c_conj;
+    c_conj.real = c.real;
+    c_conj.im   = -c.im;
+    return c;
+}
+
+// ------------------------------------------------------------------
+// UNIFORMS ---------------------------------------------------------
+// ------------------------------------------------------------------
+
+uniform UBO
+{
+    float u_Time;
+    int   u_N;
+    int   u_L;    
+};
+
+const float g = 9.81;
+
+layout(binding = 0, rg32f) readonly uniform image2D tilde_h0k;
+layout(binding = 1, rg32f) readonly uniform image2D tilde_h0minusk;
+layout(binding = 2, rgba32f) writeonly uniform image2D tilde_hkt_dx;
+layout(binding = 3, rgba32f) writeonly uniform image2D tilde_hkt_dy;
+layout(binding = 4, rgba32f) writeonly uniform image2D tilde_hkt_dz;
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    vec2  x     = vec2(gl_GlobalInvocationID.xy) - float(u_N) / 2.0;
+    vec2  k     = vec2((2.0 * M_PI * float(x.x)) / float(u_L), (2.0 * M_PI * float(x.y)) / float(u_L));
+    float k_mag = length(k);
+
+    if (k_mag < 0.00001)
+        k_mag = 0.00001;
+
+    float w = sqrt(g * k_mag);
+
+    vec2 h0k      = imageLoad(tilde_h0k, ivec2(gl_GlobalInvocationID.xy)).xy;
+    vec2 h0minusk = imageLoad(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy)).xy;
+
+    complex fourier_amp;
+
+    fourier_amp.real = h0k.x;
+    fourier_amp.im   = h0k.y;
+
+    complex fourier_amp_conj;
+
+    fourier_amp_conj.real = h0minusk.x;
+    fourier_amp_conj.im   = h0minusk.y;
+
+    fourier_amp_conj = conjugate(fourier_amp_conj);
+
+    float consinus = cos(w * u_Time);
+    float sinus    = sin(w * u_Time);
+
+    complex exp_iwkt;
+
+    exp_iwkt.real = consinus;
+    exp_iwkt.im   = sinus;
+
+    complex exp_iwkt_minus;
+
+    exp_iwkt_minus.real = consinus;
+    exp_iwkt_minus.im   = -sinus;
+
+    // dy
+    complex d_k_t_dy = add(mul(fourier_amp, exp_iwkt), mul(fourier_amp_conj, exp_iwkt_minus));
+
+    // dx
+    complex dx;
+
+    dx.real = 0.0;
+    dx.im   = -k.x / k_mag;
+
+    complex d_k_t_dx = mul(dx, d_k_t_dy);
+
+    // dz
+    complex dy;
+
+    dy.real = 0.0;
+    dy.im   = -k.y / k_mag;
+
+    complex d_k_t_dz = mul(dy, d_k_t_dy);
+
+    imageStore(tilde_hkt_dx, ivec2(gl_GlobalInvocationID.xy), vec4(d_k_t_dx.real, d_k_t_dx.im, 0.0, 1.0));
+    imageStore(tilde_hkt_dy, ivec2(gl_GlobalInvocationID.xy), vec4(d_k_t_dy.real, d_k_t_dy.im, 0.0, 1.0));
+    imageStore(tilde_hkt_dz, ivec2(gl_GlobalInvocationID.xy), vec4(d_k_t_dz.real, d_k_t_dz.im, 0.0, 1.0));
+}
+
+// ------------------------------------------------------------------
+"
+node0.render_gen()
+
+_editor.add_node(node0, -183.00000138716, 128.22726162997)
+
+var node1 = ::rendergraph::nodes::pass::Pass()
+
+node1.once = false
+
+_editor.add_node(node1, 175.29435666348, 279.16371977608)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "tilde_h0_t_dx"
+node2.gamma_correction = false
+node2.init_texture(256, 256, "rgba32f")
+node2.set_sampler("linear_repeat")
+
+_editor.add_node(node2, -846.52669186789, -14.64004159623)
+
+var node3 = ::rendergraph::nodes::compute::Compute()
+
+node3.num_groups = [ 8, 8, 1 ]
+
+_editor.add_node(node3, 7.7592534341106, 268.87811632393)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "tilde_h0_t_dy"
+node4.gamma_correction = false
+node4.init_texture(256, 256, "rgba32f")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -627.51842740508, -16.292934158213)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "tilde_h0_t_dz"
+node5.gamma_correction = false
+node5.init_texture(256, 256, "rgba32f")
+node5.set_sampler("linear_repeat")
+
+_editor.add_node(node5, -408.863144296, -20.261652141957)
+
+var node6 = ::blueprint::nodes::integer::Integer()
+
+node6.value = 256
+
+_editor.add_node(node6, -523.28973492266, 207.67278263896)
+
+var node7 = ::blueprint::nodes::integer::Integer()
+
+node7.value = 1000
+
+_editor.add_node(node7, -366.87968312361, 205.62374100556)
+
+var node8 = ::blueprint::nodes::time::Time()
+
+_editor.add_node(node8, -369.69774432222, 272.05961117074)
+
+var node9 = ::blueprint::nodes::input::Input()
+
+node9.var_name = "tilde_h0k"
+node9.var_type = "texture"
+
+_editor.add_node(node9, -546.55721919793, 107.18360837826)
+
+var node10 = ::blueprint::nodes::input::Input()
+
+node10.var_name = "tilde_h0minusk"
+node10.var_type = "texture"
+
+_editor.add_node(node10, -411.02001499144, 107.18359475884)
+
+var node11 = ::blueprint::nodes::output::Output()
+
+node11.var_name = "tilde_h0_t_dx"
+node11.var_type = "texture"
+
+_editor.add_node(node11, -807.71685791015, -303.94242858887)
+
+var node12 = ::blueprint::nodes::output::Output()
+
+node12.var_name = "tilde_h0_t_dy"
+node12.var_type = "texture"
+
+_editor.add_node(node12, -603.71685791015, -302.94242858887)
+
+var node13 = ::blueprint::nodes::output::Output()
+
+node13.var_name = "tilde_h0_t_dz"
+node13.var_type = "texture"
+
+_editor.add_node(node13, -393.71685791015, -298.94242858887)
+
+Blueprint.connect(node5, "tex", node13, "var")
+Blueprint.connect(node4, "tex", node12, "var")
+Blueprint.connect(node2, "tex", node11, "var")
+Blueprint.connect(node8, "time", node0, "u_Time")
+Blueprint.connect(node6, "v", node0, "u_N")
+Blueprint.connect(node7, "v", node0, "u_L")
+Blueprint.connect(node9, "var", node0, "tilde_h0k")
+Blueprint.connect(node10, "var", node0, "tilde_h0minusk")
+Blueprint.connect(node2, "tex", node0, "tilde_hkt_dx")
+Blueprint.connect(node4, "tex", node0, "tilde_hkt_dy")
+Blueprint.connect(node5, "tex", node0, "tilde_hkt_dz")
+Blueprint.connect(node0, "out", node3, "shader")
+Blueprint.connect(node3, "next", node1, "do")

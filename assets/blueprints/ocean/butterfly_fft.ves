@@ -1,0 +1,388 @@
+var node0 = ::rendergraph::nodes::shader::Shader()
+node0.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node0.vs = ""
+node0.tcs = ""
+node0.tes = ""
+node0.gs = ""
+node0.fs = ""
+node0.cs = "
+#define LOCAL_SIZE 32
+#define M_PI 3.1415926535897932384626433832795
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE, local_size_z = 1) in;
+
+// ------------------------------------------------------------------
+// UNIFORMS ---------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(binding = 0, rgba32f) readonly uniform image2D twiddle_factors;
+layout(binding = 1, rgba32f) uniform image2D pingpong0;
+layout(binding = 2, rgba32f) uniform image2D pingpong1;
+
+uniform UBO
+{
+    int u_PingPong;
+    int u_Direction;
+    int u_Stage;
+};
+
+// ------------------------------------------------------------------
+// FUNCTION ---------------------------------------------------------
+// ------------------------------------------------------------------
+
+struct complex
+{
+    float real;
+    float im;
+};
+
+// ------------------------------------------------------------------
+
+complex mul(complex c0, complex c1)
+{
+    complex c;
+    c.real = c0.real * c1.real - c0.im * c1.im;
+    c.im   = c0.real * c1.im + c0.im * c1.real;
+    return c;
+}
+
+// ------------------------------------------------------------------
+
+complex add(complex c0, complex c1)
+{
+    complex c;
+    c.real = c0.real + c1.real;
+    c.im   = c0.im + c1.im;
+    return c;
+}
+
+// ------------------------------------------------------------------
+
+void horizontal_butterflies()
+{
+    complex H;
+    ivec2   x = ivec2(gl_GlobalInvocationID.xy);
+
+    if (u_PingPong == 0)
+    {
+        vec4 data = imageLoad(twiddle_factors, ivec2(u_Stage, x.x)).rgba;
+        vec2 p_   = imageLoad(pingpong0, ivec2(data.z, x.y)).rg;
+        vec2 q_   = imageLoad(pingpong0, ivec2(data.w, x.y)).rg;
+        vec2 w_   = vec2(data.x, data.y);
+
+        complex p = complex(p_.x, p_.y);
+        complex q = complex(q_.x, q_.y);
+        complex w = complex(w_.x, w_.y);
+
+        //Butterfly operation
+        H = add(p, mul(w, q));
+
+        imageStore(pingpong1, x, vec4(H.real, H.im, 0, 1));
+    }
+    else if (u_PingPong == 1)
+    {
+        vec4 data = imageLoad(twiddle_factors, ivec2(u_Stage, x.x)).rgba;
+        vec2 p_   = imageLoad(pingpong1, ivec2(data.z, x.y)).rg;
+        vec2 q_   = imageLoad(pingpong1, ivec2(data.w, x.y)).rg;
+        vec2 w_   = vec2(data.x, data.y);
+
+        complex p = complex(p_.x, p_.y);
+        complex q = complex(q_.x, q_.y);
+        complex w = complex(w_.x, w_.y);
+
+        //Butterfly operation
+        H = add(p, mul(w, q));
+
+        imageStore(pingpong0, x, vec4(H.real, H.im, 0, 1));
+    }
+}
+
+// ------------------------------------------------------------------
+
+void vertical_butterflies()
+{
+    complex H;
+    ivec2   x = ivec2(gl_GlobalInvocationID.xy);
+
+    if (u_PingPong == 0)
+    {
+        vec4 data = imageLoad(twiddle_factors, ivec2(u_Stage, x.y)).rgba;
+        vec2 p_   = imageLoad(pingpong0, ivec2(x.x, data.z)).rg;
+        vec2 q_   = imageLoad(pingpong0, ivec2(x.x, data.w)).rg;
+        vec2 w_   = vec2(data.x, data.y);
+
+        complex p = complex(p_.x, p_.y);
+        complex q = complex(q_.x, q_.y);
+        complex w = complex(w_.x, w_.y);
+
+        //Butterfly operation
+        H = add(p, mul(w, q));
+
+        imageStore(pingpong1, x, vec4(H.real, H.im, 0, 1));
+    }
+    else if (u_PingPong == 1)
+    {
+        vec4 data = imageLoad(twiddle_factors, ivec2(u_Stage, x.y)).rgba;
+        vec2 p_   = imageLoad(pingpong1, ivec2(x.x, data.z)).rg;
+        vec2 q_   = imageLoad(pingpong1, ivec2(x.x, data.w)).rg;
+        vec2 w_   = vec2(data.x, data.y);
+
+        complex p = complex(p_.x, p_.y);
+        complex q = complex(q_.x, q_.y);
+        complex w = complex(w_.x, w_.y);
+
+        //Butterfly operation
+        H = add(p, mul(w, q));
+
+        imageStore(pingpong0, x, vec4(H.real, H.im, 0, 1));
+    }
+}
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    if (u_Direction == 0)
+        horizontal_butterflies();
+    else if (u_Direction == 1)
+        vertical_butterflies();
+}
+
+// ------------------------------------------------------------------
+"
+node0.render_gen()
+
+_editor.add_node(node0, -183.00000138716, 128.22726162997)
+
+var node1 = ::rendergraph::nodes::pass::Pass()
+
+node1.once = false
+
+_editor.add_node(node1, 702.21171203538, 159.65132308187)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "tilde_h0_t_dx"
+node2.gamma_correction = false
+node2.init_texture(256, 256, "rgba32f")
+node2.set_sampler("linear_repeat")
+
+_editor.add_node(node2, -740.62173319021, -277.36070275326)
+
+var node3 = ::rendergraph::nodes::compute::Compute()
+
+node3.num_groups = [ 8, 8, 1 ]
+
+_editor.add_node(node3, 7.7592534341106, 268.87811632393)
+
+var node4 = ::blueprint::nodes::loop::Loop()
+
+node4.start = 0
+node4.end = 16
+
+_editor.add_node(node4, 169.77925299022, 260.03947461341)
+
+var node5 = ::blueprint::nodes::compare::Compare()
+
+node5.cmp = "less"
+
+_editor.add_node(node5, -594.37159147771, 330.45014729228)
+
+var node6 = ::blueprint::nodes::integer::Integer()
+
+node6.value = 8
+
+_editor.add_node(node6, -735.75542015199, 316.78990133007)
+
+var node7 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node7, -437.96151169154, 265.5638962089)
+
+var node8 = ::blueprint::nodes::integer::Integer()
+
+node8.value = 0
+
+_editor.add_node(node8, -590.27355957031, 250.53759765625)
+
+var node9 = ::blueprint::nodes::integer::Integer()
+
+node9.value = 1
+
+_editor.add_node(node9, -593.00556675143, 182.91927772398)
+
+var node10 = ::blueprint::nodes::mod::Mod()
+
+_editor.add_node(node10, -458.22655039385, 466.85477920406)
+
+var node11 = ::blueprint::nodes::integer::Integer()
+
+node11.value = 2
+
+_editor.add_node(node11, -618.38637876905, 436.89780041403)
+
+var node12 = ::rendergraph::nodes::shader::Shader()
+node12.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node12.vs = ""
+node12.tcs = ""
+node12.tes = ""
+node12.gs = ""
+node12.fs = ""
+node12.cs = "
+#define LOCAL_SIZE 32
+#define M_PI 3.1415926535897932384626433832795
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE, local_size_z = 1) in;
+
+// ------------------------------------------------------------------
+// UNIFORMS ---------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(binding = 0, r32f) writeonly uniform image2D displacement;
+layout(binding = 1, rgba32f) readonly uniform image2D pingpong0;
+layout(binding = 2, rgba32f) readonly uniform image2D pingpong1;
+
+uniform UBO
+{
+    int u_PingPong;
+    int u_N;    
+};
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    ivec2 x = ivec2(gl_GlobalInvocationID.xy);
+
+    float perms[] = { 1.0, -1.0 };
+    int   index   = int(mod((int(x.x + x.y)), 2));
+    float perm    = perms[index];
+
+    if (u_PingPong == 0)
+    {
+        float h = imageLoad(pingpong0, x).r;
+        imageStore(displacement, x, vec4(perm * (h / float(u_N * u_N)), 0, 0, 1));
+    }
+    else if (u_PingPong == 1)
+    {
+        float h = imageLoad(pingpong1, x).r;
+        imageStore(displacement, x, vec4(perm * (h / float(u_N * u_N)), 0, 0, 1));
+    }
+}
+
+// ------------------------------------------------------------------
+"
+node12.render_gen()
+
+_editor.add_node(node12, 363.0367071027, -20.702493441405)
+
+var node13 = ::rendergraph::nodes::compute::Compute()
+
+node13.num_groups = [ 8, 8, 1 ]
+
+_editor.add_node(node13, 546.52323465124, 102.67563397983)
+
+var node14 = ::blueprint::nodes::integer::Integer()
+
+node14.value = 0
+
+_editor.add_node(node14, 33.569677605151, 47.46241454989)
+
+var node15 = ::blueprint::nodes::integer::Integer()
+
+node15.value = 256
+
+_editor.add_node(node15, 170.36501894411, 49.27559122487)
+
+var node16 = ::blueprint::nodes::input::Input()
+
+node16.var_name = "twiddle_factors"
+node16.var_type = "texture"
+
+_editor.add_node(node16, -573.41662944916, -3.5716505898142)
+
+var node17 = ::blueprint::nodes::input::Input()
+
+node17.var_name = "tilde_h0_t"
+node17.var_type = "texture"
+
+_editor.add_node(node17, -436.13093781899, -2.2056117021642)
+
+var node18 = ::rendergraph::nodes::texture::Texture()
+node18.query_param("unif_name").value = "dst"
+node18.gamma_correction = false
+node18.init_texture(256, 256, "r32f")
+node18.set_sampler("linear_repeat")
+
+_editor.add_node(node18, 120.93556310624, -150.17703396516)
+
+var node19 = ::blueprint::nodes::output::Output()
+
+node19.var_name = "dst"
+node19.var_type = "texture"
+
+_editor.add_node(node19, 327.81772516424, -185.80565286431)
+
+var node20 = ::blueprint::nodes::compare::Compare()
+
+node20.cmp = "less"
+
+_editor.add_node(node20, -898.04999147771, 100.9966654741)
+
+var node21 = ::blueprint::nodes::integer::Integer()
+
+node21.value = 8
+
+_editor.add_node(node21, -1039.433820152, 87.336419511887)
+
+var node22 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node22, -741.63991169154, 36.110414390717)
+
+var node23 = ::blueprint::nodes::subtract::Subtract()
+
+_editor.add_node(node23, -898.65797008167, 13.070251464843)
+
+Blueprint.connect(node4, "index", node23, "a")
+Blueprint.connect(node21, "v", node23, "b")
+Blueprint.connect(node4, "index", node20, "a")
+Blueprint.connect(node21, "v", node20, "b")
+Blueprint.connect(node20, "out", node22, "cond")
+Blueprint.connect(node4, "index", node22, "true")
+Blueprint.connect(node23, "v", node22, "false")
+Blueprint.connect(node18, "tex", node19, "var")
+Blueprint.connect(node4, "index", node10, "x")
+Blueprint.connect(node11, "v", node10, "y")
+Blueprint.connect(node4, "index", node5, "a")
+Blueprint.connect(node6, "v", node5, "b")
+Blueprint.connect(node5, "out", node7, "cond")
+Blueprint.connect(node8, "v", node7, "true")
+Blueprint.connect(node9, "v", node7, "false")
+Blueprint.connect(node3, "next", node4, "do")
+Blueprint.connect(node14, "v", node12, "u_PingPong")
+Blueprint.connect(node15, "v", node12, "u_N")
+Blueprint.connect(node17, "var", node12, "pingpong0")
+Blueprint.connect(node18, "tex", node12, "displacement")
+Blueprint.connect(node2, "tex", node12, "pingpong1")
+Blueprint.connect(node4, "next", node13, "prev")
+Blueprint.connect(node12, "out", node13, "shader")
+Blueprint.connect(node10, "v", node0, "u_PingPong")
+Blueprint.connect(node7, "result", node0, "u_Direction")
+Blueprint.connect(node22, "result", node0, "u_Stage")
+Blueprint.connect(node16, "var", node0, "twiddle_factors")
+Blueprint.connect(node17, "var", node0, "pingpong0")
+Blueprint.connect(node2, "tex", node0, "pingpong1")
+Blueprint.connect(node0, "out", node3, "shader")
+Blueprint.connect(node13, "next", node1, "do")

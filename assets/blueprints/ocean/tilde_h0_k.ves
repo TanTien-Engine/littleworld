@@ -1,0 +1,239 @@
+var node0 = ::rendergraph::nodes::shader::Shader()
+node0.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node0.vs = ""
+node0.tcs = ""
+node0.tes = ""
+node0.gs = ""
+node0.fs = ""
+node0.cs = "
+#define LOCAL_SIZE 32
+#define M_PI 3.1415926535897932384626433832795
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE, local_size_z = 1) in;
+
+// ------------------------------------------------------------------
+// INPUT ------------------------------------------------------------
+// ------------------------------------------------------------------
+
+uniform sampler2D noise0;
+uniform sampler2D noise1;
+uniform sampler2D noise2;
+uniform sampler2D noise3;
+
+uniform UBO
+{
+	float u_Amplitude;
+	float u_WindSpeed;
+	float u_SuppressFactor;
+	vec2  u_WindDirection;
+	int   u_N;
+	int   u_L;	
+};
+
+const float g = 9.81;
+
+layout(binding = 0, rg32f) writeonly uniform image2D tilde_h0k;
+layout(binding = 1, rg32f) writeonly uniform image2D tilde_h0minusk;
+
+// ------------------------------------------------------------------
+// FUNCTIONS --------------------------------------------------------
+// ------------------------------------------------------------------
+
+float suppression_factor(float k_mag_sqr)
+{
+    return exp(-k_mag_sqr * u_SuppressFactor * u_SuppressFactor);
+}
+
+// ------------------------------------------------------------------
+
+float philips_power_spectrum(vec2 k, float k_mag, float k_mag_sqr, float L_philips, float suppression)
+{
+    return (u_Amplitude * (exp(-1.0 / (k_mag_sqr * L_philips * L_philips))) * pow(dot(normalize(k), u_WindDirection), 2.0) * suppression) / (k_mag_sqr * k_mag_sqr);
+}
+
+// ------------------------------------------------------------------
+
+// Box-Muller-Method
+
+vec4 gauss_rnd()
+{
+    vec2 texCoord = vec2(gl_GlobalInvocationID.xy) / float(u_N);
+
+    float noise00 = clamp(texture(noise0, texCoord).r, 0.001, 1.0);
+    float noise01 = clamp(texture(noise1, texCoord).r, 0.001, 1.0);
+    float noise02 = clamp(texture(noise2, texCoord).r, 0.001, 1.0);
+    float noise03 = clamp(texture(noise3, texCoord).r, 0.001, 1.0);
+
+    float u0 = 2.0 * M_PI * noise00;
+    float v0 = sqrt(-2.0 * log(noise01));
+    float u1 = 2.0 * M_PI * noise02;
+    float v1 = sqrt(-2.0 * log(noise03));
+
+    vec4 rnd = vec4(v0 * cos(u0), v0 * sin(u0), v1 * cos(u1), v1 * sin(u1));
+
+    return rnd;
+}
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    vec2  x         = vec2(gl_GlobalInvocationID.xy) - float(u_N) / 2.0;
+    vec2  k         = vec2((2.0 * M_PI * float(x.x)) / float(u_L), (2.0 * M_PI * float(x.y)) / float(u_L));
+    float L_philips = (u_WindSpeed * u_WindSpeed) / g;
+    float k_mag     = length(k);
+
+    if (k_mag < 0.00001)
+        k_mag = 0.00001;
+
+    float k_mag_sqr   = k_mag * k_mag;
+    float suppression = suppression_factor(k_mag_sqr);
+
+    float h0k      = clamp(sqrt(philips_power_spectrum(k, k_mag, k_mag_sqr, L_philips, suppression)) / sqrt(2.0), -4000.0, 4000.0);
+    float h0minusk = clamp(sqrt(philips_power_spectrum(-k, k_mag, k_mag_sqr, L_philips, suppression)) / sqrt(2.0), -4000.0, 4000.0);
+
+    vec4 rnd = gauss_rnd();
+
+    imageStore(tilde_h0k, ivec2(gl_GlobalInvocationID.xy), vec4(rnd.xy * h0k, 0.0, 1.0));
+    imageStore(tilde_h0minusk, ivec2(gl_GlobalInvocationID.xy), vec4(rnd.zw * h0minusk, 0.0, 1.0));
+}
+
+// ------------------------------------------------------------------
+"
+node0.render_gen()
+
+_editor.add_node(node0, -183.00000138716, 128.22726162997)
+
+var node1 = ::rendergraph::nodes::pass::Pass()
+
+node1.once = true
+
+_editor.add_node(node1, 176.94724922546, 390.73396770996)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "u_tex"
+node2.gamma_correction = false
+node2.init_texture("../../textures/noise/LDR_LLL1_0.png")
+node2.set_sampler("nearest_clamp")
+
+_editor.add_node(node2, -1094.6781664454, 106.78583029615)
+
+var node3 = ::rendergraph::nodes::texture::Texture()
+node3.query_param("unif_name").value = "u_tex"
+node3.gamma_correction = false
+node3.init_texture("../../textures/noise/LDR_LLL1_1.png")
+node3.set_sampler("nearest_clamp")
+
+_editor.add_node(node3, -873.53170144386, 108.93068456016)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.init_texture("../../textures/noise/LDR_LLL1_2.png")
+node4.set_sampler("nearest_clamp")
+
+_editor.add_node(node4, -661.40339832209, 108.36215263428)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.init_texture("../../textures/noise/LDR_LLL1_3.png")
+node5.set_sampler("nearest_clamp")
+
+_editor.add_node(node5, -427.76701249112, 108.36215055353)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "tilde_h0_k"
+node6.gamma_correction = false
+node6.init_texture(256, 256, "rg32f")
+node6.set_sampler("nearest_clamp")
+
+_editor.add_node(node6, -800.27269186789, -237.39304159623)
+
+var node7 = ::rendergraph::nodes::compute::Compute()
+
+node7.num_groups = [ 8, 8, 1 ]
+
+_editor.add_node(node7, 9.4121459960941, 380.44836425781)
+
+var node8 = ::blueprint::nodes::integer::Integer()
+
+node8.value = 256
+
+_editor.add_node(node8, -533.73424119681, 218.96671955708)
+
+var node9 = ::blueprint::nodes::integer::Integer()
+
+node9.value = 1000
+
+_editor.add_node(node9, -401.78490512816, 219.69339977422)
+
+var node10 = ::blueprint::nodes::number::Number()
+
+node10.value = 80
+
+_editor.add_node(node10, -520.04367554859, 370.26081532279)
+
+var node11 = ::blueprint::nodes::number::Number()
+
+node11.value = 2
+
+_editor.add_node(node11, -647.78460953492, 370.03076623355)
+
+var node12 = ::blueprint::nodes::number::Number()
+
+node12.value = 0.1
+
+_editor.add_node(node12, -394.42793533119, 368.49430910429)
+
+var node13 = ::blueprint::nodes::number2::Number2()
+
+node13.value.set(1, 1)
+
+_editor.add_node(node13, -529.66458774586, 294.72885316096)
+
+var node14 = ::rendergraph::nodes::texture::Texture()
+node14.query_param("unif_name").value = "tilde_h0_k"
+node14.gamma_correction = false
+node14.init_texture(256, 256, "rg32f")
+node14.set_sampler("nearest_clamp")
+
+_editor.add_node(node14, -426.40017086789, -230.29580859623)
+
+var node15 = ::blueprint::nodes::output::Output()
+
+node15.var_name = "tilde_h0k"
+node15.var_type = "texture"
+
+_editor.add_node(node15, -609.73916015625, -222.73342590332)
+
+var node16 = ::blueprint::nodes::output::Output()
+
+node16.var_name = "tilde_h0minusk"
+node16.var_type = "texture"
+
+_editor.add_node(node16, -243.87142389471, -213.83624961159)
+
+Blueprint.connect(node14, "tex", node16, "var")
+Blueprint.connect(node6, "tex", node15, "var")
+Blueprint.connect(node11, "v", node0, "u_Amplitude")
+Blueprint.connect(node10, "v", node0, "u_WindSpeed")
+Blueprint.connect(node12, "v", node0, "u_SuppressFactor")
+Blueprint.connect(node13, "v2", node0, "u_WindDirection")
+Blueprint.connect(node8, "v", node0, "u_N")
+Blueprint.connect(node9, "v", node0, "u_L")
+Blueprint.connect(node2, "tex", node0, "noise0")
+Blueprint.connect(node3, "tex", node0, "noise1")
+Blueprint.connect(node4, "tex", node0, "noise2")
+Blueprint.connect(node5, "tex", node0, "noise3")
+Blueprint.connect(node6, "tex", node0, "tilde_h0k")
+Blueprint.connect(node14, "tex", node0, "tilde_h0minusk")
+Blueprint.connect(node0, "out", node7, "shader")
+Blueprint.connect(node7, "next", node1, "do")

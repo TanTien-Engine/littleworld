@@ -38,6 +38,9 @@ foreign class GlobeTools
 	foreign static cam_view_mat(lon, lat, theta, phi, d)
 	foreign static cam_proj_mat(lon, lat, theta, phi, d)
 	foreign static cam_position(lon, lat, theta, phi, d)
+
+	// fft ocean
+	foreign static generate_bit_reversed_indices(n)
 }
 
 );

@@ -1,0 +1,1 @@
+Code from Eric Bruneton, http://evasion.inrialpes.fr/~Eric.Bruneton/

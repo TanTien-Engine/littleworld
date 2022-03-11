@@ -1,0 +1,119 @@
+var node0 = ::rendergraph::nodes::shader::Shader()
+node0.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node0.vs = ""
+node0.tcs = ""
+node0.tes = ""
+node0.gs = ""
+node0.fs = ""
+node0.cs = "
+#define LOCAL_SIZE 32
+#define M_PI 3.1415926535897932384626433832795
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(local_size_x = LOCAL_SIZE, local_size_y = LOCAL_SIZE, local_size_z = 1) in;
+
+// ------------------------------------------------------------------
+// UNIFORMS ---------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(binding = 0, rgba32f) writeonly uniform image2D normal_map;
+
+uniform sampler2D s_HeightMap;
+
+uniform UBO
+{
+    int u_N;
+};
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    // z0 -- z1 -- z2
+    // |     |     |
+    // z3 -- h  -- z4
+    // |     |     |
+    // z5 -- z6 -- z7
+
+    ivec2 x         = ivec2(gl_GlobalInvocationID.xy);
+    vec2  tex_coord = gl_GlobalInvocationID.xy / float(u_N);
+
+    float texelSize = 1.0 / u_N;
+
+    float z0 = texture(s_HeightMap, tex_coord + vec2(-texelSize, -texelSize)).r;
+    float z1 = texture(s_HeightMap, tex_coord + vec2(0, -texelSize)).r;
+    float z2 = texture(s_HeightMap, tex_coord + vec2(texelSize, -texelSize)).r;
+    float z3 = texture(s_HeightMap, tex_coord + vec2(-texelSize, 0)).r;
+    float z4 = texture(s_HeightMap, tex_coord + vec2(texelSize, 0)).r;
+    float z5 = texture(s_HeightMap, tex_coord + vec2(-texelSize, texelSize)).r;
+    float z6 = texture(s_HeightMap, tex_coord + vec2(0, texelSize)).r;
+    float z7 = texture(s_HeightMap, tex_coord + vec2(texelSize, texelSize)).r;
+
+    vec3 normal;
+
+    // Sobel Filter
+    normal.z = z0 + 2 * z1 + z2 - z5 - 2 * z6 - z7;
+    normal.x = z0 + 2 * z3 + z5 - z2 - 2 * z4 - z7;
+    normal.y = 1.0;
+
+    imageStore(normal_map, x, vec4(normalize(normal), 1));
+}
+
+// ------------------------------------------------------------------
+"
+node0.render_gen()
+
+_editor.add_node(node0, -183.00000138716, 128.22726162997)
+
+var node1 = ::rendergraph::nodes::pass::Pass()
+
+node1.once = false
+
+_editor.add_node(node1, 169.94724922546, 200.73396770996)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "tilde_h0_k"
+node2.gamma_correction = false
+node2.init_texture(256, 256, "rgba32f")
+node2.set_sampler("linear_repeat")
+
+_editor.add_node(node2, -545.81211186789, -2.2585815962298)
+
+var node3 = ::rendergraph::nodes::compute::Compute()
+
+node3.num_groups = [ 8, 8, 1 ]
+
+_editor.add_node(node3, 2.412145996094, 190.44836425781)
+
+var node4 = ::blueprint::nodes::integer::Integer()
+
+node4.value = 256
+
+_editor.add_node(node4, -533.73424119681, 218.96671955708)
+
+var node5 = ::blueprint::nodes::output::Output()
+
+node5.var_name = "normal_map"
+node5.var_type = "texture"
+
+_editor.add_node(node5, -344.57166122994, 0.52069805406032)
+
+var node6 = ::blueprint::nodes::input::Input()
+
+node6.var_name = "s_HeightMap"
+node6.var_type = "texture"
+
+_editor.add_node(node6, -506.2698064835, 122.89472541525)
+
+Blueprint.connect(node2, "tex", node5, "var")
+Blueprint.connect(node4, "v", node0, "u_N")
+Blueprint.connect(node6, "var", node0, "s_HeightMap")
+Blueprint.connect(node2, "tex", node0, "normal_map")
+Blueprint.connect(node0, "out", node3, "shader")
+Blueprint.connect(node3, "next", node1, "do")

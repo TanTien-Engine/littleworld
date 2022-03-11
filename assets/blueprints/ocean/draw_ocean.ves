@@ -1,0 +1,346 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("patches")
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 558.8075282446, -339.48126638417)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = ""
+
+node1.vs = "
+#version 330 core
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(location = 0) in vec3 VS_IN_Position;
+layout(location = 1) in vec2 VS_IN_Texcoord;
+
+// ------------------------------------------------------------------
+// OUTPUTS ----------------------------------------------------------
+// ------------------------------------------------------------------
+
+out vec3 TCS_IN_FragPos;
+out vec2 TCS_IN_TexCoord;
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    TCS_IN_FragPos  = VS_IN_Position;
+    TCS_IN_TexCoord = VS_IN_Texcoord;
+}
+
+// ------------------------------------------------------------------
+"
+node1.tcs = "
+#version 400 core
+
+layout(vertices = 3) out;
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+in vec3 TCS_IN_FragPos[];
+in vec2 TCS_IN_TexCoord[];
+
+// ------------------------------------------------------------------
+// OUTPUTS ----------------------------------------------------------
+// ------------------------------------------------------------------
+
+out vec3 TES_IN_FragPos[];
+out vec2 TES_IN_TexCoord[];
+
+// ------------------------------------------------------------------
+// UNIFORMS ---------------------------------------------------------
+// ------------------------------------------------------------------
+
+uniform UBO
+{
+    vec3 u_CameraPos;
+};
+
+// ------------------------------------------------------------------
+// FUNCTIONS --------------------------------------------------------
+// ------------------------------------------------------------------
+
+float tessellation_level(float d0, float d1)
+{
+    float avg_d = (d0 + d1) / 2.0;
+
+    if (avg_d <= 10.0)
+        return 20.0;
+    else if (avg_d <= 20.0)
+        return 10.0;
+    else if (avg_d <= 30.0)
+        return 5.0;
+    else
+        return 1.0;
+}
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    TES_IN_FragPos[gl_InvocationID]  = TCS_IN_FragPos[gl_InvocationID];
+    TES_IN_TexCoord[gl_InvocationID] = TCS_IN_TexCoord[gl_InvocationID];
+
+    // Calculate distances to each vertex
+    float eye_to_v0_dist = distance(u_CameraPos, TES_IN_FragPos[0]);
+    float eye_to_v1_dist = distance(u_CameraPos, TES_IN_FragPos[1]);
+    float eye_to_v2_dist = distance(u_CameraPos, TES_IN_FragPos[2]);
+
+    // Calculate tessellation levels
+    gl_TessLevelOuter[0] = tessellation_level(eye_to_v1_dist, eye_to_v2_dist);
+    gl_TessLevelOuter[1] = tessellation_level(eye_to_v2_dist, eye_to_v0_dist);
+    gl_TessLevelOuter[2] = tessellation_level(eye_to_v0_dist, eye_to_v1_dist);
+    gl_TessLevelInner[0] = gl_TessLevelOuter[2];
+}
+
+// ------------------------------------------------------------------
+"
+node1.tes = "
+#version 400 core
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(triangles, equal_spacing, ccw) in;
+
+in vec3 TES_IN_FragPos[];
+in vec2 TES_IN_TexCoord[];
+
+// ------------------------------------------------------------------
+// OUTPUTS ----------------------------------------------------------
+// ------------------------------------------------------------------
+
+out vec3 FS_IN_FragPos;
+out vec3 FS_IN_Normal;
+out vec2 FS_IN_TexCoord;
+
+// ------------------------------------------------------------------
+// UNIFORMS ---------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(std140) uniform u_GlobalUBO
+{
+    mat4 view_proj;
+};
+
+uniform sampler2D s_Dy;
+uniform sampler2D s_Dx;
+uniform sampler2D s_Dz;
+uniform sampler2D s_NormalMap;
+
+uniform UBO
+{
+    float u_DisplacementScale;
+    float u_Choppiness;    
+};
+
+// ------------------------------------------------------------------
+// FUNCTIONS --------------------------------------------------------
+// ------------------------------------------------------------------
+
+vec2 interpolate_2d(vec2 v0, vec2 v1, vec2 v2)
+{
+    return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
+}
+
+// ------------------------------------------------------------------
+
+vec3 interpolate_3d(vec3 v0, vec3 v1, vec3 v2)
+{
+    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    FS_IN_FragPos  = interpolate_3d(TES_IN_FragPos[0], TES_IN_FragPos[1], TES_IN_FragPos[2]);
+    FS_IN_TexCoord = interpolate_2d(TES_IN_TexCoord[0], TES_IN_TexCoord[1], TES_IN_TexCoord[2]);
+
+    FS_IN_FragPos.y += texture(s_Dy, FS_IN_TexCoord).r * u_DisplacementScale;
+    FS_IN_FragPos.x -= texture(s_Dx, FS_IN_TexCoord).r * u_Choppiness;
+    FS_IN_FragPos.z -= texture(s_Dz, FS_IN_TexCoord).r * u_Choppiness;
+
+    FS_IN_Normal = texture(s_NormalMap, FS_IN_TexCoord).xyz;
+
+    gl_Position = view_proj * vec4(FS_IN_FragPos, 1.0);
+}
+
+// ------------------------------------------------------------------
+"
+node1.gs = ""
+node1.fs = "
+#version 330 core
+
+out vec4 FS_OUT_Color;
+
+in vec3 FS_IN_FragPos;
+in vec3 FS_IN_Normal;
+
+uniform samplerCube s_Sky;
+
+uniform UBO
+{
+    vec3        u_CameraPos;
+    vec3        u_SunDirection;
+    vec3        u_SeaColor;    
+};
+
+vec3 fresnel_schlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+void main()
+{
+    // Input lighting data
+    vec3 N = FS_IN_Normal;
+    vec3 V = normalize(u_CameraPos - FS_IN_FragPos);
+    vec3 R = reflect(-V, N);
+    vec3 L = -u_SunDirection;
+
+    vec3 F0 = vec3(0.04);
+    vec3 F  = fresnel_schlick(max(dot(N, V), 0.0), F0);
+
+//    vec3 albedo = mix(u_SeaColor, texture(s_Sky, R).rgb, F);
+    vec3 albedo = u_SeaColor;
+
+    float NdotL = max(dot(N, L), 0.0);
+    vec3  color = NdotL * albedo;
+
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0 / 2.2));
+
+    FS_OUT_Color = vec4(color, 1.0);
+}
+
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, 158.47858889296, -355.9795922234)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "color", "depth" ]
+node2.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node2, 335.02348918957, -188.12587085987)
+
+var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node3.type = "grids"
+node3.layout = [ "position", "texture" ]
+node3.shape_params = { "grids_size" : 16 }
+
+_editor.add_node(node3, 381.67421297039, -401.33131969581)
+
+var node4 = ::blueprint::nodes::perspective::Perspective()
+
+node4.fovy = 45
+node4.aspect = 0
+node4.znear = 0.1
+node4.zfar = 100
+
+_editor.add_node(node4, -295.73376471723, 53.564274662512)
+
+var node5 = ::blueprint::nodes::input::Input()
+
+node5.var_name = "s_Dy"
+node5.var_type = "texture"
+
+_editor.add_node(node5, -392.88860428235, -320.82328153248)
+
+var node6 = ::blueprint::nodes::input::Input()
+
+node6.var_name = "s_Dx"
+node6.var_type = "texture"
+
+_editor.add_node(node6, -258.48364610908, -317.34394243729)
+
+var node7 = ::blueprint::nodes::input::Input()
+
+node7.var_name = "s_Dz"
+node7.var_type = "texture"
+
+_editor.add_node(node7, -127.25225527424, -318.34394344614)
+
+var node8 = ::blueprint::nodes::camera3d::Camera3d()
+
+node8.cam.position.set(0.15755134811464, -1.9348436328098, -2.4679010154024)
+node8.cam.yaw = 89.2
+node8.cam.pitch = 58.4
+node8.cam.zoom = 45
+node8.cam.update_vectors()
+node8.speed = 0.28718087077141
+
+_editor.add_node(node8, -490.59371831558, 21.562691266109)
+
+var node9 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node9, -100.08253398859, 105.75313130028)
+
+var node10 = ::blueprint::nodes::number3::Number3()
+
+node10.value.set(0, 0.169668034, 0.439894319)
+
+_editor.add_node(node10, -1.3237431570105, -310.33802947694)
+
+var node11 = ::blueprint::nodes::number::Number()
+
+node11.value = 0.057517156004906
+
+_editor.add_node(node11, -195.17654290822, -106.2931898385)
+
+var node12 = ::blueprint::nodes::input::Input()
+
+node12.var_name = "s_NormalMap"
+node12.var_type = "texture"
+
+_editor.add_node(node12, -40.991338949857, -189.94587830202)
+
+var node13 = ::blueprint::nodes::number3::Number3()
+
+node13.value.set(0.72860580682755, 0, 0.87305027246475)
+
+_editor.add_node(node13, -212.2280906932, -212.99913038025)
+
+var node14 = ::blueprint::nodes::number::Number()
+
+node14.value = 0.018287997692823
+
+_editor.add_node(node14, -44.645920127677, -103.36637919781)
+
+Blueprint.connect(node8, "zoom", node4, "fovy")
+Blueprint.connect(node4, "mat", node9, "a")
+Blueprint.connect(node8, "mat", node9, "b")
+Blueprint.connect(node8, "pos", node1, "u_CameraPos")
+Blueprint.connect(node11, "v", node1, "u_DisplacementScale")
+Blueprint.connect(node14, "v", node1, "u_Choppiness")
+Blueprint.connect(node9, "v", node1, "view_proj")
+Blueprint.connect(node5, "var", node1, "s_Dy")
+Blueprint.connect(node6, "var", node1, "s_Dx")
+Blueprint.connect(node7, "var", node1, "s_Dz")
+Blueprint.connect(node12, "var", node1, "s_NormalMap")
+Blueprint.connect(node13, "v3", node1, "u_SunDirection")
+Blueprint.connect(node10, "v3", node1, "u_SeaColor")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node3, "out", node0, "va")

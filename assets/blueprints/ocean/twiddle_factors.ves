@@ -1,0 +1,136 @@
+var node0 = ::rendergraph::nodes::shader::Shader()
+node0.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node0.vs = ""
+node0.tcs = ""
+node0.tes = ""
+node0.gs = ""
+node0.fs = ""
+node0.cs = "
+#define LOCAL_SIZE 32
+#define M_PI 3.1415926535897932384626433832795
+
+// ------------------------------------------------------------------
+// INPUTS -----------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(local_size_x = 1, local_size_y = LOCAL_SIZE, local_size_z = 1) in;
+
+// ------------------------------------------------------------------
+// UNIFORMS ---------------------------------------------------------
+// ------------------------------------------------------------------
+
+layout(binding = 0, rgba32f) writeonly uniform image2D twiddle_factors;
+
+layout(std430, binding = 0) buffer BitReversedInt
+{
+    int bit_reversed[];
+};
+
+struct complex
+{
+    float real;
+    float im;
+};
+
+uniform UBO
+{
+    int u_N;
+};
+
+// ------------------------------------------------------------------
+// MAIN -------------------------------------------------------------
+// ------------------------------------------------------------------
+
+void main()
+{
+    vec2    x       = gl_GlobalInvocationID.xy;
+    float   k       = mod(x.y * (float(u_N) / pow(2, x.x + 1)), u_N);
+    complex twiddle = complex(cos(2.0 * M_PI * k / float(u_N)), sin(2.0 * M_PI * k / float(u_N)));
+
+    int butterflyspan = int(pow(2, x.x));
+
+    int butterflywing;
+
+    if (mod(x.y, pow(2, x.x + 1)) < pow(2, x.x))
+        butterflywing = 1;
+    else
+        butterflywing = 0;
+
+    // first stage, bit reversed indices
+    if (x.x == 0)
+    {
+        // top butterfly wing
+        if (butterflywing == 1)
+            imageStore(twiddle_factors, ivec2(x), vec4(twiddle.real, twiddle.im, bit_reversed[int(x.y)], bit_reversed[int(x.y + 1)]));
+        // bot butterfly wing
+        else
+            imageStore(twiddle_factors, ivec2(x), vec4(twiddle.real, twiddle.im, bit_reversed[int(x.y - 1)], bit_reversed[int(x.y)]));
+    }
+    // second to log2(N) stage
+    else
+    {
+        // top butterfly wing
+        if (butterflywing == 1)
+            imageStore(twiddle_factors, ivec2(x), vec4(twiddle.real, twiddle.im, x.y, x.y + butterflyspan));
+        // bot butterfly wing
+        else
+            imageStore(twiddle_factors, ivec2(x), vec4(twiddle.real, twiddle.im, x.y - butterflyspan, x.y));
+    }
+}
+
+// ------------------------------------------------------------------
+"
+node0.render_gen()
+
+_editor.add_node(node0, -183.00000138716, 128.22726162997)
+
+var node1 = ::rendergraph::nodes::pass::Pass()
+
+node1.once = true
+
+_editor.add_node(node1, 176.94724922546, 390.73396770996)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "tilde_h0_k"
+node2.gamma_correction = false
+node2.init_texture(8, 256, "rgba32f")
+node2.set_sampler("nearest_clamp")
+
+_editor.add_node(node2, -466.93969186789, 17.64195840377)
+
+var node3 = ::rendergraph::nodes::compute::Compute()
+
+node3.num_groups = [ 8, 8, 1 ]
+
+_editor.add_node(node3, 9.4121459960941, 380.44836425781)
+
+var node4 = ::blueprint::nodes::integer::Integer()
+
+node4.value = 256
+
+_editor.add_node(node4, -638.698401744, 172.29461549809)
+
+var node5 = ::globegraph::nodes::ocean_tools::OceanTools()
+
+_editor.add_node(node5, -493.46312136295, 202.69419341086)
+
+var node6 = ::rendergraph::nodes::storage_buffer::StorageBuffer()
+
+_editor.add_node(node6, -364.49188513015, 203.28300820902)
+
+var node7 = ::blueprint::nodes::output::Output()
+
+node7.var_name = "twiddle_factors"
+node7.var_type = "texture"
+
+_editor.add_node(node7, -272.1834777832, -34.20270996094)
+
+Blueprint.connect(node4, "v", node5, "N")
+Blueprint.connect(node5, "bit_reversed", node6, "data")
+Blueprint.connect(node2, "tex", node7, "var")
+Blueprint.connect(node6, "ssbo", node0, "BitReversedInt")
+Blueprint.connect(node4, "v", node0, "u_N")
+Blueprint.connect(node2, "tex", node0, "twiddle_factors")
+Blueprint.connect(node0, "out", node3, "shader")
+Blueprint.connect(node3, "next", node1, "do")
