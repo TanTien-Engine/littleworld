@@ -1,0 +1,244 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("triangles")
+node0.render_state = { "blend" : false, "depth_test" : false, "depth_func" : "less", "cull" : "disable", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 201.5802241559, 331.0448724385)
+
+var node1 = ::rendergraph::nodes::pass::Pass()
+
+node1.once = false
+
+_editor.add_node(node1, 868.26966901553, 313.48796907687)
+
+var node2 = ::rendergraph::nodes::shader::Shader()
+node2.query_param("inc_dir").value = "../../../shaders/atmo/"
+
+node2.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+out vec3 WorldPos;
+
+uniform UBO
+{
+    mat4 projection;
+    mat4 view;    
+};
+
+void main()
+{
+    WorldPos = aPos;
+    gl_Position =  projection * view * vec4(WorldPos, 1.0);
+}
+"
+node2.tcs = ""
+node2.tes = ""
+node2.gs = ""
+node2.fs = "
+#version 330 core
+
+#define _ATMOSPHERE_
+#define texture2D texture
+#define texture3D texture
+#define texture2DLod textureLod
+#include \"atmosphere.glsl\"
+
+out vec4 FragColor;
+in vec3 WorldPos;
+
+uniform UBO
+{
+    vec3 u_CameraPos;
+
+    vec3 u_SunDir;
+    float u_SunIntensity;
+};
+
+void main()
+{       
+    vec3 view_dir = normalize(WorldPos);
+    vec3 light_dir = normalize(u_SunDir);
+
+    vec3 col = vec3(0.0);
+
+
+    float l = dot(WorldPos, WorldPos);    
+    //float dist = length(WorldPos);
+    if (l <= 1.02)
+    {
+        float sun = step(cos(M_PI / 360.0), dot(view_dir, light_dir));
+
+        vec3 sunColor = vec3(sun, sun, sun) * u_SunIntensity;
+
+        vec3 extinction;
+        vec3 inscatter = skyRadiance(u_CameraPos, view_dir, light_dir, extinction);
+
+        col = sunColor * extinction + inscatter;
+    }
+    else
+    {
+        const float avgFresnel = 0.17;
+        vec3 irradiance = skyIrradiance(u_CameraPos.z, light_dir.z) / M_PI * avgFresnel;
+
+        col = irradiance;
+    }
+
+    FragColor = vec4(col, 1.0);
+}
+"
+node2.cs = ""
+node2.render_gen()
+
+_editor.add_node(node2, -226.83726622431, 111.5715401001)
+
+var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node3.type = "cube"
+node3.layout = [ "position" ]
+node3.shape_params = {  }
+
+_editor.add_node(node3, 17.574015125081, 228.0304245447)
+
+var node4 = ::blueprint::nodes::perspective::Perspective()
+
+node4.fovy = 90
+node4.aspect = 1
+node4.znear = 0.1
+node4.zfar = 10
+
+_editor.add_node(node4, -451.33358572382, 424.4185304338)
+
+var node5 = ::rendergraph::nodes::clear::Clear()
+
+node5.masks = [ "color", "depth" ]
+node5.values = { "color" : [ 255, 255, 255, 255 ] }
+
+_editor.add_node(node5, -18.603950643239, 501.5393693723)
+
+var node6 = ::rendergraph::nodes::render_target::RenderTarget()
+
+_editor.add_node(node6, 90.884829403839, -216.98809698748)
+
+var node7 = ::blueprint::nodes::loop::Loop()
+
+node7.start = 0
+node7.end = 6
+
+_editor.add_node(node7, 523.70514203633, 418.95949811384)
+
+var node8 = ::blueprint::nodes::fetch::Fetch()
+
+_editor.add_node(node8, -105.86670943051, -222.7202609055)
+
+var node9 = ::blueprint::nodes::custom::Custom()
+
+node9.code = "
+import \"maths\" for Matrix44
+import \"maths.vector\" for Vector3
+var capture_views = [
+    Matrix44.init().lookat(Vector3(0.0, 0.0, 0.0), Vector3( 1.0,  0.0,  0.0), Vector3(0.0, -1.0,  0.0)),
+    Matrix44.init().lookat(Vector3(0.0, 0.0, 0.0), Vector3(-1.0,  0.0,  0.0), Vector3(0.0, -1.0,  0.0)),
+    Matrix44.init().lookat(Vector3(0.0, 0.0, 0.0), Vector3( 0.0,  1.0,  0.0), Vector3(0.0,  0.0,  1.0)),
+    Matrix44.init().lookat(Vector3(0.0, 0.0, 0.0), Vector3( 0.0, -1.0,  0.0), Vector3(0.0,  0.0, -1.0)),
+    Matrix44.init().lookat(Vector3(0.0, 0.0, 0.0), Vector3( 0.0,  0.0,  1.0), Vector3(0.0, -1.0,  0.0)),
+    Matrix44.init().lookat(Vector3(0.0, 0.0, 0.0), Vector3( 0.0,  0.0, -1.0), Vector3(0.0, -1.0,  0.0))
+]
+_editor.script_stack.clear()
+_editor.script_stack.add(capture_views)
+"
+node9.init_ports(0, 1)
+node9.use_cache = false
+
+_editor.add_node(node9, -609.75566284544, 295.9202837015)
+
+var node10 = ::blueprint::nodes::fetch::Fetch()
+
+_editor.add_node(node10, -431.31322485646, 283.76180549888)
+
+var node11 = ::rendergraph::nodes::cubemap::Cubemap()
+node11.query_param("unif_name").value = "u_irradiance_cubemap"
+
+node11.init_texture(32, 32, "rgb16f")
+
+_editor.add_node(node11, -389.16443471476, -211.50958124766)
+
+var node12 = ::blueprint::nodes::output::Output()
+
+node12.var_name = "tex"
+node12.var_type = "texture"
+
+_editor.add_node(node12, -241.17597092553, -139.13512709854)
+
+var node13 = ::rendergraph::nodes::pass::Pass()
+
+node13.once = false
+
+_editor.add_node(node13, 374.12287515848, 432.79006772655)
+
+var node14 = ::blueprint::nodes::subgraph::Subgraph()
+node14.load_from_file(_editor, "gen_atom_textures.ves")
+
+_editor.add_node(node14, -449.36189112179, 92.089309216664)
+
+var node15 = ::blueprint::nodes::input::Input()
+
+node15.var_name = "sun_dir"
+node15.var_type = "num3"
+
+_editor.add_node(node15, -530.99285333806, 186.58181485263)
+
+var node16 = ::blueprint::nodes::input::Input()
+
+node16.var_name = "sun_intensity"
+node16.var_type = "num"
+
+_editor.add_node(node16, -399.17474920099, 185.67272394353)
+
+var node17 = ::blueprint::nodes::input::Input()
+
+node17.var_name = "camera_pos"
+node17.var_type = "num3"
+
+_editor.add_node(node17, -669.06637028466, 183.74755668611)
+
+var node18 = ::blueprint::nodes::output::Output()
+
+node18.var_name = "irradiance"
+node18.var_type = "texture"
+
+_editor.add_node(node18, -804.41430664062, 266.08343505859)
+
+var node19 = ::blueprint::nodes::output::Output()
+
+node19.var_name = "inscatter"
+node19.var_type = "texture"
+
+_editor.add_node(node19, -807.1416237571, 216.99252319336)
+
+Blueprint.connect(node14, "inscatter", node19, "var")
+Blueprint.connect(node14, "irradiance", node18, "var")
+Blueprint.connect(node14, "next", node1, "prev")
+Blueprint.connect(node7, "next", node1, "do")
+Blueprint.connect(node0, "next", node13, "do")
+Blueprint.connect(node6, "fbo", node13, "fbo")
+Blueprint.connect(node11, "tex", node12, "var")
+Blueprint.connect(node11, "sides", node8, "items")
+Blueprint.connect(node7, "index", node8, "index")
+Blueprint.connect(node8, "item", node6, "col0")
+Blueprint.connect(node9, "out0", node10, "items")
+Blueprint.connect(node7, "index", node10, "index")
+Blueprint.connect(node9, "next", node5, "prev")
+Blueprint.connect(node13, "next", node7, "do")
+Blueprint.connect(node4, "mat", node2, "projection")
+Blueprint.connect(node10, "item", node2, "view")
+Blueprint.connect(node17, "var", node2, "u_CameraPos")
+Blueprint.connect(node15, "var", node2, "u_SunDir")
+Blueprint.connect(node16, "var", node2, "u_SunIntensity")
+Blueprint.connect(node14, "transmittance", node2, "transmittanceSampler")
+Blueprint.connect(node14, "irradiance", node2, "skyIrradianceSampler")
+Blueprint.connect(node14, "inscatter", node2, "inscatterSampler")
+Blueprint.connect(node5, "next", node0, "prev")
+Blueprint.connect(node2, "out", node0, "shader")
+Blueprint.connect(node3, "out", node0, "va")

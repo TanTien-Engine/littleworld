@@ -81,7 +81,7 @@ var node15 = ::blueprint::nodes::store::Store()
 
 node15.var_name = "transmittance"
 
-_editor.add_node(node15, -550.11242951317, 229.15963980243)
+_editor.add_node(node15, -685.64961959582, 171.30840013301)
 
 var node16 = ::blueprint::nodes::load::Load()
 
@@ -247,31 +247,46 @@ _editor.add_node(node42, -302.75953981136, 483.9101175561)
 
 var node43 = ::blueprint::nodes::output::Output()
 
-node43.var_name = "irradiance"
+node43.var_name = "transmittance"
 node43.var_type = "texture"
 
-_editor.add_node(node43, -187.94826974732, 281.15924824314)
+_editor.add_node(node43, -544.67569902909, 240.73327586276)
 
 var node44 = ::blueprint::nodes::output::Output()
 
-node44.var_name = "inscatter"
+node44.var_name = "irradiance"
 node44.var_type = "texture"
 
-_editor.add_node(node44, -40.47561850253, -64.032959184127)
+_editor.add_node(node44, -187.94826974732, 281.15924824314)
 
+var node45 = ::blueprint::nodes::output::Output()
+
+node45.var_name = "inscatter"
+node45.var_type = "texture"
+
+_editor.add_node(node45, -40.47561850253, -64.032959184127)
+
+var node46 = ::rendergraph::nodes::pass::Pass()
+
+node46.once = false
+
+_editor.add_node(node46, 1662.1398925781, 71.642456054686)
+
+Blueprint.connect(node35, "next", node46, "do")
 Blueprint.connect(node35, "index", node37, "a")
 Blueprint.connect(node38, "v", node37, "b")
 Blueprint.connect(node37, "out", node36, "cond")
 Blueprint.connect(node39, "v", node36, "true")
 Blueprint.connect(node40, "v", node36, "false")
-Blueprint.connect(node12, "tex", node44, "var")
+Blueprint.connect(node12, "tex", node45, "var")
 Blueprint.connect(node12, "tex", node14, "col0")
 Blueprint.connect(node14, "fbo", node32, "var")
 Blueprint.connect(node32, "var", node34, "var")
-Blueprint.connect(node11, "tex", node43, "var")
+Blueprint.connect(node11, "tex", node44, "var")
 Blueprint.connect(node11, "tex", node13, "col0")
 Blueprint.connect(node13, "fbo", node31, "var")
 Blueprint.connect(node31, "var", node33, "var")
+Blueprint.connect(node0, "transmittance", node43, "var")
 Blueprint.connect(node0, "transmittance", node15, "var")
 Blueprint.connect(node15, "var", node23, "var")
 Blueprint.connect(node15, "var", node21, "var")

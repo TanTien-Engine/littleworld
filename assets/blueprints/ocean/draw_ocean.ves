@@ -7,7 +7,7 @@ node0.skip = false
 _editor.add_node(node0, 558.8075282446, -339.48126638417)
 
 var node1 = ::rendergraph::nodes::shader::Shader()
-node1.query_param("inc_dir").value = ""
+node1.query_param("inc_dir").value = "../../shaders/atmo/"
 
 node1.vs = "
 #version 330 core
@@ -74,11 +74,11 @@ float tessellation_level(float d0, float d1)
 {
     float avg_d = (d0 + d1) / 2.0;
 
-    if (avg_d <= 10.0)
+    if (avg_d <= 5.0)
         return 20.0;
-    else if (avg_d <= 20.0)
+    else if (avg_d <= 10.0)
         return 10.0;
-    else if (avg_d <= 30.0)
+    else if (avg_d <= 15.0)
         return 5.0;
     else
         return 1.0;
@@ -172,9 +172,10 @@ void main()
     FS_IN_FragPos  = interpolate_3d(TES_IN_FragPos[0], TES_IN_FragPos[1], TES_IN_FragPos[2]);
     FS_IN_TexCoord = interpolate_2d(TES_IN_TexCoord[0], TES_IN_TexCoord[1], TES_IN_TexCoord[2]);
 
-    FS_IN_FragPos.y += texture(s_Dy, FS_IN_TexCoord).r * u_DisplacementScale;
-    FS_IN_FragPos.x -= texture(s_Dx, FS_IN_TexCoord).r * u_Choppiness;
-    FS_IN_FragPos.z -= texture(s_Dz, FS_IN_TexCoord).r * u_Choppiness;
+    float pos_scale = 0.1;
+    FS_IN_FragPos.y += texture(s_Dy, FS_IN_TexCoord).r * u_DisplacementScale * pos_scale;
+    FS_IN_FragPos.x -= texture(s_Dx, FS_IN_TexCoord).r * u_Choppiness * pos_scale;
+    FS_IN_FragPos.z -= texture(s_Dz, FS_IN_TexCoord).r * u_Choppiness * pos_scale;
 
     FS_IN_Normal = texture(s_NormalMap, FS_IN_TexCoord).xyz;
 
@@ -196,7 +197,7 @@ uniform samplerCube s_Sky;
 
 uniform UBO
 {
-    vec3        u_CameraPos;
+    vec3        u_CameraPos_fs;
     vec3        u_SunDirection;
     vec3        u_SeaColor;    
 };
@@ -210,15 +211,14 @@ void main()
 {
     // Input lighting data
     vec3 N = FS_IN_Normal;
-    vec3 V = normalize(u_CameraPos - FS_IN_FragPos);
+    vec3 V = normalize(u_CameraPos_fs - FS_IN_FragPos);
     vec3 R = reflect(-V, N);
     vec3 L = -u_SunDirection;
 
     vec3 F0 = vec3(0.04);
     vec3 F  = fresnel_schlick(max(dot(N, V), 0.0), F0);
 
-//    vec3 albedo = mix(u_SeaColor, texture(s_Sky, R).rgb, F);
-    vec3 albedo = u_SeaColor;
+    vec3 albedo = mix(u_SeaColor, texture(s_Sky, R).rgb, F);
 
     float NdotL = max(dot(N, L), 0.0);
     vec3  color = NdotL * albedo;
@@ -248,99 +248,96 @@ var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
 
 node3.type = "grids"
 node3.layout = [ "position", "texture" ]
-node3.shape_params = { "grids_size" : 16 }
+node3.shape_params = { "grids_size" : 32 }
 
 _editor.add_node(node3, 381.67421297039, -401.33131969581)
 
-var node4 = ::blueprint::nodes::perspective::Perspective()
+var node4 = ::blueprint::nodes::input::Input()
 
-node4.fovy = 45
-node4.aspect = 0
-node4.znear = 0.1
-node4.zfar = 100
+node4.var_name = "s_Dy"
+node4.var_type = "texture"
 
-_editor.add_node(node4, -295.73376471723, 53.564274662512)
+_editor.add_node(node4, -392.88860428235, -320.82328153248)
 
 var node5 = ::blueprint::nodes::input::Input()
 
-node5.var_name = "s_Dy"
+node5.var_name = "s_Dx"
 node5.var_type = "texture"
 
-_editor.add_node(node5, -392.88860428235, -320.82328153248)
+_editor.add_node(node5, -258.48364610908, -317.34394243729)
 
 var node6 = ::blueprint::nodes::input::Input()
 
-node6.var_name = "s_Dx"
+node6.var_name = "s_Dz"
 node6.var_type = "texture"
 
-_editor.add_node(node6, -258.48364610908, -317.34394243729)
+_editor.add_node(node6, -127.25225527424, -318.34394344614)
 
-var node7 = ::blueprint::nodes::input::Input()
+var node7 = ::blueprint::nodes::number3::Number3()
 
-node7.var_name = "s_Dz"
-node7.var_type = "texture"
+node7.value.set(0, 0.169668034, 0.439894319)
 
-_editor.add_node(node7, -127.25225527424, -318.34394344614)
+_editor.add_node(node7, 1.6762568429895, -327.33802947694)
 
-var node8 = ::blueprint::nodes::camera3d::Camera3d()
+var node8 = ::blueprint::nodes::number::Number()
 
-node8.cam.position.set(0.15755134811464, -1.9348436328098, -2.4679010154024)
-node8.cam.yaw = 89.2
-node8.cam.pitch = 58.4
-node8.cam.zoom = 45
-node8.cam.update_vectors()
-node8.speed = 0.28718087077141
+node8.value = 0.43668669462204
 
-_editor.add_node(node8, -490.59371831558, 21.562691266109)
+_editor.add_node(node8, -183.30180959379, -102.47631127315)
 
-var node9 = ::blueprint::nodes::multiply::Multiply()
+var node9 = ::blueprint::nodes::input::Input()
 
-_editor.add_node(node9, -100.08253398859, 105.75313130028)
+node9.var_name = "s_NormalMap"
+node9.var_type = "texture"
 
-var node10 = ::blueprint::nodes::number3::Number3()
+_editor.add_node(node9, -43.737394547152, -176.66563788128)
 
-node10.value.set(0, 0.169668034, 0.439894319)
+var node10 = ::blueprint::nodes::number::Number()
 
-_editor.add_node(node10, -1.3237431570105, -310.33802947694)
+node10.value = 0.57384353876114
 
-var node11 = ::blueprint::nodes::number::Number()
+_editor.add_node(node10, -44.645920127677, -103.36637919781)
 
-node11.value = 0.057517156004906
+var node11 = ::blueprint::nodes::input::Input()
 
-_editor.add_node(node11, -195.17654290822, -106.2931898385)
+node11.var_name = "s_Sky"
+node11.var_type = "texture"
+
+_editor.add_node(node11, -17.341702863204, -418.03322128422)
 
 var node12 = ::blueprint::nodes::input::Input()
 
-node12.var_name = "s_NormalMap"
-node12.var_type = "texture"
+node12.var_name = "sun_dir"
+node12.var_type = "num3"
 
-_editor.add_node(node12, -40.991338949857, -189.94587830202)
+_editor.add_node(node12, -44.776347515008, -244.1686768908)
 
-var node13 = ::blueprint::nodes::number3::Number3()
+var node13 = ::blueprint::nodes::input::Input()
 
-node13.value.set(0.72860580682755, 0, 0.87305027246475)
+node13.var_name = "camera_pos"
+node13.var_type = "num3"
 
-_editor.add_node(node13, -212.2280906932, -212.99913038025)
+_editor.add_node(node13, -67.126073663883, -26.495315551759)
 
-var node14 = ::blueprint::nodes::number::Number()
+var node14 = ::blueprint::nodes::input::Input()
 
-node14.value = 0.018287997692823
+node14.var_name = "vp_mat"
+node14.var_type = "mat4"
 
-_editor.add_node(node14, -44.645920127677, -103.36637919781)
+_editor.add_node(node14, -190.76246365634, -176.49531971325)
 
-Blueprint.connect(node8, "zoom", node4, "fovy")
-Blueprint.connect(node4, "mat", node9, "a")
-Blueprint.connect(node8, "mat", node9, "b")
-Blueprint.connect(node8, "pos", node1, "u_CameraPos")
-Blueprint.connect(node11, "v", node1, "u_DisplacementScale")
-Blueprint.connect(node14, "v", node1, "u_Choppiness")
-Blueprint.connect(node9, "v", node1, "view_proj")
-Blueprint.connect(node5, "var", node1, "s_Dy")
-Blueprint.connect(node6, "var", node1, "s_Dx")
-Blueprint.connect(node7, "var", node1, "s_Dz")
-Blueprint.connect(node12, "var", node1, "s_NormalMap")
-Blueprint.connect(node13, "v3", node1, "u_SunDirection")
-Blueprint.connect(node10, "v3", node1, "u_SeaColor")
+Blueprint.connect(node13, "var", node1, "u_CameraPos")
+Blueprint.connect(node8, "v", node1, "u_DisplacementScale")
+Blueprint.connect(node10, "v", node1, "u_Choppiness")
+Blueprint.connect(node14, "var", node1, "view_proj")
+Blueprint.connect(node4, "var", node1, "s_Dy")
+Blueprint.connect(node5, "var", node1, "s_Dx")
+Blueprint.connect(node6, "var", node1, "s_Dz")
+Blueprint.connect(node9, "var", node1, "s_NormalMap")
+Blueprint.connect(node13, "var", node1, "u_CameraPos_fs")
+Blueprint.connect(node12, "var", node1, "u_SunDirection")
+Blueprint.connect(node7, "v3", node1, "u_SeaColor")
+Blueprint.connect(node11, "var", node1, "s_Sky")
 Blueprint.connect(node2, "next", node0, "prev")
 Blueprint.connect(node1, "out", node0, "shader")
 Blueprint.connect(node3, "out", node0, "va")

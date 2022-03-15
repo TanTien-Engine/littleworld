@@ -1,0 +1,651 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("triangles")
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "disable", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 549.76263944696, 652.8700238601)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+out VS_OUT {
+    vec3 frag_pos;
+    vec2 texcoord;
+} vs_out;
+
+uniform sampler2D s_Dy;
+uniform sampler2D s_Dx;
+uniform sampler2D s_Dz;
+
+uniform UBO
+{
+    mat4 view_mat;
+    mat4 proj_mat;
+
+    float u_DisplacementScale;
+    float u_Choppiness;    
+    vec3  u_CameraPos_tes;
+};
+
+vec2 oceanPos(vec3 vertex) 
+{
+    mat4 view_inv = inverse(view_mat);
+    mat4 proj_inv = inverse(proj_mat);
+
+    vec3 cameraDir = normalize((proj_inv * vec4(vertex, 1.0)).xyz);
+    vec3 worldDir = (view_inv * vec4(cameraDir, 0.0)).xyz;
+
+    float t = -u_CameraPos_tes.z / worldDir.z;
+    return u_CameraPos_tes.xy + t * worldDir.xy;
+}
+
+void main()
+{
+    vec2 pos = oceanPos(aPos);
+
+    vec2 uv = pos * 0.2;
+    vs_out.texcoord = uv;
+
+    float dy =  texture(s_Dy, uv).r * u_DisplacementScale;
+    float dx = -texture(s_Dx, uv).r * u_Choppiness;
+    float dz = -texture(s_Dz, uv).r * u_Choppiness;
+
+    vs_out.frag_pos = vec3(pos + vec2(dx, dz), dy);
+
+    gl_Position = proj_mat * view_mat * vec4(vs_out.frag_pos, 1.0);    
+}
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = ""
+node1.fs = "
+#version 330 core
+
+#define _ATMOSPHERE_
+#define _SKYMAP_
+#define texture2D texture
+#define texture3D texture
+#define texture2DLod textureLod
+#include \"atmosphere.glsl\"
+
+out vec4 FragColor;
+
+in VS_OUT {
+    vec3 frag_pos;
+    vec2 texcoord;    
+} fs_in;
+
+uniform sampler2D s_NormalMap;
+
+uniform UBO
+{
+    vec3        u_CameraPos_fs;
+    vec3        u_SunDirection;
+    vec3        u_SeaColor;    
+
+    float sigmaSq0;
+};
+
+vec3 fresnel_schlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+// ---------------------------------------------------------------------------
+// REFLECTED SUN RADIANCE
+// ---------------------------------------------------------------------------
+
+// assumes x>0
+float erfc(float x) {
+    return 2.0 * exp(-x * x) / (2.319 * x + sqrt(4.0 + 1.52 * x * x));
+}
+
+float Lambda(float cosTheta, float sigmaSq) {
+    float v = cosTheta / sqrt((1.0 - cosTheta * cosTheta) * (2.0 * sigmaSq));
+    return max(0.0, (exp(-v * v) - v * sqrt(M_PI) * erfc(v)) / (2.0 * v * sqrt(M_PI)));
+    //return (exp(-v * v)) / (2.0 * v * sqrt(M_PI)); // approximate, faster formula
+}
+
+// L, V, N, Tx, Ty in world space
+float reflectedSunRadiance(vec3 L, vec3 V, vec3 N, vec3 Tx, vec3 Ty, vec2 sigmaSq) {
+    vec3 H = normalize(L + V);
+    float zetax = dot(H, Tx) / dot(H, N);
+    float zetay = dot(H, Ty) / dot(H, N);
+
+    float zL = dot(L, N); // cos of source zenith angle
+    float zV = dot(V, N); // cos of receiver zenith angle
+    float zH = dot(H, N); // cos of facet normal zenith angle
+    float zH2 = zH * zH;
+
+    float p = exp(-0.5 * (zetax * zetax / sigmaSq.x + zetay * zetay / sigmaSq.y)) / (2.0 * M_PI * sqrt(sigmaSq.x * sigmaSq.y));
+
+    float tanV = atan(dot(V, Ty), dot(V, Tx));
+    float cosV2 = 1.0 / (1.0 + tanV * tanV);
+    float sigmaV2 = sigmaSq.x * cosV2 + sigmaSq.y * (1.0 - cosV2);
+
+    float tanL = atan(dot(L, Ty), dot(L, Tx));
+    float cosL2 = 1.0 / (1.0 + tanL * tanL);
+    float sigmaL2 = sigmaSq.x * cosL2 + sigmaSq.y * (1.0 - cosL2);
+
+    float fresnel = 0.02 + 0.98 * pow(1.0 - dot(V, H), 5.0);
+
+    zL = max(zL, 0.01);
+    zV = max(zV, 0.01);
+
+    return fresnel * p / ((1.0 + Lambda(zL, sigmaL2) + Lambda(zV, sigmaV2)) * zV * zH2 * zH2 * 4.0);
+}
+
+
+// ---------------------------------------------------------------------------
+// REFLECTED SKY RADIANCE
+// ---------------------------------------------------------------------------
+
+// manual anisotropic filter
+vec4 myTexture2DGrad(sampler2D tex, vec2 u, vec2 s, vec2 t)
+{
+    const float TEX_SIZE = 512.0; // 'tex' size in pixels
+    const int N = 1; // use (2*N+1)^2 samples
+    vec4 r = vec4(0.0);
+    float l = max(0.0, log2(max(length(s), length(t)) * TEX_SIZE) - 0.0);
+    for (int i = -N; i <= N; ++i) {
+        for (int j = -N; j <= N; ++j) {
+            r += texture2DLod(tex, u + (s * float(i) + t * float(j)) / float(N), l);
+        }
+    }
+    return r / pow(2.0 * float(N) + 1.0, 2.0);
+}
+
+// V, N, Tx, Ty in world space
+vec2 U(vec2 zeta, vec3 V, vec3 N, vec3 Tx, vec3 Ty) {
+    vec3 f = normalize(vec3(-zeta, 1.0)); // tangent space
+    vec3 F = f.x * Tx + f.y * Ty + f.z * N; // world space
+    vec3 R = 2.0 * dot(F, V) * F - V;
+    return R.xy / (1.0 + R.z);
+}
+
+float meanFresnel(float cosThetaV, float sigmaV) {
+    return pow(1.0 - cosThetaV, 5.0 * exp(-2.69 * sigmaV)) / (1.0 + 22.7 * pow(sigmaV, 1.5));
+}
+
+// V, N in world space
+float meanFresnel(vec3 V, vec3 N, vec2 sigmaSq) {
+    vec2 v = V.xy; // view direction in wind space
+    vec2 t = v * v / (1.0 - V.z * V.z); // cos^2 and sin^2 of view direction
+    float sigmaV2 = dot(t, sigmaSq); // slope variance in view direction
+    return meanFresnel(dot(V, N), sqrt(sigmaV2));
+}
+
+// V, N, Tx, Ty in world space;
+vec3 meanSkyRadiance(vec3 V, vec3 N, vec3 Tx, vec3 Ty, vec2 sigmaSq) {
+    vec4 result = vec4(0.0);
+
+    const float eps = 0.001;
+    vec2 u0 = U(vec2(0.0), V, N, Tx, Ty);
+    vec2 dux = 2.0 * (U(vec2(eps, 0.0), V, N, Tx, Ty) - u0) / eps * sqrt(sigmaSq.x);
+    vec2 duy = 2.0 * (U(vec2(0.0, eps), V, N, Tx, Ty) - u0) / eps * sqrt(sigmaSq.y);
+
+#ifdef HARDWARE_ANISTROPIC_FILTERING
+    result = texture2DGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
+#else
+    result = myTexture2DGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
+#endif
+    //if texture2DLod and texture2DGrad are not defined, you can use this (no filtering):
+    //result = texture2D(skySampler, u0 * (0.5 / 1.1) + 0.5);
+
+    return result.rgb;
+}
+
+void main()
+{
+    // Input lighting data
+    vec3 N = texture(s_NormalMap, fs_in.texcoord).xyz;
+    vec3 V = normalize(u_CameraPos_fs - fs_in.frag_pos);
+
+    vec3 PP = fs_in.frag_pos + earthPos;
+
+    vec3 Lsun;
+    vec3 Esky;
+    vec3 extinction;
+    sunRadianceAndSkyIrradiance(PP, u_SunDirection, Lsun, Esky);
+
+    //vec3 cloudL = v * (Lsun * max(u_SunDirection.z, 0.0) + Esky / 10.0) / M_PI;
+
+    //vec3 inscatter = inScattering(u_CameraPos_fs + earthPos, PP, u_SunDirection, extinction);
+    //cloudL = cloudL * extinction + inscatter;
+
+    //return vec4(cloudL, t) * cloudsColor;
+
+
+
+    vec3 color = vec3(0.0);
+
+    vec3 sun_sky = (Lsun * max(u_SunDirection.z, 0.0) + Esky / 10.0) / M_PI;
+
+    vec3 inscatter = skyRadiance(u_CameraPos_fs + earthPos, V, u_SunDirection, extinction);
+    //color += u_SeaColor * sun_sky * extinction + inscatter;
+    
+    color += 0.005 * inscatter * (Lsun * max(dot(N, u_SunDirection), 0.0) + Esky) / M_PI;
+
+    vec3 Ty = normalize(vec3(0.0, N.z, -N.y));
+    vec3 Tx = cross(Ty, N);
+
+    vec2 sigmaSq = vec2(sigmaSq0);
+
+    float fresnel = 0.02 + 0.98 * meanFresnel(V, N, sigmaSq);
+
+//    color += reflectedSunRadiance(u_SunDirection, V, N, Tx, Ty, sigmaSq) * Lsun;
+//    color += fresnel * meanSkyRadiance(V, N, Tx, Ty, sigmaSq);
+    
+    vec3 Lsea = u_SeaColor * Esky / M_PI;
+//    color += (1.0 - fresnel) * Lsea;
+
+    vec3 F0 = vec3(0.04);
+    vec3 F  = fresnel_schlick(max(dot(N, V), 0.0), F0);
+
+//    vec3 albedo = mix(u_SeaColor, texture(s_Sky, R).rgb, F);
+    vec3 albedo = u_SeaColor;
+
+//    float NdotL = max(dot(N, L), 0.0);
+//    vec3  color = NdotL * albedo;
+
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0 / 2.2));
+
+    FragColor = vec4(color, 1.0);
+}
+
+"
+node1.cs = ""
+node1.render_gen()
+node1.set_uniform("hdrExposure", [ 0 ])
+
+_editor.add_node(node1, -11.234705164313, 698.25563722809)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "color", "depth" ]
+node2.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node2, 246.28845421333, 832.92605496669)
+
+var node3 = ::blueprint::nodes::number3::Number3()
+
+node3.value.set(0, 0.169668034, 0.439894319)
+
+_editor.add_node(node3, -185.75009084326, 716.07378378962)
+
+var node4 = ::blueprint::nodes::number::Number()
+
+node4.value = 0.079640708863735
+
+_editor.add_node(node4, -327.16766338056, 1018.9355019934)
+
+var node5 = ::blueprint::nodes::number::Number()
+
+node5.value = 0.049141779541969
+
+_editor.add_node(node5, -190.42276171341, 1017.3444462698)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "tilde_h0_k.ves")
+
+_editor.add_node(node6, -1094.2923431153, 803.06971179516)
+
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "tilde_h0_t.ves")
+
+_editor.add_node(node7, -842.87690200487, 792.31152667301)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "butterfly_fft.ves")
+
+_editor.add_node(node8, -548.61759234686, 912.9628842126)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "twiddle_factors.ves")
+
+_editor.add_node(node9, -832.72509091818, 676.16427806843)
+
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "butterfly_fft.ves")
+
+_editor.add_node(node10, -547.41300498012, 802.48235320068)
+
+var node11 = ::blueprint::nodes::subgraph::Subgraph()
+node11.load_from_file(_editor, "butterfly_fft.ves")
+
+_editor.add_node(node11, -546.95973241429, 691.0952770571)
+
+var node12 = ::blueprint::nodes::subgraph::Subgraph()
+node12.load_from_file(_editor, "normal_map.ves")
+
+_editor.add_node(node12, -543.78404308862, 587.0459217561)
+
+var node13 = ::rendergraph::nodes::draw::Draw()
+
+node13.set_prim_type("tri_strip")
+node13.render_state = { "depth_test" : true, "cull" : "disable", "depth_func" : "lequal", "clip_plane" : false }
+node13.skip = false
+
+_editor.add_node(node13, 81.929689430242, -207.99736657221)
+
+var node14 = ::rendergraph::nodes::shader::Shader()
+node14.query_param("inc_dir").value = "../../shaders/atmo/"
+
+node14.vs = "
+
+#version 330 core
+
+layout (location = 0) in vec3 aPos;
+
+
+
+out vec3 view_dir;
+
+
+
+uniform UBO
+
+{
+
+    mat4 view_mat;
+
+    mat4 proj_mat;
+
+};
+
+
+
+void main()
+
+{
+
+    mat4 view_inv = inverse(view_mat);
+
+    mat4 proj_inv = inverse(proj_mat);
+
+    view_dir = (view_inv * vec4((proj_inv * vec4(aPos, 1.0)).xyz, 0.0)).xyz;
+
+    gl_Position = vec4(aPos.xy, 0.9999999, 1.0);
+
+}  
+
+"
+node14.tcs = ""
+node14.tes = ""
+node14.gs = ""
+node14.fs = "
+
+#version 330 core
+
+
+
+#define _ATMOSPHERE_
+
+#define _SKYMAP_
+
+#define texture2D texture
+
+#define texture3D texture
+
+#define texture2DLod textureLod
+
+#include \"atmosphere.glsl\"
+
+
+
+out vec4 FragColor;
+
+
+
+in vec3 view_dir;
+
+
+
+uniform UBO
+
+{
+
+    vec3 cam_pos;
+
+    vec3 sun_dir;  
+
+};
+
+
+
+void main()
+
+{    
+
+    vec3 v = normalize(view_dir);
+
+    vec3 sunColor = vec3(step(cos(3.1415926 / 180.0), dot(v, sun_dir))) * SUN_INTENSITY;
+
+    vec3 extinction;
+
+    vec3 inscatter = skyRadiance(cam_pos + earthPos, v, sun_dir, extinction);
+
+    vec3 finalColor = sunColor * extinction + inscatter;
+
+    FragColor = vec4(hdr(finalColor), 1.0);
+
+}
+
+"
+node14.cs = ""
+node14.render_gen()
+
+_editor.add_node(node14, -172.7565961607, -212.53643941281)
+
+var node15 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node15.type = "quad"
+node15.layout = [ "position" ]
+node15.shape_params = {  }
+
+_editor.add_node(node15, -143.29819800131, -508.26072222591)
+
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "../render/atmo/gen_atom_textures.ves")
+
+_editor.add_node(node16, -511.58159897942, 331.69000339718)
+
+var node17 = ::blueprint::nodes::subgraph::Subgraph()
+node17.load_from_file(_editor, "../render/atmo/gen_skymap.ves")
+
+_editor.add_node(node17, -767.50033781207, 284.23598345739)
+
+var node18 = ::blueprint::nodes::number::Number()
+
+node18.value = 0.38556519150734
+
+_editor.add_node(node18, -339.52552489443, 8.5496416742936)
+
+var node19 = ::globegraph::nodes::horizon_camera::HorizonCamera()
+node19.query_param("height").value = 2
+node19.query_param("theta").value = 0
+node19.query_param("phi").value = 7.656
+
+_editor.add_node(node19, -1611.4524506305, 1061.6001777751)
+
+var node20 = ::globegraph::nodes::sun_dir::SunDir()
+node20.query_param("dir").value.set(0.21231825714083, 0.63455238243257, 0.74314482547739)
+
+_editor.add_node(node20, -1608.2066716447, 925.33776882126)
+
+var node21 = ::blueprint::nodes::store::Store()
+
+node21.var_name = "cam_pos"
+
+_editor.add_node(node21, -1469.5489525447, 1030.2087679885)
+
+var node22 = ::blueprint::nodes::load::Load()
+
+node22.var_name = "cam_pos"
+
+_editor.add_node(node22, -191.07640928334, 959.35068643556)
+
+var node23 = ::blueprint::nodes::load::Load()
+
+node23.var_name = "cam_pos"
+
+_editor.add_node(node23, -482.50190232024, -59.016145183806)
+
+var node24 = ::blueprint::nodes::store::Store()
+
+node24.var_name = "sun_dir"
+
+_editor.add_node(node24, -1464.1895813334, 945.63555077663)
+
+var node25 = ::blueprint::nodes::load::Load()
+
+node25.var_name = "sun_dir"
+
+_editor.add_node(node25, -953.0160607505, 282.88107854919)
+
+var node26 = ::blueprint::nodes::load::Load()
+
+node26.var_name = "sun_dir"
+
+_editor.add_node(node26, -339.52442438686, -56.891921450806)
+
+var node27 = ::blueprint::nodes::load::Load()
+
+node27.var_name = "sun_dir"
+
+_editor.add_node(node27, -194.55722660974, 909.48804697405)
+
+var node28 = ::blueprint::nodes::store::Store()
+
+node28.var_name = "view"
+
+_editor.add_node(node28, -1469.8551753088, 1102.1914879581)
+
+var node29 = ::blueprint::nodes::store::Store()
+
+node29.var_name = "proj"
+
+_editor.add_node(node29, -1328.0369934906, 1101.2823915004)
+
+var node30 = ::blueprint::nodes::load::Load()
+
+node30.var_name = "view"
+
+_editor.add_node(node30, -194.449868416, 1130.6611224596)
+
+var node31 = ::blueprint::nodes::load::Load()
+
+node31.var_name = "proj"
+
+_editor.add_node(node31, -194.72262343198, 1079.8429267698)
+
+var node32 = ::blueprint::nodes::load::Load()
+
+node32.var_name = "view"
+
+_editor.add_node(node32, -477.4383525253, 70.392917417994)
+
+var node33 = ::blueprint::nodes::load::Load()
+
+node33.var_name = "proj"
+
+_editor.add_node(node33, -348.33001726628, 71.162826406294)
+
+var node34 = ::globegraph::nodes::ocean_mesh::OceanMesh()
+node34.query_param("grid_size").value = 4
+
+_editor.add_node(node34, 385.24890136719, 704.54547119141)
+
+var node35 = ::blueprint::nodes::store::Store()
+
+node35.var_name = "theta"
+
+_editor.add_node(node35, -1331.2028808594, 1034.5432128906)
+
+var node36 = ::blueprint::nodes::load::Load()
+
+node36.var_name = "theta"
+
+_editor.add_node(node36, 248.66593838868, 715.81296177406)
+
+var node37 = ::blueprint::nodes::number::Number()
+
+node37.value = 0.22524617612362
+
+_editor.add_node(node37, -292.27214195879, 827.46294036806)
+
+Blueprint.connect(node20, "dir", node24, "var")
+Blueprint.connect(node24, "var", node27, "var")
+Blueprint.connect(node24, "var", node26, "var")
+Blueprint.connect(node24, "var", node25, "var")
+Blueprint.connect(node19, "theta", node35, "var")
+Blueprint.connect(node35, "var", node36, "var")
+Blueprint.connect(node36, "var", node34, "cam_theta")
+Blueprint.connect(node19, "proj", node29, "var")
+Blueprint.connect(node29, "var", node33, "var")
+Blueprint.connect(node29, "var", node31, "var")
+Blueprint.connect(node19, "view", node28, "var")
+Blueprint.connect(node28, "var", node32, "var")
+Blueprint.connect(node28, "var", node30, "var")
+Blueprint.connect(node19, "pos", node21, "var")
+Blueprint.connect(node21, "var", node23, "var")
+Blueprint.connect(node21, "var", node22, "var")
+Blueprint.connect(node6, "next", node7, "prev")
+Blueprint.connect(node6, "tilde_h0k", node7, "tilde_h0k")
+Blueprint.connect(node6, "tilde_h0minusk", node7, "tilde_h0minusk")
+Blueprint.connect(node7, "next", node9, "prev")
+Blueprint.connect(node9, "next", node8, "prev")
+Blueprint.connect(node9, "twiddle_factors", node8, "twiddle_factors")
+Blueprint.connect(node7, "tilde_h0_t_dx", node8, "tilde_h0_t")
+Blueprint.connect(node8, "next", node10, "prev")
+Blueprint.connect(node9, "twiddle_factors", node10, "twiddle_factors")
+Blueprint.connect(node7, "tilde_h0_t_dy", node10, "tilde_h0_t")
+Blueprint.connect(node10, "next", node11, "prev")
+Blueprint.connect(node9, "twiddle_factors", node11, "twiddle_factors")
+Blueprint.connect(node7, "tilde_h0_t_dz", node11, "tilde_h0_t")
+Blueprint.connect(node11, "next", node12, "prev")
+Blueprint.connect(node10, "dst", node12, "s_HeightMap")
+Blueprint.connect(node12, "next", node17, "prev")
+Blueprint.connect(node25, "var", node17, "sunDir")
+Blueprint.connect(node17, "next", node16, "prev")
+Blueprint.connect(node32, "var", node14, "view_mat")
+Blueprint.connect(node33, "var", node14, "proj_mat")
+Blueprint.connect(node18, "v", node14, "hdrExposure")
+Blueprint.connect(node23, "var", node14, "cam_pos")
+Blueprint.connect(node26, "var", node14, "sun_dir")
+Blueprint.connect(node16, "transmittance", node14, "transmittanceSampler")
+Blueprint.connect(node16, "irradiance", node14, "skyIrradianceSampler")
+Blueprint.connect(node16, "inscatter", node14, "inscatterSampler")
+Blueprint.connect(node17, "sky_tex", node14, "skySampler")
+Blueprint.connect(node16, "next", node2, "prev")
+Blueprint.connect(node30, "var", node1, "view_mat")
+Blueprint.connect(node31, "var", node1, "proj_mat")
+Blueprint.connect(node4, "v", node1, "u_DisplacementScale")
+Blueprint.connect(node5, "v", node1, "u_Choppiness")
+Blueprint.connect(node22, "var", node1, "u_CameraPos_tes")
+Blueprint.connect(node10, "dst", node1, "s_Dy")
+Blueprint.connect(node8, "dst", node1, "s_Dx")
+Blueprint.connect(node11, "dst", node1, "s_Dz")
+Blueprint.connect(node22, "var", node1, "u_CameraPos_fs")
+Blueprint.connect(node27, "var", node1, "u_SunDirection")
+Blueprint.connect(node3, "v3", node1, "u_SeaColor")
+Blueprint.connect(node37, "v", node1, "sigmaSq0")
+Blueprint.connect(node16, "transmittance", node1, "transmittanceSampler")
+Blueprint.connect(node16, "irradiance", node1, "skyIrradianceSampler")
+Blueprint.connect(node16, "inscatter", node1, "inscatterSampler")
+Blueprint.connect(node17, "sky_tex", node1, "skySampler")
+Blueprint.connect(node12, "normal_map", node1, "s_NormalMap")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node34, "vao", node0, "va")
+Blueprint.connect(node0, "next", node13, "prev")
+Blueprint.connect(node14, "out", node13, "shader")
+Blueprint.connect(node15, "out", node13, "va")

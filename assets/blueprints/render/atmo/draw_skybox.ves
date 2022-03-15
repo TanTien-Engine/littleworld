@@ -1,0 +1,142 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("triangles")
+node0.render_state = { "depth_test" : true, "cull" : "disable", "depth_func" : "lequal", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 95.85918701258, -3.6692538702771)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = ""
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+out vec3 TexCoords;
+
+uniform UBO
+{
+	mat4 projection;
+	mat4 view;	
+};
+
+void main()
+{
+    TexCoords = aPos;
+
+    mat4 rot_view = mat4(mat3(view));
+    vec4 clipPos = projection * rot_view * vec4(aPos, 1.0);
+
+    gl_Position = clipPos.xyww;
+}  
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = ""
+node1.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in vec3 TexCoords;
+
+uniform samplerCube skybox;
+
+void main()
+{    
+    vec3 envColor = texture(skybox, TexCoords).rgb;
+    
+    // tonemap
+    envColor = envColor / (envColor + vec3(1.0));    
+    // gamma correct
+    envColor = pow(envColor, vec3(1.0/2.2));
+    
+    FragColor = vec4(envColor, 1.0);
+}
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, -101.00469155992, 80.471938659609)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "baking_envmap.ves")
+
+_editor.add_node(node2, -518.25291304155, -76.461206609552)
+
+var node3 = ::blueprint::nodes::perspective::Perspective()
+
+node3.fovy = 45
+node3.aspect = 0
+node3.znear = 0.1
+node3.zfar = 100
+
+_editor.add_node(node3, -438.66587962261, 164.34161572886)
+
+var node4 = ::blueprint::nodes::camera3d::Camera3d()
+
+node4.cam.position.set(0, 0, 3)
+node4.cam.yaw = -90
+node4.cam.pitch = 0
+node4.cam.zoom = 45
+node4.cam.update_vectors()
+node4.speed = 0.23510175943375
+
+_editor.add_node(node4, -571.91427497038, 162.2590799602)
+
+var node5 = ::blueprint::nodes::number3::Number3()
+
+node5.value.set(1, 0, 0.019568549469113)
+
+_editor.add_node(node5, -740.76116943359, -43.774658203125)
+
+var node6 = ::blueprint::nodes::number::Number()
+
+node6.value = 0
+
+_editor.add_node(node6, -738.59478735586, -148.45418828987)
+
+var node7 = ::rendergraph::nodes::clear::Clear()
+
+node7.masks = [ "color", "depth" ]
+node7.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node7, -65.761169433594, 280.22534179687)
+
+var node8 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node8.type = "cube"
+node8.layout = [  ]
+node8.shape_params = {  }
+
+_editor.add_node(node8, -73.746293400535, -129.45234415354)
+
+var node9 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node9, -322.10231711648, -114.17542336204)
+
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "../../../../../tantien/assets/blueprints/rendergraph/draw_tex3_quad.ves")
+
+_editor.add_node(node10, -253.21345189439, -310.47128115086)
+
+var node11 = ::blueprint::nodes::number::Number()
+
+node11.value = 0.64831238985062
+
+_editor.add_node(node11, -430.34811426588, -325.05169677734)
+
+Blueprint.connect(node4, "zoom", node3, "fovy")
+Blueprint.connect(node5, "v3", node2, "sun_dir")
+Blueprint.connect(node6, "v", node2, "sun_intensity")
+Blueprint.connect(node4, "pos", node2, "camera_pos")
+Blueprint.connect(node2, "tex", node9, "value")
+Blueprint.connect(node3, "mat", node1, "projection")
+Blueprint.connect(node4, "mat", node1, "view")
+Blueprint.connect(node2, "tex", node1, "skybox")
+Blueprint.connect(node7, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node8, "out", node0, "va")
+Blueprint.connect(node0, "next", node10, "prev")
+Blueprint.connect(node2, "irradiance", node10, "texture1")
+Blueprint.connect(node11, "v", node10, "layer")

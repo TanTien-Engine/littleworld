@@ -3,5 +3,5 @@ import "globegraph.nodes.*"
 var GLOBE_NODES = [
 Ellipsoid, Geodetic2d, Curve, VectorData, 
 VtexBuilder, VirtualTexture, SplitImage,
-GlobeCamera, OceanTools,
+GlobeCamera, OceanTools, HorizonCamera, SunDir, OceanMesh,
 ]

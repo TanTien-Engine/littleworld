@@ -35,9 +35,16 @@ foreign class GlobeTools
 
 	foreign static split_image(src, num_x, num_y)
 
+	// globe camera
 	foreign static cam_view_mat(lon, lat, theta, phi, d)
 	foreign static cam_proj_mat(lon, lat, theta, phi, d)
 	foreign static cam_position(lon, lat, theta, phi, d)
+	// horizon camera
+	foreign static hori_cam_view_mat(h, theta, phi)
+	foreign static hori_cam_proj_mat(h)
+
+	// ocean
+	foreign static gen_ocean_mesh(grid_size, cam_theta)
 
 	// fft ocean
 	foreign static generate_bit_reversed_indices(n)

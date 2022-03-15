@@ -1,0 +1,267 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("tri_strip")
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "lequal", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 1032.6179274131, -21.897469402529)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = "../../assets/shaders/atmo/"
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexcoord;
+
+out VS_OUT {
+    vec2 coords;
+    vec3 ray;
+    vec3 cam_pos;
+} vs_out;
+
+uniform UBO
+{
+	mat4 model;
+	mat4 view;
+	mat4 projection;
+};
+
+void main()
+{
+    vs_out.coords = aPos.xy * 0.5 + 0.5;
+    vs_out.ray = (inverse(view) * vec4((inverse(projection) * vec4(aPos, 1.0)).xyz, 0.0)).xyz;
+    vs_out.cam_pos = (inverse(view) * vec4(0, 0, 0, 1)).xyz;
+    gl_Position = vec4(aPos, 1.0);
+}
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = ""
+node1.fs = "
+#version 330 core
+
+const float Rg = 6360.0;
+const float M_PI = 3.141592657;
+
+out vec4 FragColor;
+
+in VS_OUT {
+    vec2 coords;
+    vec3 ray;
+    vec3 cam_pos;
+} fs_in;
+
+uniform UBO
+{
+	vec3 cam_pos;
+	vec3 light_pos;
+};
+
+const float exposure = 0.4;
+
+uniform samplerCube skybox;
+uniform sampler2D earth_tex;
+
+vec3 HDR(vec3 L) {
+    L = L * exposure;
+    L.r = L.r < 1.413 ? pow(L.r * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.r);
+    L.g = L.g < 1.413 ? pow(L.g * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.g);
+    L.b = L.b < 1.413 ? pow(L.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.b);
+    return L;
+}
+
+vec3 fresnel_schlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+void main()
+{
+    vec3 s = light_pos;
+
+    vec3 x = fs_in.cam_pos;
+    vec3 v = normalize(fs_in.ray);
+
+    float r = length(x);
+    float mu = dot(x, v) / r;
+    float t = -r * mu - sqrt(r * r * (mu * mu - 1.0) + Rg * Rg);
+
+    vec3 g = x - vec3(0.0, 0.0, Rg + 10.0);
+    float a = v.x * v.x + v.y * v.y - v.z * v.z;
+    float b = 2.0 * (g.x * v.x + g.y * v.y - g.z * v.z);
+    float c = g.x * g.x + g.y * g.y - g.z * g.z;
+    float d = -(b + sqrt(b * b - 4.0 * a * c)) / (2.0 * a);
+    bool cone = d > 0.0 && abs(x.z + d * v.z - Rg) <= 10.0;
+
+    if (t > 0.0) {
+        if (cone && d < t) {
+            t = d;
+        }
+    } else if (cone) {
+        t = d;
+    }
+
+    vec3 N = v;
+    vec3 V = normalize(fs_in.cam_pos - fs_in.ray);
+    vec3 R = reflect(-V, N);
+    vec3 sky_color = texture(skybox, R).rgb;
+
+    vec3 reflectance = vec3(0.0);
+    if (t > 0) 
+    {
+        vec3 x0 = x + t * v;
+        float r0 = length(x0);
+        vec3 n = x0 / r0;
+        vec2 coords = vec2(atan(n.y, n.x), acos(n.z)) * vec2(0.5, 1.0) / M_PI + vec2(0.5, 0.0);
+        reflectance = texture(earth_tex, coords).rgb;
+    }
+
+//    vec3 F0 = vec3(0.04);
+//    vec3 F  = fresnel_schlick(max(dot(N, V), 0.0), F0);
+//    vec3 albedo = mix(reflectance, sky_color, F);
+
+    vec3 albedo = mix(reflectance, sky_color, 0.5);
+//    vec3 albedo = reflectance;
+
+    FragColor = vec4(HDR(albedo), 1.0);
+}
+
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, 687.59130265145, -101.51580872096)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "depth", "color" ]
+node2.values = { "color" : [ 0.5, 0.5, 0.5, 1 ] }
+
+_editor.add_node(node2, 875.05132898274, 77.888475742039)
+
+var node3 = ::blueprint::nodes::perspective::Perspective()
+
+node3.fovy = 45
+node3.aspect = 0
+node3.znear = 0.1
+node3.zfar = 100000
+
+_editor.add_node(node3, 219.94466864433, -303.10453813102)
+
+var node4 = ::blueprint::nodes::proxy::Proxy()
+
+node4.real_name = "view_cam"
+node4.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node4, -202.65384713514, 145.92559416077)
+
+var node5 = ::blueprint::nodes::input::Input()
+
+node5.var_name = "model"
+node5.var_type = "mat4"
+
+_editor.add_node(node5, 496.80286892978, 61.218131325455)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "u_tex"
+node6.gamma_correction = false
+node6.init_texture("../../../gis/PrecomputedAtmosphericScattering/earth.tiff")
+
+_editor.add_node(node6, 454.45814752752, -102.13273237748)
+
+var node7 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node7.type = "quad"
+node7.layout = [ "position" ]
+node7.shape_params = { "grids_size" : 16 }
+
+_editor.add_node(node7, 885.09907025391, -96.730285449219)
+
+var node8 = ::globegraph::nodes::globe_camera::GlobeCamera()
+node8.query_param("lon").value = 2.0248775152506
+node8.query_param("lat").value = 1.1482977323819
+node8.query_param("theta").value = 0.8
+node8.query_param("phi").value = 0.248
+node8.query_param("d").value = 27487.553505958
+
+_editor.add_node(node8, 196.15249644531, 80.97627156836)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "../../assets/blueprints/render/atmo/baking_envmap.ves")
+
+_editor.add_node(node9, 319.29341664226, -484.43963384045)
+
+var node10 = ::blueprint::nodes::number3::Number3()
+
+node10.value.set(0, 1, 0)
+
+_editor.add_node(node10, -494.0352711235, -106.38731109366)
+
+var node11 = ::blueprint::nodes::number::Number()
+
+node11.value = 1
+
+_editor.add_node(node11, -107.73839956154, -542.04137773837)
+
+var node12 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node12, 519.61004833984, -505.09527355957)
+
+var node13 = ::blueprint::nodes::camera3d::Camera3d()
+
+node13.cam.position.set(-8766.2739431696, 1961.2656714016, 2090.2618165923)
+node13.cam.yaw = -1470.8
+node13.cam.pitch = -62
+node13.cam.zoom = 45
+node13.cam.update_vectors()
+node13.speed = 100
+
+_editor.add_node(node13, 494.38575122071, -899.11552099611)
+
+var node14 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node14, 45.56274358576, -567.57686989524)
+
+var node15 = ::blueprint::nodes::integer::Integer()
+
+node15.value = 100
+
+_editor.add_node(node15, -104.73543823242, -610.86959716797)
+
+var node16 = ::blueprint::nodes::subtract::Subtract()
+
+_editor.add_node(node16, -230.69918712269, -229.28663413308)
+
+var node17 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node17, -354.04264526367, -150.69403076172)
+
+var node18 = ::blueprint::nodes::integer::Integer()
+
+node18.value = 100000
+
+_editor.add_node(node18, -500.34266967774, -197.9940246582)
+
+Blueprint.connect(node13, "zoom", node3, "fovy")
+Blueprint.connect(node11, "v", node14, "a")
+Blueprint.connect(node15, "v", node14, "b")
+Blueprint.connect(node10, "v3", node17, "a")
+Blueprint.connect(node18, "v", node17, "b")
+Blueprint.connect(node17, "v", node16, "a")
+Blueprint.connect(node13, "pos", node16, "b")
+Blueprint.connect(node16, "v", node9, "sun_dir")
+Blueprint.connect(node14, "v", node9, "sun_intensity")
+Blueprint.connect(node13, "pos", node9, "camera_pos")
+Blueprint.connect(node9, "tex", node12, "value")
+Blueprint.connect(node5, "var", node1, "model")
+Blueprint.connect(node13, "mat", node1, "view")
+Blueprint.connect(node3, "mat", node1, "projection")
+Blueprint.connect(node13, "pos", node1, "cam_pos")
+Blueprint.connect(node17, "v", node1, "light_pos")
+Blueprint.connect(node9, "tex", node1, "skybox")
+Blueprint.connect(node6, "tex", node1, "earth_tex")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node7, "out", node0, "va")

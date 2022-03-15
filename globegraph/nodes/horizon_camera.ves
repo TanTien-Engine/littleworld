@@ -1,0 +1,91 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_MATRIX4, VAR_TYPE_NUMBER, VAR_TYPE_NUMBER3
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "maths.vector" for Vector2, Vector3
+import "globegen" for GlobeTools
+import "gui" for MOUSE_LEFT
+import "math" for Math
+
+class HorizonCamera is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "view",  VAR_TYPE_MATRIX4),
+			Pin(this, "proj",  VAR_TYPE_MATRIX4),
+			Pin(this, "pos",   VAR_TYPE_NUMBER3),
+			Pin(this, "theta", VAR_TYPE_NUMBER),
+		]
+
+		this.params.add(NodeParam("height", 2.0))
+		this.params.add(NodeParam("theta", 0))
+		this.params.add(NodeParam("phi", 0))
+
+		this.layout()
+
+		this.last_pos = nil
+	}
+
+	calc_value(idx) 
+	{
+		var height = this.query_param("height").value
+		var theta  = this.query_param("theta").value
+		var phi    = this.query_param("phi").value
+
+		if (idx == 0) {
+			return GlobeTools.hori_cam_view_mat(height, theta, phi)
+		} else if (idx == 1) {
+			return GlobeTools.hori_cam_proj_mat(height)
+		} else if (idx == 2) {
+			return Variant(Vector3(0, 0, height))
+		} else if (idx == 3) {
+			return Variant(theta)			
+		} else {
+			return nil
+		}
+	}
+
+	on_key_pressed(key) 
+	{
+		if (key == "w") {
+			this.query_param("height").value = Math.min(8000.0, this.query_param("height").value * 1.1)
+		} else if (key == "s") {
+			this.query_param("height").value = Math.max(0.5, this.query_param("height").value / 1.1)
+		}
+
+		Blueprint.send_pin_dirty_root(this.exports[0])
+		Blueprint.send_pin_dirty_root(this.exports[1])
+		Blueprint.send_pin_dirty_root(this.exports[2])
+	}
+
+	on_mouse_pressed(x, y, btn) 
+	{
+		this.last_pos = Vector2(x, y) 
+	}
+
+	on_mouse_dragged(x, y, btn) 
+	{
+		if (btn == MOUSE_LEFT)
+		{
+			var theta = this.query_param("theta").value
+			var phi   = this.query_param("phi").value
+
+	    	phi = phi + (this.last_pos.x - x) / 500.0
+	    	theta = theta + (this.last_pos.y - y) / 500.0
+	        theta = Math.max(0.0, Math.min(Math.pi(), theta))
+
+	        this.query_param("theta").value = theta
+	        this.query_param("phi").value = phi	        
+
+	        this.last_pos.x = x
+	        this.last_pos.y = y
+
+	        Blueprint.send_pin_dirty_root(this.exports[0])
+	        Blueprint.send_pin_dirty_root(this.exports[3])	        
+		}
+	}	
+}

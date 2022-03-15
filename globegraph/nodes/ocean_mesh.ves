@@ -1,0 +1,57 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "rendergraph.variant" for VAR_TYPE_VERTEX_ARRAY
+import "globegen" for GlobeTools
+
+class OceanMesh is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "cam_theta", VAR_TYPE_NUMBER),
+		]
+		this.exports = [
+			Pin(this, "vao", VAR_TYPE_VERTEX_ARRAY)
+		]
+
+		this.params.add(NodeParam("grid_size", 8.0))
+
+		this.layout()
+
+		this.va = nil
+	}
+
+	on_pin_dirty(pin)
+	{
+		if (pin.is_input) {
+			this.va = nil
+		}
+	}
+
+	on_node_dirty()
+	{
+		this.va = nil
+	}
+
+	calc_value(idx)
+	{
+		if (!this.va)
+		{
+			var grid_size = this.query_param("grid_size").value
+
+			var cam_theta = 0
+			var v_cam_theta = Blueprint.calc_input_value(this, 0)
+			if (v_cam_theta) {
+				cam_theta = v_cam_theta.value
+			}
+
+			this.va = GlobeTools.gen_ocean_mesh(grid_size, cam_theta)
+		}
+		return Variant(VAR_TYPE_VERTEX_ARRAY, this.va)
+	}
+}
