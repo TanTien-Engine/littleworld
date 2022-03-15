@@ -1,8 +1,8 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant, VAR_TYPE_MATRIX4, VAR_TYPE_NUMBER3
+import "blueprint.variant" for VAR_TYPE_MATRIX4
 import "blueprint.node_param" for NodeParam
-import "maths.vector" for Vector2, Vector3
+import "maths.vector" for Vector2
 import "globegen" for GlobeTools
 import "gui" for MOUSE_LEFT, MOUSE_RIGHT
 import "math" for Math
@@ -14,9 +14,8 @@ class GlobeCamera is Node
 		super.init()
 
 		this.exports = [
-			Pin(this, "view",  VAR_TYPE_MATRIX4),
-			Pin(this, "proj",  VAR_TYPE_MATRIX4),
-			Pin(this, "l_dir", VAR_TYPE_NUMBER3),			
+			Pin(this, "view", VAR_TYPE_MATRIX4),
+			Pin(this, "proj", VAR_TYPE_MATRIX4),
 		]
 
 		this.params.add(NodeParam("lon", 0))
@@ -24,7 +23,6 @@ class GlobeCamera is Node
 		this.params.add(NodeParam("theta", 0))
 		this.params.add(NodeParam("phi", 0))
 		this.params.add(NodeParam("d", 6360.0))
-		this.params.add(NodeParam("l_dir", Vector3(0, -1, 0)))
 
 		this.layout()
 
@@ -43,8 +41,6 @@ class GlobeCamera is Node
 			return GlobeTools.cam_view_mat(lon, lat, theta, phi, d)
 		} else if (idx == 1) {
 			return GlobeTools.cam_proj_mat(lon, lat, theta, phi, d)
-		} else if (idx == 2) {
-			return Variant(this.query_param("l_dir").value)
 		} else {
 			return nil
 		}
@@ -101,20 +97,6 @@ class GlobeCamera is Node
 
 	        this.query_param("lon").value = lon
 	        this.query_param("lat").value = lat
-
-	        this.last_pos.x = x
-	        this.last_pos.y = y
-		}
-		else
-		{
-			var s = this.query_param("l_dir").value
-	    	var vangle = Math.asin(s.z)
-	    	var hangle = Math.atan2(s.y, s.x)
-	    	vangle = vangle + (this.last_pos.y - y) / 180.0 * Math.pi() / 4
-	    	hangle = hangle + (this.last_pos.x - x) / 180.0 * Math.pi() / 4
-	    	s.x = Math.cos(vangle) * Math.cos(hangle)
-	    	s.y = Math.cos(vangle) * Math.sin(hangle)
-	    	s.z = Math.sin(vangle)
 
 	        this.last_pos.x = x
 	        this.last_pos.y = y

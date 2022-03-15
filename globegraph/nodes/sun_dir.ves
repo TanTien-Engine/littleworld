@@ -1,0 +1,54 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER3
+import "blueprint.node_param" for NodeParam
+import "maths.vector" for Vector2, Vector3
+import "gui" for MOUSE_LEFT
+import "math" for Math
+
+class SunDir is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "dir", VAR_TYPE_NUMBER3),			
+		]
+
+		this.params.add(NodeParam("dir", Vector3(0, -1, 0)))
+
+		this.layout()
+
+		this.last_pos = nil
+	}
+
+
+	calc_value(idx) 
+	{
+		return Variant(this.query_param("dir").value)
+	}
+
+	on_mouse_pressed(x, y, btn) 
+	{
+		this.last_pos = Vector2(x, y) 
+	}
+
+	on_mouse_dragged(x, y, btn) 
+	{
+		if (btn == MOUSE_LEFT)
+		{
+			var s = this.query_param("dir").value
+	    	var vangle = Math.asin(s.z)
+	    	var hangle = Math.atan2(s.y, s.x)
+	    	vangle = vangle + (this.last_pos.y - y) / 180.0 * Math.pi() / 4
+	    	hangle = hangle + (this.last_pos.x - x) / 180.0 * Math.pi() / 4
+	    	s.x = Math.cos(vangle) * Math.cos(hangle)
+	    	s.y = Math.cos(vangle) * Math.sin(hangle)
+	    	s.z = Math.sin(vangle)
+
+	        this.last_pos.x = x
+	        this.last_pos.y = y
+		}
+	}	
+}

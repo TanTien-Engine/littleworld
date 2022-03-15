@@ -298,25 +298,42 @@ _editor.add_node(node8, 706.33246025391, -394.67463544922)
 var node9 = ::globegraph::nodes::globe_camera::GlobeCamera()
 node9.query_param("lon").value = 0.87860146376918
 node9.query_param("lat").value = 1.3437606722863
-node9.query_param("theta").value = 1.568
-node9.query_param("phi").value = 0.658
-node9.query_param("d").value = 15306.098326275
-node9.query_param("l_dir").value.set(-0.0005709601396818, -0.013077137176769, 0.99991432757401)
+node9.query_param("theta").value = 1.188
+node9.query_param("phi").value = 0.6
+node9.query_param("d").value = 128.32556647056
 
 _editor.add_node(node9, 197.61659644531, 82.44037156836)
 
 var node10 = ::blueprint::nodes::subgraph::Subgraph()
 node10.load_from_file(_editor, "../../assets/blueprints/render/atmo/gen_atom_textures.ves")
 
-_editor.add_node(node10, 457.02553405762, -37.01760269165)
+_editor.add_node(node10, 333.02553405762, 4.98239730835)
 
+var node11 = ::blueprint::nodes::subgraph::Subgraph()
+node11.load_from_file(_editor, "../../../tantien/assets/blueprints/rendergraph/draw_tex3_quad.ves")
+
+_editor.add_node(node11, 665.9755859375, 252.35235595703)
+
+var node12 = ::blueprint::nodes::number::Number()
+
+node12.value = 0.37804937362671
+
+_editor.add_node(node12, 420.97555541992, 130.35234069824)
+
+var node13 = ::globegraph::nodes::sun_dir::SunDir()
+node13.query_param("dir").value.set(0.3319782303321, -0.93747760237377, 0.10452846326765)
+
+_editor.add_node(node13, 457.35855, -149.32533)
+
+Blueprint.connect(node12, "v", node11, "layer")
 Blueprint.connect(node4, "zoom", node3, "fovy")
 Blueprint.connect(node5, "var", node1, "model")
 Blueprint.connect(node9, "view", node1, "view")
 Blueprint.connect(node9, "proj", node1, "projection")
 Blueprint.connect(node4, "pos", node1, "cam_pos")
-Blueprint.connect(node9, "l_dir", node1, "light_pos")
+Blueprint.connect(node13, "dir", node1, "light_pos")
 Blueprint.connect(node6, "v4", node1, "diffuse_specular_ambient_shininess")
+Blueprint.connect(node10, "transmittance", node1, "transmittanceSampler")
 Blueprint.connect(node10, "inscatter", node1, "inscatterSampler")
 Blueprint.connect(node7, "tex", node1, "reflectanceSampler")
 Blueprint.connect(node10, "irradiance", node1, "irradianceSampler")
