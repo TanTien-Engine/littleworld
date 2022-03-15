@@ -413,12 +413,13 @@ void w_GlobeTools_hori_cam_view_mat()
 
 void w_GlobeTools_hori_cam_proj_mat()
 {
-    float h = ves_tonumber(1);
+    float znear = ves_tonumber(1);
+    float zfar  = ves_tonumber(2);
 
     float width  = tt::Graphics::Instance()->GetWidth();
     float height = tt::Graphics::Instance()->GetHeight();
 
-    sm::mat4 proj = sm::mat4::Perspective(90.0f, float(width) / float(height), 0.1f * h, 1000000.0f * h);
+    sm::mat4 proj = sm::mat4::Perspective(90.0f, float(width) / float(height), znear, zfar);
 
     ves_pop(ves_argnum());
 
@@ -588,7 +589,7 @@ VesselForeignMethodFn GlobeGenBindMethod(const char* signature)
     if (strcmp(signature, "static GlobeTools.cam_proj_mat(_,_,_,_,_)") == 0) return w_GlobeTools_cam_proj_mat;
     if (strcmp(signature, "static GlobeTools.cam_position(_,_,_,_,_)") == 0) return w_GlobeTools_cam_position;
     if (strcmp(signature, "static GlobeTools.hori_cam_view_mat(_,_,_)") == 0) return w_GlobeTools_hori_cam_view_mat;
-    if (strcmp(signature, "static GlobeTools.hori_cam_proj_mat(_)") == 0) return w_GlobeTools_hori_cam_proj_mat;
+    if (strcmp(signature, "static GlobeTools.hori_cam_proj_mat(_,_)") == 0) return w_GlobeTools_hori_cam_proj_mat;
     if (strcmp(signature, "static GlobeTools.gen_ocean_mesh(_,_)") == 0) return w_GlobeTools_gen_ocean_mesh;
     if (strcmp(signature, "static GlobeTools.generate_bit_reversed_indices(_)") == 0) return w_GlobeTools_generate_bit_reversed_indices;
 

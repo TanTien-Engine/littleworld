@@ -80,8 +80,9 @@ _editor.add_node(node1, 169.94724922546, 200.73396770996)
 var node2 = ::rendergraph::nodes::texture::Texture()
 node2.query_param("unif_name").value = "tilde_h0_k"
 node2.gamma_correction = false
+node2.mipmap = true
 node2.init_texture(256, 256, "rgba32f")
-node2.set_sampler("linear_repeat")
+node2.set_sampler("linear_repeat_mipmap")
 
 _editor.add_node(node2, -545.81211186789, -2.2585815962298)
 
@@ -102,7 +103,7 @@ var node5 = ::blueprint::nodes::output::Output()
 node5.var_name = "normal_map"
 node5.var_type = "texture"
 
-_editor.add_node(node5, -344.57166122994, 0.52069805406032)
+_editor.add_node(node5, -342.37166122994, -12.67930194594)
 
 var node6 = ::blueprint::nodes::input::Input()
 

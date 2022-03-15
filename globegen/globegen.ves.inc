@@ -41,7 +41,7 @@ foreign class GlobeTools
 	foreign static cam_position(lon, lat, theta, phi, d)
 	// horizon camera
 	foreign static hori_cam_view_mat(h, theta, phi)
-	foreign static hori_cam_proj_mat(h)
+	foreign static hori_cam_proj_mat(near, far)
 
 	// ocean
 	foreign static gen_ocean_mesh(grid_size, cam_theta)

@@ -39,14 +39,26 @@ class HorizonCamera is Node
 		if (idx == 0) {
 			return GlobeTools.hori_cam_view_mat(height, theta, phi)
 		} else if (idx == 1) {
-			return GlobeTools.hori_cam_proj_mat(height)
+			var near = this.calc_znear(height)
+			var far = this.calc_zfar(height)
+			return GlobeTools.hori_cam_proj_mat(near, far)
 		} else if (idx == 2) {
 			return Variant(Vector3(0, 0, height))
 		} else if (idx == 3) {
-			return Variant(theta)			
+			return Variant(theta)
 		} else {
 			return nil
 		}
+	}
+
+	calc_znear(height)
+	{
+		return height * 0.1
+	}
+
+	calc_zfar(height)
+	{
+		return height * 1000000.0
 	}
 
 	on_key_pressed(key) 
