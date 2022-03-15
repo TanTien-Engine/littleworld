@@ -1,0 +1,150 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("tri_strip")
+node0.render_state = { "depth_test" : true, "cull" : "disable", "depth_func" : "lequal", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 184.48159403102, 1.4110115002069)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = "../../../shaders/atmo/"
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+out vec3 view_dir;
+
+uniform UBO
+{
+    mat4 view_mat;
+    mat4 proj_mat;
+};
+
+void main()
+{
+    mat4 view_inv = inverse(view_mat);
+    mat4 proj_inv = inverse(proj_mat);
+    view_dir = (view_inv * vec4((proj_inv * vec4(aPos, 1.0)).xyz, 0.0)).xyz;
+    gl_Position = vec4(aPos.xy, 0.9999999, 1.0);
+}  
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = ""
+node1.fs = "
+#version 330 core
+
+#define _ATMOSPHERE_
+#define _SKYMAP_
+#define texture2D texture
+#define texture3D texture
+#define texture2DLod textureLod
+#include \"atmosphere.glsl\"
+
+out vec4 FragColor;
+
+in vec3 view_dir;
+
+uniform UBO
+{
+    vec3 cam_pos;
+    vec3 sun_dir;  
+};
+
+void main()
+{    
+    vec3 v = normalize(view_dir);
+    vec3 sunColor = vec3(step(cos(3.1415926 / 180.0), dot(v, sun_dir))) * SUN_INTENSITY;
+    vec3 extinction;
+    vec3 inscatter = skyRadiance(cam_pos + earthPos, v, sun_dir, extinction);
+    vec3 finalColor = sunColor * extinction + inscatter;
+    FragColor = vec4(hdr(finalColor), 1.0);
+}
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, -70.20469155992, -3.128061340391)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "color", "depth" ]
+node2.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node2, -65.761169433594, 280.22534179687)
+
+var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node3.type = "quad"
+node3.layout = [ "position" ]
+node3.shape_params = {  }
+
+_editor.add_node(node3, -40.746293400535, -298.85234415354)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "gen_atom_textures.ves")
+
+_editor.add_node(node4, -393.96781008111, 45.705546758775)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "gen_skymap.ves")
+
+_editor.add_node(node5, -660.54770593856, -108.85591119756)
+
+var node6 = ::blueprint::nodes::number::Number()
+
+node6.value = 0.38556519150734
+
+_editor.add_node(node6, -559.70089302092, 171.59438338305)
+
+var node7 = ::blueprint::nodes::camera3d::Camera3d()
+
+node7.cam.position.set(0, 0, 3)
+node7.cam.yaw = -91.6
+node7.cam.pitch = -6.5
+node7.cam.zoom = 45
+node7.cam.update_vectors()
+node7.speed = 0.19910322129726
+
+_editor.add_node(node7, -714.32899613814, 377.23675537109)
+
+var node8 = ::blueprint::nodes::perspective::Perspective()
+
+node8.fovy = 45
+node8.aspect = 0
+node8.znear = 0.1
+node8.zfar = 100
+
+_editor.add_node(node8, -504.85491338052, 467.98809305445)
+
+var node9 = ::globegraph::nodes::globe_camera::GlobeCamera()
+node9.query_param("lon").value = 0.0022915113868155
+node9.query_param("lat").value = -0.011809950725924
+node9.query_param("theta").value = 1.56
+node9.query_param("phi").value = 1.296
+node9.query_param("d").value = 780.39999086903
+
+_editor.add_node(node9, -732.62117678126, 110.80122187588)
+
+var node10 = ::globegraph::nodes::sun_dir::SunDir()
+node10.query_param("dir").value.set(-0.98784341706951, 0.1256695553203, 0.091501618663402)
+
+_editor.add_node(node10, -880.17603052657, -52.786966577498)
+
+Blueprint.connect(node10, "dir", node5, "sunDir")
+Blueprint.connect(node5, "next", node4, "prev")
+Blueprint.connect(node4, "next", node2, "prev")
+Blueprint.connect(node7, "zoom", node8, "fovy")
+Blueprint.connect(node9, "view", node1, "view_mat")
+Blueprint.connect(node9, "proj", node1, "proj_mat")
+Blueprint.connect(node6, "v", node1, "hdrExposure")
+Blueprint.connect(node7, "pos", node1, "cam_pos")
+Blueprint.connect(node10, "dir", node1, "sun_dir")
+Blueprint.connect(node4, "transmittance", node1, "transmittanceSampler")
+Blueprint.connect(node4, "irradiance", node1, "skyIrradianceSampler")
+Blueprint.connect(node4, "inscatter", node1, "inscatterSampler")
+Blueprint.connect(node5, "sky_tex", node1, "skySampler")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node3, "out", node0, "va")

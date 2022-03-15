@@ -1,0 +1,147 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("tri_strip")
+node0.render_state = { "depth_test" : false, "cull" : "disable", "depth_func" : "lequal", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 184.48159403102, 1.4110115002069)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = "../../../shaders/atmo/"
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 aPos;
+
+out vec2 U;
+
+void main()
+{
+    gl_Position = vec4(aPos, 1.0);
+    U = aPos.xy * 1.1;
+}  
+"
+node1.tcs = ""
+node1.tes = ""
+node1.gs = ""
+node1.fs = "
+#version 330 core
+
+#define _ATMOSPHERE_
+#define texture2D texture
+#define texture3D texture
+#define texture2DLod textureLod
+#include \"atmosphere.glsl\"
+
+out vec4 FragColor;
+
+in vec2 U;
+
+uniform UBO
+{
+    vec3 sunDir;
+};
+
+void main()
+{    
+    vec2 u = U;
+    float l = dot(u, u);
+    vec3 result = vec3(0.0);
+
+    if (l <= 1.02) {
+        if (l > 1.0) {
+            u = u / l;
+            l = 1.0 / l;
+        }
+
+        // inverse stereographic projection,
+        // from skymap coordinates to world space directions
+        vec3 r = vec3(2.0 * u, 1.0 - l) / (1.0 + l);
+
+        vec3 extinction;
+        result = skyRadiance(earthPos, r, sunDir, extinction);
+
+#ifdef CLOUDS
+        vec4 cloudL = cloudColorV(vec3(0.0), r, sunDir);
+        result = cloudL.rgb * cloudL.a + result * (1.0 - cloudL.a);
+#endif
+    } else {
+        // below horizon:
+        // use average fresnel * average sky radiance
+        // to simulate multiple reflections on waves
+
+        const float avgFresnel = 0.17;
+        result = skyIrradiance(earthPos.z, sunDir.z) / M_PI * avgFresnel;
+    }
+
+    FragColor = vec4(result, 1.0);
+}
+"
+node1.cs = ""
+node1.render_gen()
+
+_editor.add_node(node1, -101.00469155992, 80.471938659609)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "color" ]
+node2.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node2, -65.761169433594, 280.22534179687)
+
+var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node3.type = "quad"
+node3.layout = [ "position" ]
+node3.shape_params = {  }
+
+_editor.add_node(node3, -73.746293400535, -129.45234415354)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "sky_tex"
+node4.gamma_correction = false
+node4.init_texture(512, 512, "rgba16f")
+
+_editor.add_node(node4, -263.15512877494, -395.9078511458)
+
+var node5 = ::rendergraph::nodes::pass::Pass()
+
+node5.once = false
+
+_editor.add_node(node5, 382.84877319211, 95.408556671173)
+
+var node6 = ::rendergraph::nodes::render_target::RenderTarget()
+
+_editor.add_node(node6, -80.92425917446, -321.34201806641)
+
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "gen_atom_textures.ves")
+
+_editor.add_node(node7, -364.63977313008, 70.110470056364)
+
+var node8 = ::blueprint::nodes::output::Output()
+
+node8.var_name = "sky_tex"
+node8.var_type = "texture"
+
+_editor.add_node(node8, -76.399073242187, -433.06498535156)
+
+var node9 = ::blueprint::nodes::input::Input()
+
+node9.var_name = "sunDir"
+node9.var_type = "num3"
+
+_editor.add_node(node9, -312.76774458452, 168.95211237127)
+
+Blueprint.connect(node7, "next", node2, "prev")
+Blueprint.connect(node9, "var", node1, "sunDir")
+Blueprint.connect(node7, "transmittance", node1, "transmittanceSampler")
+Blueprint.connect(node7, "irradiance", node1, "skyIrradianceSampler")
+Blueprint.connect(node7, "inscatter", node1, "inscatterSampler")
+Blueprint.connect(node0, "next", node5, "do")
+Blueprint.connect(node6, "fbo", node5, "fbo")
+Blueprint.connect(node4, "tex", node8, "var")
+Blueprint.connect(node4, "tex", node6, "col0")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node3, "out", node0, "va")
