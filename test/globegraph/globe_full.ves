@@ -1,0 +1,94 @@
+var node0 = ::blueprint::nodes::camera3d::Camera3d()
+
+node0.cam.position.set(-39.279026265194, 182.98463044595, 1033.4837767339)
+node0.cam.yaw = -92.5
+node0.cam.pitch = 20.8
+node0.cam.zoom = 45
+node0.cam.update_vectors()
+node0.speed = 10
+
+_editor.add_node(node0, -967.19474335641, 723.97968440793)
+
+var node1 = ::globegraph::nodes::vtex_builder::VtexBuilder()
+node1.query_param("out_path").value = "../../../tmp/test.vtex"
+node1.query_param("src_path").value = "../../../gis/dem15/new"
+
+_editor.add_node(node1, -425.40900031423, 539.00886399729)
+
+var node2 = ::globegraph::nodes::virtual_texture::VirtualTexture()
+node2.query_param("sphere").value = true
+
+_editor.add_node(node2, -286.53022036254, 500.84404552363)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../assets/blueprints/render/globe/terrain_and_ocean.ves")
+
+_editor.add_node(node3, 24.985753894063, 662.46824220667)
+
+var node4 = ::blueprint::nodes::perspective::Perspective()
+
+node4.fovy = 45
+node4.aspect = 0
+node4.znear = 0.01
+node4.zfar = 10000
+
+_editor.add_node(node4, -791.29922579996, 724.02886590269)
+
+var node5 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node5, -629.13107003166, 691.53082485626)
+
+var node6 = ::blueprint::nodes::matrix::Matrix()
+
+_editor.add_node(node6, -801.10226844845, 567.51519219444)
+
+var node7 = ::blueprint::nodes::number3::Number3()
+
+node7.value.set(1000, 1000, 1000)
+
+_editor.add_node(node7, -947.06591036073, 570.9515447335)
+
+var node8 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node8, -424.88539238328, 479.24107080861)
+
+var node9 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node9, -162.77698497826, 326.30921827788)
+
+var node10 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node10, -296.20239256084, 325.08688690414)
+
+var node11 = ::blueprint::nodes::orbit_camera::OrbitCamera()
+node11.query_param("speed").value = 0.005
+
+_editor.add_node(node11, -805.46098419332, 466.75991882816)
+
+var node12 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node12, -624.16548671034, 596.72311604121)
+
+var node13 = ::blueprint::nodes::print::Print()
+
+_editor.add_node(node13, -427.68887327373, 327.45843841781)
+
+Blueprint.connect(node7, "v3", node6, "scaling")
+Blueprint.connect(node6, "mat", node12, "a")
+Blueprint.connect(node11, "mat", node12, "b")
+Blueprint.connect(node0, "zoom", node4, "fovy")
+Blueprint.connect(node4, "mat", node5, "a")
+Blueprint.connect(node0, "mat", node5, "b")
+Blueprint.connect(node5, "v", node8, "a")
+Blueprint.connect(node12, "v", node8, "b")
+Blueprint.connect(node1, "path", node2, "filepath")
+Blueprint.connect(node8, "v", node2, "mvp_mat")
+Blueprint.connect(node2, "feedback", node13, "value")
+Blueprint.connect(node2, "tex_atlas", node10, "value")
+Blueprint.connect(node2, "page_table", node9, "value")
+Blueprint.connect(node0, "this", node3, "view_cam")
+Blueprint.connect(node2, "page_table", node3, "u_page_table_tex")
+Blueprint.connect(node2, "tex_atlas", node3, "u_texture_atlas_tex")
+Blueprint.connect(node2, "feedback", node3, "u_feedback_tex")
+Blueprint.connect(node2, "size", node3, "vtex_size")
+Blueprint.connect(node12, "v", node3, "model_mat")

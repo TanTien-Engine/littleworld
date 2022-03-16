@@ -146,94 +146,97 @@ void main()
 "
 node0.render_gen()
 
-_editor.add_node(node0, -183.00000138716, 128.22726162997)
+_editor.add_node(node0, 111.89217874284, 82.36065674997)
 
 var node1 = ::rendergraph::nodes::pass::Pass()
 
 node1.once = false
 
-_editor.add_node(node1, 175.29435666348, 279.16371977608)
+_editor.add_node(node1, 470.18653679348, 233.29711489608)
 
 var node2 = ::rendergraph::nodes::texture::Texture()
 node2.query_param("unif_name").value = "tilde_h0_t_dx"
 node2.gamma_correction = false
+node2.mipmap = false
 node2.init_texture(256, 256, "rgba32f")
 node2.set_sampler("linear_repeat")
 
-_editor.add_node(node2, -846.52669186789, -14.64004159623)
+_editor.add_node(node2, -551.63451173789, -60.50664647623)
 
 var node3 = ::rendergraph::nodes::compute::Compute()
 
 node3.num_groups = [ 8, 8, 1 ]
 
-_editor.add_node(node3, 7.7592534341106, 268.87811632393)
+_editor.add_node(node3, 302.65143356411, 223.01151144393)
 
 var node4 = ::rendergraph::nodes::texture::Texture()
 node4.query_param("unif_name").value = "tilde_h0_t_dy"
 node4.gamma_correction = false
+node4.mipmap = false
 node4.init_texture(256, 256, "rgba32f")
 node4.set_sampler("linear_repeat")
 
-_editor.add_node(node4, -627.51842740508, -16.292934158213)
+_editor.add_node(node4, -332.62624727508, -62.159539038213)
 
 var node5 = ::rendergraph::nodes::texture::Texture()
 node5.query_param("unif_name").value = "tilde_h0_t_dz"
 node5.gamma_correction = false
+node5.mipmap = false
 node5.init_texture(256, 256, "rgba32f")
 node5.set_sampler("linear_repeat")
 
-_editor.add_node(node5, -408.863144296, -20.261652141957)
+_editor.add_node(node5, -113.970964166, -66.128257021957)
 
 var node6 = ::blueprint::nodes::integer::Integer()
 
 node6.value = 256
 
-_editor.add_node(node6, -523.28973492266, 207.67278263896)
+_editor.add_node(node6, -228.39755479266, 161.80617775896)
 
 var node7 = ::blueprint::nodes::integer::Integer()
 
 node7.value = 1000
 
-_editor.add_node(node7, -366.87968312361, 205.62374100556)
+_editor.add_node(node7, -71.98750299361, 159.75713612556)
 
 var node8 = ::blueprint::nodes::time::Time()
 
-_editor.add_node(node8, -369.69774432222, 272.05961117074)
+_editor.add_node(node8, -74.80556419222, 226.19300629074)
 
 var node9 = ::blueprint::nodes::input::Input()
 
 node9.var_name = "tilde_h0k"
 node9.var_type = "texture"
 
-_editor.add_node(node9, -546.55721919793, 107.18360837826)
+_editor.add_node(node9, -251.66503906793, 61.31700349826)
 
 var node10 = ::blueprint::nodes::input::Input()
 
 node10.var_name = "tilde_h0minusk"
 node10.var_type = "texture"
 
-_editor.add_node(node10, -411.02001499144, 107.18359475884)
+_editor.add_node(node10, -116.12783486144, 61.31698987884)
 
 var node11 = ::blueprint::nodes::output::Output()
 
 node11.var_name = "tilde_h0_t_dx"
 node11.var_type = "texture"
 
-_editor.add_node(node11, -807.71685791015, -303.94242858887)
+_editor.add_node(node11, -512.82467778015, -349.80903346887)
 
 var node12 = ::blueprint::nodes::output::Output()
 
 node12.var_name = "tilde_h0_t_dy"
 node12.var_type = "texture"
 
-_editor.add_node(node12, -603.71685791015, -302.94242858887)
+_editor.add_node(node12, -308.82467778015, -348.80903346887)
 
 var node13 = ::blueprint::nodes::output::Output()
 
 node13.var_name = "tilde_h0_t_dz"
 node13.var_type = "texture"
 
-_editor.add_node(node13, -393.71685791015, -298.94242858887)
+_editor.add_node(node13, -98.82467778015, -344.80903346887)
 
 Blueprint.connect(node5, "tex", node13, "var")
 Blueprint.connect(node4, "tex", node12, "var")

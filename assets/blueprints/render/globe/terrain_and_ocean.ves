@@ -1,0 +1,850 @@
+var node0 = ::rendergraph::nodes::draw::Draw()
+
+node0.set_prim_type("patches")
+node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "back", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
+node0.skip = false
+
+_editor.add_node(node0, 559.49054169997, -338.72995158327)
+
+var node1 = ::rendergraph::nodes::shader::Shader()
+node1.query_param("inc_dir").value = ""
+
+node1.vs = "
+#version 330 core
+layout (location = 0) in vec3 position;
+
+out vec3 TCS_IN_FragPos;
+
+void main()
+{
+    TCS_IN_FragPos = position;
+}
+"
+node1.tcs = "
+#version 400 core
+
+layout(vertices = 3) out;
+
+in vec3 TCS_IN_FragPos[];
+
+out vec3 TES_IN_FragPos[];
+
+uniform UBO_TCS
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;   
+
+    vec3 cam_pos;
+    int lod_level;  
+} tcs;
+
+void main()
+{
+    TES_IN_FragPos[gl_InvocationID] = TCS_IN_FragPos[gl_InvocationID];
+
+    if (gl_InvocationID == 0)
+    {
+        vec3 pos = normalize(TCS_IN_FragPos[0]);
+        vec3 world_pos = (tcs.model * vec4(pos, 1.0)).xyz;
+
+//        float dist = pow(length(tcs.cam_pos - world_pos), 2);
+        float dist = length(tcs.cam_pos - world_pos);
+
+        int max_level = tcs.lod_level;
+        int curr_level = max_level;
+        if (dist < 100) {
+            curr_level = 0;
+        } else if (dist < 200) {
+            curr_level = 1;
+        } else if (dist < 400) {
+            curr_level = 2;
+        } else if (dist < 800) {
+            curr_level = 3;
+        } else if (dist < 1500) {
+            curr_level = 4;
+        } else if (dist < 3000) {
+            curr_level = 5;
+        } else {
+            curr_level = 6;
+        }
+
+        float level = clamp(pow(2.0, (max_level - curr_level)), 1.0, float(gl_MaxTessGenLevel));
+        for (int i = 0; i < 3; ++i) {
+            gl_TessLevelOuter[i] = level;
+        }
+        gl_TessLevelInner[0] = level / 2;
+    }
+}
+"
+node1.tes = "
+#version 400 core
+
+layout(triangles, equal_spacing, ccw) in;
+
+in vec3 TES_IN_FragPos[];
+
+out VS_OUT {
+    float height;
+    vec3 fragpos;
+    vec2 texcoord;
+
+    float uv_scale;
+    float landmask;
+} vs_out;
+
+uniform UBO_TES
+{
+    mat4 projection;
+    mat4 view;
+    mat4 model;   
+
+    float height_scale;
+
+    // vtex
+    vec2  u_page_table_size;
+    float u_atlas_scale;
+    float u_border_scale;
+    float u_border_offset;
+
+    // ocean
+    float DisplacementScale;
+    float Choppiness;
+} tes;
+
+uniform sampler2D u_feedback_tex;
+uniform sampler2D u_texture_atlas_tex;
+uniform sampler2D u_page_table_tex;
+
+uniform sampler2D s_Dx;
+uniform sampler2D s_Dy;
+uniform sampler2D s_Dz;
+
+uniform sampler2D landmask_tex;
+
+vec2 interpolate_2d(vec2 v0, vec2 v1, vec2 v2)
+{
+    return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
+}
+
+vec3 interpolate_3d(vec3 v0, vec3 v1, vec3 v2)
+{
+    return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+
+vec3 sample_table(vec2 uv, int mip)
+{
+    vec2 offset = fract(uv * tes.u_page_table_size) / tes.u_page_table_size;
+    return texelFetch(u_page_table_tex, ivec2((uv - offset) * tes.u_page_table_size * pow(0.5, mip)), mip).xyz;
+}
+
+vec4 sample_atlas(vec3 page, vec2 uv)
+{
+    float mipsize = exp2(floor(page.z * 255.0 + 0.5));
+
+    uv = fract(uv * tes.u_page_table_size / mipsize);
+    uv *= tes.u_border_scale;
+    uv += tes.u_border_offset;
+
+    vec2 offset = floor(page.xy * 255 + 0.5);
+
+    return texture(u_texture_atlas_tex, (offset + uv) * tes.u_atlas_scale);
+}
+
+float calc_mip_level(vec2 texcoord)
+{
+    ivec2 pos = ivec2(texcoord * 64);
+    float mip = texelFetch(u_feedback_tex, pos, 0).b * 255;
+    mip = clamp(mip, 0, log2(min(tes.u_page_table_size.x, tes.u_page_table_size.y)));
+    return mip;
+}
+
+vec4 bilinear_sample(vec2 texcoord)
+{
+    float mip = floor(calc_mip_level(texcoord));
+    mip = clamp(mip, 0, log2(min(tes.u_page_table_size.x, tes.u_page_table_size.y)));
+
+    vec3 page = sample_table(texcoord, int(mip));
+    return sample_atlas(page, texcoord);
+}
+
+float calc_height(vec2 texcoord)
+{
+    float h_base = bilinear_sample(texcoord).r;
+    if (h_base > 0.1) {
+        return 0.0;
+    }
+    return h_base;
+}
+
+vec3 GeodeticSurfaceNormal(vec3 positionOnEllipsoid, vec3 oneOverEllipsoidRadiiSquared)
+{
+    return normalize(positionOnEllipsoid * oneOverEllipsoidRadiiSquared);
+}
+
+vec2 ComputeTextureCoordinates(vec3 normal)
+{
+    return vec2(atan(normal.x, normal.z) / (2 * 3.14159) + 0.5, asin(normal.y) / 3.14159 + 0.5);
+}
+
+void main()
+{
+    vec4 pos = vec4(interpolate_3d(TES_IN_FragPos[0],TES_IN_FragPos[1],TES_IN_FragPos[2]), 1.0);
+
+    vec3 N = normalize(pos.xyz);
+    vec3 T = cross(N, vec3(0, 1, 0));
+    vec3 B = cross(N, T);
+
+//    vs_out.fragpos = vec3(tes.model * pos);
+    vs_out.fragpos = pos.xyz;
+
+    vec3 normal = GeodeticSurfaceNormal(vs_out.fragpos, vec3(1));
+    vec2 tex_coord = ComputeTextureCoordinates(normal);
+
+    vs_out.texcoord = tex_coord;
+
+    vs_out.height = calc_height(tex_coord);
+//    pos.y += vs_out.height * tes.height_scale;
+    pos.xyz += normal * vs_out.height * tes.height_scale;
+
+    float landmask = texture(landmask_tex, tex_coord).r;
+    if (landmask < 1.0)
+    {
+        vs_out.uv_scale = 100.0;
+        vec2 uv_ocean = tex_coord * vs_out.uv_scale;
+        float pos_scale = 0.001;
+        float dy = texture(s_Dy, uv_ocean).r * tes.DisplacementScale * pos_scale;
+        float dx = -texture(s_Dx, uv_ocean).r * tes.Choppiness * pos_scale;
+        float dz = -texture(s_Dz, uv_ocean).r * tes.Choppiness * pos_scale;
+        pos.xyz += dy * N;
+        pos.xyz += dx * B;
+        pos.xyz += dz * T;
+    }
+    vs_out.landmask = landmask;
+
+    gl_Position = tes.projection * tes.view * tes.model * pos;
+}
+"
+node1.gs = ""
+node1.fs = "
+#version 330 core
+out vec4 FragColor;
+
+in VS_OUT {
+    float height;
+    vec3 fragpos;
+    vec2 texcoord;
+
+    float uv_scale;
+    float landmask;
+} fs_in;
+
+uniform UBO_FS
+{
+    vec3 light_dir;
+    vec3 view_pos;
+
+    vec2 inv_res;
+
+    // brush
+    vec2 mouse_pos;
+    float draw_radius;
+
+    vec2 u_page_table_size;
+    vec2 u_virt_tex_size;
+
+    float u_atlas_scale;
+
+    float u_border_scale;
+    float u_border_offset;
+
+    float height_scale;
+
+    vec4 diffuse_specular_ambient_shininess;
+
+} fs;
+
+uniform sampler2D fs_page_table_tex;
+uniform sampler2D fs_texture_atlas_tex;
+
+uniform sampler2D earth_tex;
+uniform sampler2D s_NormalMap;
+
+vec3 sample_table(vec2 uv, int mip)
+{
+    vec2 offset = fract(uv * fs.u_page_table_size) / fs.u_page_table_size;
+    return texelFetch(fs_page_table_tex, ivec2((uv - offset) * fs.u_page_table_size * pow(0.5, mip)), mip).xyz;
+}
+
+vec4 sample_atlas(vec3 page, vec2 uv)
+{
+    float mipsize = exp2(floor(page.z * 255.0 + 0.5));
+
+    uv = fract(uv * fs.u_page_table_size / mipsize);
+    uv *= fs.u_border_scale;
+    uv += fs.u_border_offset;
+
+    vec2 offset = floor(page.xy * 255 + 0.5);
+
+    return texture(fs_texture_atlas_tex, (offset + uv) * fs.u_atlas_scale);
+}
+
+float tex_mip_level(vec2 coord, vec2 tex_size)
+{
+   vec2 dx_scaled, dy_scaled;
+   vec2 coord_scaled = coord * tex_size;
+
+   dx_scaled = dFdx(coord_scaled);
+   dy_scaled = dFdy(coord_scaled);
+
+   vec2 dtex = dx_scaled*dx_scaled + dy_scaled*dy_scaled;
+   float min_delta = max(dtex.x,dtex.y);
+   float miplevel = max(0.5 * log2(min_delta), 0.0);
+
+   return miplevel;
+}
+
+vec4 bilinear_sample(vec2 texcoord)
+{
+    float mip = floor(tex_mip_level(texcoord, fs.u_virt_tex_size));
+    mip = clamp(mip, 0, log2(min(fs.u_page_table_size.x, fs.u_page_table_size.y)));
+
+    vec3 page = sample_table(texcoord, int(mip));
+    return sample_atlas(page, texcoord);
+}
+
+float calc_height(vec2 texcoord)
+{
+    float h_base = bilinear_sample(texcoord).r;
+    if (h_base > 0.1) {
+        return 0.0;
+    }    
+    return h_base;
+}
+
+vec3 ComputeNormalCentralDifference(vec2 position, float heightExaggeration)
+{
+    float leftHeight = calc_height(position - vec2(1.0, 0.0) * fs.inv_res) * heightExaggeration;
+    float rightHeight = calc_height(position + vec2(1.0, 0.0) * fs.inv_res) * heightExaggeration;
+    float bottomHeight = calc_height(position - vec2(0.0, 1.0) * fs.inv_res) * heightExaggeration;
+    float topHeight = calc_height(position + vec2(0.0, 1.0) * fs.inv_res) * heightExaggeration;
+    return normalize(vec3(leftHeight - rightHeight, 2.0, bottomHeight - topHeight));
+}
+
+float SumElements(mat3 m)
+{
+    return 
+        m[0].x + m[0].y + m[0].z +
+        m[1].x + m[1].y + m[1].z +
+        m[2].x + m[2].y + m[2].z;
+}
+
+vec3 ComputeNormalSobelFilter(vec2 uv, vec2 inv_res)
+{
+    //
+    // Original unoptimized verion
+    //
+    //vec2 position = displacedPosition.xy;
+    //float upperLeft = calc_height(position + inv_res * vec2(-1.0, 1.0)) * fs.height_scale;
+    //float upperCenter = calc_height(position + inv_res * vec2(0.0, 1.0)) * fs.height_scale;
+    //float upperRight = calc_height(position + inv_res * vec2(1.0, 1.0)) * fs.height_scale;
+    //float left = calc_height(position + inv_res * vec2(-1.0, 0.0)) * fs.height_scale;
+    //float right = calc_height(position + inv_res * vec2(1.0, 0.0)) * fs.height_scale;
+    //float lowerLeft = calc_height(position + inv_res * vec2(-1.0, -1.0)) * fs.height_scale;
+    //float lowerCenter = calc_height(position + inv_res * vec2(0.0, -1.0)) * fs.height_scale;
+    //float lowerRight = calc_height(position + inv_res * vec2(1.0, -1.0)) * fs.height_scale;
+    //
+    //mat3 positions = mat3(
+    //    upperLeft, left, lowerLeft,
+    //    upperCenter, 0.0, lowerCenter,
+    //    upperRight, right, lowerRight);
+    //mat3 sobelX = mat3(
+    //    -1.0, -2.0, -1.0,
+    //     0.0,  0.0,  0.0,
+    //     1.0,  2.0,  1.0);
+    //mat3 sobelY = mat3(
+    //    -1.0, 0.0, 1.0,
+    //    -2.0, 0.0, 2.0,
+    //    -1.0, 0.0, 1.0);
+    //
+    //float x = SumElements(matrixCompMult(positions, sobelX));
+    //float y = SumElements(matrixCompMult(positions, sobelY));
+    //
+    //return vec3(-x, y, 1.0);
+
+    vec2 position = uv;
+    float upperLeft = calc_height(position + inv_res * vec2(-1.0, 1.0)) * fs.height_scale;
+    float upperCenter = calc_height(position + inv_res * vec2(0.0, 1.0)) * fs.height_scale;
+    float upperRight = calc_height(position + inv_res * vec2(1.0, 1.0)) * fs.height_scale;
+    float left = calc_height(position + inv_res * vec2(-1.0, 0.0)) * fs.height_scale;
+    float right = calc_height(position + inv_res * vec2(1.0, 0.0)) * fs.height_scale;
+    float lowerLeft = calc_height(position + inv_res * vec2(-1.0, -1.0)) * fs.height_scale;
+    float lowerCenter = calc_height(position + inv_res * vec2(0.0, -1.0)) * fs.height_scale;
+    float lowerRight = calc_height(position + inv_res * vec2(1.0, -1.0)) * fs.height_scale;
+
+    float x = upperRight + (2.0 * right) + lowerRight - upperLeft - (2.0 * left) - lowerLeft;
+    float y = lowerLeft + (2.0 * lowerCenter) + lowerRight - upperLeft - (2.0 * upperCenter) - upperRight;
+
+    return vec3(-x, 1.0 * inv_res.x, y);
+}
+
+float LightIntensity(vec3 normal, vec3 toLight, vec3 toEye, vec4 diffuseSpecularAmbientShininess)
+{
+    vec3 toReflectedLight = reflect(-toLight, normal);
+
+    float diffuse = max(dot(toLight, normal), 0.0);
+
+    float specular = max(dot(toReflectedLight, toEye), 0.0);
+    specular = pow(specular, diffuseSpecularAmbientShininess.w);
+
+    return (diffuseSpecularAmbientShininess.x * diffuse) +
+            (diffuseSpecularAmbientShininess.y * specular) +
+            diffuseSpecularAmbientShininess.z;
+}
+
+vec2 ComputeTextureCoordinates(vec3 normal)
+{
+    return vec2(atan(normal.x, normal.z) / (2 * 3.14159) + 0.5, asin(normal.y) / 3.14159 + 0.5);
+}
+
+void main()
+{
+    vec3 pos = fs_in.fragpos;
+
+    vec3 N = normalize(fs_in.fragpos);
+    vec3 T = cross(N, vec3(0, 1, 0));
+    vec3 B = cross(N, T);
+    mat3 TBN = mat3(T, B, N);
+
+    vec2 tex_coord = ComputeTextureCoordinates(N);
+
+    vec3 color, normal;
+    if (fs_in.landmask < 1.0) {
+        //color = vec3(0, 0.169668034, 0.439894319);
+        color = texture(earth_tex, tex_coord).rgb * 1.5;
+        normal = TBN * normalize(texture(s_NormalMap, fs_in.texcoord * fs_in.uv_scale).xyz);
+    } else {
+        color = texture(earth_tex, tex_coord).rgb;
+        normal = TBN * normalize(ComputeNormalSobelFilter(fs_in.texcoord, fs.inv_res));
+    }
+
+    vec3 view_dir = normalize(fs.view_pos - pos);
+
+    float intensity = LightIntensity(normal, fs.light_dir, view_dir, fs.diffuse_specular_ambient_shininess);
+    color *= intensity;
+
+    // HDR tonemapping
+    color = color / (color + vec3(1.0));
+    // gamma correct
+    color = pow(color, vec3(1.0 / 2.2));
+
+    FragColor = vec4(color, 1.0); 
+}
+"
+node1.cs = ""
+node1.render_gen()
+node1.set_uniform("tes.height_scale", [ 0.05 ])
+node1.set_uniform("fs.inv_res", [ 0.05/4096, 0.05/4096 ])
+node1.set_uniform("fs.height_scale", [ 0.05 ])
+
+_editor.add_node(node1, 151.58509361941, -365.9795922234)
+
+var node2 = ::rendergraph::nodes::clear::Clear()
+
+node2.masks = [ "color", "depth" ]
+node2.values = { "color" : [ 128, 128, 128, 255 ] }
+
+_editor.add_node(node2, 335.02348918957, -188.12587085987)
+
+var node3 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
+
+node3.type = "big_sphere"
+node3.layout = [ "position" ]
+node3.shape_params = { "grids_size" : 2048 }
+
+_editor.add_node(node3, 381.67421297039, -401.33131969581)
+
+var node4 = ::blueprint::nodes::proxy::Proxy()
+
+node4.real_name = "view_cam"
+node4.init_real_node(::blueprint::nodes::camera3d::Camera3d())
+
+_editor.add_node(node4, -483.20257443076, 193.98989510278)
+
+var node5 = ::blueprint::nodes::input::Input()
+
+node5.var_name = "fs.mouse_pos"
+node5.var_type = "num2"
+
+_editor.add_node(node5, -89.644755089016, -522.38689999516)
+
+var node6 = ::blueprint::nodes::input::Input()
+
+node6.var_name = "fs.draw_radius"
+node6.var_type = "num"
+
+_editor.add_node(node6, -88.618435382146, -571.65009712652)
+
+var node7 = ::blueprint::nodes::perspective::Perspective()
+
+node7.fovy = 45
+node7.aspect = 0
+node7.znear = 0.01
+node7.zfar = 10000
+
+_editor.add_node(node7, -301.69434322962, 70.77518375342)
+
+var node8 = ::blueprint::nodes::input::Input()
+
+node8.var_name = "u_page_table_tex"
+node8.var_type = "texture"
+
+_editor.add_node(node8, -407.30991180672, -112.52814351232)
+
+var node9 = ::blueprint::nodes::input::Input()
+
+node9.var_name = "u_texture_atlas_tex"
+node9.var_type = "texture"
+
+_editor.add_node(node9, -412.26856780249, -218.31328261194)
+
+var node10 = ::blueprint::nodes::input::Input()
+
+node10.var_name = "u_feedback_tex"
+node10.var_type = "texture"
+
+_editor.add_node(node10, -413.92148356792, -308.39591412505)
+
+var node11 = ::blueprint::nodes::input::Input()
+
+node11.var_name = "vtex_size"
+node11.var_type = "num4"
+
+_editor.add_node(node11, -1386.87050625, 388.42472099609)
+
+var node12 = ::blueprint::nodes::split::Split()
+
+_editor.add_node(node12, -1245.2482561612, 358.59770017756)
+
+var node13 = ::blueprint::nodes::store::Store()
+
+node13.var_name = "vtex_w"
+
+_editor.add_node(node13, -1102.7118842019, 416.77947951882)
+
+var node14 = ::blueprint::nodes::store::Store()
+
+node14.var_name = "vtex_h"
+
+_editor.add_node(node14, -962.71188142756, 416.77950171342)
+
+var node15 = ::blueprint::nodes::store::Store()
+
+node15.var_name = "tile_sz"
+
+_editor.add_node(node15, -1104.5300632457, 346.77952390803)
+
+var node16 = ::blueprint::nodes::store::Store()
+
+node16.var_name = "border_sz"
+
+_editor.add_node(node16, -959.07547340199, 346.32495625888)
+
+var node17 = ::blueprint::nodes::load::Load()
+
+node17.var_name = "vtex_w"
+
+_editor.add_node(node17, -1335.4371859687, 238.67901822273)
+
+var node18 = ::blueprint::nodes::load::Load()
+
+node18.var_name = "vtex_h"
+
+_editor.add_node(node18, -1335.4371789068, 192.3980443942)
+
+var node19 = ::blueprint::nodes::combine::Combine()
+
+_editor.add_node(node19, -1187.5032973836, 170.08397589157)
+
+var node20 = ::blueprint::nodes::store::Store()
+
+node20.var_name = "vtex_sz"
+
+_editor.add_node(node20, -1048.5606279874, 181.34251773793)
+
+var node21 = ::blueprint::nodes::load::Load()
+
+node21.var_name = "vtex_sz"
+
+_editor.add_node(node21, -57.64682172378, -298.19807063331)
+
+var node22 = ::blueprint::nodes::load::Load()
+
+node22.var_name = "tile_sz"
+
+_editor.add_node(node22, -1272.8259783922, 39.981682433981)
+
+var node23 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node23, -1139.7681043905, 13.53540219888)
+
+var node24 = ::blueprint::nodes::load::Load()
+
+node24.var_name = "border_sz"
+
+_editor.add_node(node24, -1402.578038644, 1.1387097494825)
+
+var node25 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node25, -1273.6524261234, -21.175331514317)
+
+var node26 = ::blueprint::nodes::integer::Integer()
+
+node26.value = 2
+
+_editor.add_node(node26, -1403.4044508765, -60.018297136896)
+
+var node27 = ::blueprint::nodes::store::Store()
+
+node27.var_name = "tile_sz_with_border"
+
+_editor.add_node(node27, -1005.0573744605, 12.708964430023)
+
+var node28 = ::blueprint::nodes::load::Load()
+
+node28.var_name = "tile_sz"
+
+_editor.add_node(node28, -518.99795725943, -755.03736412244)
+
+var node29 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node29, -382.68852078185, -672.50245026208)
+
+var node30 = ::blueprint::nodes::load::Load()
+
+node30.var_name = "tile_sz_with_border"
+
+_editor.add_node(node30, -523.31797668753, -699.09242997218)
+
+var node31 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node31, -373.40074016577, -783.2798116445)
+
+var node32 = ::blueprint::nodes::load::Load()
+
+node32.var_name = "tile_sz_with_border"
+
+_editor.add_node(node32, -519.81701199255, -806.00531742455)
+
+var node33 = ::blueprint::nodes::load::Load()
+
+node33.var_name = "border_sz"
+
+_editor.add_node(node33, -526.0697959003, -650.18039651738)
+
+var node34 = ::blueprint::nodes::load::Load()
+
+node34.var_name = "vtex_sz"
+
+_editor.add_node(node34, -536.55341430664, -541.08205688477)
+
+var node35 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node35, -397.40341674805, -567.70204589844)
+
+var node36 = ::blueprint::nodes::load::Load()
+
+node36.var_name = "tile_sz"
+
+_editor.add_node(node36, -532.00324021043, -593.03955320239)
+
+var node37 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node37, -398.80017674805, -438.61685589844)
+
+var node38 = ::blueprint::nodes::number::Number()
+
+node38.value = 2064
+
+_editor.add_node(node38, -535.87137939453, -482.6292980957)
+
+var node39 = ::blueprint::nodes::load::Load()
+
+node39.var_name = "tile_sz_with_border"
+
+_editor.add_node(node39, -536.51660109843, -419.46684975225)
+
+var node40 = ::blueprint::nodes::number4::Number4()
+
+node40.value.set(0.65, 0.25, 0.1, 12)
+
+_editor.add_node(node40, -18.844078063965, -96.882011413574)
+
+var node41 = ::blueprint::nodes::integer::Integer()
+
+node41.value = 6
+
+_editor.add_node(node41, -50.163913116455, 332.45596435547)
+
+var node42 = ::blueprint::nodes::input::Input()
+
+node42.var_name = "model_mat"
+node42.var_type = "mat4"
+
+_editor.add_node(node42, -238.97158325195, 433.33388671875)
+
+var node43 = ::rendergraph::nodes::texture::Texture()
+node43.query_param("unif_name").value = "u_tex"
+node43.gamma_correction = false
+node43.mipmap = false
+node43.init_texture("../../../textures/globe/earth4K.png")
+
+_editor.add_node(node43, -246.09225463867, -129.93347167969)
+
+var node44 = ::globegraph::nodes::sun_dir::SunDir()
+node44.query_param("dir").value.set(-0.063852813920538, -0.97420568242684, 0.2164396139381)
+
+_editor.add_node(node44, -124.43809509277, 231.2388458252)
+
+var node45 = ::blueprint::nodes::subgraph::Subgraph()
+node45.load_from_file(_editor, "../../ocean/tilde_h0_k.ves")
+
+_editor.add_node(node45, -1094.2923431153, 803.06971179516)
+
+var node46 = ::blueprint::nodes::subgraph::Subgraph()
+node46.load_from_file(_editor, "../../ocean/tilde_h0_t.ves")
+
+_editor.add_node(node46, -842.87690200487, 792.31152667301)
+
+var node47 = ::blueprint::nodes::subgraph::Subgraph()
+node47.load_from_file(_editor, "../../ocean/butterfly_fft.ves")
+
+_editor.add_node(node47, -548.61759234686, 912.9628842126)
+
+var node48 = ::blueprint::nodes::subgraph::Subgraph()
+node48.load_from_file(_editor, "../../ocean/twiddle_factors.ves")
+
+_editor.add_node(node48, -832.72509091818, 676.16427806843)
+
+var node49 = ::blueprint::nodes::subgraph::Subgraph()
+node49.load_from_file(_editor, "../../ocean/butterfly_fft.ves")
+
+_editor.add_node(node49, -547.41300498012, 802.48235320068)
+
+var node50 = ::blueprint::nodes::subgraph::Subgraph()
+node50.load_from_file(_editor, "../../ocean/butterfly_fft.ves")
+
+_editor.add_node(node50, -546.95973241429, 691.0952770571)
+
+var node51 = ::blueprint::nodes::subgraph::Subgraph()
+node51.load_from_file(_editor, "../../ocean/normal_map.ves")
+
+_editor.add_node(node51, -543.78404308862, 587.0459217561)
+
+var node52 = ::blueprint::nodes::number::Number()
+
+node52.value = 0.6462334394455
+
+_editor.add_node(node52, -673.1610103125, 444.09605228516)
+
+var node53 = ::blueprint::nodes::number::Number()
+
+node53.value = 1
+
+_editor.add_node(node53, -658.66638875, 373.23362276367)
+
+var node54 = ::rendergraph::nodes::texture::Texture()
+node54.query_param("unif_name").value = "u_tex"
+node54.gamma_correction = false
+node54.mipmap = false
+node54.init_texture("../../../textures/globe/landmask4K.png")
+
+_editor.add_node(node54, -592.269328125, -138.1226496582)
+
+Blueprint.connect(node45, "next", node46, "prev")
+Blueprint.connect(node45, "tilde_h0k", node46, "tilde_h0k")
+Blueprint.connect(node45, "tilde_h0minusk", node46, "tilde_h0minusk")
+Blueprint.connect(node46, "next", node48, "prev")
+Blueprint.connect(node48, "next", node47, "prev")
+Blueprint.connect(node48, "twiddle_factors", node47, "twiddle_factors")
+Blueprint.connect(node46, "tilde_h0_t_dx", node47, "tilde_h0_t")
+Blueprint.connect(node47, "next", node49, "prev")
+Blueprint.connect(node48, "twiddle_factors", node49, "twiddle_factors")
+Blueprint.connect(node46, "tilde_h0_t_dy", node49, "tilde_h0_t")
+Blueprint.connect(node49, "next", node50, "prev")
+Blueprint.connect(node48, "twiddle_factors", node50, "twiddle_factors")
+Blueprint.connect(node46, "tilde_h0_t_dz", node50, "tilde_h0_t")
+Blueprint.connect(node50, "next", node51, "prev")
+Blueprint.connect(node49, "dst", node51, "s_HeightMap")
+Blueprint.connect(node11, "var", node12, "xyzw")
+Blueprint.connect(node12, "w", node16, "var")
+Blueprint.connect(node16, "var", node33, "var")
+Blueprint.connect(node16, "var", node24, "var")
+Blueprint.connect(node24, "var", node25, "a")
+Blueprint.connect(node26, "v", node25, "b")
+Blueprint.connect(node12, "z", node15, "var")
+Blueprint.connect(node15, "var", node36, "var")
+Blueprint.connect(node15, "var", node28, "var")
+Blueprint.connect(node15, "var", node22, "var")
+Blueprint.connect(node22, "var", node23, "a")
+Blueprint.connect(node25, "v", node23, "b")
+Blueprint.connect(node23, "v", node27, "var")
+Blueprint.connect(node27, "var", node39, "var")
+Blueprint.connect(node39, "var", node37, "a")
+Blueprint.connect(node38, "v", node37, "b")
+Blueprint.connect(node27, "var", node32, "var")
+Blueprint.connect(node28, "var", node31, "a")
+Blueprint.connect(node32, "var", node31, "b")
+Blueprint.connect(node27, "var", node30, "var")
+Blueprint.connect(node33, "var", node29, "a")
+Blueprint.connect(node30, "var", node29, "b")
+Blueprint.connect(node12, "y", node14, "var")
+Blueprint.connect(node14, "var", node18, "var")
+Blueprint.connect(node12, "x", node13, "var")
+Blueprint.connect(node13, "var", node17, "var")
+Blueprint.connect(node17, "var", node19, "x")
+Blueprint.connect(node18, "var", node19, "y")
+Blueprint.connect(node19, "xy", node20, "var")
+Blueprint.connect(node20, "var", node34, "var")
+Blueprint.connect(node34, "var", node35, "a")
+Blueprint.connect(node36, "var", node35, "b")
+Blueprint.connect(node20, "var", node21, "var")
+Blueprint.connect(node4, "zoom", node7, "fovy")
+Blueprint.connect(node7, "mat", node1, "tcs.projection")
+Blueprint.connect(node4, "mat", node1, "tcs.view")
+Blueprint.connect(node42, "var", node1, "tcs.model")
+Blueprint.connect(node4, "pos", node1, "tcs.cam_pos")
+Blueprint.connect(node41, "v", node1, "tcs.lod_level")
+Blueprint.connect(node7, "mat", node1, "tes.projection")
+Blueprint.connect(node4, "mat", node1, "tes.view")
+Blueprint.connect(node42, "var", node1, "tes.model")
+Blueprint.connect(node35, "v", node1, "tes.u_page_table_size")
+Blueprint.connect(node37, "v", node1, "tes.u_atlas_scale")
+Blueprint.connect(node31, "v", node1, "tes.u_border_scale")
+Blueprint.connect(node29, "v", node1, "tes.u_border_offset")
+Blueprint.connect(node52, "v", node1, "tes.DisplacementScale")
+Blueprint.connect(node53, "v", node1, "tes.Choppiness")
+Blueprint.connect(node8, "var", node1, "u_page_table_tex")
+Blueprint.connect(node9, "var", node1, "u_texture_atlas_tex")
+Blueprint.connect(node10, "var", node1, "u_feedback_tex")
+Blueprint.connect(node54, "tex", node1, "landmask_tex")
+Blueprint.connect(node49, "dst", node1, "s_Dy")
+Blueprint.connect(node47, "dst", node1, "s_Dx")
+Blueprint.connect(node50, "dst", node1, "s_Dz")
+Blueprint.connect(node44, "dir", node1, "fs.light_dir")
+Blueprint.connect(node4, "pos", node1, "fs.view_pos")
+Blueprint.connect(node5, "var", node1, "fs.mouse_pos")
+Blueprint.connect(node6, "var", node1, "fs.draw_radius")
+Blueprint.connect(node35, "v", node1, "fs.u_page_table_size")
+Blueprint.connect(node21, "var", node1, "fs.u_virt_tex_size")
+Blueprint.connect(node37, "v", node1, "fs.u_atlas_scale")
+Blueprint.connect(node31, "v", node1, "fs.u_border_scale")
+Blueprint.connect(node29, "v", node1, "fs.u_border_offset")
+Blueprint.connect(node40, "v4", node1, "fs.diffuse_specular_ambient_shininess")
+Blueprint.connect(node8, "var", node1, "fs_page_table_tex")
+Blueprint.connect(node9, "var", node1, "fs_texture_atlas_tex")
+Blueprint.connect(node43, "tex", node1, "earth_tex")
+Blueprint.connect(node51, "normal_map", node1, "s_NormalMap")
+Blueprint.connect(node2, "next", node0, "prev")
+Blueprint.connect(node1, "out", node0, "shader")
+Blueprint.connect(node3, "out", node0, "va")

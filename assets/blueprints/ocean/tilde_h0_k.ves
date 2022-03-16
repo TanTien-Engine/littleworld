@@ -109,117 +109,123 @@ void main()
 "
 node0.render_gen()
 
-_editor.add_node(node0, -183.00000138716, 128.22726162997)
+_editor.add_node(node0, 375.36201184164, 61.69026496757)
 
 var node1 = ::rendergraph::nodes::pass::Pass()
 
 node1.once = true
 
-_editor.add_node(node1, 176.94724922546, 390.73396770996)
+_editor.add_node(node1, 735.30926245426, 324.19697104756)
 
 var node2 = ::rendergraph::nodes::texture::Texture()
 node2.query_param("unif_name").value = "u_tex"
 node2.gamma_correction = false
+node2.mipmap = false
 node2.init_texture("../../textures/noise/LDR_LLL1_0.png")
 node2.set_sampler("nearest_clamp")
 
-_editor.add_node(node2, -1094.6781664454, 106.78583029615)
+_editor.add_node(node2, -536.3161532166, 40.24883363375)
 
 var node3 = ::rendergraph::nodes::texture::Texture()
 node3.query_param("unif_name").value = "u_tex"
 node3.gamma_correction = false
+node3.mipmap = false
 node3.init_texture("../../textures/noise/LDR_LLL1_1.png")
 node3.set_sampler("nearest_clamp")
 
-_editor.add_node(node3, -873.53170144386, 108.93068456016)
+_editor.add_node(node3, -315.16968821506, 42.39368789776)
 
 var node4 = ::rendergraph::nodes::texture::Texture()
 node4.query_param("unif_name").value = "u_tex"
 node4.gamma_correction = false
+node4.mipmap = false
 node4.init_texture("../../textures/noise/LDR_LLL1_2.png")
 node4.set_sampler("nearest_clamp")
 
-_editor.add_node(node4, -661.40339832209, 108.36215263428)
+_editor.add_node(node4, -103.04138509329, 41.82515597188)
 
 var node5 = ::rendergraph::nodes::texture::Texture()
 node5.query_param("unif_name").value = "u_tex"
 node5.gamma_correction = false
+node5.mipmap = false
 node5.init_texture("../../textures/noise/LDR_LLL1_3.png")
 node5.set_sampler("nearest_clamp")
 
-_editor.add_node(node5, -427.76701249112, 108.36215055353)
+_editor.add_node(node5, 130.59500073768, 41.82515389113)
 
 var node6 = ::rendergraph::nodes::texture::Texture()
 node6.query_param("unif_name").value = "tilde_h0_k"
 node6.gamma_correction = false
+node6.mipmap = false
 node6.init_texture(256, 256, "rg32f")
 node6.set_sampler("nearest_clamp")
 
-_editor.add_node(node6, -800.27269186789, -237.39304159623)
+_editor.add_node(node6, -241.91067863909, -303.93003825863)
 
 var node7 = ::rendergraph::nodes::compute::Compute()
 
 node7.num_groups = [ 8, 8, 1 ]
 
-_editor.add_node(node7, 9.4121459960941, 380.44836425781)
+_editor.add_node(node7, 567.77415922489, 313.91136759541)
 
 var node8 = ::blueprint::nodes::integer::Integer()
 
 node8.value = 256
 
-_editor.add_node(node8, -533.73424119681, 218.96671955708)
+_editor.add_node(node8, 24.627772031991, 152.42972289468)
 
 var node9 = ::blueprint::nodes::integer::Integer()
 
 node9.value = 1000
 
-_editor.add_node(node9, -401.78490512816, 219.69339977422)
+_editor.add_node(node9, 156.57710810064, 153.15640311182)
 
 var node10 = ::blueprint::nodes::number::Number()
 
 node10.value = 80
 
-_editor.add_node(node10, -520.04367554859, 370.26081532279)
+_editor.add_node(node10, 38.31833768021, 303.72381866039)
 
 var node11 = ::blueprint::nodes::number::Number()
 
 node11.value = 2
 
-_editor.add_node(node11, -647.78460953492, 370.03076623355)
+_editor.add_node(node11, -89.42259630612, 303.49376957115)
 
 var node12 = ::blueprint::nodes::number::Number()
 
 node12.value = 0.1
 
-_editor.add_node(node12, -394.42793533119, 368.49430910429)
+_editor.add_node(node12, 163.93407789761, 301.95731244189)
 
 var node13 = ::blueprint::nodes::number2::Number2()
 
 node13.value.set(1, 1)
 
-_editor.add_node(node13, -529.66458774586, 294.72885316096)
+_editor.add_node(node13, 28.697425482941, 228.19185649856)
 
 var node14 = ::rendergraph::nodes::texture::Texture()
 node14.query_param("unif_name").value = "tilde_h0_k"
 node14.gamma_correction = false
+node14.mipmap = false
 node14.init_texture(256, 256, "rg32f")
 node14.set_sampler("nearest_clamp")
 
-_editor.add_node(node14, -426.40017086789, -230.29580859623)
+_editor.add_node(node14, 131.96184236091, -296.83280525863)
 
 var node15 = ::blueprint::nodes::output::Output()
 
 node15.var_name = "tilde_h0k"
 node15.var_type = "texture"
 
-_editor.add_node(node15, -609.73916015625, -222.73342590332)
+_editor.add_node(node15, -51.37714692745, -289.27042256572)
 
 var node16 = ::blueprint::nodes::output::Output()
 
 node16.var_name = "tilde_h0minusk"
 node16.var_type = "texture"
 
-_editor.add_node(node16, -243.87142389471, -213.83624961159)
+_editor.add_node(node16, 314.49058933409, -280.37324627399)
 
 Blueprint.connect(node14, "tex", node16, "var")
 Blueprint.connect(node6, "tex", node15, "var")

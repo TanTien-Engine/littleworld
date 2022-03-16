@@ -283,9 +283,10 @@ _editor.add_node(node6, 408.33280979529, 271.02984059403)
 var node7 = ::rendergraph::nodes::texture::Texture()
 node7.query_param("unif_name").value = "u_tex"
 node7.gamma_correction = false
+node7.mipmap = false
 node7.init_texture("../../../gis/PrecomputedAtmosphericScattering/earth.tiff")
 
-_editor.add_node(node7, 6.2763293457028, -177.58727783203)
+_editor.add_node(node7, -78.641470654298, -332.78187783203)
 
 var node8 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
 
@@ -296,11 +297,11 @@ node8.shape_params = { "grids_size" : 16 }
 _editor.add_node(node8, 706.33246025391, -394.67463544922)
 
 var node9 = ::globegraph::nodes::globe_camera::GlobeCamera()
-node9.query_param("lon").value = 0.87860146376918
-node9.query_param("lat").value = 1.3437606722863
-node9.query_param("theta").value = 1.188
-node9.query_param("phi").value = 0.6
-node9.query_param("d").value = 128.32556647056
+node9.query_param("lon").value = 3.5503020832528
+node9.query_param("lat").value = 1.4383301191701
+node9.query_param("theta").value = 2.286
+node9.query_param("phi").value = -2.762
+node9.query_param("d").value = 8949.1586880935
 
 _editor.add_node(node9, 197.61659644531, 82.44037156836)
 
@@ -321,9 +322,17 @@ node12.value = 0.37804937362671
 _editor.add_node(node12, 420.97555541992, 130.35234069824)
 
 var node13 = ::globegraph::nodes::sun_dir::SunDir()
-node13.query_param("dir").value.set(0.3319782303321, -0.93747760237377, 0.10452846326765)
+node13.query_param("dir").value.set(0.50166845012066, 0.67796599990256, 0.53729960834683)
 
 _editor.add_node(node13, 457.35855, -149.32533)
+
+var node14 = ::rendergraph::nodes::texture::Texture()
+node14.query_param("unif_name").value = "u_tex"
+node14.gamma_correction = false
+node14.mipmap = false
+node14.init_texture("../../assets/textures/globe/earth4K.png")
+
+_editor.add_node(node14, -146.21000999756, -108.40776640625)
 
 Blueprint.connect(node12, "v", node11, "layer")
 Blueprint.connect(node4, "zoom", node3, "fovy")
@@ -335,7 +344,7 @@ Blueprint.connect(node13, "dir", node1, "light_pos")
 Blueprint.connect(node6, "v4", node1, "diffuse_specular_ambient_shininess")
 Blueprint.connect(node10, "transmittance", node1, "transmittanceSampler")
 Blueprint.connect(node10, "inscatter", node1, "inscatterSampler")
-Blueprint.connect(node7, "tex", node1, "reflectanceSampler")
+Blueprint.connect(node14, "tex", node1, "reflectanceSampler")
 Blueprint.connect(node10, "irradiance", node1, "irradianceSampler")
 Blueprint.connect(node2, "next", node0, "prev")
 Blueprint.connect(node1, "out", node0, "shader")

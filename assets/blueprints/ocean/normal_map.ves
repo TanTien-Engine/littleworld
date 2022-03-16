@@ -69,13 +69,13 @@ void main()
 "
 node0.render_gen()
 
-_editor.add_node(node0, -183.00000138716, 128.22726162997)
+_editor.add_node(node0, 58.37424462284, 99.86307690997)
 
 var node1 = ::rendergraph::nodes::pass::Pass()
 
 node1.once = false
 
-_editor.add_node(node1, 169.94724922546, 200.73396770996)
+_editor.add_node(node1, 411.32149523546, 172.36978298996)
 
 var node2 = ::rendergraph::nodes::texture::Texture()
 node2.query_param("unif_name").value = "tilde_h0_k"
@@ -84,33 +84,33 @@ node2.mipmap = true
 node2.init_texture(256, 256, "rgba32f")
 node2.set_sampler("linear_repeat_mipmap")
 
-_editor.add_node(node2, -545.81211186789, -2.2585815962298)
+_editor.add_node(node2, -304.43786585789, -30.62276631623)
 
 var node3 = ::rendergraph::nodes::compute::Compute()
 
 node3.num_groups = [ 8, 8, 1 ]
 
-_editor.add_node(node3, 2.412145996094, 190.44836425781)
+_editor.add_node(node3, 243.78639200609, 162.08417953781)
 
 var node4 = ::blueprint::nodes::integer::Integer()
 
 node4.value = 256
 
-_editor.add_node(node4, -533.73424119681, 218.96671955708)
+_editor.add_node(node4, -292.35999518681, 190.60253483708)
 
 var node5 = ::blueprint::nodes::output::Output()
 
 node5.var_name = "normal_map"
 node5.var_type = "texture"
 
-_editor.add_node(node5, -342.37166122994, -12.67930194594)
+_editor.add_node(node5, -100.99741521994, -41.04348666594)
 
 var node6 = ::blueprint::nodes::input::Input()
 
 node6.var_name = "s_HeightMap"
 node6.var_type = "texture"
 
-_editor.add_node(node6, -506.2698064835, 122.89472541525)
+_editor.add_node(node6, -264.8955604735, 94.53054069525)
 
 Blueprint.connect(node2, "tex", node5, "var")
 Blueprint.connect(node4, "v", node0, "u_N")

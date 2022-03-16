@@ -4,7 +4,7 @@ node0.set_prim_type("triangles")
 node0.render_state = { "stencil_test" : false, "rasterization" : "fill", "stencil_func" : "always", "stencil_mask" : 255, "cull" : "disable", "blend" : false, "stencil_ref" : 0, "depth_test" : true, "depth_func" : "less", "clip_plane" : false }
 node0.skip = false
 
-_editor.add_node(node0, 549.76263944696, 652.8700238601)
+_editor.add_node(node0, 461.99293974929, 123.81080361101)
 
 var node1 = ::rendergraph::nodes::shader::Shader()
 node1.query_param("inc_dir").value = "../../shaders/atmo/"
@@ -271,67 +271,67 @@ node1.cs = ""
 node1.render_gen()
 node1.set_uniform("hdrExposure", [ 0 ])
 
-_editor.add_node(node1, -11.234705164313, 698.25563722809)
+_editor.add_node(node1, -22.046524635596, -125.31148542167)
 
 var node2 = ::rendergraph::nodes::clear::Clear()
 
 node2.masks = [ "color", "depth" ]
 node2.values = { "color" : [ 128, 128, 128, 255 ] }
 
-_editor.add_node(node2, 246.28845421333, 832.92605496669)
+_editor.add_node(node2, 158.51875451566, 303.86683471764)
 
 var node3 = ::blueprint::nodes::number3::Number3()
 
 node3.value.set(0, 0.169668034, 0.439894319)
 
-_editor.add_node(node3, -185.75009084326, 716.07378378962)
+_editor.add_node(node3, -334.05251887953, -9.0710999420287)
 
 var node4 = ::blueprint::nodes::number::Number()
 
 node4.value = 0.079640708863735
 
-_editor.add_node(node4, -327.16766338056, 1018.9355019934)
+_editor.add_node(node4, -337.97948285184, 280.25449621964)
 
 var node5 = ::blueprint::nodes::number::Number()
 
 node5.value = 0.049141779541969
 
-_editor.add_node(node5, -190.42276171341, 1017.3444462698)
+_editor.add_node(node5, -204.0876978908, 273.66459139114)
 
 var node6 = ::blueprint::nodes::subgraph::Subgraph()
 node6.load_from_file(_editor, "tilde_h0_k.ves")
 
-_editor.add_node(node6, -1094.2923431153, 803.06971179516)
+_editor.add_node(node6, -1302.8423625866, -371.14331085457)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
 node7.load_from_file(_editor, "tilde_h0_t.ves")
 
-_editor.add_node(node7, -842.87690200487, 792.31152667301)
+_editor.add_node(node7, -1051.4269214762, -381.90149597677)
 
 var node8 = ::blueprint::nodes::subgraph::Subgraph()
 node8.load_from_file(_editor, "butterfly_fft.ves")
 
-_editor.add_node(node8, -548.61759234686, 912.9628842126)
+_editor.add_node(node8, -757.16761181814, -261.25013843717)
 
 var node9 = ::blueprint::nodes::subgraph::Subgraph()
 node9.load_from_file(_editor, "twiddle_factors.ves")
 
-_editor.add_node(node9, -832.72509091818, 676.16427806843)
+_editor.add_node(node9, -1041.2751103895, -498.04874458137)
 
 var node10 = ::blueprint::nodes::subgraph::Subgraph()
 node10.load_from_file(_editor, "butterfly_fft.ves")
 
-_editor.add_node(node10, -547.41300498012, 802.48235320068)
+_editor.add_node(node10, -755.9630244514, -371.73066944907)
 
 var node11 = ::blueprint::nodes::subgraph::Subgraph()
 node11.load_from_file(_editor, "butterfly_fft.ves")
 
-_editor.add_node(node11, -546.95973241429, 691.0952770571)
+_editor.add_node(node11, -755.50975188557, -483.11774559267)
 
 var node12 = ::blueprint::nodes::subgraph::Subgraph()
 node12.load_from_file(_editor, "normal_map.ves")
 
-_editor.add_node(node12, -543.78404308862, 587.0459217561)
+_editor.add_node(node12, -752.3340625599, -587.16710089367)
 
 var node13 = ::rendergraph::nodes::draw::Draw()
 
@@ -339,7 +339,7 @@ node13.set_prim_type("tri_strip")
 node13.render_state = { "depth_test" : true, "cull" : "disable", "depth_func" : "lequal", "clip_plane" : false }
 node13.skip = false
 
-_editor.add_node(node13, 81.929689430242, -207.99736657221)
+_editor.add_node(node13, 1225.7459826476, 150.97399509095)
 
 var node14 = ::rendergraph::nodes::shader::Shader()
 node14.query_param("inc_dir").value = "../../shaders/atmo/"
@@ -448,7 +448,7 @@ void main()
 node14.cs = ""
 node14.render_gen()
 
-_editor.add_node(node14, -172.7565961607, -212.53643941281)
+_editor.add_node(node14, 996.35509128289, 201.03704417963)
 
 var node15 = ::rendergraph::nodes::primitive_shape::PrimitiveShape()
 
@@ -456,141 +456,310 @@ node15.type = "quad"
 node15.layout = [ "position" ]
 node15.shape_params = {  }
 
-_editor.add_node(node15, -143.29819800131, -508.26072222591)
+_editor.add_node(node15, 1021.2680348968, -97.414511360749)
 
 var node16 = ::blueprint::nodes::subgraph::Subgraph()
 node16.load_from_file(_editor, "../render/atmo/gen_atom_textures.ves")
 
-_editor.add_node(node16, -511.58159897942, 331.69000339718)
+_editor.add_node(node16, -740.2203802689, 18.62984165653)
 
 var node17 = ::blueprint::nodes::subgraph::Subgraph()
 node17.load_from_file(_editor, "../render/atmo/gen_skymap.ves")
 
-_editor.add_node(node17, -767.50033781207, 284.23598345739)
+_editor.add_node(node17, -975.2300281925, 17.53945808033)
 
 var node18 = ::blueprint::nodes::number::Number()
 
 node18.value = 0.38556519150734
 
-_editor.add_node(node18, -339.52552489443, 8.5496416742936)
+_editor.add_node(node18, 814.66573816331, 292.30247199455)
 
 var node19 = ::globegraph::nodes::horizon_camera::HorizonCamera()
 node19.query_param("height").value = 2
 node19.query_param("theta").value = 0
-node19.query_param("phi").value = 7.656
+node19.query_param("phi").value = 20.616
 
-_editor.add_node(node19, -1611.4524506305, 1061.6001777751)
+_editor.add_node(node19, -799.7170864654, 374.04265694353)
 
 var node20 = ::globegraph::nodes::sun_dir::SunDir()
-node20.query_param("dir").value.set(0.21231825714083, 0.63455238243257, 0.74314482547739)
+node20.query_param("dir").value.set(0.24958528947999, 0.82928112439341, 0.49999999999999)
 
-_editor.add_node(node20, -1610.0694356139, 894.91262399136)
+_editor.add_node(node20, -798.3340714488, 207.35510315973)
 
 var node21 = ::blueprint::nodes::store::Store()
 
 node21.var_name = "cam_pos"
 
-_editor.add_node(node21, -1473.2744804831, 1079.2615525102)
+_editor.add_node(node21, -656.9936617725, 356.24948622413)
 
 var node22 = ::blueprint::nodes::load::Load()
 
 node22.var_name = "cam_pos"
 
-_editor.add_node(node22, -191.07640928334, 959.35068643556)
+_editor.add_node(node22, -201.88822875462, 135.7835637858)
 
 var node23 = ::blueprint::nodes::load::Load()
 
 node23.var_name = "cam_pos"
 
-_editor.add_node(node23, -482.50190232024, -59.016145183806)
+_editor.add_node(node23, 671.6893607375, 224.73668513646)
 
 var node24 = ::blueprint::nodes::store::Store()
 
 node24.var_name = "sun_dir"
 
-_editor.add_node(node24, -1466.0523453026, 915.21040594673)
+_editor.add_node(node24, -654.3169811375, 227.65288511513)
 
 var node25 = ::blueprint::nodes::load::Load()
 
 node25.var_name = "sun_dir"
 
-_editor.add_node(node25, -953.0160607505, 282.88107854919)
+_editor.add_node(node25, -1164.3821147673, 7.0936440812298)
 
 var node26 = ::blueprint::nodes::load::Load()
 
 node26.var_name = "sun_dir"
 
-_editor.add_node(node26, -339.52442438686, -56.891921450806)
+_editor.add_node(node26, 814.66683867088, 226.86090886945)
 
 var node27 = ::blueprint::nodes::load::Load()
 
 node27.var_name = "sun_dir"
 
-_editor.add_node(node27, -194.55722660974, 909.48804697405)
+_editor.add_node(node27, -329.20555064579, 85.920924324291)
 
 var node28 = ::blueprint::nodes::store::Store()
 
 node28.var_name = "view"
 
-_editor.add_node(node28, -1473.5807032472, 1151.2442724798)
+_editor.add_node(node28, -657.2998845366, 428.23220619373)
 
 var node29 = ::blueprint::nodes::store::Store()
 
 node29.var_name = "proj"
 
-_editor.add_node(node29, -1331.762521429, 1150.3351760221)
+_editor.add_node(node29, -520.936248173, 423.68674609963)
 
 var node30 = ::blueprint::nodes::load::Load()
 
 node30.var_name = "view"
 
-_editor.add_node(node30, -194.449868416, 1130.6611224596)
+_editor.add_node(node30, -344.59643278176, 343.29371294414)
 
 var node31 = ::blueprint::nodes::load::Load()
 
 node31.var_name = "proj"
 
-_editor.add_node(node31, -194.72262343198, 1079.8429267698)
+_editor.add_node(node31, -208.26649672472, 344.38453986214)
 
 var node32 = ::blueprint::nodes::load::Load()
 
 node32.var_name = "view"
 
-_editor.add_node(node32, -477.4383525253, 70.392917417994)
+_editor.add_node(node32, 676.75291053244, 354.14574773826)
 
 var node33 = ::blueprint::nodes::load::Load()
 
 node33.var_name = "proj"
 
-_editor.add_node(node33, -348.33001726628, 71.162826406294)
+_editor.add_node(node33, 805.86124579146, 354.91565672655)
 
 var node34 = ::globegraph::nodes::ocean_mesh::OceanMesh()
 node34.query_param("grid_size").value = 4
 
-_editor.add_node(node34, 385.24890136719, 704.54547119141)
+_editor.add_node(node34, 297.47920166952, 175.48625094232)
 
 var node35 = ::blueprint::nodes::store::Store()
 
 node35.var_name = "theta"
 
-_editor.add_node(node35, -1334.9284087978, 1083.5959974123)
+_editor.add_node(node35, -524.1021355418, 356.94756748983)
 
 var node36 = ::blueprint::nodes::load::Load()
 
 node36.var_name = "theta"
 
-_editor.add_node(node36, 248.66593838868, 715.81296177406)
+_editor.add_node(node36, 160.89623869101, 186.75374152494)
 
 var node37 = ::blueprint::nodes::number::Number()
 
-node37.value = 0.46856299042702
+node37.value = 1
 
-_editor.add_node(node37, -190.17066196459, 849.02866686577)
+_editor.add_node(node37, -197.16560287052, 79.321941749321)
+
+var node38 = ::blueprint::nodes::commentary::Commentary()
+
+node38.set_size(429.09090909091, 333.63636363636)
+node38.title = "Params"
+
+_editor.add_node(node38, -659.1024376816, 472.78253871383)
+
+var node39 = ::blueprint::nodes::commentary::Commentary()
+
+node39.set_size(796.6556, 260.6102)
+node39.title = "Prepare atmo textures"
+
+_editor.add_node(node39, -832.9343279869, 110.30809297523)
+
+var node40 = ::blueprint::nodes::store::Store()
+
+node40.var_name = "sky_tex"
+
+_editor.add_node(node40, -786.1455043899, -89.99050373827)
+
+var node41 = ::blueprint::nodes::store::Store()
+
+node41.var_name = "transmittance"
+
+_editor.add_node(node41, -539.76674854958, 60.86598743083)
+
+var node42 = ::blueprint::nodes::store::Store()
+
+node42.var_name = "irradiance"
+
+_editor.add_node(node42, -536.87427057538, -6.7523063600703)
+
+var node43 = ::blueprint::nodes::store::Store()
+
+node43.var_name = "inscatter"
+
+_editor.add_node(node43, -536.48353662018, -78.96116678467)
+
+var node44 = ::blueprint::nodes::load::Load()
+
+node44.var_name = "sky_tex"
+
+_editor.add_node(node44, 817.82055279638, 34.568610827221)
+
+var node45 = ::blueprint::nodes::load::Load()
+
+node45.var_name = "sky_tex"
+
+_editor.add_node(node45, -198.34432753727, -117.50198645575)
+
+var node46 = ::blueprint::nodes::load::Load()
+
+node46.var_name = "transmittance"
+
+_editor.add_node(node46, -199.08103611011, 19.200656827871)
+
+var node47 = ::blueprint::nodes::load::Load()
+
+node47.var_name = "irradiance"
+
+_editor.add_node(node47, -199.08102501281, -26.253896949659)
+
+var node48 = ::blueprint::nodes::load::Load()
+
+node48.var_name = "inscatter"
+
+_editor.add_node(node48, -196.35376338284, -72.617533313289)
+
+var node49 = ::blueprint::nodes::load::Load()
+
+node49.var_name = "transmittance"
+
+_editor.add_node(node49, 814.25475129146, 170.45087449789)
+
+var node50 = ::blueprint::nodes::load::Load()
+
+node50.var_name = "irradiance"
+
+_editor.add_node(node50, 814.25476238876, 124.99632072036)
+
+var node51 = ::blueprint::nodes::load::Load()
+
+node51.var_name = "inscatter"
+
+_editor.add_node(node51, 816.98202401866, 78.632684356731)
+
+var node52 = ::blueprint::nodes::commentary::Commentary()
+
+node52.set_size(710.47698, 605.45734)
+node52.title = "Draw sky"
+
+_editor.add_node(node52, 949.37263497181, 427.89720490034)
+
+var node53 = ::blueprint::nodes::commentary::Commentary()
+
+node53.set_size(1089.8452, 467.8205)
+node53.title = "Prepare ocean textures"
+
+_editor.add_node(node53, -974.5826159479, -187.20950830447)
+
+var node54 = ::blueprint::nodes::store::Store()
+
+node54.var_name = "dx"
+
+_editor.add_node(node54, -558.34235501823, -269.97458174197)
+
+var node55 = ::blueprint::nodes::store::Store()
+
+node55.var_name = "dy"
+
+_editor.add_node(node55, -563.60158150699, -391.68756178737)
+
+var node56 = ::blueprint::nodes::store::Store()
+
+node56.var_name = "dz"
+
+_editor.add_node(node56, -564.35291153229, -477.33744377077)
+
+var node57 = ::blueprint::nodes::store::Store()
+
+node57.var_name = "normal"
+
+_editor.add_node(node57, -559.09368765735, -596.04514920479)
+
+var node58 = ::blueprint::nodes::load::Load()
+
+node58.var_name = "dx"
+
+_editor.add_node(node58, -338.9843379063, 223.71656408754)
+
+var node59 = ::blueprint::nodes::load::Load()
+
+node59.var_name = "dy"
+
+_editor.add_node(node59, -334.20324279745, 175.90573011673)
+
+var node60 = ::blueprint::nodes::load::Load()
+
+node60.var_name = "dz"
+
+_editor.add_node(node60, -332.8371978067, 130.14371816779)
+
+var node61 = ::blueprint::nodes::load::Load()
+
+node61.var_name = "normal"
+
+_editor.add_node(node61, -198.02879655444, -161.76861713027)
+
+var node62 = ::blueprint::nodes::commentary::Commentary()
+
+node62.set_size(976.82026160001, 1017.7433207)
+node62.title = "Draw ocean"
+
+_editor.add_node(node62, 74.714585164992, 426.53605415284)
 
 Blueprint.connect(node20, "dir", node24, "var")
 Blueprint.connect(node24, "var", node27, "var")
 Blueprint.connect(node24, "var", node26, "var")
 Blueprint.connect(node24, "var", node25, "var")
+Blueprint.connect(node25, "var", node17, "sunDir")
+Blueprint.connect(node17, "sky_tex", node40, "var")
+Blueprint.connect(node40, "var", node45, "var")
+Blueprint.connect(node40, "var", node44, "var")
+Blueprint.connect(node17, "next", node16, "prev")
+Blueprint.connect(node16, "inscatter", node43, "var")
+Blueprint.connect(node43, "var", node51, "var")
+Blueprint.connect(node43, "var", node48, "var")
+Blueprint.connect(node16, "irradiance", node42, "var")
+Blueprint.connect(node42, "var", node50, "var")
+Blueprint.connect(node42, "var", node47, "var")
+Blueprint.connect(node16, "transmittance", node41, "var")
+Blueprint.connect(node41, "var", node49, "var")
+Blueprint.connect(node41, "var", node46, "var")
 Blueprint.connect(node19, "theta", node35, "var")
 Blueprint.connect(node35, "var", node36, "var")
 Blueprint.connect(node36, "var", node34, "cam_theta")
@@ -603,6 +772,15 @@ Blueprint.connect(node28, "var", node30, "var")
 Blueprint.connect(node19, "pos", node21, "var")
 Blueprint.connect(node21, "var", node23, "var")
 Blueprint.connect(node21, "var", node22, "var")
+Blueprint.connect(node32, "var", node14, "view_mat")
+Blueprint.connect(node33, "var", node14, "proj_mat")
+Blueprint.connect(node18, "v", node14, "hdrExposure")
+Blueprint.connect(node23, "var", node14, "cam_pos")
+Blueprint.connect(node26, "var", node14, "sun_dir")
+Blueprint.connect(node49, "var", node14, "transmittanceSampler")
+Blueprint.connect(node50, "var", node14, "skyIrradianceSampler")
+Blueprint.connect(node51, "var", node14, "inscatterSampler")
+Blueprint.connect(node44, "var", node14, "skySampler")
 Blueprint.connect(node6, "next", node7, "prev")
 Blueprint.connect(node6, "tilde_h0k", node7, "tilde_h0k")
 Blueprint.connect(node6, "tilde_h0minusk", node7, "tilde_h0minusk")
@@ -610,44 +788,39 @@ Blueprint.connect(node7, "next", node9, "prev")
 Blueprint.connect(node9, "next", node8, "prev")
 Blueprint.connect(node9, "twiddle_factors", node8, "twiddle_factors")
 Blueprint.connect(node7, "tilde_h0_t_dx", node8, "tilde_h0_t")
+Blueprint.connect(node8, "dst", node54, "var")
+Blueprint.connect(node54, "var", node58, "var")
 Blueprint.connect(node8, "next", node10, "prev")
 Blueprint.connect(node9, "twiddle_factors", node10, "twiddle_factors")
 Blueprint.connect(node7, "tilde_h0_t_dy", node10, "tilde_h0_t")
+Blueprint.connect(node10, "dst", node55, "var")
+Blueprint.connect(node55, "var", node59, "var")
 Blueprint.connect(node10, "next", node11, "prev")
 Blueprint.connect(node9, "twiddle_factors", node11, "twiddle_factors")
 Blueprint.connect(node7, "tilde_h0_t_dz", node11, "tilde_h0_t")
+Blueprint.connect(node11, "dst", node56, "var")
+Blueprint.connect(node56, "var", node60, "var")
 Blueprint.connect(node11, "next", node12, "prev")
 Blueprint.connect(node10, "dst", node12, "s_HeightMap")
-Blueprint.connect(node12, "next", node17, "prev")
-Blueprint.connect(node25, "var", node17, "sunDir")
-Blueprint.connect(node17, "next", node16, "prev")
-Blueprint.connect(node32, "var", node14, "view_mat")
-Blueprint.connect(node33, "var", node14, "proj_mat")
-Blueprint.connect(node18, "v", node14, "hdrExposure")
-Blueprint.connect(node23, "var", node14, "cam_pos")
-Blueprint.connect(node26, "var", node14, "sun_dir")
-Blueprint.connect(node16, "transmittance", node14, "transmittanceSampler")
-Blueprint.connect(node16, "irradiance", node14, "skyIrradianceSampler")
-Blueprint.connect(node16, "inscatter", node14, "inscatterSampler")
-Blueprint.connect(node17, "sky_tex", node14, "skySampler")
-Blueprint.connect(node16, "next", node2, "prev")
+Blueprint.connect(node12, "normal_map", node57, "var")
+Blueprint.connect(node57, "var", node61, "var")
 Blueprint.connect(node30, "var", node1, "view_mat")
 Blueprint.connect(node31, "var", node1, "proj_mat")
 Blueprint.connect(node4, "v", node1, "u_DisplacementScale")
 Blueprint.connect(node5, "v", node1, "u_Choppiness")
 Blueprint.connect(node22, "var", node1, "u_CameraPos_tes")
-Blueprint.connect(node10, "dst", node1, "s_Dy")
-Blueprint.connect(node8, "dst", node1, "s_Dx")
-Blueprint.connect(node11, "dst", node1, "s_Dz")
+Blueprint.connect(node59, "var", node1, "s_Dy")
+Blueprint.connect(node58, "var", node1, "s_Dx")
+Blueprint.connect(node60, "var", node1, "s_Dz")
 Blueprint.connect(node22, "var", node1, "u_CameraPos_fs")
 Blueprint.connect(node27, "var", node1, "u_SunDirection")
 Blueprint.connect(node3, "v3", node1, "u_SeaColor")
 Blueprint.connect(node37, "v", node1, "sigmaSq0")
-Blueprint.connect(node16, "transmittance", node1, "transmittanceSampler")
-Blueprint.connect(node16, "irradiance", node1, "skyIrradianceSampler")
-Blueprint.connect(node16, "inscatter", node1, "inscatterSampler")
-Blueprint.connect(node17, "sky_tex", node1, "skySampler")
-Blueprint.connect(node12, "normal_map", node1, "s_NormalMap")
+Blueprint.connect(node46, "var", node1, "transmittanceSampler")
+Blueprint.connect(node47, "var", node1, "skyIrradianceSampler")
+Blueprint.connect(node48, "var", node1, "inscatterSampler")
+Blueprint.connect(node45, "var", node1, "skySampler")
+Blueprint.connect(node61, "var", node1, "s_NormalMap")
 Blueprint.connect(node2, "next", node0, "prev")
 Blueprint.connect(node1, "out", node0, "shader")
 Blueprint.connect(node34, "vao", node0, "va")
