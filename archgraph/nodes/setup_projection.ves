@@ -1,0 +1,70 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgen" for TextureMapping
+import "maths.vector" for Vector2, Vector3
+
+class SetupProjection is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+		this.exports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+
+		this.params.add(NodeParam("axes", "xy", { "combo" : [ "xy", "xz", "yx", "yz", "zx", "zy" ] }))
+		this.params.add(NodeParam("scale", Vector2(1, 1)))
+		this.params.add(NodeParam("offset", Vector2(0, 0)))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		
+		
+
+		if (v_geo and v_geo.value) 
+		{
+			var axes = this.query_param("axes").value
+			var axes_x = Vector3(1, 0, 0)
+			var axes_y = Vector3(0, 1, 0)
+			if (axes == "xy") {
+				axes_x = Vector3(1, 0, 0)
+				axes_y = Vector3(0, 1, 0)
+			} else if (axes == "xz") {
+				axes_x = Vector3(1, 0, 0)
+				axes_y = Vector3(0, 0, 1)
+			} else if (axes == "yx") {
+				axes_x = Vector3(0, 1, 0)
+				axes_y = Vector3(1, 0, 0)
+			} else if (axes == "yz") {
+				axes_x = Vector3(0, 1, 0)
+				axes_y = Vector3(0, 0, 1)
+			} else if (axes == "zx") {
+				axes_x = Vector3(0, 0, 1)
+				axes_y = Vector3(1, 0, 0)
+			} else if (axes == "zy") {
+				axes_x = Vector3(0, 0, 1)
+				axes_y = Vector3(0, 1, 0)
+			}
+
+			var scale = this.query_param("scale").value
+			var offset = this.query_param("offset").value
+
+			var geo = v_geo.value
+			geo.uv_mapping = TextureMapping.init(axes_x, axes_y, scale, offset)
+			geo.rebuild_mesh()
+		}
+
+		return v_geo
+	}
+}

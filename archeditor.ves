@@ -1,0 +1,44 @@
+import "editor.editor" for Editor
+
+class Archeditor is Editor
+{
+	load()
+	{
+		super.load()
+
+		this.prepare_nodes()
+	}
+
+	prepare_nodes()
+	{
+		this.clear_popup_nodes()
+
+		import "editor.bpnodes" for BP_NODES		
+		for (var node in BP_NODES) {
+			super.add_popup_node(node)
+		}
+		
+		import "archnodes" for ARCH_NODES
+		for (var node in ARCH_NODES) {
+			super.add_popup_node(node)
+		}
+	}
+
+	draw_preview()
+	{
+		if (this.scene_stack.bp_dirty) {
+			this.rebuild_all()
+		}
+
+		super.draw_preview()
+	}
+
+	rebuild_all()
+	{
+		var scene = this.scene_stack.root()
+		for (var node in scene.nodes) {
+			var bp_node = node.components["bp"]
+			bp_node.on_node_dirty()
+		}
+	}
+}

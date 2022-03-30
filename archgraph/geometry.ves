@@ -1,0 +1,47 @@
+import "maths.vector" for Vector3
+import "archgen" for GeometryTools
+
+class Geometry
+{
+	init(polys)
+	{
+		this.polys = polys
+
+		this.mesh = nil
+
+		// material
+		this.color = Vector3(1, 1, 1)
+		this.texture = nil
+
+		// texcoords
+		this.uv_mapping = nil
+
+		this.rebuild_mesh()
+	}
+
+	clone()
+	{
+		var polys = []
+		for (var poly in this.polys) {
+			polys.add(poly.clone())
+		}
+
+		var new = Geometry(polys)
+
+		var c = this.color
+		new.color.set(c.x, c.y, c.z)
+
+		new.texture = this.texture
+
+		new.uv_mapping = this.uv_mapping.clone()
+
+		new.rebuild_mesh()
+
+		return new
+	}
+
+	rebuild_mesh()
+	{
+		this.mesh = GeometryTools.build_mesh(this.polys, this.uv_mapping)
+	}
+}

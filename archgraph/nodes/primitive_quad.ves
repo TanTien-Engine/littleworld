@@ -1,0 +1,48 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
+import "geometry" for PolyPoint, PolyFace, Polytope
+import "maths" for Plane
+import "maths.vector" for Vector2
+
+class PrimitiveQuad is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var hx = 0.5
+		var hz = 0.5
+
+		var pos = Vector2(0, 0)
+
+		var xmin = pos.x - hx
+		var xmax = pos.x + hx
+		var zmin = pos.y - hz
+		var zmax = pos.y + hz
+		var y = 0
+
+		var points = []
+		points.add(PolyPoint.init([ xmin, y, zmin ]))
+		points.add(PolyPoint.init([ xmin, y, zmax ]))
+		points.add(PolyPoint.init([ xmax, y, zmax ]))
+		points.add(PolyPoint.init([ xmax, y, zmin ]))
+
+		var face = PolyFace.init([ 0, 1, 2, 3 ], [])
+		var poly = Polytope.init(points, [ face ])
+
+	    var geo = Geometry([ poly ])
+		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+}
