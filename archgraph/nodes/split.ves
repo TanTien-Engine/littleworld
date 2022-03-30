@@ -1,0 +1,222 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.node_param" for NodeParam
+import "blueprint.node_helper" for NodeHelper
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant
+import "archgraph.variant" for VAR_TYPE_SCOPE, VAR_TYPE_SPLIT_SIZE, VarScope
+import "math" for Math
+
+var CHILD_IDX_OFFSET = 1
+
+class Split is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "scope", VAR_TYPE_SCOPE),
+			Pin(this, "size0", VAR_TYPE_SPLIT_SIZE),
+			Pin(this, "size1", VAR_TYPE_SPLIT_SIZE),
+		]
+		this.exports = [
+			Pin(this, "child0", VAR_TYPE_SCOPE),
+			Pin(this, "child1", VAR_TYPE_SCOPE),
+		]
+
+		this.params.add(NodeParam("axis", "hori", { "combo" : [ "hori", "vert" ] }))
+
+		this.layout()
+
+		this.scopes = nil
+	}
+
+	on_pin_dirty(pin)
+	{
+		super.on_pin_dirty(pin)
+		
+		this.scopes = nil
+	}
+
+	calc_value(idx)
+	{
+		if (!this.scopes) {
+			this.build_scopes()
+		}
+		if (this.scopes and idx < this.scopes.count) {
+			return Variant(VAR_TYPE_SCOPE, this.scopes[idx])		
+		}
+		return nil
+	}
+
+	on_connected(pin)
+	{
+		if (pin.is_input) {
+			NodeHelper.dynamic_imports_update(this, CHILD_IDX_OFFSET, "size", VAR_TYPE_SCOPE)
+			this.dynamic_exports_update()
+		}
+	}
+
+	on_disconnected(pin)
+	{
+		if (pin.is_input) {
+			NodeHelper.dynamic_imports_update(this, CHILD_IDX_OFFSET, "size", VAR_TYPE_SCOPE)
+			this.dynamic_exports_update()
+		}
+	}
+
+	build_scopes()
+	{
+		var v_scope = Blueprint.calc_input_value(this, 0)
+		if (!v_scope or !v_scope.value) {
+			return
+		}
+
+		var in_sizes = []
+		for (var i in 1..this.imports.count)
+		{
+			var v_size = Blueprint.calc_input_value(this, i)
+			if (v_size and v_size.value) {
+				in_sizes.add(v_size.value)
+			}
+		}
+
+		this.scopes = []
+
+		var scope = v_scope.value
+
+		var axis = this.query_param("axis").value
+		if (axis == "hori")
+		{
+			var sizes = this.calc_sizes(in_sizes, scope.w)
+			var ds = this.calc_divides(scope.x, scope.x + scope.w, sizes)
+
+			var x = scope.x
+			for (var d in ds) {
+				this.scopes.add(VarScope(x, scope.y, d - x, scope.h))
+				x = d
+			}
+		}
+		else
+		{
+			var sizes = this.calc_sizes(in_sizes, scope.h)		
+			var ds = this.calc_divides(scope.y, scope.y + scope.h, sizes)
+
+			var y = scope.y
+			for (var d in ds) {
+				this.scopes.add(VarScope(scope.x, y, scope.w, d - y))
+				y = d
+			}
+		}
+	}
+
+	calc_sizes(in_sizes, tot)
+	{
+		var sizes = []
+
+		var floating_num = 0
+		for (var sz in in_sizes) 
+		{
+			if (sz.mode == "absolute") {
+				sizes.add(sz.size)
+			} else if (sz.mode == "relative") {
+				sizes.add(sz.size * tot)
+			} else if (sz.mode == "floating") {
+				sizes.add(-sz.size)
+				floating_num = floating_num + 1
+			}
+		}
+
+		if (floating_num > 0)
+		{
+			var avaliable = tot
+			var tot_floating = 0
+			for (var sz in sizes) 
+			{
+				if (sz > 0) {
+					avaliable = avaliable - sz
+				} else {
+					tot_floating = tot_floating - sz
+				}
+			}
+			if (avaliable > 0 and tot_floating > 0)
+			{
+				if (floating_num == 1)
+				{
+					for (var i in 0..sizes.count) {
+						if (sizes[i] < 0) {
+							sizes[i] = Math.min(-sizes[i], avaliable)
+						}
+					}
+				}
+				else
+				{
+					for (var i in 0..sizes.count) {
+						if (sizes[i] < 0) {
+							sizes[i] = avaliable * (-sizes[i]) / tot_floating
+						}
+					}
+				}
+			}
+			else
+			{
+				for (var i in 0..sizes.count) {
+					if (sizes[i] < 0) {
+						sizes[i] = 0
+					}
+				}
+			}
+		}
+
+		return sizes
+	}
+
+	calc_divides(min, max, sizes)
+	{
+		var scopes = []
+
+		var start = min
+		for (var sz in sizes)
+		{
+			var end = start + sz
+			if (end > max) {
+				end = max
+			}
+
+			scopes.add(end)
+
+			if (end == max) {
+				return scopes
+			}
+
+			start = end
+		}
+
+		return scopes
+	}
+
+	dynamic_exports_update()
+	{
+		var num = 0
+		for (var i in 1 .. this.imports.count) {
+			if (!this.imports[i].conns.isEmpty) {
+				num = num + 1
+			}
+		}
+		while (this.exports.count > num) {
+			this.exports.pop_back()
+		}
+		while (this.exports.count < num) {
+			this.exports.add(Pin(this, "child%(this.exports.count)", VAR_TYPE_SCOPE))
+		}
+
+		this.layout()
+
+		for (var port in this.exports) {
+			for (var conn in port.conns) {
+				conn.update()
+			}
+		}
+	}	
+}

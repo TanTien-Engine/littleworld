@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "geos"
 node0.var_type = "array"
 
-_editor.add_node(node0, -522.76253257099, -230.6174483392)
+_editor.add_node(node0, 602.80746742901, -95.7274483392)
 
 var node1 = ::rendergraph::nodes::draw::Draw()
 
@@ -95,7 +95,7 @@ var node3 = ::rendergraph::nodes::clear::Clear()
 node3.masks = [ "color", "depth" ]
 node3.values = { "color" : [ 0.5, 0.5, 0.5, 1 ] }
 
-_editor.add_node(node3, 316.44626889273, -80.274393748188)
+_editor.add_node(node3, 516.44626889273, 56.725606251812)
 
 var node4 = ::blueprint::nodes::perspective::Perspective()
 
@@ -122,12 +122,12 @@ _editor.add_node(node6, -193.20282387549, 70.019674439062)
 var node7 = ::blueprint::nodes::cache::Cache()
 node7.query_param("disable").value = false
 
-_editor.add_node(node7, -388.2136201683, -231.56207394932)
+_editor.add_node(node7, 737.3563798317, -96.67207394932)
 
 var node8 = ::blueprint::nodes::field_get::FieldGet()
 node8.query_param("name").value = "mesh"
 
-_editor.add_node(node8, -235.3683309121, -313.03281775098)
+_editor.add_node(node8, 385.6316690879, -289.03281775098)
 
 var node9 = ::blueprint::nodes::field_get::FieldGet()
 node9.query_param("name").value = "color"
@@ -137,7 +137,7 @@ _editor.add_node(node9, -229.9349807994, -158.77193743543)
 var node10 = ::blueprint::nodes::field_get::FieldGet()
 node10.query_param("name").value = "texture"
 
-_editor.add_node(node10, -234.66336023426, -209.22655344922)
+_editor.add_node(node10, -229.66336023426, -206.22655344922)
 
 var node11 = ::rendergraph::nodes::shader::Shader()
 node11.query_param("inc_dir").value = ""
@@ -212,23 +212,26 @@ _editor.add_node(node11, 6.7657009182429, -304.16270103295)
 
 var node12 = ::blueprint::nodes::branch_f::BranchF()
 
-_editor.add_node(node12, 321.60999432761, -209.12298506196)
+_editor.add_node(node12, 324.60999432761, -43.12298506196)
 
 var node13 = ::blueprint::nodes::is_null::IsNull()
 
-_editor.add_node(node13, 180.38072160033, -191.35281545081)
+_editor.add_node(node13, 178.38072160033, -135.35281545081)
 
-Blueprint.connect(node5, "zoom", node4, "fovy")
-Blueprint.connect(node0, "var", node7, "var")
-Blueprint.connect(node7, "var", node10, "value")
+var node14 = ::blueprint::nodes::for_each::ForEach()
+
+_editor.add_node(node14, 901.69828136719, -82.505942138672)
+
+Blueprint.connect(node14, "out", node10, "value")
 Blueprint.connect(node10, "field", node13, "in")
-Blueprint.connect(node7, "var", node9, "value")
+Blueprint.connect(node14, "out", node9, "value")
+Blueprint.connect(node14, "out", node8, "value")
+Blueprint.connect(node5, "zoom", node4, "fovy")
 Blueprint.connect(node5, "mat", node11, "view")
 Blueprint.connect(node4, "mat", node11, "projection")
 Blueprint.connect(node6, "v3", node11, "light_pos")
 Blueprint.connect(node5, "pos", node11, "cam_pos")
 Blueprint.connect(node9, "field", node11, "color")
-Blueprint.connect(node10, "field", node11, "base_color")
 Blueprint.connect(node5, "mat", node2, "view")
 Blueprint.connect(node4, "mat", node2, "projection")
 Blueprint.connect(node6, "v3", node2, "light_pos")
@@ -238,7 +241,9 @@ Blueprint.connect(node10, "field", node2, "base_color")
 Blueprint.connect(node13, "out", node12, "cond")
 Blueprint.connect(node11, "out", node12, "true")
 Blueprint.connect(node2, "out", node12, "false")
-Blueprint.connect(node7, "var", node8, "value")
-Blueprint.connect(node3, "next", node1, "prev")
 Blueprint.connect(node12, "result", node1, "shader")
 Blueprint.connect(node8, "field", node1, "va")
+Blueprint.connect(node3, "next", node14, "prev")
+Blueprint.connect(node7, "var", node14, "in")
+Blueprint.connect(node1, "next", node14, "do")
+Blueprint.connect(node0, "var", node7, "var")
