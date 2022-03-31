@@ -1,0 +1,75 @@
+var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+
+_editor.add_node(node0, -433.68737000597, 190.84332383666)
+
+var node1 = ::blueprint::nodes::number3::Number3()
+
+node1.value.set(0.84666681289673, 0.54444444179535, 0)
+
+_editor.add_node(node1, -498.4, 68.4)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node2, -36.447, 64.75)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node3, -157.32, -147.44)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node4, 483.73494412408, 49.911624359376)
+
+var node5 = ::blueprint::nodes::camera3d::Camera3d()
+
+node5.cam.position.set(2.2685025314135, 0.80336011735346, 1.4163863356158)
+node5.cam.yaw = -146.3
+node5.cam.pitch = -31.8
+node5.cam.zoom = 45
+node5.cam.update_vectors()
+node5.speed = 0.22097560763359
+
+_editor.add_node(node5, 273.32241098754, -86.83277435757)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "u_tex"
+node6.gamma_correction = false
+node6.mipmap = false
+node6.init_texture("../../../../tantien/samples/rendergraph/learnopengl/resources/textures/bricks2.jpg")
+node6.set_sampler("linear_repeat")
+
+_editor.add_node(node6, -423.28636363636, -297.14909090909)
+
+var node7 = ::archgraph::nodes::setup_projection::SetupProjection()
+node7.query_param("axes").value = "xy"
+node7.query_param("scale").value.set(1, 1)
+node7.query_param("offset").value.set(0, 0)
+
+_editor.add_node(node7, -459.14, -192.94)
+
+var node8 = ::archgraph::nodes::comp::Comp()
+node8.query_param("selector").value = "face6"
+
+_editor.add_node(node8, -283.42550626631, 214.72408719592)
+
+var node9 = ::archgraph::nodes::primitive_polygon::PrimitivePolygon()
+node9.query_param("vertices").value = [ 0, 0, 1, 0, 1.5, 1, 1, 1.5, 0, 1 ]
+
+_editor.add_node(node9, -581.00539948817, 259.23305871334)
+
+var node10 = ::archgraph::nodes::extrude::Extrude()
+node10.query_param("distance").value = 0.46580809354782
+
+_editor.add_node(node10, -434.8506032713, 252.72488489989)
+
+Blueprint.connect(node9, "geo", node10, "geo")
+Blueprint.connect(node10, "geo", node8, "geo")
+Blueprint.connect(node7, "geo", node3, "geo")
+Blueprint.connect(node6, "tex", node3, "texture")
+Blueprint.connect(node8, "back", node2, "geo")
+Blueprint.connect(node1, "v3", node2, "color")
+Blueprint.connect(node2, "geo", node4, "geos")
+Blueprint.connect(node5, "this", node4, "view_cam")

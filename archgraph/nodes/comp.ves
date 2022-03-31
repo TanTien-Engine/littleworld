@@ -1,0 +1,227 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
+import "maths.vector" for Vector3
+import "geometry" for Polytope
+import "maths" for Maths
+import "math" for Math
+
+class Comp is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+		this.exports = [
+			Pin(this, "front",  VAR_TYPE_GEOMETRY),
+			Pin(this, "back",   VAR_TYPE_GEOMETRY),
+			Pin(this, "left",   VAR_TYPE_GEOMETRY),
+			Pin(this, "right",  VAR_TYPE_GEOMETRY),
+			Pin(this, "top",    VAR_TYPE_GEOMETRY),
+			Pin(this, "bottom", VAR_TYPE_GEOMETRY),
+		]
+
+		this.params.add(NodeParam("selector", "face6", { "combo" : [ "face6", "normal_y", "side" ] }))
+
+		this.layout()
+
+		this.polys = nil
+	}
+
+	on_pin_dirty(pin)
+	{
+		super.on_pin_dirty(pin)
+		
+		this.polys = nil
+	}
+
+	on_param_dirty()
+	{
+		super.on_param_dirty()
+
+		this.polys = nil
+
+		for (var p in this.exports) {
+			while (!p.conns.isEmpty) {
+				Blueprint.disconnect(p.conns.front())
+			}
+		}
+
+		this.exports.clear()
+
+		var selector = this.query_param("selector").value
+		if (selector == "face6") 
+		{
+			this.exports.add(Pin(this, "front",  VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "back",   VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "left",   VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "right",  VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "top",    VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "bottom", VAR_TYPE_GEOMETRY))			
+		}
+		else if (selector == "normal_y")
+		{
+			this.exports.add(Pin(this, "vertical",   VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "horizontal", VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "aslant",     VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "nutant",     VAR_TYPE_GEOMETRY))			
+		}
+		else if (selector == "side")
+		{
+			this.exports.add(Pin(this, "side", VAR_TYPE_GEOMETRY))
+		}
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo or !v_geo.value) {
+			return nil
+		}
+
+		if (!this.polys) {
+			this.build_polys()
+		}
+		if (!this.polys or this.polys[idx].isEmpty) {
+			return nil
+		}
+
+		return Variant(VAR_TYPE_GEOMETRY, Geometry(this.polys[idx]))
+	}
+
+	build_polys()
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo or !v_geo.value) {
+			return
+		}
+
+		this.polys = []
+
+		var selector = this.query_param("selector").value
+		if (selector == "face6") 
+		{
+			for (var i in 0..6) {
+				this.polys.add([])
+			}
+
+			var normals = []
+			normals.add(Vector3( 0,  0, -1))
+			normals.add(Vector3( 0,  0,  1))
+			normals.add(Vector3(-1,  0,  0))
+			normals.add(Vector3( 1,  0,  0))
+			normals.add(Vector3( 0,  1,  0))
+			normals.add(Vector3( 0, -1,  0))
+
+			for (var poly in v_geo.value.polys) 
+			{
+				var faces6 = []
+				for (var i in 0..6) {
+					faces6.add([])
+				}
+
+				for (var face in poly.get_faces()) 
+				{
+					var norm = face.get_normal()
+
+					var min_idx = -1
+					var min_ang = Math.pi()
+					for (var i in 0..6)
+					{
+						var angle = Maths.calc_angle([0, 0, 0], norm, [ normals[i].x, normals[i].y, normals[i].z ])
+						if (angle < min_ang) {
+							min_idx = i
+							min_ang = angle
+						}
+					}
+
+					faces6[min_idx].add(face)
+				}
+
+				var points = poly.get_points()
+				for (var i in 0..6) {
+					if (!faces6[i].isEmpty) {
+						this.polys[i].add(Polytope.init(points, faces6[i]))
+					}
+				}
+			}
+		}
+		else if (selector == "normal_y")
+		{
+			for (var i in 0..4) {
+				this.polys.add([])
+			}
+
+			for (var poly in v_geo.value.polys) 
+			{
+				var faces4 = []
+				for (var i in 0..6) {
+					faces4.add([])
+				}
+
+				for (var face in poly.get_faces()) 
+				{
+					var angle = this.calc_normal_y_angle(face)
+					var EPSILON = 0.0001
+			        if (angle > 78.75 and angle < 90 + EPSILON) {
+			        	faces4[1].add(face)
+			        } else if (angle > 11.25 and angle <= 78.75) {
+			        	faces4[2].add(face)
+			        } else if (angle > -11.25 and angle <= 11.25) {
+			        	faces4[0].add(face)
+			        } else if (angle > -78.75 and angle <= -11.25) {
+			        	faces4[3].add(face)
+			        } else if (angle > -90 - EPSILON and angle <= -78.75) {
+			        	faces4[1].add(face)
+			        }
+				}
+
+				var points = poly.get_points()
+				for (var i in 0..4) {
+					if (!faces4[i].isEmpty) {
+						this.polys[i].add(Polytope.init(points, faces4[i]))
+					}
+				}
+			}
+		}
+		else if (selector == "side")
+		{
+			for (var i in 0..1) {
+				this.polys.add([])
+			}
+
+			for (var poly in v_geo.value.polys) 
+			{
+				var faces = []
+				for (var face in poly.get_faces()) 
+				{
+					var angle = this.calc_normal_y_angle(face)
+					if (angle > -80 and angle < 80) {
+						faces.add(face)
+					}
+				}
+
+				var points = poly.get_points()
+				if (!faces.isEmpty) {
+					this.polys[0].add(Polytope.init(points, faces))
+				}
+			}
+		}
+	}
+
+	calc_normal_y_angle(face)
+	{
+		var norm = face.get_normal()
+		var angle = Maths.calc_angle([0, 0, 0], norm, [0, 1, 0])
+		return angle * 180 / Math.pi() - 90
+	}
+}

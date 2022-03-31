@@ -1,6 +1,7 @@
 import "archgraph.nodes.*"
 
 var ARCH_NODES = [ 
-PrimitiveCube, PrimitiveQuad, SetupProjection,
-Split, SplitSize,
+PrimitiveCube, PrimitiveQuad, PrimitivePolygon, Extrude,
+Split, SplitSize, Comp,
+SetupProjection,
 ]

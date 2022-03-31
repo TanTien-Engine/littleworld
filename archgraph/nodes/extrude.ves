@@ -1,0 +1,57 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+
+class Extrude is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+		]
+		this.exports = [
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+		]
+
+		this.params.add(NodeParam("distance", 0.0))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo or !v_geo.value) {
+			return nil
+		}
+
+		var distance = this.query_param("distance").value
+
+		this.extrude(v_geo, distance)
+
+		return v_geo
+	}
+
+	extrude(v_geo, distance)
+	{
+		if (v_geo.type == VAR_TYPE_ARRAY)
+		{
+			for (var v in v_geo.value) {
+				this.extrude(v, distance)
+			}
+		}
+		else if (v_geo.type == VAR_TYPE_GEOMETRY)
+		{
+			var geo = v_geo.value
+			for (var poly in geo.polys) {
+				poly.extrude(distance)
+			}
+			geo.rebuild_mesh()
+		}
+	}
+}

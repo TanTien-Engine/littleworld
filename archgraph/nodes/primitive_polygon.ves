@@ -1,0 +1,49 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "blueprint.node_param" for NodeParam
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
+import "geometry" for PolyPoint, PolyFace, Polytope
+
+class PrimitivePolygon is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+
+		this.params.add(NodeParam("vertices", []))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var vertices = this.query_param("vertices").value
+		if (!vertices or vertices.count < 3 * 2) {
+			return nil
+		}
+
+		var points = []
+		var border = []
+		var n = vertices.count / 2
+		for (var i = 0; i < n; i = i + 1)
+		{
+			var x = vertices[i * 2]
+			var y = vertices[i * 2 + 1]
+			points.add(PolyPoint.init([ x, 0, y ]))
+
+			border.add(i)
+		}
+
+		var face = PolyFace.init(border, [])
+		var poly = Polytope.init(points, [ face ])
+
+	    var geo = Geometry([ poly ])
+		return Variant(VAR_TYPE_GEOMETRY, geo)		
+	}	
+}
