@@ -22,13 +22,11 @@ class VarScope
 
 class VarSplitSize
 {
-	init(size, mode, repeat)
+	init(size, mode)
 	{
 		this.size = size
 
 		// absolute, relative, floating
 		this.mode = mode
-
-		this.repeat = repeat
 	}
 }

@@ -47,28 +47,24 @@ _editor.add_node(node6, -170.31446227361, -69.060560828522)
 var node7 = ::archgraph::nodes::split_size::SplitSize()
 node7.query_param("size").value = 0.14295044541359
 node7.query_param("mode").value = "absolute"
-node7.query_param("repeat").value = false
 
 _editor.add_node(node7, -468.6218273279, -53.67140736317)
 
 var node8 = ::archgraph::nodes::split_size::SplitSize()
 node8.query_param("size").value = 0.34215292334557
 node8.query_param("mode").value = "floating"
-node8.query_param("repeat").value = false
 
 _editor.add_node(node8, -331.56660744591, -48.819687739646)
 
 var node9 = ::archgraph::nodes::split_size::SplitSize()
 node9.query_param("size").value = 0.18117268383503
 node9.query_param("mode").value = "absolute"
-node9.query_param("repeat").value = false
 
 _editor.add_node(node9, -329.37802416186, -174.64528322536)
 
 var node10 = ::archgraph::nodes::split_size::SplitSize()
 node10.query_param("size").value = 0.42847087979317
 node10.query_param("mode").value = "floating"
-node10.query_param("repeat").value = false
 
 _editor.add_node(node10, -468.3269795939, -170.50986489781)
 

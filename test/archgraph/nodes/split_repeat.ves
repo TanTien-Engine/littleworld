@@ -1,0 +1,147 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node0, 376.24664846417, -70.066589496217)
+
+var node1 = ::blueprint::nodes::camera3d::Camera3d()
+
+node1.cam.position.set(-0.33591781240193, 1.9043053201214, 1.835459031702)
+node1.cam.yaw = -90.3
+node1.cam.pitch = -42.7
+node1.cam.zoom = 45
+node1.cam.update_vectors()
+node1.speed = 0.22097560763359
+
+_editor.add_node(node1, 176.57331285987, -222.74742911369)
+
+var node2 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+
+_editor.add_node(node2, -330.99175166224, 37.405654766251)
+
+var node3 = ::archgraph::nodes::split::Split()
+node3.query_param("axis").value = "hori"
+node3.query_param("repeat").value = true
+
+_editor.add_node(node3, -177.75247880254, -62.448990580588)
+
+var node4 = ::archgraph::nodes::split_size::SplitSize()
+node4.query_param("size").value = 0.10690917819738
+node4.query_param("mode").value = "floating"
+
+_editor.add_node(node4, -330.37990396201, -38.645111345138)
+
+var node5 = ::archgraph::nodes::split_size::SplitSize()
+node5.query_param("size").value = 0.16074015200138
+node5.query_param("mode").value = "floating"
+
+_editor.add_node(node5, -325.68551325835, -125.52209877714)
+
+var node6 = ::blueprint::nodes::function::Function()
+
+node6.set_size(663.47107438016, 187.60330578513)
+node6.title = "red"
+
+_editor.add_node(node6, -68.56149935058, 561.55965218386)
+
+var node7 = ::blueprint::nodes::func_in::FuncIn()
+
+node7.var_name = "scope"
+node7.var_type = "scope"
+
+_editor.add_node(node7, -325.49158377834, 512.75017962848)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node8, -2.1171467535198, 485.80740381414)
+
+var node9 = ::blueprint::nodes::number3::Number3()
+
+node9.value.set(1, 0, 0)
+
+_editor.add_node(node9, -190.23240032911, 417.89732298139)
+
+var node10 = ::blueprint::nodes::func_out::FuncOut()
+
+node10.var_name = "geo"
+node10.var_type = "geometry"
+
+_editor.add_node(node10, 180.54182252311, 498.6161659566)
+
+var node11 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node11, 177.0625064731, -53.656823975843)
+
+var node12 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+
+_editor.add_node(node12, -189.5143402856, 505.6491404328)
+
+var node13 = ::blueprint::nodes::func_call::FuncCall()
+node13.imports.add(::blueprint::pin::Pin(node13, "scope", "scope"))
+node13.exports.add(::blueprint::pin::Pin(node13, "geo", "geometry"))
+node13.layout()
+
+_editor.add_node(node13, -7.9573940807602, -1.4190845985792)
+
+var node14 = ::blueprint::nodes::function::Function()
+
+node14.set_size(663.47107438016, 187.60330578513)
+node14.title = "green"
+
+_editor.add_node(node14, -73.43394935058, 333.62150218384)
+
+var node15 = ::blueprint::nodes::func_in::FuncIn()
+
+node15.var_name = "scope"
+node15.var_type = "scope"
+
+_editor.add_node(node15, -330.36403377834, 284.81202962848)
+
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node16, -8.1820512989697, 257.62325381414)
+
+var node17 = ::blueprint::nodes::number3::Number3()
+
+node17.value.set(0, 1, 0)
+
+_editor.add_node(node17, -195.10485032911, 189.95917298139)
+
+var node18 = ::blueprint::nodes::func_out::FuncOut()
+
+node18.var_name = "geo"
+node18.var_type = "geometry"
+
+_editor.add_node(node18, 175.66937252311, 270.6780159566)
+
+var node19 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+
+_editor.add_node(node19, -194.3867902856, 277.7109904328)
+
+var node20 = ::blueprint::nodes::func_call::FuncCall()
+node20.imports.add(::blueprint::pin::Pin(node20, "scope", "scope"))
+node20.exports.add(::blueprint::pin::Pin(node20, "geo", "geometry"))
+node20.layout()
+
+_editor.add_node(node20, -9.5964789806633, -67.364037723579)
+
+Blueprint.connect(node15, "var", node19, "scope")
+Blueprint.connect(node19, "geo", node16, "geo")
+Blueprint.connect(node17, "v3", node16, "color")
+Blueprint.connect(node16, "geo", node18, "var")
+Blueprint.connect(node7, "var", node12, "scope")
+Blueprint.connect(node12, "geo", node8, "geo")
+Blueprint.connect(node9, "v3", node8, "color")
+Blueprint.connect(node8, "geo", node10, "var")
+Blueprint.connect(node2, "scope", node3, "scope")
+Blueprint.connect(node4, "size", node3, "size0")
+Blueprint.connect(node5, "size", node3, "size1")
+Blueprint.connect(node14, "func", node20, "func")
+Blueprint.connect(node3, "child1", node20, "scope")
+Blueprint.connect(node6, "func", node13, "func")
+Blueprint.connect(node3, "child0", node13, "scope")
+Blueprint.connect(node13, "geo", node11, "in0")
+Blueprint.connect(node20, "geo", node11, "in1")
+Blueprint.connect(node11, "list", node0, "geos")
+Blueprint.connect(node1, "this", node0, "view_cam")

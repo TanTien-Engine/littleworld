@@ -1,29 +1,35 @@
 var node0 = ::blueprint::nodes::field_set::FieldSet()
 node0.query_param("name").value = "color"
 
-_editor.add_node(node0, 5.8050079345704, 238.65863037109)
+_editor.add_node(node0, -112.79096476973, 315.65287443043)
 
 var node1 = ::blueprint::nodes::input::Input()
 
 node1.var_name = "geo"
 node1.var_type = "geometry"
 
-_editor.add_node(node1, -146, 265.5)
+_editor.add_node(node1, -118.05854046234, 392.78887122713)
 
 var node2 = ::blueprint::nodes::input::Input()
 
 node2.var_name = "color"
 node2.var_type = "num3"
 
-_editor.add_node(node2, -146, 198.5)
+_editor.add_node(node2, -270.18426461183, 292.25911978193)
 
 var node3 = ::blueprint::nodes::output::Output()
 
 node3.var_name = "geo"
 node3.var_type = "geometry"
 
-_editor.add_node(node3, 153, 248.5)
+_editor.add_node(node3, 169.14395439954, 388.20729768831)
 
-Blueprint.connect(node1, "var", node0, "value")
+var node4 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node4, 28.586947034544, 368.15252958072)
+
+Blueprint.connect(node4, "curr_item", node0, "value")
 Blueprint.connect(node2, "var", node0, "field")
-Blueprint.connect(node0, "value", node3, "var")
+Blueprint.connect(node1, "var", node4, "items")
+Blueprint.connect(node0, "value", node4, "eval")
+Blueprint.connect(node4, "result", node3, "var")

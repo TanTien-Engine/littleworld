@@ -5,8 +5,10 @@ class Geometry
 {
 	init(polys)
 	{
+		// src
 		this.polys = polys
 
+		// dst
 		this.mesh = nil
 
 		// material

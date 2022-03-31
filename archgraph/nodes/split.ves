@@ -3,7 +3,7 @@ import "blueprint.pin" for Pin
 import "blueprint.node_param" for NodeParam
 import "blueprint.node_helper" for NodeHelper
 import "blueprint.blueprint" for Blueprint
-import "blueprint.variant" for Variant
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "archgraph.variant" for VAR_TYPE_SCOPE, VAR_TYPE_SPLIT_SIZE, VarScope
 import "math" for Math
 
@@ -21,11 +21,12 @@ class Split is Node
 			Pin(this, "size1", VAR_TYPE_SPLIT_SIZE),
 		]
 		this.exports = [
-			Pin(this, "child0", VAR_TYPE_SCOPE),
-			Pin(this, "child1", VAR_TYPE_SCOPE),
+			Pin(this, "child0", [ VAR_TYPE_SCOPE, VAR_TYPE_ARRAY ]),
+			Pin(this, "child1", [ VAR_TYPE_SCOPE, VAR_TYPE_ARRAY ]),
 		]
 
 		this.params.add(NodeParam("axis", "hori", { "combo" : [ "hori", "vert" ] }))
+		this.params.add(NodeParam("repeat", false))
 
 		this.layout()
 
@@ -44,10 +45,16 @@ class Split is Node
 		if (!this.scopes) {
 			this.build_scopes()
 		}
-		if (this.scopes and idx < this.scopes.count) {
-			return Variant(VAR_TYPE_SCOPE, this.scopes[idx])		
+		if (!this.scopes) {
+			return nil
 		}
-		return nil
+
+		var scope = this.scopes[idx]
+		if (scope is List) {
+			return Variant(VAR_TYPE_ARRAY, scope)
+		} else {
+			return Variant(VAR_TYPE_SCOPE, scope)
+		}
 	}
 
 	on_connected(pin)
@@ -73,12 +80,12 @@ class Split is Node
 			return
 		}
 
-		var in_sizes = []
+		var src_sizes = []
 		for (var i in 1..this.imports.count)
 		{
 			var v_size = Blueprint.calc_input_value(this, i)
 			if (v_size and v_size.value) {
-				in_sizes.add(v_size.value)
+				src_sizes.add(v_size.value)
 			}
 		}
 
@@ -87,52 +94,146 @@ class Split is Node
 		var scope = v_scope.value
 
 		var axis = this.query_param("axis").value
-		if (axis == "hori")
-		{
-			var sizes = this.calc_sizes(in_sizes, scope.w)
-			var ds = this.calc_divides(scope.x, scope.x + scope.w, sizes)
 
-			var x = scope.x
-			for (var d in ds) {
-				this.scopes.add(VarScope(x, scope.y, d - x, scope.h))
-				x = d
+		var dst_sizes = nil
+		if (axis == "hori") {
+			dst_sizes = this.calc_sizes(src_sizes, scope.w)
+		} else {
+			dst_sizes = this.calc_sizes(src_sizes, scope.h)
+		}
+
+		if (dst_sizes.isEmpty) {
+			return
+		}
+
+		if (dst_sizes[0] is List)
+		{
+			for (var _ in dst_sizes[0]) {
+				this.scopes.add([])
+			}
+
+			if (axis == "hori")
+			{
+				var x = scope.x
+				for (var i in 0..dst_sizes[0].count) {				
+					for (var j in 0..dst_sizes.count) {
+						var sz = dst_sizes[j][i]
+						this.scopes[j].add(Variant(VAR_TYPE_SCOPE, VarScope(x, scope.y, sz, scope.h)))
+						x = x + sz
+					}
+				}
+			}
+			else
+			{
+				var y = scope.y
+				for (var i in 0..dst_sizes[0].count) {				
+					for (var j in 0..dst_sizes.count) {				
+						var sz = dst_sizes[j][i]
+						this.scopes[j].add(Variant(VAR_TYPE_SCOPE, VarScope(scope.x, y, scope.w, sz)))
+						y = y + sz
+					}
+				}
 			}
 		}
 		else
 		{
-			var sizes = this.calc_sizes(in_sizes, scope.h)		
-			var ds = this.calc_divides(scope.y, scope.y + scope.h, sizes)
-
-			var y = scope.y
-			for (var d in ds) {
-				this.scopes.add(VarScope(scope.x, y, scope.w, d - y))
-				y = d
+			if (axis == "hori")
+			{
+				var x = scope.x
+				for (var sz in dst_sizes) {
+					this.scopes.add(VarScope(x, scope.y, sz, scope.h))
+					x = x + sz
+				}
+			}
+			else
+			{
+				var y = scope.y
+				for (var sz in dst_sizes) {
+					this.scopes.add(VarScope(scope.x, y, scope.w, sz))
+					y = y + sz
+				}
 			}
 		}
 	}
 
-	calc_sizes(in_sizes, tot)
+	calc_sizes(src, tot)
 	{
-		var sizes = []
+		var repeat = this.query_param("repeat").value
+		if (repeat)
+		{
+			var sizes = []
+			for (var _ in src) {
+				sizes.add([])
+			}
 
+			var floating = false
+			for (var sz in src) {
+				if (sz.mode == "floating") {
+					floating = true
+				}
+			}
+
+			if (floating)
+			{
+				var dst = []
+				var len = this.calc_sizes_single_layer(dst, src, tot, tot)
+				var num = Math.ceil(tot / len)
+				for (var i in 0..num)
+				{
+					var dst = []
+					this.calc_sizes_single_layer(dst, src, tot / num, tot)
+					for (var i in 0 .. dst.count) {
+						sizes[i].add(dst[i])
+					}
+				}
+			}
+			else
+			{
+				var avaliable = tot
+				while (avaliable > 0)
+				{
+					var dst = []
+					var len = this.calc_sizes_single_layer(dst, src, avaliable, tot)
+					for (var i in 0 .. dst.count) {
+						sizes[i].add(dst[i])
+					}
+
+					avaliable = avaliable - len
+				}
+			}
+
+			return sizes
+		}
+		else
+		{
+			var sizes = []
+			this.calc_sizes_single_layer(sizes, src, tot, tot)
+			return sizes
+		}
+	}
+
+	calc_sizes_single_layer(dst, src, length, tot_len)
+	{
+		// prepare relative and floating values
 		var floating_num = 0
-		for (var sz in in_sizes) 
+		for (var sz in src) 
 		{
 			if (sz.mode == "absolute") {
-				sizes.add(sz.size)
+				dst.add(sz.size)
 			} else if (sz.mode == "relative") {
-				sizes.add(sz.size * tot)
+				dst.add(sz.size * tot_len)
 			} else if (sz.mode == "floating") {
-				sizes.add(-sz.size)
+				dst.add(-sz.size)
 				floating_num = floating_num + 1
 			}
 		}
 
+		// calc floating
 		if (floating_num > 0)
 		{
-			var avaliable = tot
+			var avaliable = length
 			var tot_floating = 0
-			for (var sz in sizes) 
+			for (var sz in dst) 
 			{
 				if (sz > 0) {
 					avaliable = avaliable - sz
@@ -144,56 +245,59 @@ class Split is Node
 			{
 				if (floating_num == 1)
 				{
-					for (var i in 0..sizes.count) {
-						if (sizes[i] < 0) {
-							sizes[i] = Math.min(-sizes[i], avaliable)
+					for (var i in 0..dst.count) {
+						if (dst[i] < 0) {
+							var len = -dst[i]
+							dst[i] = Math.min(len, avaliable)
 						}
 					}
 				}
 				else
 				{
-					for (var i in 0..sizes.count) {
-						if (sizes[i] < 0) {
-							sizes[i] = avaliable * (-sizes[i]) / tot_floating
+					for (var i in 0..dst.count) {
+						if (dst[i] < 0) {
+							var len = -dst[i]
+							dst[i] = Math.min(len, avaliable * len / tot_floating)
 						}
 					}
 				}
 			}
 			else
 			{
-				for (var i in 0..sizes.count) {
-					if (sizes[i] < 0) {
-						sizes[i] = 0
+				for (var i in 0..dst.count) {
+					if (dst[i] < 0) {
+						dst[i] = 0
 					}
 				}
 			}
 		}
 
-		return sizes
-	}
-
-	calc_divides(min, max, sizes)
-	{
-		var scopes = []
-
-		var start = min
-		for (var sz in sizes)
+		// trim sizes
+		if (!dst.isEmpty)
 		{
-			var end = start + sz
-			if (end > max) {
-				end = max
+			var len = 0
+			var idx = 0
+			while (idx < dst.count and len + dst[idx] < length) {
+				len = len + dst[idx]
+				idx = idx + 1
 			}
 
-			scopes.add(end)
-
-			if (end == max) {
-				return scopes
+			if (idx < dst.count)
+			{
+				dst[idx] = length - len
+				for (var i in idx + 1 .. dst.count) {
+					dst[i] = 0
+				}
 			}
-
-			start = end
 		}
 
-		return scopes
+		// calc tot len
+		var len = 0
+		for (var sz in dst) {
+			len = len + sz
+		}
+
+		return len
 	}
 
 	dynamic_exports_update()

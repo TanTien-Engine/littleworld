@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "geos"
 node0.var_type = "array"
 
-_editor.add_node(node0, 602.80746742901, -95.7274483392)
+_editor.add_node(node0, 475.80746742901, -99.7274483392)
 
 var node1 = ::rendergraph::nodes::draw::Draw()
 
@@ -222,6 +222,10 @@ var node14 = ::blueprint::nodes::for_each::ForEach()
 
 _editor.add_node(node14, 901.69828136719, -82.505942138672)
 
+var node15 = ::blueprint::nodes::list_flatten::ListFlatten()
+
+_editor.add_node(node15, 605.43939208984, -97.611633300781)
+
 Blueprint.connect(node14, "out", node10, "value")
 Blueprint.connect(node10, "field", node13, "in")
 Blueprint.connect(node14, "out", node9, "value")
@@ -246,4 +250,5 @@ Blueprint.connect(node8, "field", node1, "va")
 Blueprint.connect(node3, "next", node14, "prev")
 Blueprint.connect(node7, "var", node14, "in")
 Blueprint.connect(node1, "next", node14, "do")
-Blueprint.connect(node0, "var", node7, "var")
+Blueprint.connect(node0, "var", node15, "list")
+Blueprint.connect(node15, "list", node7, "var")
