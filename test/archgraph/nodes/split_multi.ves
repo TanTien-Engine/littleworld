@@ -39,7 +39,7 @@ var node5 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
 
 _editor.add_node(node5, -532.99175166224, 36.405654766251)
 
-var node6 = ::archgraph::nodes::split::Split()
+var node6 = ::archgraph::nodes::split_scope::SplitScope()
 node6.query_param("axis").value = "hori"
 node6.query_param("repeat").value = false
 
@@ -198,7 +198,7 @@ node31.layout()
 
 _editor.add_node(node31, 197.04676294403, -266.84163831759)
 
-var node32 = ::archgraph::nodes::split::Split()
+var node32 = ::archgraph::nodes::split_scope::SplitScope()
 node32.query_param("axis").value = "vert"
 node32.query_param("repeat").value = false
 

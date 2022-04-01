@@ -9,7 +9,7 @@ import "math" for Math
 
 var CHILD_IDX_OFFSET = 1
 
-class Split is Node
+class SplitScope is Node
 {
 	init()
 	{

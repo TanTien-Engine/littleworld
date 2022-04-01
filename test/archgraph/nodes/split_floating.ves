@@ -39,7 +39,7 @@ var node5 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
 
 _editor.add_node(node5, -330.99175166224, 37.405654766251)
 
-var node6 = ::archgraph::nodes::split::Split()
+var node6 = ::archgraph::nodes::split_scope::SplitScope()
 node6.query_param("axis").value = "hori"
 
 _editor.add_node(node6, -170.31446227361, -69.060560828522)
