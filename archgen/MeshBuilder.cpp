@@ -16,6 +16,7 @@ namespace
 struct Vertex
 {
 	sm::vec3 pos;
+	sm::vec3 normal;
 	sm::vec2 texcoord;
 };
 
@@ -44,15 +45,19 @@ create_va(const ur::Device& dev, const std::vector<Vertex>& vertices, const std:
 		va->SetIndexBuffer(ibuf);
 	}
 
-	std::vector<std::shared_ptr<ur::VertexInputAttribute>> vbuf_attrs(2);
+	std::vector<std::shared_ptr<ur::VertexInputAttribute>> vbuf_attrs;
     // pos
-    vbuf_attrs[0] = std::make_shared<ur::VertexInputAttribute>(
-        0, ur::ComponentDataType::Float, 3, 0, 20
-    );
+	vbuf_attrs.push_back(std::make_shared<ur::VertexInputAttribute>(
+        0, ur::ComponentDataType::Float, 3, 0, 32
+    ));
+    // normal
+	vbuf_attrs.push_back(std::make_shared<ur::VertexInputAttribute>(
+        1, ur::ComponentDataType::Float, 3, 12, 32
+    ));
     // texcoord
-    vbuf_attrs[1] = std::make_shared<ur::VertexInputAttribute>(
-        1, ur::ComponentDataType::Float, 2, 12, 20
-    );
+	vbuf_attrs.push_back(std::make_shared<ur::VertexInputAttribute>(
+        2, ur::ComponentDataType::Float, 2, 24, 32
+    ));
 	va->SetVertexBufferAttrs(vbuf_attrs);
 
 	return va;
@@ -68,38 +73,37 @@ MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::P
 	             const std::shared_ptr<pm3::TextureMapping>& uv_map)
 {
 	std::vector<Vertex> vertices;
-	std::vector<unsigned short> indices;
-
-	size_t start_idx = 0;
 	for (auto& poly : polys)
 	{
 		auto& points = poly->Points();
-		for (auto& p : points)
-		{
-			Vertex vert;
-			vert.pos = p->pos;
-			if (uv_map) {
-				vert.texcoord = uv_map->CalcTexCoords(p->pos, 1, 1);
-			}
-			vertices.push_back(vert);
-		}
 
 		auto& faces = poly->Faces();
 		for (auto& f : faces) 
 		{
 			auto& polyline = f->border;
-			if (polyline.size() > 2) {
-				for (size_t i = 1, n = polyline.size() - 1; i < n; ++i) {
-					indices.push_back(start_idx + polyline[0]);
-					indices.push_back(start_idx + polyline[i]);
-					indices.push_back(start_idx + polyline[i + 1]);
+			if (polyline.size() > 2) 
+			{
+				for (size_t i = 1, n = polyline.size() - 1; i < n; ++i) 
+				{
+					Vertex tri[3];
+					tri[0].pos = points[polyline[0]]->pos;
+					tri[1].pos = points[polyline[i]]->pos;
+					tri[2].pos = points[polyline[i + 1]]->pos;
+					for (auto& p : tri) 
+					{
+						p.normal = f->plane.normal;
+						if (uv_map) {
+							p.texcoord = uv_map->CalcTexCoords(p.pos, 1, 1);
+						}
+
+						vertices.push_back(p);
+					}
 				}
 			}
 		}
-		start_idx += points.size();
 	}
 
-	return create_va(dev, vertices, indices);
+	return create_va(dev, vertices, {});
 }
 
 std::shared_ptr<ur::VertexArray>
@@ -152,6 +156,7 @@ MeshBuilder::Gen(const ur::Device& dev, const std::string& filepath)
 
 				Vertex vert;
 				vert.pos.Set(vx, vy, vz);
+				vert.normal.Set(nx, ny, nz);
 				vert.texcoord.Set(tx, ty);
 				vertices.push_back(vert);
 			}
