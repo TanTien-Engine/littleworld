@@ -1,0 +1,67 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SCOPE, VarScope
+import "archgraph.geometry" for Geometry
+import "geometry" for PolyPoint, PolyFace, Polytope
+
+class Cut is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "scope", [ VAR_TYPE_SCOPE, VAR_TYPE_ARRAY ]),
+		]
+		this.exports = [
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_scope = Blueprint.calc_input_value(this, 1)
+		if (!v_scope) {
+			return nil
+		}
+
+		if (v_scope.type == VAR_TYPE_SCOPE) 
+		{
+			return this.create_geo_from_scope(v_scope.value)
+		} 
+		else if (v_scope.type == VAR_TYPE_ARRAY) 
+		{
+			var geos = []
+			for (var s in v_scope.value) {
+				geos.add(this.create_geo_from_scope(s.value))
+			}
+			return Variant(geos)
+		}
+	}
+
+	create_geo_from_scope(scope)
+	{
+		var xmin = scope.x
+		var xmax = scope.x + scope.w
+		var zmin = scope.y
+		var zmax = scope.y + scope.h
+		var y = 0
+
+		var points = []
+		points.add(PolyPoint.init([ xmin, y, zmin ]))
+		points.add(PolyPoint.init([ xmin, y, zmax ]))
+		points.add(PolyPoint.init([ xmax, y, zmax ]))
+		points.add(PolyPoint.init([ xmax, y, zmin ]))
+
+		var face = PolyFace.init([ 0, 1, 2, 3 ], [])
+		var poly = Polytope.init(points, [ face ])
+
+	    var geo = Geometry([ poly ])
+		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+}

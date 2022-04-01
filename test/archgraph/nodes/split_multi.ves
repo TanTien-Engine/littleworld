@@ -35,251 +35,246 @@ node4.query_param("offset").value.set(0, 0)
 
 _editor.add_node(node4, 331.05008380408, 591.250560652)
 
-var node5 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+var node5 = ::archgraph::nodes::split_scope::SplitScope()
+node5.query_param("axis").value = "hori"
+node5.query_param("repeat").value = false
 
-_editor.add_node(node5, -532.99175166224, 36.405654766251)
+_editor.add_node(node5, -372.31446227361, -70.060560828522)
 
-var node6 = ::archgraph::nodes::split_scope::SplitScope()
-node6.query_param("axis").value = "hori"
-node6.query_param("repeat").value = false
+var node6 = ::archgraph::nodes::split_size::SplitSize()
+node6.query_param("size").value = 0.14295044541359
+node6.query_param("mode").value = "absolute"
 
-_editor.add_node(node6, -372.31446227361, -70.060560828522)
+_editor.add_node(node6, -670.6218273279, -54.67140736317)
 
 var node7 = ::archgraph::nodes::split_size::SplitSize()
-node7.query_param("size").value = 0.14295044541359
-node7.query_param("mode").value = "absolute"
+node7.query_param("size").value = 0.34215292334557
+node7.query_param("mode").value = "floating"
 
-_editor.add_node(node7, -670.6218273279, -54.67140736317)
+_editor.add_node(node7, -533.56660744591, -49.819687739646)
 
 var node8 = ::archgraph::nodes::split_size::SplitSize()
-node8.query_param("size").value = 0.34215292334557
-node8.query_param("mode").value = "floating"
+node8.query_param("size").value = 0.18117268383503
+node8.query_param("mode").value = "absolute"
 
-_editor.add_node(node8, -533.56660744591, -49.819687739646)
+_editor.add_node(node8, -531.37802416186, -175.64528322536)
 
 var node9 = ::archgraph::nodes::split_size::SplitSize()
-node9.query_param("size").value = 0.18117268383503
-node9.query_param("mode").value = "absolute"
+node9.query_param("size").value = 0.42847087979317
+node9.query_param("mode").value = "floating"
 
-_editor.add_node(node9, -531.37802416186, -175.64528322536)
+_editor.add_node(node9, -670.3269795939, -171.50986489781)
 
-var node10 = ::archgraph::nodes::split_size::SplitSize()
-node10.query_param("size").value = 0.42847087979317
-node10.query_param("mode").value = "floating"
+var node10 = ::blueprint::nodes::function::Function()
 
-_editor.add_node(node10, -670.3269795939, -171.50986489781)
+node10.set_size(663.47107438016, 187.60330578513)
+node10.title = "red"
 
-var node11 = ::blueprint::nodes::function::Function()
+_editor.add_node(node10, -367.95530835058, 690.88360518386)
 
-node11.set_size(663.47107438016, 187.60330578513)
-node11.title = "red"
+var node11 = ::blueprint::nodes::func_in::FuncIn()
 
-_editor.add_node(node11, -367.95530835058, 690.88360518386)
+node11.var_name = "scope"
+node11.var_type = "scope"
 
-var node12 = ::blueprint::nodes::func_in::FuncIn()
+_editor.add_node(node11, -624.88539277834, 642.07413262848)
 
-node12.var_name = "scope"
-node12.var_type = "scope"
+var node12 = ::blueprint::nodes::subgraph::Subgraph()
+node12.load_from_file(_editor, "../../../assets/archgraph/color.ves")
 
-_editor.add_node(node12, -624.88539277834, 642.07413262848)
+_editor.add_node(node12, -296.81277393533, 607.42862954141)
 
-var node13 = ::blueprint::nodes::subgraph::Subgraph()
-node13.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+var node13 = ::blueprint::nodes::number3::Number3()
 
-_editor.add_node(node13, -296.81277393533, 607.42862954141)
+node13.value.set(1, 0, 0)
 
-var node14 = ::blueprint::nodes::number3::Number3()
+_editor.add_node(node13, -489.62620932911, 547.22127598139)
 
-node14.value.set(1, 0, 0)
+var node14 = ::blueprint::nodes::func_out::FuncOut()
 
-_editor.add_node(node14, -489.62620932911, 547.22127598139)
+node14.var_name = "geo"
+node14.var_type = "geometry"
 
-var node15 = ::blueprint::nodes::func_out::FuncOut()
+_editor.add_node(node14, -118.85198647689, 627.9401189566)
 
-node15.var_name = "geo"
-node15.var_type = "geometry"
+var node15 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node15, -118.85198647689, 627.9401189566)
+_editor.add_node(node15, 375.24432465492, -69.111369430388)
 
-var node16 = ::blueprint::nodes::merge::Merge()
+var node16 = ::blueprint::nodes::func_call::FuncCall()
+node16.imports.add(::blueprint::pin::Pin(node16, "scope", "scope"))
+node16.exports.add(::blueprint::pin::Pin(node16, "geo", "geometry"))
+node16.layout()
 
-_editor.add_node(node16, 375.24432465492, -69.111369430388)
+_editor.add_node(node16, 186.70376294403, 72.407361682413)
 
-var node17 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+var node17 = ::blueprint::nodes::function::Function()
 
-_editor.add_node(node17, -488.9081492856, 634.9730934328)
+node17.set_size(663.47107438016, 187.60330578513)
+node17.title = "green"
 
-var node18 = ::blueprint::nodes::func_call::FuncCall()
-node18.imports.add(::blueprint::pin::Pin(node18, "scope", "scope"))
-node18.exports.add(::blueprint::pin::Pin(node18, "geo", "geometry"))
-node18.layout()
+_editor.add_node(node17, -372.82775835058, 462.94545518384)
 
-_editor.add_node(node18, 186.70376294403, 72.407361682413)
+var node18 = ::blueprint::nodes::func_in::FuncIn()
 
-var node19 = ::blueprint::nodes::function::Function()
+node18.var_name = "scope"
+node18.var_type = "scope"
 
-node19.set_size(663.47107438016, 187.60330578513)
-node19.title = "green"
+_editor.add_node(node18, -629.75784277834, 414.13598262848)
 
-_editor.add_node(node19, -372.82775835058, 462.94545518384)
+var node19 = ::blueprint::nodes::subgraph::Subgraph()
+node19.load_from_file(_editor, "../../../assets/archgraph/color.ves")
 
-var node20 = ::blueprint::nodes::func_in::FuncIn()
+_editor.add_node(node19, -307.57586029897, 386.94720681414)
 
-node20.var_name = "scope"
-node20.var_type = "scope"
+var node20 = ::blueprint::nodes::number3::Number3()
 
-_editor.add_node(node20, -629.75784277834, 414.13598262848)
+node20.value.set(0, 1, 0)
 
-var node21 = ::blueprint::nodes::subgraph::Subgraph()
-node21.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+_editor.add_node(node20, -494.49865932911, 319.28312598139)
 
-_editor.add_node(node21, -307.57586029897, 386.94720681414)
+var node21 = ::blueprint::nodes::func_out::FuncOut()
 
-var node22 = ::blueprint::nodes::number3::Number3()
+node21.var_name = "geo"
+node21.var_type = "geometry"
 
-node22.value.set(0, 1, 0)
+_editor.add_node(node21, -123.72443647689, 400.0019689566)
 
-_editor.add_node(node22, -494.49865932911, 319.28312598139)
+var node22 = ::blueprint::nodes::func_call::FuncCall()
+node22.imports.add(::blueprint::pin::Pin(node22, "scope", "scope"))
+node22.exports.add(::blueprint::pin::Pin(node22, "geo", "geometry"))
+node22.layout()
 
-var node23 = ::blueprint::nodes::func_out::FuncOut()
+_editor.add_node(node22, 102.22660190676, -59.57048164507)
 
-node23.var_name = "geo"
-node23.var_type = "geometry"
+var node23 = ::blueprint::nodes::function::Function()
 
-_editor.add_node(node23, -123.72443647689, 400.0019689566)
+node23.set_size(838.63014198016, 512.34654218513)
+node23.title = "texture"
 
-var node24 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+_editor.add_node(node23, 401.41253253942, 685.00158904386)
 
-_editor.add_node(node24, -493.7805992856, 407.0349434328)
+var node24 = ::blueprint::nodes::func_in::FuncIn()
 
-var node25 = ::blueprint::nodes::func_call::FuncCall()
-node25.imports.add(::blueprint::pin::Pin(node25, "scope", "scope"))
-node25.exports.add(::blueprint::pin::Pin(node25, "geo", "geometry"))
-node25.layout()
+node24.var_name = "scope"
+node24.var_type = "scope"
 
-_editor.add_node(node25, 102.22660190676, -59.57048164507)
+_editor.add_node(node24, 52.941099111665, 635.53184678848)
 
-var node26 = ::blueprint::nodes::function::Function()
+var node25 = ::blueprint::nodes::func_out::FuncOut()
 
-node26.set_size(838.63014198016, 512.34654218513)
-node26.title = "texture"
+node25.var_name = "geo"
+node25.var_type = "geometry"
 
-_editor.add_node(node26, 401.41253253942, 685.00158904386)
+_editor.add_node(node25, 726.57052541311, 579.9070631166)
 
-var node27 = ::blueprint::nodes::func_in::FuncIn()
+var node26 = ::blueprint::nodes::func_call::FuncCall()
+node26.imports.add(::blueprint::pin::Pin(node26, "scope", "scope"))
+node26.exports.add(::blueprint::pin::Pin(node26, "geo", "geometry"))
+node26.layout()
 
-node27.var_name = "scope"
-node27.var_type = "scope"
-
-_editor.add_node(node27, 52.941099111665, 635.53184678848)
-
-var node28 = ::blueprint::nodes::func_out::FuncOut()
-
-node28.var_name = "geo"
-node28.var_type = "geometry"
-
-_editor.add_node(node28, 726.57052541311, 579.9070631166)
-
-var node29 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
-
-_editor.add_node(node29, 192.2423426044, 630.4238075928)
-
-var node30 = ::blueprint::nodes::func_call::FuncCall()
-node30.imports.add(::blueprint::pin::Pin(node30, "scope", "scope"))
-node30.exports.add(::blueprint::pin::Pin(node30, "geo", "geometry"))
-node30.layout()
-
-_editor.add_node(node30, 194.45644810028, -203.18448402072)
-
-var node31 = ::blueprint::nodes::func_call::FuncCall()
-node31.imports.add(::blueprint::pin::Pin(node31, "scope", "scope"))
-node31.exports.add(::blueprint::pin::Pin(node31, "geo", "geometry"))
-node31.layout()
-
-_editor.add_node(node31, 197.04676294403, -266.84163831759)
-
-var node32 = ::archgraph::nodes::split_scope::SplitScope()
-node32.query_param("axis").value = "vert"
-node32.query_param("repeat").value = false
-
-_editor.add_node(node32, -53.709794477983, -66.489393754439)
-
-var node33 = ::archgraph::nodes::split_size::SplitSize()
-node33.query_param("size").value = 0.42080587148666
-node33.query_param("mode").value = "floating"
-
-_editor.add_node(node33, -221.87252252752, 35.457353071732)
-
-var node34 = ::archgraph::nodes::split_size::SplitSize()
-node34.query_param("size").value = 0.2668172121048
-node34.query_param("mode").value = "absolute"
-
-_editor.add_node(node34, -222.01355397139, -56.93597135719)
-
-var node35 = ::archgraph::nodes::split_size::SplitSize()
-node35.query_param("size").value = 0.4523529112339
-node35.query_param("mode").value = "floating"
-
-_editor.add_node(node35, -220.71175685574, -147.45989364945)
-
-var node36 = ::blueprint::nodes::func_call::FuncCall()
-node36.imports.add(::blueprint::pin::Pin(node36, "scope", "scope"))
-node36.exports.add(::blueprint::pin::Pin(node36, "geo", "geometry"))
-node36.layout()
-
-_editor.add_node(node36, 100.16433628477, 2.6494344274735)
-
-var node37 = ::blueprint::nodes::merge::Merge()
-
-_editor.add_node(node37, 233.74775834517, -38.861977317117)
-
-var node38 = ::blueprint::nodes::func_call::FuncCall()
-node38.imports.add(::blueprint::pin::Pin(node38, "scope", "scope"))
-node38.exports.add(::blueprint::pin::Pin(node38, "geo", "geometry"))
-node38.layout()
-
-_editor.add_node(node38, 102.06456079658, -122.75306755704)
-
-Blueprint.connect(node27, "var", node29, "scope")
-Blueprint.connect(node29, "geo", node4, "geo")
-Blueprint.connect(node20, "var", node24, "scope")
-Blueprint.connect(node24, "geo", node21, "geo")
-Blueprint.connect(node22, "v3", node21, "color")
-Blueprint.connect(node21, "geo", node23, "var")
-Blueprint.connect(node12, "var", node17, "scope")
-Blueprint.connect(node17, "geo", node13, "geo")
-Blueprint.connect(node14, "v3", node13, "color")
-Blueprint.connect(node13, "geo", node15, "var")
-Blueprint.connect(node5, "scope", node6, "scope")
-Blueprint.connect(node7, "size", node6, "size0")
-Blueprint.connect(node8, "size", node6, "size1")
-Blueprint.connect(node10, "size", node6, "size2")
-Blueprint.connect(node9, "size", node6, "size3")
-Blueprint.connect(node6, "child1", node32, "scope")
-Blueprint.connect(node33, "size", node32, "size0")
-Blueprint.connect(node34, "size", node32, "size1")
-Blueprint.connect(node35, "size", node32, "size2")
-Blueprint.connect(node26, "func", node38, "func")
-Blueprint.connect(node32, "child2", node38, "scope")
-Blueprint.connect(node26, "func", node36, "func")
-Blueprint.connect(node32, "child0", node36, "scope")
-Blueprint.connect(node19, "func", node25, "func")
-Blueprint.connect(node32, "child1", node25, "scope")
-Blueprint.connect(node36, "geo", node37, "in0")
-Blueprint.connect(node25, "geo", node37, "in1")
-Blueprint.connect(node38, "geo", node37, "in2")
-Blueprint.connect(node11, "func", node31, "func")
-Blueprint.connect(node6, "child3", node31, "scope")
-Blueprint.connect(node26, "func", node30, "func")
-Blueprint.connect(node6, "child2", node30, "scope")
-Blueprint.connect(node11, "func", node18, "func")
-Blueprint.connect(node6, "child0", node18, "scope")
-Blueprint.connect(node18, "geo", node16, "in0")
-Blueprint.connect(node37, "list", node16, "in1")
-Blueprint.connect(node30, "geo", node16, "in2")
-Blueprint.connect(node31, "geo", node16, "in3")
+_editor.add_node(node26, 194.45644810028, -203.18448402072)
+
+var node27 = ::blueprint::nodes::func_call::FuncCall()
+node27.imports.add(::blueprint::pin::Pin(node27, "scope", "scope"))
+node27.exports.add(::blueprint::pin::Pin(node27, "geo", "geometry"))
+node27.layout()
+
+_editor.add_node(node27, 197.04676294403, -266.84163831759)
+
+var node28 = ::archgraph::nodes::split_scope::SplitScope()
+node28.query_param("axis").value = "vert"
+node28.query_param("repeat").value = false
+
+_editor.add_node(node28, -53.709794477983, -66.489393754439)
+
+var node29 = ::archgraph::nodes::split_size::SplitSize()
+node29.query_param("size").value = 0.42080587148666
+node29.query_param("mode").value = "floating"
+
+_editor.add_node(node29, -221.04607624653, 37.936691914707)
+
+var node30 = ::archgraph::nodes::split_size::SplitSize()
+node30.query_param("size").value = 0.2668172121048
+node30.query_param("mode").value = "absolute"
+
+_editor.add_node(node30, -222.01355397139, -56.93597135719)
+
+var node31 = ::archgraph::nodes::split_size::SplitSize()
+node31.query_param("size").value = 0.4523529112339
+node31.query_param("mode").value = "floating"
+
+_editor.add_node(node31, -220.71175685574, -147.45989364945)
+
+var node32 = ::blueprint::nodes::func_call::FuncCall()
+node32.imports.add(::blueprint::pin::Pin(node32, "scope", "scope"))
+node32.exports.add(::blueprint::pin::Pin(node32, "geo", "geometry"))
+node32.layout()
+
+_editor.add_node(node32, 100.16433628477, 2.6494344274735)
+
+var node33 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node33, 233.74775834517, -38.861977317117)
+
+var node34 = ::blueprint::nodes::func_call::FuncCall()
+node34.imports.add(::blueprint::pin::Pin(node34, "scope", "scope"))
+node34.exports.add(::blueprint::pin::Pin(node34, "geo", "geometry"))
+node34.layout()
+
+_editor.add_node(node34, 102.06456079658, -122.75306755704)
+
+var node35 = ::archgraph::nodes::cut::Cut()
+
+_editor.add_node(node35, -495.27353515625, 633.97199707031)
+
+var node36 = ::archgraph::nodes::cut::Cut()
+
+_editor.add_node(node36, -493.4014457017, 406.84915752485)
+
+var node37 = ::archgraph::nodes::cut::Cut()
+
+_editor.add_node(node37, 193.27980866193, 626.16786488849)
+
+Blueprint.connect(node24, "var", node37, "scope")
+Blueprint.connect(node37, "geo", node4, "geo")
+Blueprint.connect(node18, "var", node36, "scope")
+Blueprint.connect(node36, "geo", node19, "geo")
+Blueprint.connect(node20, "v3", node19, "color")
+Blueprint.connect(node19, "geo", node21, "var")
+Blueprint.connect(node11, "var", node35, "scope")
+Blueprint.connect(node35, "geo", node12, "geo")
+Blueprint.connect(node13, "v3", node12, "color")
+Blueprint.connect(node12, "geo", node14, "var")
+Blueprint.connect(node6, "size", node5, "size0")
+Blueprint.connect(node7, "size", node5, "size1")
+Blueprint.connect(node9, "size", node5, "size2")
+Blueprint.connect(node8, "size", node5, "size3")
+Blueprint.connect(node5, "child1", node28, "scope")
+Blueprint.connect(node29, "size", node28, "size0")
+Blueprint.connect(node30, "size", node28, "size1")
+Blueprint.connect(node31, "size", node28, "size2")
+Blueprint.connect(node23, "func", node34, "func")
+Blueprint.connect(node28, "child2", node34, "scope")
+Blueprint.connect(node23, "func", node32, "func")
+Blueprint.connect(node28, "child0", node32, "scope")
+Blueprint.connect(node17, "func", node22, "func")
+Blueprint.connect(node28, "child1", node22, "scope")
+Blueprint.connect(node32, "geo", node33, "in0")
+Blueprint.connect(node22, "geo", node33, "in1")
+Blueprint.connect(node34, "geo", node33, "in2")
+Blueprint.connect(node10, "func", node27, "func")
+Blueprint.connect(node5, "child3", node27, "scope")
+Blueprint.connect(node23, "func", node26, "func")
+Blueprint.connect(node5, "child2", node26, "scope")
+Blueprint.connect(node10, "func", node16, "func")
+Blueprint.connect(node5, "child0", node16, "scope")
+Blueprint.connect(node16, "geo", node15, "in0")
+Blueprint.connect(node33, "list", node15, "in1")
+Blueprint.connect(node26, "geo", node15, "in2")
+Blueprint.connect(node27, "geo", node15, "in3")
 Blueprint.connect(node4, "geo", node0, "geo")
 Blueprint.connect(node3, "tex", node0, "texture")
-Blueprint.connect(node0, "geo", node28, "var")
-Blueprint.connect(node16, "list", node1, "geos")
+Blueprint.connect(node0, "geo", node25, "var")
+Blueprint.connect(node15, "list", node1, "geos")
 Blueprint.connect(node2, "this", node1, "view_cam")
