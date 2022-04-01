@@ -75,9 +75,13 @@ class Split is Node
 
 	build_scopes()
 	{
+		var scope = nil
+
 		var v_scope = Blueprint.calc_input_value(this, 0)
-		if (!v_scope or !v_scope.value) {
-			return
+		if (v_scope and v_scope.value) {
+			scope = v_scope.value
+		} else {
+			scope = VarScope(0, 0, 1, 1)
 		}
 
 		var src_sizes = []
@@ -90,8 +94,6 @@ class Split is Node
 		}
 
 		this.scopes = []
-
-		var scope = v_scope.value
 
 		var axis = this.query_param("axis").value
 
