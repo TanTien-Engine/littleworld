@@ -1,4 +1,7 @@
 import "editor.editor" for Editor
+import "archgraph.nodes.mesh_file" for MeshFile
+import "filesystem" for Filesystem
+import "gui" for GUI
 
 class Archeditor is Editor
 {
@@ -41,4 +44,23 @@ class Archeditor is Editor
 			bp_node.on_node_dirty()
 		}
 	}
+
+	add_node_from_file(filepath, x, y)
+	{
+		super.add_node_from_file(filepath, x, y)
+
+		var node = nil
+
+		if (filepath.contains(".obj"))
+		{
+			node = MeshFile()
+			var relative = Filesystem.get_relative_path(filepath)
+			node.filepath = relative
+		}
+
+		if (node) {
+			var pos = GUI.trans_scr_pos_to_proj(x, y, -this.camera.pos.x, -this.camera.pos.y, 1.0/this.camera.scale)
+			this.add_node(node, pos[0], pos[1])
+		}		
+	}	
 }

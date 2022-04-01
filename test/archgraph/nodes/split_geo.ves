@@ -1,0 +1,115 @@
+var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+
+_editor.add_node(node0, -853.88737000597, 371.24332383666)
+
+var node1 = ::blueprint::nodes::number3::Number3()
+
+node1.value.set(0.84666681289673, 0.54444444179535, 0)
+
+_editor.add_node(node1, -498.4, 68.4)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node2, -36.447, 64.75)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node3, 37.38, -68.24)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node4, 483.73494412408, 49.911624359376)
+
+var node5 = ::blueprint::nodes::camera3d::Camera3d()
+
+node5.cam.position.set(1.3459467400958, 0.60558590294028, 2.8141617875208)
+node5.cam.yaw = -108.1
+node5.cam.pitch = -26.7
+node5.cam.zoom = 45
+node5.cam.update_vectors()
+node5.speed = 0.22097560763359
+
+_editor.add_node(node5, 272.11241098754, -86.83277435757)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "u_tex"
+node6.gamma_correction = false
+node6.mipmap = false
+node6.init_texture("../../../../tantien/samples/rendergraph/learnopengl/resources/textures/bricks2.jpg")
+node6.set_sampler("linear_repeat")
+
+_editor.add_node(node6, -260.48636363636, -303.74909090909)
+
+var node7 = ::archgraph::nodes::setup_projection::SetupProjection()
+node7.query_param("axes").value = "xy"
+node7.query_param("scale").value.set(0.47155559062958, 0.43822225928307)
+node7.query_param("offset").value.set(0, 0)
+
+_editor.add_node(node7, -264.44, -113.74)
+
+var node8 = ::archgraph::nodes::comp::Comp()
+node8.query_param("selector").value = "face6"
+
+_editor.add_node(node8, -706.04550626631, 371.91408719592)
+
+var node9 = ::archgraph::nodes::primitive_polygon::PrimitivePolygon()
+node9.query_param("vertices").value = [ 0, 0, 1, 0, 1.5, 1, 1, 1.5, 0, 1 ]
+
+_editor.add_node(node9, -986.90539948817, 439.63305871334)
+
+var node10 = ::archgraph::nodes::extrude::Extrude()
+node10.query_param("distance").value = 0.67500680685043
+
+_editor.add_node(node10, -852.8506032713, 429.82488489989)
+
+var node11 = ::archgraph::nodes::split_scope::SplitScope()
+node11.query_param("axis").value = "hori"
+node11.query_param("repeat").value = false
+
+_editor.add_node(node11, -721.29697262309, 162.57883728417)
+
+var node12 = ::archgraph::nodes::cut::Cut()
+
+_editor.add_node(node12, -474.06701660156, 296.68299560547)
+
+var node13 = ::archgraph::nodes::split_size::SplitSize()
+node13.query_param("size").value = 0.52407771348953
+node13.query_param("mode").value = "floating"
+
+_editor.add_node(node13, -893.16699829102, 190.20297119141)
+
+var node14 = ::archgraph::nodes::split_size::SplitSize()
+node14.query_param("size").value = 0.40072020888329
+node14.query_param("mode").value = "absolute"
+
+_editor.add_node(node14, -904.06482910156, 95.817298583984)
+
+var node15 = ::archgraph::nodes::split_size::SplitSize()
+node15.query_param("size").value = 0.32912528514862
+node15.query_param("mode").value = "floating"
+
+_editor.add_node(node15, -897.62129829102, -6.5896988085903)
+
+var node16 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node16, -579.08813476563, 195.92764282227)
+
+Blueprint.connect(node13, "size", node11, "size0")
+Blueprint.connect(node14, "size", node11, "size1")
+Blueprint.connect(node15, "size", node11, "size2")
+Blueprint.connect(node11, "child0", node16, "in0")
+Blueprint.connect(node11, "child2", node16, "in1")
+Blueprint.connect(node9, "geo", node10, "geo")
+Blueprint.connect(node10, "geo", node8, "geo")
+Blueprint.connect(node8, "back", node12, "geo")
+Blueprint.connect(node16, "list", node12, "scope")
+Blueprint.connect(node12, "geo", node7, "geo")
+Blueprint.connect(node7, "geo", node3, "geo")
+Blueprint.connect(node6, "tex", node3, "texture")
+Blueprint.connect(node3, "geo", node4, "geos")
+Blueprint.connect(node5, "this", node4, "view_cam")
+Blueprint.connect(node12, "geo", node2, "geo")
+Blueprint.connect(node1, "v3", node2, "color")

@@ -1,5 +1,6 @@
 import "maths.vector" for Vector3
 import "archgen" for GeometryTools
+import "maths" for Matrix44
 
 class Geometry
 {
@@ -11,6 +12,9 @@ class Geometry
 		// dst
 		this.mesh = nil
 
+		// transform
+		this.trans = Matrix44.init()
+
 		// material
 		this.color = Vector3(1, 1, 1)
 		this.texture = nil
@@ -18,32 +22,22 @@ class Geometry
 		// texcoords
 		this.uv_mapping = nil
 
-		this.rebuild_mesh()
+		this.rebuild_mesh()		
 	}
 
-	clone()
+	new_instance()
 	{
-		var polys = []
-		for (var poly in this.polys) {
-			polys.add(poly.clone())
-		}
-
-		var new = Geometry(polys)
-
-		var c = this.color
-		new.color.set(c.x, c.y, c.z)
-
+		var new = Geometry([])
+		new.mesh = this.mesh
 		new.texture = this.texture
-
-		new.uv_mapping = this.uv_mapping.clone()
-
-		new.rebuild_mesh()
-
+		new.uv_mapping = this.uv_mapping
 		return new
 	}
 
 	rebuild_mesh()
 	{
-		this.mesh = GeometryTools.build_mesh(this.polys, this.uv_mapping)
+		if (this.polys) {
+			this.mesh = GeometryTools.build_mesh(this.polys, this.uv_mapping)		
+		}
 	}
 }

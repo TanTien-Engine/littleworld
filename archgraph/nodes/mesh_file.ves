@@ -1,0 +1,62 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
+import "filesystem" for Filesystem
+import "archgen" for GeometryTools
+
+class MeshFile is Node
+{
+	init()
+	{
+		super.init()
+
+		this.exports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+
+		this.layout()
+
+		this.filepath = ""
+		this.mesh = nil
+	}
+
+	to_string(name) 
+	{
+		var ret = ""
+
+		if (this.filepath != "") 
+		{
+			var absolute = Filesystem.get_absolute_path(this.filepath)
+			var relative = Filesystem.get_relative_path(absolute)
+			ret = ret + "%(name).init_filepath(\"%(relative)\")\n"
+		}
+
+		return ret
+	}
+
+	calc_value(idx)
+	{
+		if (!this.mesh) {
+			var absolute = Filesystem.get_absolute_path(this.filepath)	
+			this.mesh = GeometryTools.build_mesh(absolute)
+		}
+
+		if (!this.mesh) {
+			return nil
+		}
+
+	    var geo = Geometry([])
+	    geo.mesh = this.mesh
+		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+
+	init_filepath(filepath)
+	{
+		var absolute = Filesystem.get_absolute_path(filepath)
+		this.filepath = absolute
+
+		this.mesh = nil
+	}
+}

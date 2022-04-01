@@ -1,0 +1,40 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "blueprint.blueprint" for Blueprint
+import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SCOPE
+import "maths" for Matrix44
+
+class Insert is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo",   VAR_TYPE_GEOMETRY),
+			Pin(this, "scope", VAR_TYPE_SCOPE),
+		]
+		this.exports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo or !v_geo.value) {
+			return nil
+		}
+
+		var geo = v_geo.value.new_instance()
+
+		var mat = Matrix44.init()
+		mat.scale(0.001, 0.001, 0.001)
+		geo.trans = mat
+
+		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+}

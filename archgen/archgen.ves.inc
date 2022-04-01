@@ -11,6 +11,7 @@ foreign class TextureMapping
 foreign class GeometryTools
 {
 	foreign static build_mesh(polys, tex_mapping)
+	foreign static build_mesh(filepath)
 }
 
 );

@@ -226,16 +226,24 @@ var node15 = ::blueprint::nodes::list_flatten::ListFlatten()
 
 _editor.add_node(node15, 605.43939208984, -97.611633300781)
 
+var node16 = ::blueprint::nodes::field_get::FieldGet()
+node16.query_param("name").value = "trans"
+
+_editor.add_node(node16, -231.00110840426, -258.32377015922)
+
+Blueprint.connect(node14, "out", node16, "value")
 Blueprint.connect(node14, "out", node10, "value")
 Blueprint.connect(node10, "field", node13, "in")
 Blueprint.connect(node14, "out", node9, "value")
 Blueprint.connect(node14, "out", node8, "value")
 Blueprint.connect(node5, "zoom", node4, "fovy")
+Blueprint.connect(node16, "field", node11, "model")
 Blueprint.connect(node5, "mat", node11, "view")
 Blueprint.connect(node4, "mat", node11, "projection")
 Blueprint.connect(node6, "v3", node11, "light_pos")
 Blueprint.connect(node5, "pos", node11, "cam_pos")
 Blueprint.connect(node9, "field", node11, "color")
+Blueprint.connect(node16, "field", node2, "model")
 Blueprint.connect(node5, "mat", node2, "view")
 Blueprint.connect(node4, "mat", node2, "projection")
 Blueprint.connect(node6, "v3", node2, "light_pos")
