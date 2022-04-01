@@ -4,6 +4,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SCOPE, VarScope
 import "archgraph.geometry" for Geometry
+import "maths.vector" for Vector3
 import "geometry" for PolyPoint, PolyFace, Polytope
 
 class Cut is Node
@@ -13,7 +14,7 @@ class Cut is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
 			Pin(this, "scope", [ VAR_TYPE_SCOPE, VAR_TYPE_ARRAY ]),
 		]
 		this.exports = [
@@ -30,18 +31,54 @@ class Cut is Node
 			return nil
 		}
 
-		if (v_scope.type == VAR_TYPE_SCOPE) 
-		{
-			return this.create_geo_from_scope(v_scope.value)
-		} 
-		else if (v_scope.type == VAR_TYPE_ARRAY) 
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (v_geo)
 		{
 			var geos = []
-			for (var s in v_scope.value) {
-				geos.add(this.create_geo_from_scope(s.value))
+
+			for (var poly in v_geo.value.polys) 
+			{
+				var points = poly.get_points()
+				for (var face in poly.get_faces()) 
+				{
+					if (v_scope.type == VAR_TYPE_SCOPE) 
+					{
+						var geo = this.create_geo_from_scope(v_scope.value, face, points)
+						if (geo) {
+							geos.add(geo)
+						}
+					} 
+					else if (v_scope.type == VAR_TYPE_ARRAY) 
+					{
+						for (var s in v_scope.value) {
+							var geo = this.create_geo_from_scope(s.value, face, points)
+							if (geo) {
+								geos.add(geo)
+							}
+						}
+					}
+				}
 			}
+
 			return Variant(geos)
 		}
+		else
+		{
+			if (v_scope.type == VAR_TYPE_SCOPE) 
+			{
+				return this.create_geo_from_scope(v_scope.value)
+			} 
+			else if (v_scope.type == VAR_TYPE_ARRAY) 
+			{
+				var geos = []
+				for (var s in v_scope.value) {
+					geos.add(this.create_geo_from_scope(s.value))
+				}
+				return Variant(geos)
+			}
+		}
+
+		return nil
 	}
 
 	create_geo_from_scope(scope)
@@ -63,5 +100,40 @@ class Cut is Node
 
 	    var geo = Geometry([ poly ])
 		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+
+	create_geo_from_scope(scope, face, points)
+	{
+		var border = face.get_border()
+		if (border.count < 4) {
+			return nil
+		}
+
+		var p1 = points[border[1]].get_pos()
+		var ori_p = Vector3(p1[0], p1[1], p1[2])
+
+		var p0 = points[border[0]].get_pos()
+		var dir_y = Vector3(p0[0], p0[1], p0[2]).sub(ori_p)
+
+		var p2 = points[border[2]].get_pos()
+		var dir_x = Vector3(p2[0], p2[1], p2[2]).sub(ori_p)
+
+		var pts = []
+		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x,           scope.y,           ori_p, dir_x, dir_y)))
+		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x,           scope.y + scope.h, ori_p, dir_x, dir_y)))
+		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x + scope.w, scope.y + scope.h, ori_p, dir_x, dir_y)))
+		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x + scope.w, scope.y,           ori_p, dir_x, dir_y)))
+
+		var f = PolyFace.init([ 0, 1, 2, 3 ], [])
+		var poly = Polytope.init(pts, [ f ])
+
+	    var geo = Geometry([ poly ])
+		return Variant(VAR_TYPE_GEOMETRY, geo)		
+	}
+
+	coordinate_mapping(x, y, ori_p, dir_x, dir_y)
+	{
+		var v3 = ori_p.add(dir_x.mul(x)).add(dir_y.mul(y))
+		return [ v3.x, v3.y, v3.z ]
 	}
 }
