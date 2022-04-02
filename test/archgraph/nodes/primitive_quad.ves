@@ -21,14 +21,14 @@ _editor.add_node(node3, 483.73494412408, 49.911624359376)
 
 var node4 = ::blueprint::nodes::camera3d::Camera3d()
 
-node4.cam.position.set(-0.33591781240193, 1.9043053201214, 1.835459031702)
-node4.cam.yaw = -90.3
-node4.cam.pitch = -42.7
+node4.cam.position.set(-0.33453351210315, 2.0501368522712, 2.0281744600095)
+node4.cam.yaw = -63.5
+node4.cam.pitch = -53
 node4.cam.zoom = 45
 node4.cam.update_vectors()
 node4.speed = 0.22097560763359
 
-_editor.add_node(node4, 275.57635539024, -86.83277435757)
+_editor.add_node(node4, 276.57635539024, -86.83277435757)
 
 var node5 = ::rendergraph::nodes::texture::Texture()
 node5.query_param("unif_name").value = "u_tex"
