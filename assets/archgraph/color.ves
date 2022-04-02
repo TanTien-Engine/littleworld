@@ -8,7 +8,7 @@ var node1 = ::blueprint::nodes::input::Input()
 node1.var_name = "geo"
 node1.var_type = "geometry"
 
-_editor.add_node(node1, -118.05854046234, 392.78887122713)
+_editor.add_node(node1, -242.60399500779, 387.33432577258)
 
 var node2 = ::blueprint::nodes::input::Input()
 
@@ -28,8 +28,13 @@ var node4 = ::blueprint::nodes::for_each_f::ForEachF()
 
 _editor.add_node(node4, 28.586947034544, 368.15252958072)
 
+var node5 = ::blueprint::nodes::list_flatten::ListFlatten()
+
+_editor.add_node(node5, -108.44317072088, 388.80475963246)
+
 Blueprint.connect(node4, "curr_item", node0, "value")
 Blueprint.connect(node2, "var", node0, "field")
-Blueprint.connect(node1, "var", node4, "items")
+Blueprint.connect(node1, "var", node5, "list")
+Blueprint.connect(node5, "list", node4, "items")
 Blueprint.connect(node0, "value", node4, "eval")
 Blueprint.connect(node4, "result", node3, "var")

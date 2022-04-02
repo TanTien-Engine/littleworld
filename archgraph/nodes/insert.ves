@@ -2,8 +2,9 @@ import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant
 import "blueprint.blueprint" for Blueprint
-import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SCOPE
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "maths" for Matrix44
+import "math" for Math
 
 class Insert is Node
 {
@@ -12,8 +13,8 @@ class Insert is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "geo",   VAR_TYPE_GEOMETRY),
-			Pin(this, "scope", VAR_TYPE_SCOPE),
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+			Pin(this, "pos", VAR_TYPE_GEOMETRY),
 		]
 		this.exports = [
 			Pin(this, "geo", VAR_TYPE_GEOMETRY),
@@ -31,9 +32,22 @@ class Insert is Node
 
 		var geo = v_geo.value.new_instance()
 
-		var mat = Matrix44.init()
-		mat.scale(0.001, 0.001, 0.001)
-		geo.trans = mat
+		var v_pos = Blueprint.calc_input_value(this, 1)
+		if (v_pos)
+		{
+			var aabb = geo.mesh.aabb
+			var size = aabb.get_size()
+
+			var scope = v_pos.value.scope
+
+			var scale_x = scope.x.length() / size[0]
+			var scale_y = scope.y.length() / size[1]
+			var scale = Math.min(scale_x, scale_y)
+
+			var mat = Matrix44.init()
+			mat.scale(scale, scale, scale)
+			geo.trans = mat
+		}
 
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}

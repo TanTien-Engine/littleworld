@@ -4,25 +4,29 @@ import "blueprint.node_param" for NodeParam
 import "blueprint.node_helper" for NodeHelper
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
-import "archgraph.variant" for VAR_TYPE_SCOPE, VAR_TYPE_SPLIT_SIZE, VarScope
+import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SPLIT_SIZE
+import "archgraph.geometry" for Geometry
+import "archgraph.scope" for Scope
+import "maths.vector" for Vector3, Vector4
+import "geometry" for PolyPoint, PolyFace, Polytope
 import "math" for Math
 
 var CHILD_IDX_OFFSET = 1
 
-class SplitScope is Node
+class Split is Node
 {
 	init()
 	{
 		super.init()
 
 		this.imports = [
-			Pin(this, "scope", VAR_TYPE_SCOPE),
-			Pin(this, "size0", VAR_TYPE_SPLIT_SIZE),
-			Pin(this, "size1", VAR_TYPE_SPLIT_SIZE),
+			Pin(this, "parent", VAR_TYPE_GEOMETRY),
+			Pin(this, "size0",  VAR_TYPE_SPLIT_SIZE),
+			Pin(this, "size1",  VAR_TYPE_SPLIT_SIZE),
 		]
 		this.exports = [
-			Pin(this, "child0", [ VAR_TYPE_SCOPE, VAR_TYPE_ARRAY ]),
-			Pin(this, "child1", [ VAR_TYPE_SCOPE, VAR_TYPE_ARRAY ]),
+			Pin(this, "child0", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "child1", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
 		]
 
 		this.params.add(NodeParam("axis", "hori", { "combo" : [ "hori", "vert" ] }))
@@ -30,37 +34,62 @@ class SplitScope is Node
 
 		this.layout()
 
-		this.scopes = nil
+		this.rects = nil
 	}
 
 	on_pin_dirty(pin)
 	{
 		super.on_pin_dirty(pin)
 		
-		this.scopes = nil
+		this.rects = nil
 	}
 
 	calc_value(idx)
 	{
-		if (!this.scopes) {
-			this.build_scopes()
+		if (!this.rects) {
+			this.build_rects()
 		}
-		if (!this.scopes) {
+		if (!this.rects) {
 			return nil
 		}
 
-		var scope = this.scopes[idx]
-		if (scope is List) {
-			return Variant(VAR_TYPE_ARRAY, scope)
+		var rects = this.rects[idx]
+
+		var geos = []
+
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (v_geo)
+		{
+			for (var poly in v_geo.value.mesh.polys) 
+			{
+				var points = poly.get_points()
+				for (var face in poly.get_faces()) {
+					for (var r in rects) {
+						geos.add(this.create_geo(r, face, points))
+					}
+				}
+			}
+		}
+		else
+		{
+			for (var r in rects) {
+				geos.add(this.create_geo(r))
+			}
+		}
+
+		if (geos.count > 1) {
+			return Variant(VAR_TYPE_ARRAY, geos)
+		} else if (geos.count == 1) {
+			return geos[0]
 		} else {
-			return Variant(VAR_TYPE_SCOPE, scope)
+			return nil
 		}
 	}
 
 	on_connected(pin)
 	{
 		if (pin.is_input) {
-			NodeHelper.dynamic_imports_update(this, CHILD_IDX_OFFSET, "size", VAR_TYPE_SCOPE)
+			NodeHelper.dynamic_imports_update(this, CHILD_IDX_OFFSET, "size", VAR_TYPE_GEOMETRY)
 			this.dynamic_exports_update()
 		}
 	}
@@ -68,21 +97,14 @@ class SplitScope is Node
 	on_disconnected(pin)
 	{
 		if (pin.is_input) {
-			NodeHelper.dynamic_imports_update(this, CHILD_IDX_OFFSET, "size", VAR_TYPE_SCOPE)
+			NodeHelper.dynamic_imports_update(this, CHILD_IDX_OFFSET, "size", VAR_TYPE_GEOMETRY)
 			this.dynamic_exports_update()
 		}
 	}
 
-	build_scopes()
+	build_rects()
 	{
-		var scope = nil
-
-		var v_scope = Blueprint.calc_input_value(this, 0)
-		if (v_scope and v_scope.value) {
-			scope = v_scope.value
-		} else {
-			scope = VarScope(0, 0, 1, 1)
-		}
+		var rect = Vector4(0, 0, 1, 1)
 
 		var src_sizes = []
 		for (var i in 1..this.imports.count)
@@ -93,15 +115,15 @@ class SplitScope is Node
 			}
 		}
 
-		this.scopes = []
+		this.rects = []
 
 		var axis = this.query_param("axis").value
 
 		var dst_sizes = nil
 		if (axis == "hori") {
-			dst_sizes = this.calc_sizes(src_sizes, scope.w)
+			dst_sizes = this.calc_sizes(src_sizes, rect.z)
 		} else {
-			dst_sizes = this.calc_sizes(src_sizes, scope.h)
+			dst_sizes = this.calc_sizes(src_sizes, rect.w)
 		}
 
 		if (dst_sizes.isEmpty) {
@@ -111,27 +133,27 @@ class SplitScope is Node
 		if (dst_sizes[0] is List)
 		{
 			for (var _ in dst_sizes[0]) {
-				this.scopes.add([])
+				this.rects.add([])
 			}
 
 			if (axis == "hori")
 			{
-				var x = scope.x
+				var x = rect.x
 				for (var i in 0..dst_sizes[0].count) {				
 					for (var j in 0..dst_sizes.count) {
 						var sz = dst_sizes[j][i]
-						this.scopes[j].add(Variant(VAR_TYPE_SCOPE, VarScope(x, scope.y, sz, scope.h)))
+						this.rects[j].add(Vector4(x, rect.y, sz, rect.w))
 						x = x + sz
 					}
 				}
 			}
 			else
 			{
-				var y = scope.y
+				var y = rect.y
 				for (var i in 0..dst_sizes[0].count) {				
 					for (var j in 0..dst_sizes.count) {				
 						var sz = dst_sizes[j][i]
-						this.scopes[j].add(Variant(VAR_TYPE_SCOPE, VarScope(scope.x, y, scope.w, sz)))
+						this.rects[j].add(Vector4(rect.x, y, rect.z, sz))
 						y = y + sz
 					}
 				}
@@ -139,19 +161,27 @@ class SplitScope is Node
 		}
 		else
 		{
+			for (var _ in dst_sizes) {
+				this.rects.add([])
+			}
+
 			if (axis == "hori")
 			{
-				var x = scope.x
-				for (var sz in dst_sizes) {
-					this.scopes.add(VarScope(x, scope.y, sz, scope.h))
+				var x = rect.x
+				for (var i in 0 .. dst_sizes.count) 
+				{
+					var sz = dst_sizes[i]
+					this.rects[i].add(Vector4(x, rect.y, sz, rect.w))
 					x = x + sz
 				}
 			}
 			else
 			{
-				var y = scope.y
-				for (var sz in dst_sizes) {
-					this.scopes.add(VarScope(scope.x, y, scope.w, sz))
+				var y = rect.y
+				for (var i in 0 .. dst_sizes.count) 
+				{
+					var sz = dst_sizes[i]
+					this.rects[i].add(Vector4(rect.x, y, rect.z, sz))
 					y = y + sz
 				}
 			}
@@ -314,7 +344,7 @@ class SplitScope is Node
 			this.exports.pop_back()
 		}
 		while (this.exports.count < num) {
-			this.exports.add(Pin(this, "child%(this.exports.count)", VAR_TYPE_SCOPE))
+			this.exports.add(Pin(this, "child%(this.exports.count)", VAR_TYPE_GEOMETRY))
 		}
 
 		this.layout()
@@ -324,5 +354,68 @@ class SplitScope is Node
 				conn.update()
 			}
 		}
+	}
+
+	create_geo(rect)
+	{
+		var xmin = rect.x
+		var xmax = rect.x + rect.z
+		var zmin = rect.y
+		var zmax = rect.y + rect.w
+		var y = 0
+
+		var points = []
+		points.add(PolyPoint.init([ xmin, y, zmin ]))
+		points.add(PolyPoint.init([ xmin, y, zmax ]))
+		points.add(PolyPoint.init([ xmax, y, zmax ]))
+		points.add(PolyPoint.init([ xmax, y, zmin ]))
+
+		var face = PolyFace.init([ 0, 1, 2, 3 ], [])
+		var poly = Polytope.init(points, [ face ])
+
+	    var s = Scope()
+	    s.o.set(xmin,        0, zmin)
+	    s.x.set(xmax - xmin, 0, 0)
+	    s.y.set(0,           0, -(zmax - zmin))
+
+	    var geo = Geometry([ poly ])
+	    geo.scope = s
+
+		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+
+	create_geo(rect, face, points)
+	{
+		var border = face.get_border()
+		if (border.count < 4) {
+			return nil
+		}
+
+		var p1 = points[border[1]].get_pos()
+		var ori_p = Vector3(p1[0], p1[1], p1[2])
+
+		var p0 = points[border[0]].get_pos()
+		var dir_y = Vector3(p0[0], p0[1], p0[2]).sub(ori_p)
+
+		var p2 = points[border[2]].get_pos()
+		var dir_x = Vector3(p2[0], p2[1], p2[2]).sub(ori_p)
+
+		var pts = []
+		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x,          rect.y,          ori_p, dir_x, dir_y)))
+		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x + rect.z, rect.y,          ori_p, dir_x, dir_y)))
+		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x + rect.z, rect.y + rect.w, ori_p, dir_x, dir_y)))		
+		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x,          rect.y + rect.w, ori_p, dir_x, dir_y)))
+
+		var f = PolyFace.init([ 0, 1, 2, 3 ], [])
+		var poly = Polytope.init(pts, [ f ])
+
+	    var geo = Geometry([ poly ])
+		return Variant(VAR_TYPE_GEOMETRY, geo)		
+	}
+
+	coordinate_mapping(x, y, ori_p, dir_x, dir_y)
+	{
+		var v3 = ori_p.add(dir_x.mul(x)).add(dir_y.mul(y))
+		return [ v3.x, v3.y, v3.z ]
 	}	
 }

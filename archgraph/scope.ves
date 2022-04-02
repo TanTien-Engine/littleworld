@@ -1,0 +1,11 @@
+import "maths.vector" for Vector3
+
+class Scope
+{
+	init()
+	{
+		this.o = Vector3(0, 0, 0)
+		this.x = Vector3(1, 0, 0)
+		this.y = Vector3(0, 0, -1)
+	}
+}

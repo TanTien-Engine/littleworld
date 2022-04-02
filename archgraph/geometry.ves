@@ -16,6 +16,9 @@ class Geometry
 		// material
 		this.color = Vector3(1, 1, 1)
 		this.texture = nil
+
+		// scope
+		this.scope = nil
 	}
 
 	new_instance()

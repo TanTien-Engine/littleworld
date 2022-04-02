@@ -82,7 +82,21 @@ node13.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_
 
 _editor.add_node(node13, -186.04813178711, -304.19020449219)
 
+var node14 = ::archgraph::nodes::split_size::SplitSize()
+node14.query_param("size").value = 0.081955298781395
+node14.query_param("mode").value = "absolute"
+
+_editor.add_node(node14, -288.21236461293, 359.84191783558)
+
+var node15 = ::archgraph::nodes::split::Split()
+node15.query_param("axis").value = "hori"
+node15.query_param("repeat").value = false
+
+_editor.add_node(node15, -132.98068010314, 388.06341300523)
+
+Blueprint.connect(node14, "size", node15, "size0")
 Blueprint.connect(node11, "geo", node12, "geo")
+Blueprint.connect(node15, "child0", node12, "pos")
 Blueprint.connect(node12, "geo", node3, "geo")
 Blueprint.connect(node13, "tex", node3, "texture")
 Blueprint.connect(node9, "geo", node10, "geo")
