@@ -36,7 +36,7 @@ class Cut is Node
 		{
 			var geos = []
 
-			for (var poly in v_geo.value.polys) 
+			for (var poly in v_geo.value.mesh.polys) 
 			{
 				var points = poly.get_points()
 				for (var face in poly.get_faces()) 

@@ -42,7 +42,32 @@ void w_TextureMapping_clone()
 	proxy->obj = dst;
 }
 
-void w_GeometryTools_build_mesh()
+void return_mesh(const std::shared_ptr<ur::VertexArray>& va, const sm::cube& aabb)
+{
+	ves_pop(ves_argnum());
+
+	ves_newmap();
+	{
+		ves_pushnil();
+		ves_import_class("render", "VertexArray");
+		auto proxy = (tt::Proxy<ur::VertexArray>*)ves_set_newforeign(1, 2, sizeof(tt::Proxy<ur::VertexArray>));
+		proxy->obj = va;
+		ves_pop(1);
+		ves_setfield(-2, "va");
+		ves_pop(1);
+	}
+	{
+		ves_pushnil();
+		ves_import_class("maths", "Cube");
+		sm::cube* cube = (sm::cube*)ves_set_newforeign(1, 2, sizeof(sm::cube));
+		*cube = aabb;
+		ves_pop(1);
+		ves_setfield(-2, "aabb");
+		ves_pop(1);
+	}
+}
+
+void w_MeshBuilder_build_mesh()
 {
 	std::vector<std::shared_ptr<pm3::Polytope>> polys;
 	tt::list_to_foreigns(1, polys);
@@ -53,34 +78,24 @@ void w_GeometryTools_build_mesh()
 	}
 
 	auto dev = tt::Render::Instance()->Device();
-	auto va = archgen::MeshBuilder::Gen(*dev, polys, uv_map);
+	sm::cube aabb;
+	auto va = archgen::MeshBuilder::Gen(*dev, polys, uv_map, aabb);
 	if (va) {
-		ves_pop(ves_argnum());
-
-		ves_pushnil();
-		ves_import_class("render", "VertexArray");
-		auto proxy = (tt::Proxy<ur::VertexArray>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<ur::VertexArray>));
-		proxy->obj = va;
-		ves_pop(1);
+		return_mesh(va, aabb);
 	} else {
 		ves_set_nil(0);
 	}
 }
 
-void w_GeometryTools_build_mesh_from_file()
+void w_MeshBuilder_build_mesh_from_file()
 {
 	auto filepath = ves_tostring(1);
 
 	auto dev = tt::Render::Instance()->Device();
-	auto va = archgen::MeshBuilder::Gen(*dev, filepath);
+	sm::cube aabb;
+	auto va = archgen::MeshBuilder::Gen(*dev, filepath, aabb);
 	if (va) {
-		ves_pop(ves_argnum());
-
-		ves_pushnil();
-		ves_import_class("render", "VertexArray");
-		auto proxy = (tt::Proxy<ur::VertexArray>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<ur::VertexArray>));
-		proxy->obj = va;
-		ves_pop(1);
+		return_mesh(va, aabb);
 	} else {
 		ves_set_nil(0);
 	}
@@ -95,8 +110,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 {
 	if (strcmp(signature, "TextureMapping.clone()") == 0) return w_TextureMapping_clone;
 
-	if (strcmp(signature, "static GeometryTools.build_mesh(_,_)") == 0) return w_GeometryTools_build_mesh;
-	if (strcmp(signature, "static GeometryTools.build_mesh(_)") == 0) return w_GeometryTools_build_mesh_from_file;
+	if (strcmp(signature, "static MeshBuilder.build_mesh(_,_)") == 0) return w_MeshBuilder_build_mesh;
+	if (strcmp(signature, "static MeshBuilder.build_mesh(_)") == 0) return w_MeshBuilder_build_mesh_from_file;
 
 	return nullptr;
 }

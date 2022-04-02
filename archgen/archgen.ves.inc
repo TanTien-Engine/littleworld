@@ -8,7 +8,7 @@ foreign class TextureMapping
 	foreign clone()
 }
 
-foreign class GeometryTools
+foreign class MeshBuilder
 {
 	foreign static build_mesh(polys, tex_mapping)
 	foreign static build_mesh(filepath)

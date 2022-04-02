@@ -1,0 +1,34 @@
+import "filesystem" for Filesystem
+import "archgen" for MeshBuilder
+
+class Mesh
+{
+	init()
+	{
+		// mem
+		this.polys      = nil
+		this.uv_mapping = nil
+		// file
+		this.filepath = nil
+
+		this.vao = nil
+
+		this.aabb = nil
+	}
+
+	rebuild()
+	{
+		var info = nil
+		if (this.polys) {
+			info = MeshBuilder.build_mesh(this.polys, this.uv_mapping)
+		} else if (this.filepath) {
+			var absolute = Filesystem.get_absolute_path(this.filepath)
+			info = MeshBuilder.build_mesh(absolute)
+		}
+
+		if (info) {
+			this.vao  = info["va"]
+			this.aabb = info["aabb"]
+		}
+	}
+}

@@ -70,8 +70,10 @@ namespace archgen
 
 std::shared_ptr<ur::VertexArray> 
 MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::Polytope>>& polys,
-	             const std::shared_ptr<pm3::TextureMapping>& uv_map)
+	             const std::shared_ptr<pm3::TextureMapping>& uv_map, sm::cube& aabb)
 {
+	aabb.MakeEmpty();
+
 	std::vector<Vertex> vertices;
 	for (auto& poly : polys)
 	{
@@ -86,6 +88,10 @@ MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::P
 			auto& polyline = f->border;
 			if (polyline.size() > 2) 
 			{
+				for (auto& i : polyline) {
+					aabb.Combine(points[i]->pos);
+				}
+
 				for (size_t i = 1, n = polyline.size() - 1; i < n; ++i) 
 				{
 					Vertex tri[3];
@@ -110,8 +116,10 @@ MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::P
 }
 
 std::shared_ptr<ur::VertexArray>
-MeshBuilder::Gen(const ur::Device& dev, const std::string& filepath)
+MeshBuilder::Gen(const ur::Device& dev, const std::string& filepath, sm::cube& aabb)
 {
+	aabb.MakeEmpty();
+
 	tinyobj::attrib_t attrib;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
@@ -162,6 +170,8 @@ MeshBuilder::Gen(const ur::Device& dev, const std::string& filepath)
 				vert.normal.Set(nx, ny, nz);
 				vert.texcoord.Set(tx, ty);
 				vertices.push_back(vert);
+
+				aabb.Combine(vert.pos);
 			}
 
 			index_offset += 3;

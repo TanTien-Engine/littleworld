@@ -122,7 +122,7 @@ class Comp is Node
 			normals.add(Vector3( 0,  1,  0))
 			normals.add(Vector3( 0, -1,  0))
 
-			for (var poly in v_geo.value.polys) 
+			for (var poly in v_geo.value.mesh.polys) 
 			{
 				var faces6 = []
 				for (var i in 0..6) {
@@ -161,7 +161,7 @@ class Comp is Node
 				this.polys.add([])
 			}
 
-			for (var poly in v_geo.value.polys) 
+			for (var poly in v_geo.value.mesh.polys) 
 			{
 				var faces4 = []
 				for (var i in 0..6) {
@@ -199,7 +199,7 @@ class Comp is Node
 				this.polys.add([])
 			}
 
-			for (var poly in v_geo.value.polys) 
+			for (var poly in v_geo.value.mesh.polys) 
 			{
 				var faces = []
 				for (var face in poly.get_faces()) 

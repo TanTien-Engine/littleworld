@@ -47,11 +47,11 @@ class Extrude is Node
 		}
 		else if (v_geo.type == VAR_TYPE_GEOMETRY)
 		{
-			var geo = v_geo.value
-			for (var poly in geo.polys) {
+			var mesh = v_geo.value.mesh
+			for (var poly in mesh.polys) {
 				poly.extrude(distance)
 			}
-			geo.rebuild_mesh()
+			mesh.rebuild()
 		}
 	}
 }

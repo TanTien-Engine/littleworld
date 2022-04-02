@@ -1,5 +1,7 @@
 #pragma once
 
+#include <SM_Cube.h>
+
 #include <memory>
 #include <vector>
 #include <string>
@@ -15,10 +17,9 @@ class MeshBuilder
 public:
 	static std::shared_ptr<ur::VertexArray> 
 		Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::Polytope>>& polys, 
-			const std::shared_ptr<pm3::TextureMapping>& uv_map);
-
+			const std::shared_ptr<pm3::TextureMapping>& uv_map, sm::cube& aabb);
 	static std::shared_ptr<ur::VertexArray>
-		Gen(const ur::Device& dev, const std::string& filepath);
+		Gen(const ur::Device& dev, const std::string& filepath, sm::cube& aabb);
 
 }; // MeshBuilder
 

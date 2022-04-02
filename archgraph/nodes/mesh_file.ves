@@ -3,8 +3,8 @@ import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
+import "archgraph.mesh" for Mesh
 import "filesystem" for Filesystem
-import "archgen" for GeometryTools
 
 class MeshFile is Node
 {
@@ -39,12 +39,9 @@ class MeshFile is Node
 	calc_value(idx)
 	{
 		if (!this.mesh) {
-			var absolute = Filesystem.get_absolute_path(this.filepath)	
-			this.mesh = GeometryTools.build_mesh(absolute)
-		}
-
-		if (!this.mesh) {
-			return nil
+			this.mesh = Mesh()
+			this.mesh.filepath = this.filepath
+			this.mesh.rebuild()
 		}
 
 	    var geo = Geometry([])
