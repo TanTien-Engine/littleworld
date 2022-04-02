@@ -120,9 +120,9 @@ class Cut is Node
 
 		var pts = []
 		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x,           scope.y,           ori_p, dir_x, dir_y)))
-		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x,           scope.y + scope.h, ori_p, dir_x, dir_y)))
-		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x + scope.w, scope.y + scope.h, ori_p, dir_x, dir_y)))
 		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x + scope.w, scope.y,           ori_p, dir_x, dir_y)))
+		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x + scope.w, scope.y + scope.h, ori_p, dir_x, dir_y)))		
+		pts.add(PolyPoint.init(this.coordinate_mapping(scope.x,           scope.y + scope.h, ori_p, dir_x, dir_y)))
 
 		var f = PolyFace.init([ 0, 1, 2, 3 ], [])
 		var poly = Polytope.init(pts, [ f ])
