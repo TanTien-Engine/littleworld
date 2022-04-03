@@ -4,7 +4,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.variant_helper" for VariantHelper
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
-import "maths" for Matrix44
+import "maths" for Matrix44, Maths
 import "math" for Math
 
 class Insert is Node
@@ -47,20 +47,23 @@ class Insert is Node
 			var sc = pos.scope
 
 			var scale_x = sc.x.length() / size[0]
+			var scale_y = sc.y.length() / size[1]			
 			var scale_z = sc.x.length() / size[2]
-			var scale_xz = Math.min(scale_x, scale_z)
+			var scale = Math.min(scale_x, Math.min(scale_y, scale_z))
 
-			var scale_y = sc.y.length() / size[1]
+			var rot_mat = Maths.calc_rot_mat([ 1, 0, 0 ], [ sc.x.x, sc.x.y, sc.x.z ])
 
 			var center = sc.get_center()
 
 			var mat = Matrix44.init()
-			mat.scale(scale_xz, scale_y, scale_xz)
+			mat.scale(scale, scale, scale)
+			mat.transform_mat4(rot_mat)
 			mat.translate(center.x, center.y, center.z)
 
 			var geo = v_geo.value.new_instance()
 			geo.trans = mat
-			geos.add(Variant(VAR_TYPE_GEOMETRY, geo))
+
+			geos.add(Variant(VAR_TYPE_GEOMETRY, geo))			
 		}
 
 		if (geos.count > 1) {
