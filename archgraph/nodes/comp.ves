@@ -102,7 +102,16 @@ class Comp is Node
 			return nil
 		}
 
-		return Variant(VAR_TYPE_GEOMETRY, Geometry(this.polys[idx]))
+		var geos = []
+		var polys = this.polys[idx]
+		for (var poly in polys) {
+			geos.add(Variant(VAR_TYPE_GEOMETRY, Geometry([ poly ])))
+		}
+		if (geos.count == 1) {
+			return geos[0]
+		} else {
+			return Variant(VAR_TYPE_ARRAY, geos)
+		}
 	}
 
 	build_polys()
@@ -157,7 +166,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0..6) {
 					if (!faces6[i].isEmpty) {
-						this.polys[i].add(Polytope.init(points, faces6[i]))
+						this.create_polys(i, points, faces6[i])
 					}
 				}
 			}
@@ -195,7 +204,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0..4) {
 					if (!faces4[i].isEmpty) {
-						this.polys[i].add(Polytope.init(points, faces4[i]))
+						this.create_polys(i, points, faces4[i])
 					}
 				}
 			}
@@ -219,7 +228,7 @@ class Comp is Node
 
 				var points = poly.get_points()
 				if (!faces.isEmpty) {
-					this.polys[0].add(Polytope.init(points, faces))
+					this.create_polys(0, points, faces)
 				}
 			}
 		}
@@ -230,5 +239,12 @@ class Comp is Node
 		var norm = face.get_normal()
 		var angle = Maths.calc_angle([0, 0, 0], norm, [0, 1, 0])
 		return angle * 180 / Math.pi() - 90
+	}
+
+	create_polys(idx, points, faces)
+	{
+		for (var face in faces) {
+			this.polys[idx].add(Polytope.init(points, [ face ]))
+		}
 	}
 }
