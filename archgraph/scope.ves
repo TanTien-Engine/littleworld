@@ -8,4 +8,9 @@ class Scope
 		this.x = Vector3(1, 0, 0)
 		this.y = Vector3(0, 0, -1)
 	}
+
+	get_center()
+	{
+		return this.o.add(this.x.mul(0.5).add(this.y.mul(0.5)))
+	}
 }

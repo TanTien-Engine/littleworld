@@ -4,9 +4,9 @@ import "blueprint.node_param" for NodeParam
 import "blueprint.node_helper" for NodeHelper
 import "blueprint.blueprint" for Blueprint
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.variant_helper" for VariantHelper
 import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SPLIT_SIZE
 import "archgraph.geometry" for Geometry
-import "archgraph.scope" for Scope
 import "maths.vector" for Vector3, Vector4
 import "geometry" for PolyPoint, PolyFace, Polytope
 import "math" for Math
@@ -34,49 +34,26 @@ class Split is Node
 
 		this.layout()
 
-		this.rects = nil
+		this.children = nil
 	}
 
 	on_pin_dirty(pin)
 	{
 		super.on_pin_dirty(pin)
 		
-		this.rects = nil
+		this.children = nil		
 	}
 
 	calc_value(idx)
 	{
-		if (!this.rects) {
-			this.build_rects()
+		if (!this.children) {
+			this.build_children()
 		}
-		if (!this.rects) {
+		if (!this.children) {
 			return nil
 		}
 
-		var rects = this.rects[idx]
-
-		var geos = []
-
-		var v_geo = Blueprint.calc_input_value(this, 0)
-		if (v_geo)
-		{
-			for (var poly in v_geo.value.mesh.polys) 
-			{
-				var points = poly.get_points()
-				for (var face in poly.get_faces()) {
-					for (var r in rects) {
-						geos.add(this.create_geo(r, face, points))
-					}
-				}
-			}
-		}
-		else
-		{
-			for (var r in rects) {
-				geos.add(this.create_geo(r))
-			}
-		}
-
+		var geos = this.children[idx]
 		if (geos.count > 1) {
 			return Variant(VAR_TYPE_ARRAY, geos)
 		} else if (geos.count == 1) {
@@ -102,10 +79,68 @@ class Split is Node
 		}
 	}
 
-	build_rects()
+	build_children()
 	{
-		var rect = Vector4(0, 0, 1, 1)
+		this.children = []
+		for (var i in 0 .. this.exports.count) {
+			this.children.add([])
+		}
 
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (v_geo)
+		{
+			this.build_children(v_geo)
+		}
+		else
+		{
+			var rects = this.build_rects(1, 1)
+			for (var i in 0 .. rects.count) {
+				for (var r in rects[i]) {
+					this.children[i].add(this.create_geo(r))
+				}
+			}
+		}
+	}	
+
+	build_children(v_geo)
+	{
+		var in_geos = VariantHelper.flatten_values(v_geo, VAR_TYPE_GEOMETRY)
+		for (var geo in in_geos) {
+			for (var poly in geo.mesh.polys) {
+				var points = poly.get_points()
+				for (var face in poly.get_faces()) {
+					var border = face.get_border()
+					if (border.count >= 4) 
+					{
+						var p1 = points[border[1]].get_pos()
+						var ori_p = Vector3(p1[0], p1[1], p1[2])
+
+						var p0 = points[border[0]].get_pos()
+						var dir_y = Vector3(p0[0], p0[1], p0[2]).sub(ori_p)
+
+						var p2 = points[border[2]].get_pos()
+						var dir_x = Vector3(p2[0], p2[1], p2[2]).sub(ori_p)
+
+						var width  = dir_x.length()
+						var height = dir_y.length()
+						var rects = this.build_rects(width, height)
+
+						dir_x.normalize()
+						dir_y.normalize()
+
+						for (var i in 0 .. rects.count) {
+							for (var r in rects[i]) {
+								this.children[i].add(this.create_geo(r, face, points, ori_p, dir_x, dir_y))
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	build_rects(width, height)
+	{
 		var src_sizes = []
 		for (var i in 1..this.imports.count)
 		{
@@ -115,34 +150,35 @@ class Split is Node
 			}
 		}
 
-		this.rects = []
+		var rects = []
 
 		var axis = this.query_param("axis").value
 
 		var dst_sizes = nil
 		if (axis == "hori") {
-			dst_sizes = this.calc_sizes(src_sizes, rect.z)
+			dst_sizes = this.calc_sizes(src_sizes, width)
 		} else {
-			dst_sizes = this.calc_sizes(src_sizes, rect.w)
+			dst_sizes = this.calc_sizes(src_sizes, height)
 		}
 
 		if (dst_sizes.isEmpty) {
 			return
 		}
 
+		var rect = Vector4(0, 0, width, height)
+
+		for (var _ in dst_sizes) {
+			rects.add([])
+		}
 		if (dst_sizes[0] is List)
 		{
-			for (var _ in dst_sizes[0]) {
-				this.rects.add([])
-			}
-
 			if (axis == "hori")
 			{
 				var x = rect.x
 				for (var i in 0..dst_sizes[0].count) {				
 					for (var j in 0..dst_sizes.count) {
 						var sz = dst_sizes[j][i]
-						this.rects[j].add(Vector4(x, rect.y, sz, rect.w))
+						rects[j].add(Vector4(x, rect.y, sz, rect.w))
 						x = x + sz
 					}
 				}
@@ -153,7 +189,7 @@ class Split is Node
 				for (var i in 0..dst_sizes[0].count) {				
 					for (var j in 0..dst_sizes.count) {				
 						var sz = dst_sizes[j][i]
-						this.rects[j].add(Vector4(rect.x, y, rect.z, sz))
+						rects[j].add(Vector4(rect.x, y, rect.z, sz))
 						y = y + sz
 					}
 				}
@@ -161,17 +197,13 @@ class Split is Node
 		}
 		else
 		{
-			for (var _ in dst_sizes) {
-				this.rects.add([])
-			}
-
 			if (axis == "hori")
 			{
 				var x = rect.x
 				for (var i in 0 .. dst_sizes.count) 
 				{
 					var sz = dst_sizes[i]
-					this.rects[i].add(Vector4(x, rect.y, sz, rect.w))
+					rects[i].add(Vector4(x, rect.y, sz, rect.w))
 					x = x + sz
 				}
 			}
@@ -181,11 +213,13 @@ class Split is Node
 				for (var i in 0 .. dst_sizes.count) 
 				{
 					var sz = dst_sizes[i]
-					this.rects[i].add(Vector4(rect.x, y, rect.z, sz))
+					rects[i].add(Vector4(rect.x, y, rect.z, sz))
 					y = y + sz
 				}
 			}
 		}
+
+		return rects
 	}
 
 	calc_sizes(src, tot)
@@ -373,33 +407,12 @@ class Split is Node
 		var face = PolyFace.init([ 0, 1, 2, 3 ], [])
 		var poly = Polytope.init(points, [ face ])
 
-	    var s = Scope()
-	    s.o.set(xmin,        0, zmin)
-	    s.x.set(xmax - xmin, 0, 0)
-	    s.y.set(0,           0, -(zmax - zmin))
-
 	    var geo = Geometry([ poly ])
-	    geo.scope = s
-
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
 
-	create_geo(rect, face, points)
+	create_geo(rect, face, points, ori_p, dir_x, dir_y)
 	{
-		var border = face.get_border()
-		if (border.count < 4) {
-			return nil
-		}
-
-		var p1 = points[border[1]].get_pos()
-		var ori_p = Vector3(p1[0], p1[1], p1[2])
-
-		var p0 = points[border[0]].get_pos()
-		var dir_y = Vector3(p0[0], p0[1], p0[2]).sub(ori_p)
-
-		var p2 = points[border[2]].get_pos()
-		var dir_x = Vector3(p2[0], p2[1], p2[2]).sub(ori_p)
-
 		var pts = []
 		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x,          rect.y,          ori_p, dir_x, dir_y)))
 		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x + rect.z, rect.y,          ori_p, dir_x, dir_y)))
