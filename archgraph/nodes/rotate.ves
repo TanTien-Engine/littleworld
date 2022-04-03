@@ -1,0 +1,52 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.node_param" for NodeParam
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "maths.vector" for Vector3
+
+class Rotate is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),		
+		]
+		this.exports = [
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+		]
+
+		this.params.add(NodeParam("r", Vector3(0, 0, 0)))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo) {
+			return
+		}
+
+		var r = this.query_param("r").value
+		this.rotate_geo(v_geo, r)
+		return v_geo
+	}
+
+	rotate_geo(v_geo, r)
+	{
+		if (v_geo.type == VAR_TYPE_ARRAY)
+		{
+			for (var geo in v_geo.value) {
+				this.rotate_geo(geo, r)
+			}
+		}
+		else if (v_geo.type == VAR_TYPE_GEOMETRY)
+		{
+			v_geo.value.trans.rotate(r.x, r.y, r.z)
+		}
+	}
+}

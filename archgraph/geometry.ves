@@ -18,7 +18,7 @@ class Geometry
 		this.color = Vector3(1, 1, 1)
 		this.texture = nil
 
-		// scope
+		// context
 		this.scope = nil
 
 		if (polys.count == 1)

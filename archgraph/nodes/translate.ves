@@ -1,0 +1,55 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.node_param" for NodeParam
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SCOPE_SIZE
+import "maths.vector" for Vector3
+
+class Translate is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "x", VAR_TYPE_SCOPE_SIZE),
+			Pin(this, "y", VAR_TYPE_SCOPE_SIZE),
+			Pin(this, "z", VAR_TYPE_SCOPE_SIZE),			
+		]
+		this.exports = [
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+		]
+
+		this.params.add(NodeParam("t", Vector3(0, 0, 0)))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo) {
+			return
+		}
+
+		var t = this.query_param("t").value
+		this.translate_geo(v_geo, t)
+		return v_geo
+	}
+
+	translate_geo(v_geo, t)
+	{
+		if (v_geo.type == VAR_TYPE_ARRAY)
+		{
+			for (var geo in v_geo.value) {
+				this.translate_geo(geo, t)
+			}
+		}
+		else if (v_geo.type == VAR_TYPE_GEOMETRY)
+		{
+			v_geo.value.trans.translate(t.x, t.y, t.z)
+		}
+	}
+}

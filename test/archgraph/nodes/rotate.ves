@@ -1,0 +1,59 @@
+var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+
+_editor.add_node(node0, -706.38737000597, 149.42514201848)
+
+var node1 = ::blueprint::nodes::number3::Number3()
+
+node1.value.set(0.84666681289673, 0.54444444179535, 0)
+
+_editor.add_node(node1, -708.4, 66.581818181818)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node2, -507.2, 121.18181818182)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node3, 346.84159412408, 61.185194359376)
+
+var node4 = ::blueprint::nodes::camera3d::Camera3d()
+
+node4.cam.position.set(-3.2292095624948, 1.5326077212325, 0.084629437860196)
+node4.cam.yaw = -12.4
+node4.cam.pitch = -23
+node4.cam.zoom = 45
+node4.cam.update_vectors()
+node4.speed = 0.22097560763359
+
+_editor.add_node(node4, 136.42906098754, -75.55920435757)
+
+var node5 = ::archgraph::nodes::translate::Translate()
+node5.query_param("t").value.set(0, 1, 0)
+
+_editor.add_node(node5, -160.72907381925, -142.17741622546)
+
+var node6 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node6, 140.10999603271, 81.644943847656)
+
+var node7 = ::archgraph::nodes::rotate::Rotate()
+node7.query_param("r").value.set(0, 0.92222219705582, 0)
+
+_editor.add_node(node7, -306.72727272727, -113.81818181818)
+
+var node8 = ::archgraph::nodes::scale::Scale()
+node8.query_param("s").value.set(1, 0.10829026997089, 1)
+
+_editor.add_node(node8, -448.7461270419, -144.26082819158)
+
+Blueprint.connect(node0, "geo", node2, "geo")
+Blueprint.connect(node1, "v3", node2, "color")
+Blueprint.connect(node2, "geo", node8, "geo")
+Blueprint.connect(node8, "geo", node7, "geo")
+Blueprint.connect(node7, "geo", node5, "geo")
+Blueprint.connect(node2, "geo", node6, "in0")
+Blueprint.connect(node5, "geo", node6, "in1")
+Blueprint.connect(node6, "list", node3, "geos")
+Blueprint.connect(node4, "this", node3, "view_cam")
