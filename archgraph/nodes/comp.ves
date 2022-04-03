@@ -81,6 +81,13 @@ class Comp is Node
 		this.layout()
 	}
 
+	to_string(name) 
+	{
+		return super.to_string(name) + "
+%(name).on_param_dirty()
+"
+	}
+
 	calc_value(idx)
 	{
 		var v_geo = Blueprint.calc_input_value(this, 0)
