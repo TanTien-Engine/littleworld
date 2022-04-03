@@ -35,9 +35,9 @@ class Geometry
 					var p0 = points[border[0]].get_pos()
 					var p1 = points[border[1]].get_pos()
 					var p2 = points[border[2]].get_pos()
-					var ori_p = Vector3(p0[0], p0[1], p0[2])
-					var dir_x = Vector3(p1[0], p1[1], p1[2]).sub(ori_p)
-					var dir_y = Vector3(p2[0], p2[1], p2[2]).sub(Vector3(p1[0], p1[1], p1[2]))
+					var ori_p = Vector3(p1[0], p1[1], p1[2])
+					var dir_x = Vector3(p0[0], p0[1], p0[2]).sub(ori_p)
+					var dir_y = Vector3(p2[0], p2[1], p2[2]).sub(ori_p)
 
 					var s = Scope()
 					s.o = ori_p
