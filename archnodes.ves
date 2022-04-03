@@ -2,7 +2,7 @@ import "archgraph.nodes.*"
 
 var ARCH_NODES = [ 
 PrimitiveCube, PrimitiveQuad, PrimitivePolygon, Extrude,
-Split, SplitSize, Comp, 
+ScopeSize, Split, Comp, 
 SetupProjection,
 MeshFile, Insert,
 ]

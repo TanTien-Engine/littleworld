@@ -50,19 +50,19 @@ node7.query_param("distance").value = 0.67500680685043
 
 _editor.add_node(node7, -892.79423715684, 56.066596399479)
 
-var node8 = ::archgraph::nodes::split_size::SplitSize()
+var node8 = ::archgraph::nodes::scope_size::ScopeSize()
 node8.query_param("size").value = 0.52407771348953
 node8.query_param("mode").value = "floating"
 
 _editor.add_node(node8, -750.14025781373, -145.58033395068)
 
-var node9 = ::archgraph::nodes::split_size::SplitSize()
+var node9 = ::archgraph::nodes::scope_size::ScopeSize()
 node9.query_param("size").value = 0.40072020888329
 node9.query_param("mode").value = "absolute"
 
 _editor.add_node(node9, -752.25348862427, -231.07329291492)
 
-var node10 = ::archgraph::nodes::split_size::SplitSize()
+var node10 = ::archgraph::nodes::scope_size::ScopeSize()
 node10.query_param("size").value = 0.32912528514862
 node10.query_param("mode").value = "floating"
 

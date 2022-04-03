@@ -1,7 +1,7 @@
 var VAR_TYPE_GEOMETRY   = "geometry"
-var VAR_TYPE_SPLIT_SIZE = "ssize"
+var VAR_TYPE_SCOPE_SIZE = "ssize"
 
-class VarSplitSize
+class VarScopeSize
 {
 	init(size, mode)
 	{

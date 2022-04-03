@@ -14,13 +14,13 @@ node1.speed = 0.22097560763359
 
 _editor.add_node(node1, 150.21951285987, -192.00132911369)
 
-var node2 = ::archgraph::nodes::split_size::SplitSize()
+var node2 = ::archgraph::nodes::scope_size::ScopeSize()
 node2.query_param("size").value = 0.10690917819738
 node2.query_param("mode").value = "floating"
 
 _editor.add_node(node2, -330.37990396201, -38.645111345138)
 
-var node3 = ::archgraph::nodes::split_size::SplitSize()
+var node3 = ::archgraph::nodes::scope_size::ScopeSize()
 node3.query_param("size").value = 0.16074015200138
 node3.query_param("mode").value = "floating"
 
