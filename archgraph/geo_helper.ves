@@ -1,0 +1,23 @@
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+
+class GeoHelper
+{
+	static clone_geo(v_geo)
+	{
+		if (v_geo.type == VAR_TYPE_ARRAY)
+		{
+			var geos = []
+			for (var geo in v_geo.value) {
+				geos.add(this.clone_geo(geo))
+			}
+			return Variant(VAR_TYPE_ARRAY, geos)
+		}
+		else if (v_geo.type == VAR_TYPE_GEOMETRY)
+		{
+			var geo = v_geo.value.clone()
+			return Variant(VAR_TYPE_GEOMETRY, geo)
+		}
+		return nil
+	}
+}

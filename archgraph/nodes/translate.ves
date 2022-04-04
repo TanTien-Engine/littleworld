@@ -4,6 +4,7 @@ import "blueprint.node_param" for NodeParam
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geo_helper" for GeoHelper
 import "maths.vector" for Vector3
 
 class Translate is Node
@@ -26,14 +27,17 @@ class Translate is Node
 
 	calc_value(idx)
 	{
-		var v_geo = Blueprint.calc_input_value(this, 0)
-		if (!v_geo) {
-			return
+		var in_geo = Blueprint.calc_input_value(this, 0)
+		if (!in_geo) {
+			return nil
 		}
 
+		var out_geo = GeoHelper.clone_geo(in_geo)
+
 		var t = this.query_param("t").value
-		this.translate_geo(v_geo, t)
-		return v_geo
+		this.translate_geo(out_geo, t)
+		
+		return out_geo
 	}
 
 	translate_geo(v_geo, t)
