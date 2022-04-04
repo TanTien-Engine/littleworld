@@ -21,6 +21,8 @@ void w_TextureMapping_allocate()
 	uv_map->scale  = tt::map_to_vec2(3);
 	uv_map->offset = tt::map_to_vec2(4); 
 
+	uv_map->uw_factor = ves_tonumber(5);
+
     auto proxy = (tt::Proxy<pm3::TextureMapping>*)ves_set_newforeign(0, 0, sizeof(tt::Proxy<pm3::TextureMapping>));
     proxy->obj = uv_map;
 }

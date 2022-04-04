@@ -23,6 +23,7 @@ class SetupProjection is Node
 		this.params.add(NodeParam("axes", "xy", { "combo" : [ "xy", "xz", "yx", "yz", "zx", "zy" ] }))
 		this.params.add(NodeParam("scale", Vector2(1, 1)))
 		this.params.add(NodeParam("offset", Vector2(0, 0)))
+		this.params.add(NodeParam("uw_factor", 0.0))
 
 		this.layout()
 	}
@@ -59,24 +60,25 @@ class SetupProjection is Node
 
 		var scale = this.query_param("scale").value
 		var offset = this.query_param("offset").value
+		var uw_factor = this.query_param("uw_factor").value
 
-		this.setup_proj(v_geo, axes_x, axes_y, scale, offset)
+		this.setup_proj(v_geo, axes_x, axes_y, scale, offset, uw_factor)
 
 		return v_geo
 	}
 
-	setup_proj(v_geo, axes_x, axes_y, scale, offset)
+	setup_proj(v_geo, axes_x, axes_y, scale, offset, uw_factor)
 	{
 		if (v_geo.type == VAR_TYPE_ARRAY)
 		{
 			for (var v in v_geo.value) {
-				this.setup_proj(v, axes_x, axes_y, scale, offset)
+				this.setup_proj(v, axes_x, axes_y, scale, offset, uw_factor)
 			}
 		}
 		else if (v_geo.type == VAR_TYPE_GEOMETRY)
 		{
 			var mesh = v_geo.value.mesh
-			mesh.uv_mapping = TextureMapping.init(axes_x, axes_y, scale, offset)
+			mesh.uv_mapping = TextureMapping.init(axes_x, axes_y, scale, offset, uw_factor)
 			mesh.rebuild()
 		}
 	}

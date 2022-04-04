@@ -3,7 +3,7 @@ static const char* archgenModuleSource = QUOTE(
 
 foreign class TextureMapping
 {
-	init(axes_x, axes_y, scale, offset) {}
+	init(axes_x, axes_y, scale, offset, uw_factor) {}
 
 	foreign clone()
 }
