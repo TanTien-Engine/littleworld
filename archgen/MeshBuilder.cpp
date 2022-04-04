@@ -85,6 +85,8 @@ MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::P
 			sm::vec3 normal;
 			poly->CalcFaceNormal(*f, normal);
 
+			auto& uv = uv_map ? *uv_map : f->tex_map;
+
 			auto& polyline = f->border;
 			if (polyline.size() > 2) 
 			{
@@ -101,9 +103,7 @@ MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::P
 					for (auto& p : tri) 
 					{
 						p.normal = normal;
-						if (uv_map) {
-							p.texcoord = uv_map->CalcTexCoords(p.pos, 1, 1);
-						}
+						p.texcoord = uv.CalcTexCoords(p.pos, 1, 1);
 
 						vertices.push_back(p);
 					}
