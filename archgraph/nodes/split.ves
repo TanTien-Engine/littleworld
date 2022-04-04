@@ -7,6 +7,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.variant_helper" for VariantHelper
 import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SCOPE_SIZE
 import "archgraph.geometry" for Geometry
+import "archgraph.scope_helper" for ScopeHelper
 import "maths.vector" for Vector3, Vector4
 import "geometry" for PolyPoint, PolyFace, Polytope
 import "math" for Math
@@ -423,7 +424,9 @@ class Split is Node
 		var poly = Polytope.init(pts, [ f ])
 
 	    var geo = Geometry([ poly ])
-		return Variant(VAR_TYPE_GEOMETRY, geo)		
+	    var axis = this.query_param("axis").value
+	    geo.scope = ScopeHelper.calc_mat(pts, f, axis == "hori")
+		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
 
 	coordinate_mapping(x, y, ori_p, dir_x, dir_y)

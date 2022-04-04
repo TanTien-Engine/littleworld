@@ -1,6 +1,5 @@
 import "maths.vector" for Vector3
 import "archgraph.mesh" for Mesh
-import "archgraph.scope" for Scope
 import "maths" for Matrix44
 
 class Geometry
@@ -20,40 +19,21 @@ class Geometry
 
 		// context
 		this.scope = nil
-
-		if (polys.count == 1)
-		{
-			var poly = polys[0]
-			var points = poly.get_points()
-			var faces = poly.get_faces()
-			if (faces.count == 1)
-			{
-				var face = faces[0]
-				var border = face.get_border()
-				if (border.count == 4)
-				{
-					var p0 = points[border[0]].get_pos()
-					var p1 = points[border[1]].get_pos()
-					var p2 = points[border[2]].get_pos()
-					var ori_p = Vector3(p1[0], p1[1], p1[2])
-					var dir_x = Vector3(p0[0], p0[1], p0[2]).sub(ori_p)
-					var dir_y = Vector3(p2[0], p2[1], p2[2]).sub(ori_p)
-
-					var s = Scope()
-					s.o = ori_p
-					s.x = dir_x
-					s.y = dir_y
-					this.scope = s
-				}
-			}
-		}
 	}
 
-	new_instance()
+	clone()
 	{
 		var new = Geometry([])
+
 		new.mesh = this.mesh
+
+		new.trans = this.trans.clone()
+
+		new.color = this.color.clone()
 		new.texture = this.texture
+
+		new.scope = this.scope
+
 		return new
 	}
 }

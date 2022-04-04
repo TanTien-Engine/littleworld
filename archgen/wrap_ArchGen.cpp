@@ -101,6 +101,26 @@ void w_MeshBuilder_build_mesh_from_file()
 	}
 }
 
+void w_ArchTools_calc_geo_mat()
+{
+	sm::cube* aabb = (sm::cube*)ves_toforeign(1);
+	sm::mat4* scope = (sm::mat4*)ves_toforeign(2);
+
+	auto c = aabb->Center();
+	auto mat_t = sm::mat4::Translated(c.x, c.y, c.z);
+
+	auto sz = aabb->Size();
+	auto mat_s = sm::mat4::Scaled(1.0f / sz.x, 1.0f / sz.y, 1.0f / sz.z);
+
+	ves_pop(ves_argnum());
+
+	ves_pushnil();
+	ves_import_class("maths", "Matrix44");
+	sm::mat4* mat = (sm::mat4*)ves_set_newforeign(0, 1, sizeof(sm::mat4));
+	*mat = *scope * mat_t * mat_s;
+	ves_pop(1);
+}
+
 }
 
 namespace archgen
@@ -112,6 +132,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 
 	if (strcmp(signature, "static MeshBuilder.build_mesh(_,_)") == 0) return w_MeshBuilder_build_mesh;
 	if (strcmp(signature, "static MeshBuilder.build_mesh(_)") == 0) return w_MeshBuilder_build_mesh_from_file;
+
+	if (strcmp(signature, "static ArchTools.calc_geo_mat(_,_)") == 0) return w_ArchTools_calc_geo_mat;
 
 	return nullptr;
 }

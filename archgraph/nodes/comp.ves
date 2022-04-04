@@ -5,6 +5,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
+import "archgraph.scope_helper" for ScopeHelper
 import "maths.vector" for Vector3
 import "geometry" for Polytope
 import "maths" for Maths
@@ -32,21 +33,21 @@ class Comp is Node
 
 		this.layout()
 
-		this.polys = nil
+		this.children = nil
 	}
 
 	on_pin_dirty(pin)
 	{
 		super.on_pin_dirty(pin)
 		
-		this.polys = nil
+		this.children = nil
 	}
 
 	on_param_dirty()
 	{
 		super.on_param_dirty()
 
-		this.polys = nil
+		this.children = nil
 
 		for (var p in this.exports) {
 			while (!p.conns.isEmpty) {
@@ -95,18 +96,11 @@ class Comp is Node
 			return nil
 		}
 
-		if (!this.polys) {
-			this.build_polys()
-		}
-		if (!this.polys or this.polys[idx].isEmpty) {
-			return nil
+		if (!this.children) {
+			this.build_children()
 		}
 
-		var geos = []
-		var polys = this.polys[idx]
-		for (var poly in polys) {
-			geos.add(Variant(VAR_TYPE_GEOMETRY, Geometry([ poly ])))
-		}
+		var geos = this.children[idx]
 		if (geos.count == 1) {
 			return geos[0]
 		} else {
@@ -114,20 +108,20 @@ class Comp is Node
 		}
 	}
 
-	build_polys()
+	build_children()
 	{
 		var v_geo = Blueprint.calc_input_value(this, 0)
 		if (!v_geo or !v_geo.value) {
 			return
 		}
 
-		this.polys = []
+		this.children = []
 
 		var selector = this.query_param("selector").value
 		if (selector == "face6") 
 		{
 			for (var i in 0..6) {
-				this.polys.add([])
+				this.children.add([])
 			}
 
 			var normals = []
@@ -166,7 +160,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0..6) {
 					if (!faces6[i].isEmpty) {
-						this.create_polys(i, points, faces6[i])
+						this.create_children(i, points, faces6[i])
 					}
 				}
 			}
@@ -174,7 +168,7 @@ class Comp is Node
 		else if (selector == "normal_y")
 		{
 			for (var i in 0..4) {
-				this.polys.add([])
+				this.children.add([])
 			}
 
 			for (var poly in v_geo.value.mesh.polys) 
@@ -204,7 +198,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0..4) {
 					if (!faces4[i].isEmpty) {
-						this.create_polys(i, points, faces4[i])
+						this.create_children(i, points, faces4[i])
 					}
 				}
 			}
@@ -212,7 +206,7 @@ class Comp is Node
 		else if (selector == "side")
 		{
 			for (var i in 0..1) {
-				this.polys.add([])
+				this.children.add([])
 			}
 
 			for (var poly in v_geo.value.mesh.polys) 
@@ -228,7 +222,7 @@ class Comp is Node
 
 				var points = poly.get_points()
 				if (!faces.isEmpty) {
-					this.create_polys(0, points, faces)
+					this.create_children(0, points, faces)
 				}
 			}
 		}
@@ -241,10 +235,17 @@ class Comp is Node
 		return angle * 180 / Math.pi() - 90
 	}
 
-	create_polys(idx, points, faces)
+	create_children(idx, points, faces)
 	{
-		for (var face in faces) {
-			this.polys[idx].add(Polytope.init(points, [ face ]))
+		for (var face in faces) 
+		{
+			var poly = Polytope.init(points, [ face ])
+
+			var geo = Geometry([ poly ])
+			geo.scope = ScopeHelper.calc_mat(points, face, true)
+
+			var v_geo = Variant(VAR_TYPE_GEOMETRY, geo)
+			this.children[idx].add(v_geo)
 		}
 	}
 }

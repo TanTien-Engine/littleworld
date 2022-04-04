@@ -4,6 +4,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.variant_helper" for VariantHelper
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgen" for ArchTools
 import "maths" for Matrix44, Maths
 import "math" for Math
 
@@ -36,34 +37,18 @@ class Insert is Node
 			return nil
 		}
 
-		var aabb = v_geo.value.mesh.aabb
-		var size = aabb.get_size()
-
 		var geos = []
 
+		var aabb = v_geo.value.mesh.aabb
 		var positions = VariantHelper.flatten_values(v_pos, VAR_TYPE_GEOMETRY)
 		for (var pos in positions)
 		{
-			var sc = pos.scope
-
-			var scale_x = sc.x.length() / size[0]
-			var scale_y = sc.y.length() / size[1]			
-			var scale_z = sc.x.length() / size[2]
-			var scale = Math.min(scale_x, Math.min(scale_y, scale_z))
-
-			var rot_mat = Maths.calc_rot_mat([ 1, 0, 0 ], [ sc.x.x, sc.x.y, sc.x.z ])
-
-			var center = sc.get_center()
-
-			var mat = Matrix44.init()
-			mat.scale(scale, scale, scale)
-			mat.transform_mat4(rot_mat)
-			mat.translate(center.x, center.y, center.z)
-
-			var geo = v_geo.value.new_instance()
-			geo.trans = mat
-
-			geos.add(Variant(VAR_TYPE_GEOMETRY, geo))			
+			if (pos.scope)
+			{
+				var geo = v_geo.value.clone()
+				geo.trans.transform_mat4(ArchTools.calc_geo_mat(aabb, pos.scope))
+				geos.add(Variant(VAR_TYPE_GEOMETRY, geo))
+			}
 		}
 
 		if (geos.count > 1) {

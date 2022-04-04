@@ -14,4 +14,9 @@ foreign class MeshBuilder
 	foreign static build_mesh(filepath)
 }
 
+foreign class ArchTools
+{
+	foreign static calc_geo_mat(aabb, scope)
+}
+
 );
