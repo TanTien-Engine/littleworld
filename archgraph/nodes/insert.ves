@@ -15,11 +15,11 @@ class Insert is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "geo", VAR_TYPE_GEOMETRY),
-			Pin(this, "pos", VAR_TYPE_GEOMETRY),
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "pos", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
 		]
 		this.exports = [
-			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
 		]
 
 		this.layout()
@@ -39,15 +39,19 @@ class Insert is Node
 
 		var geos = []
 
-		var aabb = v_geo.value.mesh.aabb
 		var positions = VariantHelper.flatten_values(v_pos, VAR_TYPE_GEOMETRY)
+		var in_geos = VariantHelper.flatten_values(v_geo, VAR_TYPE_GEOMETRY)		
 		for (var pos in positions)
 		{
 			if (pos.scope)
 			{
-				var geo = v_geo.value.clone()
-				geo.trans.transform_mat4(ArchTools.calc_geo_mat(aabb, pos.scope))
-				geos.add(Variant(VAR_TYPE_GEOMETRY, geo))
+				for (var geo in in_geos)
+				{
+					var aabb = geo.mesh.aabb
+					var new = geo.clone()
+					new.trans.transform_mat4(ArchTools.calc_geo_mat(aabb, pos.scope))
+					geos.add(Variant(VAR_TYPE_GEOMETRY, new))
+				}
 			}
 		}
 
