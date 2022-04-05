@@ -415,10 +415,10 @@ class Split is Node
 	create_geo(rect, face, points, ori_p, dir_x, dir_y)
 	{
 		var pts = []
+		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x,          rect.y + rect.w, ori_p, dir_x, dir_y)))		
 		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x,          rect.y,          ori_p, dir_x, dir_y)))
 		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x + rect.z, rect.y,          ori_p, dir_x, dir_y)))
 		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x + rect.z, rect.y + rect.w, ori_p, dir_x, dir_y)))		
-		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x,          rect.y + rect.w, ori_p, dir_x, dir_y)))
 
 		var f = PolyFace.init([ 0, 1, 2, 3 ], [])
 		var poly = Polytope.init(pts, [ f ])

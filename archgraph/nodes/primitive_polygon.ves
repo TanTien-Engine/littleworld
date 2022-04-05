@@ -37,7 +37,7 @@ class PrimitivePolygon is Node
 			var y = vertices[i * 2 + 1]
 			points.add(PolyPoint.init([ x, 0, y ]))
 
-			border.add(i)
+			border.add(n - 1 - i)
 		}
 
 		var face = PolyFace.init(border, [])

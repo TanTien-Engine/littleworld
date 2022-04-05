@@ -16,24 +16,27 @@ class ScopeHelper
 		var p1 = points[border[1]].get_pos()
 		var p2 = points[border[2]].get_pos()
 		var o = Vector3(p1[0], p1[1], p1[2])
-		var x = Vector3(p0[0], p0[1], p0[2]).sub(o)
-		var y = Vector3(p2[0], p2[1], p2[2]).sub(o)
-
-		var co = o.add(x).add(y).add(o).mul(0.5)
-
-		var lx = x.length()
-		var ly = y.length()
-
-		var rot_mat = Maths.calc_rot_mat([ 1, 0, 0 ], [ x.x, x.y, x.z ])
+		var y = Vector3(p0[0], p0[1], p0[2]).sub(o)
+		var x = Vector3(p2[0], p2[1], p2[2]).sub(o)
 
 		var mat = Matrix44.init()
 
+		// s
+		var lx = x.length()
+		var ly = y.length()
 		if (vert) {
-			mat.scale(lx, ly, lx)
+			mat.scale(lx, ly, 1.0)
 		} else {
-			mat.scale(lx, ly, ly)
+			mat.scale(lx, ly, 1.0)
 		}
+
+		// r
+		var z = x.cross(y)
+		var rot_mat = Maths.calc_rot_mat([ 0, 0, 1 ], [ z.x, z.y, z.z ])		
 		mat.transform_mat4(rot_mat)
+
+		// t
+		var co = o.add(x).add(y).add(o).mul(0.5)		
 		mat.translate(co.x, co.y, co.z)
 
 		return mat
