@@ -116,7 +116,8 @@ MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::P
 }
 
 std::shared_ptr<ur::VertexArray>
-MeshBuilder::Gen(const ur::Device& dev, const std::string& filepath, sm::cube& aabb)
+MeshBuilder::Gen(const ur::Device& dev, const std::string& filepath, 
+	             const std::shared_ptr<pm3::TextureMapping>& uv_map, sm::cube& aabb)
 {
 	aabb.MakeEmpty();
 
@@ -148,20 +149,28 @@ MeshBuilder::Gen(const ur::Device& dev, const std::string& filepath, sm::cube& a
 				tinyobj::real_t nz = attrib.normals[3 * idx.normal_index + 2];
 
 				tinyobj::real_t tx, ty;
-
-				if (!attrib.texcoords.empty())
+				if (uv_map)
 				{
-					tx = attrib.texcoords[2 * idx.texcoord_index + 0];
-					ty = 1.0 - attrib.texcoords[2 * idx.texcoord_index + 1];
+					auto uv = uv_map->CalcTexCoords(sm::vec3(vx, vy, vz), 1, 1);
+					tx = uv.x;
+					ty = uv.y;
 				}
 				else
 				{
-					if (v == 0) {
-						tx = ty = 0;
-					} else if (v == 1) {
-						tx = 0, ty = 1;
-					} else {
-						tx = ty = 1;
+					if (!attrib.texcoords.empty())
+					{
+						tx = attrib.texcoords[2 * idx.texcoord_index + 0];
+						ty = 1.0 - attrib.texcoords[2 * idx.texcoord_index + 1];
+					}
+					else
+					{
+						if (v == 0) {
+							tx = ty = 0;
+						} else if (v == 1) {
+							tx = 0, ty = 1;
+						} else {
+							tx = ty = 1;
+						}
 					}
 				}
 

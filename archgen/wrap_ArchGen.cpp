@@ -69,7 +69,7 @@ void return_mesh(const std::shared_ptr<ur::VertexArray>& va, const sm::cube& aab
 	}
 }
 
-void w_MeshBuilder_build_mesh()
+void w_MeshBuilder_build_mesh_from_poly()
 {
 	std::vector<std::shared_ptr<pm3::Polytope>> polys;
 	tt::list_to_foreigns(1, polys);
@@ -93,9 +93,14 @@ void w_MeshBuilder_build_mesh_from_file()
 {
 	auto filepath = ves_tostring(1);
 
+	std::shared_ptr<pm3::TextureMapping> uv_map = nullptr;
+	if (ves_toforeign(2)) {
+		uv_map = ((tt::Proxy<pm3::TextureMapping>*)(ves_toforeign(2)))->obj;
+	}
+
 	auto dev = tt::Render::Instance()->Device();
 	sm::cube aabb;
-	auto va = archgen::MeshBuilder::Gen(*dev, filepath, aabb);
+	auto va = archgen::MeshBuilder::Gen(*dev, filepath, uv_map, aabb);
 	if (va) {
 		return_mesh(va, aabb);
 	} else {
@@ -132,8 +137,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 {
 	if (strcmp(signature, "TextureMapping.clone()") == 0) return w_TextureMapping_clone;
 
-	if (strcmp(signature, "static MeshBuilder.build_mesh(_,_)") == 0) return w_MeshBuilder_build_mesh;
-	if (strcmp(signature, "static MeshBuilder.build_mesh(_)") == 0) return w_MeshBuilder_build_mesh_from_file;
+	if (strcmp(signature, "static MeshBuilder.build_mesh_from_poly(_,_)") == 0) return w_MeshBuilder_build_mesh_from_poly;
+	if (strcmp(signature, "static MeshBuilder.build_mesh_from_file(_,_)") == 0) return w_MeshBuilder_build_mesh_from_file;
 
 	if (strcmp(signature, "static ArchTools.calc_geo_mat(_,_)") == 0) return w_ArchTools_calc_geo_mat;
 

@@ -10,8 +10,8 @@ foreign class TextureMapping
 
 foreign class MeshBuilder
 {
-	foreign static build_mesh(polys, tex_mapping)
-	foreign static build_mesh(filepath)
+	foreign static build_mesh_from_poly(polys, tex_mapping)
+	foreign static build_mesh_from_file(filepath, tex_mapping)
 }
 
 foreign class ArchTools

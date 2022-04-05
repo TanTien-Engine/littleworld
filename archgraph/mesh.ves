@@ -20,10 +20,10 @@ class Mesh
 	{
 		var info = nil
 		if (this.polys) {
-			info = MeshBuilder.build_mesh(this.polys, this.uv_mapping)
+			info = MeshBuilder.build_mesh_from_poly(this.polys, this.uv_mapping)
 		} else if (this.filepath) {
 			var absolute = Filesystem.get_absolute_path(this.filepath)
-			info = MeshBuilder.build_mesh(absolute)
+			info = MeshBuilder.build_mesh_from_file(absolute, this.uv_mapping)
 		}
 
 		if (info) {
