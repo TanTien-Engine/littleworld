@@ -1,6 +1,6 @@
 var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
 
-_editor.add_node(node0, -479.33723730373, 510.39239492098)
+_editor.add_node(node0, -501.88437730373, 510.39239492098)
 
 var node1 = ::blueprint::nodes::number3::Number3()
 
@@ -25,9 +25,9 @@ _editor.add_node(node4, 672.76152388742, 468.38882485205)
 
 var node5 = ::blueprint::nodes::camera3d::Camera3d()
 
-node5.cam.position.set(1.8457116146783, 2.0015223745527, -1.3827937735366)
-node5.cam.yaw = -240.5
-node5.cam.pitch = -42.6
+node5.cam.position.set(1.7784148354474, 3.1255982045915, -0.79602718500538)
+node5.cam.yaw = -233.1
+node5.cam.pitch = -55.3
 node5.cam.zoom = 37
 node5.cam.update_vectors()
 node5.speed = 0.22097560763359
@@ -47,6 +47,7 @@ var node7 = ::archgraph::nodes::setup_projection::SetupProjection()
 node7.query_param("axes").value = "xy"
 node7.query_param("scale").value.set(1, 1)
 node7.query_param("offset").value.set(0, 0)
+node7.query_param("uw_factor").value = 0
 
 _editor.add_node(node7, -397.3374108, 55.741777300001)
 
@@ -55,22 +56,22 @@ node8.query_param("selector").value = "side"
 
 node8.on_param_dirty()
 
-_editor.add_node(node8, -317.62082810952, 521.27315828024)
+_editor.add_node(node8, -340.16796810952, 521.27315828024)
 
 var node9 = ::archgraph::nodes::primitive_polygon::PrimitivePolygon()
 node9.query_param("vertices").value = [ 0, 0, 1, 0, 1.5, 1, 1, 1.5, 0, 1 ]
 
-_editor.add_node(node9, -626.65526678593, 578.78212979766)
+_editor.add_node(node9, -649.20240678593, 578.78212979766)
 
 var node10 = ::archgraph::nodes::extrude::Extrude()
-node10.query_param("distance").value = 0.6872290968895
+node10.query_param("distance").value = 0.76719564199448
 
-_editor.add_node(node10, -480.50047056906, 572.27395598421)
+_editor.add_node(node10, -503.04761056906, 572.27395598421)
 
 var node11 = ::archgraph::nodes::mesh_file::MeshFile()
 node11.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/primitives/cylinder.vert.8.notop.tex.obj")
 
-_editor.add_node(node11, -73.11870023666, 504.75232049267)
+_editor.add_node(node11, -65.06615023666, 496.69977049267)
 
 var node12 = ::archgraph::nodes::insert::Insert()
 
@@ -82,39 +83,46 @@ node13.gamma_correction = false
 node13.mipmap = false
 node13.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/grill/grillTexture_1.jpg")
 
-_editor.add_node(node13, 40.020177976231, 367.13706600048)
+_editor.add_node(node13, 98.320177976231, 271.43706600048)
 
 var node14 = ::archgraph::nodes::scope_size::ScopeSize()
-node14.query_param("size").value = 0.10924682766199
-node14.query_param("mode").value = "floating"
+node14.query_param("size").value = 0.1
+node14.query_param("mode").value = "absolute"
 
-_editor.add_node(node14, -313.83219932367, 439.18076081079)
+_editor.add_node(node14, -336.37933932367, 439.18076081079)
 
 var node15 = ::archgraph::nodes::split::Split()
 node15.query_param("axis").value = "hori"
 node15.query_param("repeat").value = true
 
-_editor.add_node(node15, -166.98068010314, 391.06341300523)
+_editor.add_node(node15, -189.52782010314, 391.06341300523)
 
 var node16 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node16, 478.75920672989, 481.06043359814)
 
 var node17 = ::archgraph::nodes::scope_size::ScopeSize()
-node17.query_param("size").value = 0.20753309130669
+node17.query_param("size").value = 0.2
 node17.query_param("mode").value = "floating"
 
-_editor.add_node(node17, -315.53111035442, 349.72322541158)
+_editor.add_node(node17, -338.07825035442, 349.72322541158)
+
+var node18 = ::archgraph::nodes::scale_scope::ScaleScope()
+node18.query_param("s").value.set(1, 1, 0.1)
+
+_editor.add_node(node18, -60.728296920166, 410.14367675781)
 
 Blueprint.connect(node9, "geo", node10, "geo")
 Blueprint.connect(node10, "geo", node8, "geo")
 Blueprint.connect(node8, "side", node15, "parent")
 Blueprint.connect(node14, "size", node15, "size0")
 Blueprint.connect(node17, "size", node15, "size1")
+Blueprint.connect(node15, "child0", node18, "geo")
 Blueprint.connect(node11, "geo", node12, "geo")
-Blueprint.connect(node15, "child0", node12, "pos")
+Blueprint.connect(node18, "geo", node12, "pos")
 Blueprint.connect(node12, "geo", node3, "geo")
 Blueprint.connect(node13, "tex", node3, "texture")
+Blueprint.connect(node10, "geo", node16, "in0")
 Blueprint.connect(node3, "geo", node16, "in1")
 Blueprint.connect(node16, "list", node4, "geos")
 Blueprint.connect(node5, "this", node4, "view_cam")

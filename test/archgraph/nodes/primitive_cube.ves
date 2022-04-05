@@ -47,6 +47,7 @@ var node7 = ::archgraph::nodes::setup_projection::SetupProjection()
 node7.query_param("axes").value = "xy"
 node7.query_param("scale").value.set(1, 1)
 node7.query_param("offset").value.set(0, 0)
+node7.query_param("uw_factor").value = 1
 
 _editor.add_node(node7, -42.9, 114.4)
 
