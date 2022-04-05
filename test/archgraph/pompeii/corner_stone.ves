@@ -1,0 +1,48 @@
+var node0 = ::blueprint::nodes::number::Number()
+
+node0.value = 0
+
+_editor.add_node(node0, -190.04089522635, -141.79128287588)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node1, 252.6085397592, -19.7862595044)
+
+var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
+node2.query_param("axes").value = "xy"
+node2.query_param("scale").value.set(5, 2.5)
+node2.query_param("offset").value.set(0, 0)
+node2.query_param("uw_factor").value = 2.5
+
+_editor.add_node(node2, 33.556419527691, 15.0034607456)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "geo"
+node3.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node3, 440.8949, -8.1618000000002)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "corner_stone_tex_rand.ves")
+
+_editor.add_node(node4, -3.3888598632809, -132.94301544189)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "noise_cube_obj_rand.ves")
+
+_editor.add_node(node5, -161.5264050293, 84.97544433594)
+
+var node6 = ::blueprint::nodes::number::Number()
+
+node6.value = 0
+
+_editor.add_node(node6, -352.97146481983, 75.610153789668)
+
+Blueprint.connect(node6, "v", node5, "rand")
+Blueprint.connect(node5, "geo", node2, "geo")
+Blueprint.connect(node0, "v", node4, "rand")
+Blueprint.connect(node2, "geo", node1, "geo")
+Blueprint.connect(node4, "tex", node1, "texture")
+Blueprint.connect(node1, "geo", node3, "var")

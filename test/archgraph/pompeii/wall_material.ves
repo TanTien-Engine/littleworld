@@ -1,0 +1,67 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node0, -297.2, 123)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node1, 132.904, 27.053)
+
+var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
+node2.query_param("axes").value = "xy"
+node2.query_param("scale").value.set(8, 1)
+node2.query_param("offset").value.set(0, 0)
+node2.query_param("uw_factor").value = 4
+
+_editor.add_node(node2, -104.126, 65.153)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "wall_tex_rand.ves")
+
+_editor.add_node(node3, -142.11125390625, -76.237872192383)
+
+var node4 = ::blueprint::nodes::number::Number()
+
+node4.value = 1
+
+_editor.add_node(node4, -327.40331894952, -86.385457018126)
+
+var node5 = ::blueprint::nodes::combine::Combine()
+
+_editor.add_node(node5, -494.55077423735, 31.658559523474)
+
+var node6 = ::blueprint::nodes::number::Number()
+
+node6.value = 0.85508626699448
+
+_editor.add_node(node6, -633.63722074579, -18.015146741168)
+
+var node7 = ::blueprint::nodes::input::Input()
+
+node7.var_name = "geo"
+node7.var_type = "geometry"
+
+_editor.add_node(node7, -493.65463988249, 156.83359546504)
+
+var node8 = ::blueprint::nodes::output::Output()
+
+node8.var_name = "geo"
+node8.var_type = "geometry"
+
+_editor.add_node(node8, 322.83377685547, 36.41466064453)
+
+var node9 = ::blueprint::nodes::number3::Number3()
+
+node9.value.set(0.87134808301926, 0, 0)
+
+_editor.add_node(node9, -491.63845258866, -106.3401724273)
+
+Blueprint.connect(node6, "v", node5, "xyz")
+Blueprint.connect(node7, "var", node0, "geo")
+Blueprint.connect(node5, "xyz", node0, "color")
+Blueprint.connect(node0, "geo", node2, "geo")
+Blueprint.connect(node4, "v", node3, "rand")
+Blueprint.connect(node2, "geo", node1, "geo")
+Blueprint.connect(node3, "tex", node1, "texture")
+Blueprint.connect(node1, "geo", node8, "var")

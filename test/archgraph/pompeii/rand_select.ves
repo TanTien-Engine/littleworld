@@ -1,0 +1,84 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "rand"
+node0.var_type = "num"
+
+_editor.add_node(node0, -379.29501362149, 18.973732101636)
+
+var node1 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node1, 395.0552718341, 96.87084565143)
+
+var node2 = ::blueprint::nodes::fetch::Fetch()
+
+_editor.add_node(node2, 599.03732414, 149.57093502781)
+
+var node3 = ::blueprint::nodes::count::Count()
+
+_editor.add_node(node3, 246.83270404822, 113.19479647259)
+
+var node4 = ::blueprint::nodes::output::Output()
+
+node4.var_name = "tex"
+node4.var_type = "texture"
+
+_editor.add_node(node4, 771.8132230658, 179.45253952)
+
+var node5 = ::blueprint::nodes::compare::Compare()
+
+node5.cmp = "greater_equal"
+
+_editor.add_node(node5, 61.264814870409, -31.424045089004)
+
+var node6 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node6, 244.58562532741, 45.210059444086)
+
+var node7 = ::blueprint::nodes::number::Number()
+
+node7.value = 0
+
+_editor.add_node(node7, 59.010839239309, -108.80947734596)
+
+var node8 = ::blueprint::nodes::number::Number()
+
+node8.value = 1
+
+_editor.add_node(node8, -74.728011458192, -67.305928264554)
+
+var node9 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node9, -80.599416672591, 33.370121444086)
+
+var node10 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node10, -227.46921501128, 68.779745219576)
+
+var node11 = ::blueprint::nodes::number::Number()
+
+node11.value = 0
+
+_editor.add_node(node11, -227.46921501128, 11.779745219576)
+
+var node12 = ::blueprint::nodes::input::Input()
+
+node12.var_name = "items"
+node12.var_type = "array"
+
+_editor.add_node(node12, 101.18183545925, 177.73183572916)
+
+Blueprint.connect(node12, "var", node3, "var")
+Blueprint.connect(node0, "var", node10, "in")
+Blueprint.connect(node10, "out", node9, "cond")
+Blueprint.connect(node11, "v", node9, "true")
+Blueprint.connect(node0, "var", node9, "false")
+Blueprint.connect(node9, "result", node5, "a")
+Blueprint.connect(node8, "v", node5, "b")
+Blueprint.connect(node5, "out", node6, "cond")
+Blueprint.connect(node7, "v", node6, "true")
+Blueprint.connect(node9, "result", node6, "false")
+Blueprint.connect(node6, "result", node1, "a")
+Blueprint.connect(node3, "num", node1, "b")
+Blueprint.connect(node12, "var", node2, "items")
+Blueprint.connect(node1, "v", node2, "index")
+Blueprint.connect(node2, "item", node4, "var")

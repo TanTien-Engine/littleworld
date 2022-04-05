@@ -1,0 +1,186 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "rand"
+node0.var_type = "num"
+
+_editor.add_node(node0, 748.6522531476, 210.728806218)
+
+var node1 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node1, 749.0232171076, -18.538764648441)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "tex"
+node2.var_type = "texture"
+
+_editor.add_node(node2, 1147.884880744, 191.19335545455)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node3, 949.326483125, 181.41303177246)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.mipmap = false
+node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.01.jpg")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -115.2434387207, 396.39105834961)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.mipmap = false
+node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.02.jpg")
+node5.set_sampler("linear_repeat")
+
+_editor.add_node(node5, 95.75393371582, 397.58543701172)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "u_tex"
+node6.gamma_correction = false
+node6.mipmap = false
+node6.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.03.jpg")
+node6.set_sampler("linear_repeat")
+
+_editor.add_node(node6, 314.65393066406, 396.48543701172)
+
+var node7 = ::rendergraph::nodes::texture::Texture()
+node7.query_param("unif_name").value = "u_tex"
+node7.gamma_correction = false
+node7.mipmap = false
+node7.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.04.jpg")
+node7.set_sampler("linear_repeat")
+
+_editor.add_node(node7, 532.45388183594, 397.5854309082)
+
+var node8 = ::rendergraph::nodes::texture::Texture()
+node8.query_param("unif_name").value = "u_tex"
+node8.gamma_correction = false
+node8.mipmap = false
+node8.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.05.jpg")
+node8.set_sampler("linear_repeat")
+
+_editor.add_node(node8, -112.23955871582, 64.877237854004)
+
+var node9 = ::rendergraph::nodes::texture::Texture()
+node9.query_param("unif_name").value = "u_tex"
+node9.gamma_correction = false
+node9.mipmap = false
+node9.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.06.jpg")
+node9.set_sampler("linear_repeat")
+
+_editor.add_node(node9, 101.930440979, 66.087236022949)
+
+var node10 = ::rendergraph::nodes::texture::Texture()
+node10.query_param("unif_name").value = "u_tex"
+node10.gamma_correction = false
+node10.mipmap = false
+node10.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.07.jpg")
+node10.set_sampler("linear_repeat")
+
+_editor.add_node(node10, 314.89043457031, 72.137238464355)
+
+var node11 = ::rendergraph::nodes::texture::Texture()
+node11.query_param("unif_name").value = "u_tex"
+node11.gamma_correction = false
+node11.mipmap = false
+node11.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.08.jpg")
+node11.set_sampler("linear_repeat")
+
+_editor.add_node(node11, 535.1104296875, 72.137239379883)
+
+var node12 = ::rendergraph::nodes::texture::Texture()
+node12.query_param("unif_name").value = "u_tex"
+node12.gamma_correction = false
+node12.mipmap = false
+node12.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.09.jpg")
+node12.set_sampler("linear_repeat")
+
+_editor.add_node(node12, -114.65955871582, -252.14277038574)
+
+var node13 = ::rendergraph::nodes::texture::Texture()
+node13.query_param("unif_name").value = "u_tex"
+node13.gamma_correction = false
+node13.mipmap = false
+node13.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.10.jpg")
+node13.set_sampler("linear_repeat")
+
+_editor.add_node(node13, 101.93043884277, -249.72276000977)
+
+var node14 = ::rendergraph::nodes::texture::Texture()
+node14.query_param("unif_name").value = "u_tex"
+node14.gamma_correction = false
+node14.mipmap = false
+node14.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.11.jpg")
+node14.set_sampler("linear_repeat")
+
+_editor.add_node(node14, 316.10043457031, -252.14275146484)
+
+var node15 = ::rendergraph::nodes::texture::Texture()
+node15.query_param("unif_name").value = "u_tex"
+node15.gamma_correction = false
+node15.mipmap = false
+node15.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.12.jpg")
+node15.set_sampler("linear_repeat")
+
+_editor.add_node(node15, 537.53045410156, -258.19275085449)
+
+var node16 = ::rendergraph::nodes::texture::Texture()
+node16.query_param("unif_name").value = "u_tex"
+node16.gamma_correction = false
+node16.mipmap = false
+node16.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.13.jpg")
+node16.set_sampler("linear_repeat")
+
+_editor.add_node(node16, -110.11621295166, -543.14123828125)
+
+var node17 = ::rendergraph::nodes::texture::Texture()
+node17.query_param("unif_name").value = "u_tex"
+node17.gamma_correction = false
+node17.mipmap = false
+node17.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.14.jpg")
+node17.set_sampler("linear_repeat")
+
+_editor.add_node(node17, 104.17478302002, -540.47926049805)
+
+var node18 = ::rendergraph::nodes::texture::Texture()
+node18.query_param("unif_name").value = "u_tex"
+node18.gamma_correction = false
+node18.mipmap = false
+node18.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.15.jpg")
+node18.set_sampler("linear_repeat")
+
+_editor.add_node(node18, 322.45876831055, -540.47927832031)
+
+var node19 = ::rendergraph::nodes::texture::Texture()
+node19.query_param("unif_name").value = "u_tex"
+node19.gamma_correction = false
+node19.mipmap = false
+node19.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/walls/wall.c.16.jpg")
+node19.set_sampler("linear_repeat")
+
+_editor.add_node(node19, 542.07379541016, -540.47925927734)
+
+Blueprint.connect(node4, "tex", node1, "in0")
+Blueprint.connect(node5, "tex", node1, "in1")
+Blueprint.connect(node6, "tex", node1, "in2")
+Blueprint.connect(node7, "tex", node1, "in3")
+Blueprint.connect(node8, "tex", node1, "in4")
+Blueprint.connect(node9, "tex", node1, "in5")
+Blueprint.connect(node10, "tex", node1, "in6")
+Blueprint.connect(node11, "tex", node1, "in7")
+Blueprint.connect(node12, "tex", node1, "in8")
+Blueprint.connect(node13, "tex", node1, "in9")
+Blueprint.connect(node14, "tex", node1, "in10")
+Blueprint.connect(node15, "tex", node1, "in11")
+Blueprint.connect(node16, "tex", node1, "in12")
+Blueprint.connect(node17, "tex", node1, "in13")
+Blueprint.connect(node18, "tex", node1, "in14")
+Blueprint.connect(node19, "tex", node1, "in15")
+Blueprint.connect(node0, "var", node3, "rand")
+Blueprint.connect(node1, "list", node3, "items")
+Blueprint.connect(node3, "tex", node2, "var")
