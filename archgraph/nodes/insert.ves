@@ -4,7 +4,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.variant_helper" for VariantHelper
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
-import "archgen" for ArchTools
+import "archgen" for ScopeTools
 import "maths" for Matrix44, Maths
 import "math" for Math
 
@@ -49,7 +49,7 @@ class Insert is Node
 				{
 					var aabb = geo.mesh.aabb
 					var new = geo.clone()
-					new.trans.transform_mat4(ArchTools.calc_geo_mat(aabb, pos.scope))
+					new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, pos.scope))
 					geos.add(Variant(VAR_TYPE_GEOMETRY, new))
 				}
 			}

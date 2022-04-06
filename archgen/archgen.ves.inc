@@ -14,9 +14,10 @@ foreign class MeshBuilder
 	foreign static build_mesh_from_file(filepath, tex_mapping)
 }
 
-foreign class ArchTools
+foreign class ScopeTools
 {
-	foreign static calc_geo_mat(aabb, scope)
+	foreign static face_mapping(poly, face)
+	foreign static calc_insert_mat(aabb, scope)
 	foreign static get_scope_size(scope)
 }
 

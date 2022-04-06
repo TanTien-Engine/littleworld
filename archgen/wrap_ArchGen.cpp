@@ -5,6 +5,7 @@
 
 #include <polymesh3/Polytope.h>
 #include <unirender/VertexArray.h>
+#include <SM_Rect.h>
 
 #include <string.h>
 
@@ -108,7 +109,54 @@ void w_MeshBuilder_build_mesh_from_file()
 	}
 }
 
-void w_ArchTools_calc_geo_mat()
+void w_ScopeTools_face_mapping()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+	auto face = ((tt::Proxy<pm3::Polytope::Face>*)ves_toforeign(2))->obj;
+
+	sm::vec3 normal;
+	if (!poly->CalcFaceNormal(*face, normal)) {
+		ves_set_nil(0);
+		return;
+	}
+
+	auto rot = sm::mat4(sm::Quaternion::CreateFromVectors(normal, sm::vec3(0, 0, 1)));
+
+	auto& pts = poly->Points();
+
+	std::vector<sm::vec3> rot_face;
+	rot_face.reserve(face->border.size());
+	for (auto idx : face->border) {
+		rot_face.push_back(rot * pts[idx]->pos);
+	}
+
+	float z = 0.0f;
+	for (auto& p : rot_face) {
+		z += p.z;
+	}
+	z /= rot_face.size();
+
+	sm::rect r;
+	r.MakeEmpty();
+	for (auto& p : rot_face) {
+		r.Combine(sm::vec2(p.x, p.y));
+	}
+
+	auto inv_rot = rot.Inverted();
+
+	sm::vec3 o = inv_rot * sm::vec3(r.xmin, r.ymin, z);
+	sm::vec3 dx = inv_rot * sm::vec3(r.xmax, r.ymin, z) - o;
+	sm::vec3 dy = inv_rot * sm::vec3(r.xmin, r.ymax, z) - o;
+
+	const sm::vec3 EXPECT_Y(0, 1, 0);
+	if (fabs(EXPECT_Y.Dot(dx)) - fabs(EXPECT_Y.Dot(dy)) > SM_LARGE_EPSILON) {
+		std::swap(dx, dy);
+	}
+
+	tt::return_list(std::vector<float>{ o.x, o.y, o.z, dx.x, dx.y, dx.z, dy.x, dy.y, dy.z });
+}
+
+void w_ScopeTools_calc_insert_mat()
 {
 	sm::cube* aabb = (sm::cube*)ves_toforeign(1);
 	sm::mat4* scope = (sm::mat4*)ves_toforeign(2);
@@ -154,7 +202,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 	if (strcmp(signature, "static MeshBuilder.build_mesh_from_poly(_,_)") == 0) return w_MeshBuilder_build_mesh_from_poly;
 	if (strcmp(signature, "static MeshBuilder.build_mesh_from_file(_,_)") == 0) return w_MeshBuilder_build_mesh_from_file;
 
-	if (strcmp(signature, "static ArchTools.calc_geo_mat(_,_)") == 0) return w_ArchTools_calc_geo_mat;
+	if (strcmp(signature, "static ScopeTools.face_mapping(_,_)") == 0) return w_ScopeTools_face_mapping;
+	if (strcmp(signature, "static ScopeTools.calc_insert_mat(_,_)") == 0) return w_ScopeTools_calc_insert_mat;
 	if (strcmp(signature, "static ScopeTools.get_scope_size(_)") == 0) return w_ScopeTools_get_scope_size;
 
 	return nullptr;

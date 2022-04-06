@@ -242,7 +242,7 @@ class Comp is Node
 			var poly = Polytope.init(points, [ face ])
 
 			var geo = Geometry([ poly ])
-			geo.scope = ScopeHelper.calc_mat(points, face, false)
+			geo.scope = ScopeHelper.calc_mat(poly, face, false)
 
 			var v_geo = Variant(VAR_TYPE_GEOMETRY, geo)
 			this.children[idx].add(v_geo)

@@ -9,6 +9,7 @@ import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SPLIT_SIZE
 import "archgraph.geometry" for Geometry
 import "archgraph.scope_helper" for ScopeHelper
 import "maths.vector" for Vector3, Vector4
+import "archgen" for ScopeTools
 import "geometry" for PolyPoint, PolyFace, Polytope
 import "math" for Math
 
@@ -110,17 +111,12 @@ class Split is Node
 			for (var poly in geo.mesh.polys) {
 				var points = poly.get_points()
 				for (var face in poly.get_faces()) {
-					var border = face.get_border()
-					if (border.count >= 4) 
+					var map = ScopeTools.face_mapping(poly, face)
+					if (map)
 					{
-						var p1 = points[border[1]].get_pos()
-						var ori_p = Vector3(p1[0], p1[1], p1[2])
-
-						var p0 = points[border[0]].get_pos()
-						var dir_y = Vector3(p0[0], p0[1], p0[2]).sub(ori_p)
-
-						var p2 = points[border[2]].get_pos()
-						var dir_x = Vector3(p2[0], p2[1], p2[2]).sub(ori_p)
+						var ori_p = Vector3(map[0], map[1], map[2])
+						var dir_x = Vector3(map[3], map[4], map[5])
+						var dir_y = Vector3(map[6], map[7], map[8])
 
 						var width  = dir_x.length()
 						var height = dir_y.length()
@@ -133,7 +129,7 @@ class Split is Node
 							for (var r in rects[i]) {
 								this.children[i].add(this.create_geo(r, face, points, ori_p, dir_x, dir_y))
 							}
-						}
+						}						
 					}
 				}
 			}
@@ -425,7 +421,7 @@ class Split is Node
 
 	    var geo = Geometry([ poly ])
 	    var axis = this.query_param("axis").value
-	    geo.scope = ScopeHelper.calc_mat(pts, f, axis == "hori")
+	    geo.scope = ScopeHelper.calc_mat(poly, f, axis == "hori")
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
 

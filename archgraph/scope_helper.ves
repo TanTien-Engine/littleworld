@@ -1,23 +1,19 @@
 import "maths.vector" for Vector3
+import "archgen" for ScopeTools
 import "maths" for Matrix44, Maths
 
 class ScopeHelper
 {
-	static calc_mat(points, face, vert)
+	static calc_mat(poly, face, vert)
 	{
-		var border = face.get_border()
-
-		// todo: only support quad facade now
-		if (border.count != 4) {
+		var map = ScopeTools.face_mapping(poly, face)
+		if (!map) {
 			return nil
 		}
 
-		var p0 = points[border[0]].get_pos()
-		var p1 = points[border[1]].get_pos()
-		var p2 = points[border[2]].get_pos()
-		var o = Vector3(p1[0], p1[1], p1[2])
-		var y = Vector3(p0[0], p0[1], p0[2]).sub(o)
-		var x = Vector3(p2[0], p2[1], p2[2]).sub(o)
+		var o = Vector3(map[0], map[1], map[2])
+		var x = Vector3(map[3], map[4], map[5])
+		var y = Vector3(map[6], map[7], map[8])
 
 		var mat = Matrix44.init()
 
