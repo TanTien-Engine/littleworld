@@ -7,6 +7,15 @@ import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgen" for TextureMapping
 import "maths.vector" for Vector2, Vector3
 
+var BASE_AXES = [
+    Vector3(1, 0, 0), Vector3(0, 1, 0),
+    Vector3(1, 0, 0), Vector3(0, 0, 1),
+    Vector3(0, 1, 0), Vector3(1, 0, 0),
+    Vector3(0, 1, 0), Vector3(0, 0, 1),
+    Vector3(0, 0, 1), Vector3(1, 0, 0),
+    Vector3(0, 0, 1), Vector3(0, 1, 0)
+]
+
 class SetupProjection is Node
 {
 	init()
@@ -15,7 +24,6 @@ class SetupProjection is Node
 
 		this.imports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
-			Pin(this, "uw_factor", VAR_TYPE_NUMBER),
 		]
 		this.exports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
@@ -25,6 +33,7 @@ class SetupProjection is Node
 		this.params.add(NodeParam("scale", Vector2(1, 1)))
 		this.params.add(NodeParam("offset", Vector2(0, 0)))
 		this.params.add(NodeParam("uw_factor", 0.0))
+		this.params.add(NodeParam("gpu", false))
 
 		this.layout()
 	}
@@ -37,55 +46,58 @@ class SetupProjection is Node
 		}		
 		
 		var axes = this.query_param("axes").value
-		var axes_x = Vector3(1, 0, 0)
-		var axes_y = Vector3(0, 1, 0)
+		var axes_idx = 0
 		if (axes == "xy") {
-			axes_x = Vector3(1, 0, 0)
-			axes_y = Vector3(0, 1, 0)
+			axes_idx = 0
 		} else if (axes == "xz") {
-			axes_x = Vector3(1, 0, 0)
-			axes_y = Vector3(0, 0, 1)
+			axes_idx = 1
 		} else if (axes == "yx") {
-			axes_x = Vector3(0, 1, 0)
-			axes_y = Vector3(1, 0, 0)
+			axes_idx = 2
 		} else if (axes == "yz") {
-			axes_x = Vector3(0, 1, 0)
-			axes_y = Vector3(0, 0, 1)
+			axes_idx = 3
 		} else if (axes == "zx") {
-			axes_x = Vector3(0, 0, 1)
-			axes_y = Vector3(1, 0, 0)
+			axes_idx = 4
 		} else if (axes == "zy") {
-			axes_x = Vector3(0, 0, 1)
-			axes_y = Vector3(0, 1, 0)
+			axes_idx = 5
 		}
 
-		var scale = this.query_param("scale").value
-		var offset = this.query_param("offset").value
-
+		var scale     = this.query_param("scale").value
+		var offset    = this.query_param("offset").value
 		var uw_factor = this.query_param("uw_factor").value
-		var v_uw_factor = Blueprint.calc_input_value(this, "uw_factor")
-		if (v_uw_factor) {
-			uw_factor = v_uw_factor.value
-		}
+		var gpu       = this.query_param("gpu").value
 
-		this.setup_proj(v_geo, axes_x, axes_y, scale, offset, uw_factor)
+		this.setup_proj(v_geo, axes_idx, scale, offset, uw_factor, gpu)
 
 		return v_geo
 	}
 
-	setup_proj(v_geo, axes_x, axes_y, scale, offset, uw_factor)
+	setup_proj(v_geo, axes, scale, offset, uw_factor, gpu)
 	{
 		if (v_geo.type == VAR_TYPE_ARRAY)
 		{
 			for (var v in v_geo.value) {
-				this.setup_proj(v, axes_x, axes_y, scale, offset, uw_factor)
+				this.setup_proj(v, axes, scale, offset, uw_factor, gpu)
 			}
 		}
 		else if (v_geo.type == VAR_TYPE_GEOMETRY)
 		{
-			var mesh = v_geo.value.mesh
-			mesh.uv_mapping = TextureMapping.init(axes_x, axes_y, scale, offset, uw_factor)
-			mesh.rebuild()
+			if (gpu)
+			{
+				var geo = v_geo.value
+				geo.uv_gpu = true
+				geo.uv_props0.set(scale.x, scale.y, offset.x, offset.y)
+				geo.uv_props1.set(axes, uw_factor, 1.0, 1.0)				
+			}
+			else
+			{
+				var mesh = v_geo.value.mesh
+
+				var axes_x = BASE_AXES[axes * 2]
+				var axes_y = BASE_AXES[axes * 2 + 1]
+				mesh.uv_mapping = TextureMapping.init(axes_x, axes_y, scale, offset, uw_factor)
+
+				mesh.rebuild()
+			}
 		}
 	}
 }

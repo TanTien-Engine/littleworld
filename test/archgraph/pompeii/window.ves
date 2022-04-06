@@ -51,13 +51,13 @@ _editor.add_node(node8, 285.81838056759, -1.6861443570028)
 
 var node9 = ::blueprint::nodes::integer::Integer()
 
-node9.value = 2
+node9.value = 0
 
 _editor.add_node(node9, -151.10528564453, -140.95724487305)
 
 var node10 = ::blueprint::nodes::integer::Integer()
 
-node10.value = 2
+node10.value = 0
 
 _editor.add_node(node10, -131.30976147461, 122.51987805176)
 

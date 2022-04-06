@@ -1,4 +1,4 @@
-import "maths.vector" for Vector3
+import "maths.vector" for Vector3, Vector4
 import "archgraph.mesh" for Mesh
 import "maths" for Matrix44
 
@@ -19,6 +19,11 @@ class Geometry
 
 		// context
 		this.scope = nil
+
+		// uv mapping
+		this.uv_gpu = false
+		this.uv_props0 = Vector4(1, 1, 0, 0)	// scalc_x, scale_y, offset_x, offset_y
+		this.uv_props1 = Vector4(0, 0, 1, 1)	// axis, uw_factor, tex_w, tex_h
 	}
 
 	clone()
@@ -33,6 +38,10 @@ class Geometry
 		new.texture = this.texture
 
 		new.scope = this.scope
+
+		new.uv_gpu = this.uv_gpu
+		new.uv_props0.set(this.uv_props0.x, this.uv_props0.y, this.uv_props0.z, this.uv_props0.w)
+		new.uv_props1.set(this.uv_props1.x, this.uv_props1.y, this.uv_props1.z, this.uv_props1.w)
 
 		return new
 	}

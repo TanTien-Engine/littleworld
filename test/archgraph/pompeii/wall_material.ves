@@ -10,9 +10,10 @@ _editor.add_node(node1, 132.904, 27.053)
 
 var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
 node2.query_param("axes").value = "xy"
-node2.query_param("scale").value.set(8, 1)
+node2.query_param("scale").value.set(1, 1)
 node2.query_param("offset").value.set(0, 0)
-node2.query_param("uw_factor").value = 4
+node2.query_param("uw_factor").value = 1
+node2.query_param("gpu").value = true
 
 _editor.add_node(node2, -104.126, 65.153)
 

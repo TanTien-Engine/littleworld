@@ -5,9 +5,9 @@ _editor.add_node(node0, 117.15444493852, 42.36663679465)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(-0.20776139007011, 0.65372159406259, -0.65334117527901)
-node1.cam.yaw = 55.5
-node1.cam.pitch = -15.4
+node1.cam.position.set(2.486862063207, 2.8395301393449, 5.0439944312026)
+node1.cam.yaw = -143.5
+node1.cam.pitch = -21.3
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -85,10 +85,15 @@ node14.on_param_dirty()
 
 _editor.add_node(node14, -583.59151944247, 139.89687832919)
 
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "corner_stone.ves")
+
+_editor.add_node(node15, -299.46041592685, -241.62005615234)
+
+Blueprint.connect(node15, "geo", node5, "in1")
 Blueprint.connect(node3, "geo", node4, "geo")
 Blueprint.connect(node4, "geo", node14, "geo")
 Blueprint.connect(node14, "front", node13, "facade")
-Blueprint.connect(node13, "geo", node5, "in1")
 Blueprint.connect(node4, "geo", node2, "geo")
 Blueprint.connect(node2, "side", node12, "facade")
 Blueprint.connect(node2, "side", node10, "facade")

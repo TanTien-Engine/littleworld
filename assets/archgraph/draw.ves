@@ -33,14 +33,68 @@ uniform UBO
 	mat4 model;
 	mat4 view;
 	mat4 projection;
+
+    bool uv_mapping;
+    vec4 uv_props0;     // scalc_x, scale_y, offset_x, offset_y
+    vec4 uv_props1;     // axis, uw_factor, tex_w, tex_h
 };
+
+const vec3 BASE_AXES[2 * 6] = vec3[](
+    vec3(1, 0, 0), vec3(0, 1, 0),
+    vec3(1, 0, 0), vec3(0, 0, 1),
+    vec3(0, 1, 0), vec3(1, 0, 0),
+    vec3(0, 1, 0), vec3(0, 0, 1),
+    vec3(0, 0, 1), vec3(1, 0, 0),
+    vec3(0, 0, 1), vec3(0, 1, 0)
+);
+
+vec2 calc_uv(vec4 world_pos, vec3 normal)
+{
+    int axis = int(uv_props1.x);
+    vec3 x_axis = BASE_AXES[axis * 2];
+    vec3 y_axis = BASE_AXES[axis * 2 + 1];
+
+    float sx = uv_props0.x;
+    float sy = uv_props0.y;
+    float dx = uv_props0.z;
+    float dy = uv_props0.w;
+
+    float uw_factor = uv_props1.y;
+
+    vec2 uv;
+
+    vec3 p = world_pos.xyz;
+    if (uw_factor != 0)
+    {
+        vec3 z_axis = cross(x_axis, y_axis);
+        p += x_axis * dot(z_axis, p) * uw_factor;
+    }
+
+    float tex_w = uv_props1.z;
+    float tex_h = uv_props1.w;
+    uv.x = (dot(p, x_axis / sx) + dx) / tex_w;
+    uv.y = (dot(p, y_axis / sy) + dy) / tex_h;
+
+    return uv;
+}
 
 void main()
 {
-	vs_out.frag_pos = vec3(model * vec4(aPos, 1.0));
+    vec4 world_pos = model * vec4(aPos, 1.0);
+
+	vs_out.frag_pos = vec3(world_pos);
+
+    vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
+//    vs_out.normal = normal;
     vs_out.normal = aNormal;
-    vs_out.tex_coord = aTexCoord;
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+
+    if (uv_mapping) {
+        vs_out.tex_coord = calc_uv(world_pos, normal);
+    } else {
+        vs_out.tex_coord = aTexCoord;
+    }
+
+    gl_Position = projection * view * world_pos;
 }
 "
 node2.tcs = ""
@@ -111,13 +165,13 @@ var node5 = ::blueprint::nodes::proxy::Proxy()
 node5.real_name = "view_cam"
 node5.init_real_node(::blueprint::nodes::camera3d::Camera3d())
 
-_editor.add_node(node5, -204.41676722514, 396.89227467053)
+_editor.add_node(node5, -195.94676722514, 399.52227467053)
 
 var node6 = ::blueprint::nodes::number3::Number3()
 
 node6.value.set(5.9766573905945, 5.6433238983154, 5.3099908828735)
 
-_editor.add_node(node6, -193.20282387549, 70.019674439062)
+_editor.add_node(node6, -196.83918751185, 60.928765348153)
 
 var node7 = ::blueprint::nodes::cache::Cache()
 node7.query_param("disable").value = false
@@ -236,6 +290,24 @@ node17.query_param("name").value = "vao"
 
 _editor.add_node(node17, 357.8098034668, -313.02820922852)
 
+var node18 = ::blueprint::nodes::field_get::FieldGet()
+node18.query_param("name").value = "uv_gpu"
+
+_editor.add_node(node18, -391.29397917413, 371.08616988644)
+
+var node19 = ::blueprint::nodes::field_get::FieldGet()
+node19.query_param("name").value = "uv_props0"
+
+_editor.add_node(node19, -390.7018304138, 327.54195501041)
+
+var node20 = ::blueprint::nodes::field_get::FieldGet()
+node20.query_param("name").value = "uv_props1"
+
+_editor.add_node(node20, -391.52827669479, 282.91385583685)
+
+Blueprint.connect(node14, "out", node20, "value")
+Blueprint.connect(node14, "out", node19, "value")
+Blueprint.connect(node14, "out", node18, "value")
 Blueprint.connect(node14, "out", node16, "value")
 Blueprint.connect(node14, "out", node10, "value")
 Blueprint.connect(node10, "field", node13, "in")
@@ -252,6 +324,9 @@ Blueprint.connect(node9, "field", node11, "color")
 Blueprint.connect(node16, "field", node2, "model")
 Blueprint.connect(node5, "mat", node2, "view")
 Blueprint.connect(node4, "mat", node2, "projection")
+Blueprint.connect(node18, "field", node2, "uv_mapping")
+Blueprint.connect(node19, "field", node2, "uv_props0")
+Blueprint.connect(node20, "field", node2, "uv_props1")
 Blueprint.connect(node6, "v3", node2, "light_pos")
 Blueprint.connect(node5, "pos", node2, "cam_pos")
 Blueprint.connect(node9, "field", node2, "color")
