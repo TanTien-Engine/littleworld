@@ -26,12 +26,12 @@ node3.var_type = [ "geometry", "array" ]
 _editor.add_node(node3, 440.8949, -8.1618000000002)
 
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "corner_stone_tex_rand.ves")
+node4.load_from_file(_editor, "corner_stone_tex.ves")
 
 _editor.add_node(node4, -3.3888598632809, -132.94301544189)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "noise_cube_obj_rand.ves")
+node5.load_from_file(_editor, "noise_cube_obj.ves")
 
 _editor.add_node(node5, -161.5264050293, 84.97544433594)
 

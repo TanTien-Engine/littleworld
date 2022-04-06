@@ -18,7 +18,7 @@ node2.query_param("gpu").value = true
 _editor.add_node(node2, -104.126, 65.153)
 
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
-node3.load_from_file(_editor, "wall_tex_rand.ves")
+node3.load_from_file(_editor, "wall_tex.ves")
 
 _editor.add_node(node3, -142.11125390625, -76.237872192383)
 
