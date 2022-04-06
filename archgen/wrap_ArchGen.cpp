@@ -169,14 +169,14 @@ void w_ScopeTools_calc_insert_mat()
 	auto mat_s = sm::mat4::Scaled(sx, sy, sz);
 
 	auto c = aabb->Center();
-	auto mat_t = sm::mat4::Translated(c.x * sx, c.y * sy, c.z * sz);
+	auto mat_t = sm::mat4::Translated(-c.x, -c.y, -c.z);
 
 	ves_pop(ves_argnum());
 
 	ves_pushnil();
 	ves_import_class("maths", "Matrix44");
 	sm::mat4* mat = (sm::mat4*)ves_set_newforeign(0, 1, sizeof(sm::mat4));
-	*mat = *scope * mat_t * mat_s;
+	*mat = *scope * mat_s * mat_t;
 	ves_pop(1);
 }
 
