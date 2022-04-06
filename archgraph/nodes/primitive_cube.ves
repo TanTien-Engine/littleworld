@@ -1,6 +1,7 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant
+import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
 import "geometry" for PolyFace, Polytope
@@ -17,14 +18,18 @@ class PrimitiveCube is Node
 			Pin(this, "geo", VAR_TYPE_GEOMETRY),
 		]
 
+		this.params.add(NodeParam("size", Vector3(1, 1, 1)))
+
 		this.layout()
 	}
 
 	calc_value(idx)
 	{
-		var hx = 0.5
-		var hy = 0.5
-		var hz = 0.5
+		var size = this.query_param("size").value		
+
+		var hx = size.x * 0.5
+		var hy = size.y * 0.5
+		var hz = size.z * 0.5
 
 		var pos = Vector3(0, 0, 0)
 

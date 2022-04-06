@@ -1,0 +1,44 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER
+import "blueprint.blueprint" for Blueprint
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgen" for ScopeTools
+
+class ScopeSize is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+		this.exports = [
+			Pin(this, "sx", VAR_TYPE_NUMBER),
+			Pin(this, "sy", VAR_TYPE_NUMBER),
+			Pin(this, "sz", VAR_TYPE_NUMBER),			
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo or v_geo.type != VAR_TYPE_GEOMETRY) {
+			return nil
+		}
+
+		var sz = ScopeTools.get_scope_size(v_geo.value.scope)
+		if (idx == 0) {
+			return Variant(sz[0])
+		} else if (idx == 1) {
+			return Variant(sz[1])
+		} else if (idx == 2) {
+			return Variant(sz[2])
+		}
+
+		return nil
+	}
+}

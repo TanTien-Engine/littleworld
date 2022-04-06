@@ -17,6 +17,7 @@ foreign class MeshBuilder
 foreign class ArchTools
 {
 	foreign static calc_geo_mat(aabb, scope)
+	foreign static get_scope_size(scope)
 }
 
 );

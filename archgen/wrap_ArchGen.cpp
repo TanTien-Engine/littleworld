@@ -132,6 +132,16 @@ void w_ArchTools_calc_geo_mat()
 	ves_pop(1);
 }
 
+void w_ScopeTools_get_scope_size()
+{
+	sm::mat4* scope = (sm::mat4*)ves_toforeign(1);
+
+	sm::vec3 s, r, t;
+	scope->Decompose(t, r, s);
+
+	tt::return_list(std::vector<float>{ s.x, s.y, s.z });
+}
+
 }
 
 namespace archgen
@@ -145,6 +155,7 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 	if (strcmp(signature, "static MeshBuilder.build_mesh_from_file(_,_)") == 0) return w_MeshBuilder_build_mesh_from_file;
 
 	if (strcmp(signature, "static ArchTools.calc_geo_mat(_,_)") == 0) return w_ArchTools_calc_geo_mat;
+	if (strcmp(signature, "static ScopeTools.get_scope_size(_)") == 0) return w_ScopeTools_get_scope_size;
 
 	return nullptr;
 }
