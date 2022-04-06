@@ -28,13 +28,13 @@ node4.load_from_file(_editor, "grill.ves")
 
 _editor.add_node(node4, 69.709557822672, -19.346656291388)
 
-var node5 = ::archgraph::nodes::scope_size::ScopeSize()
+var node5 = ::archgraph::nodes::split_size::SplitSize()
 node5.query_param("size").value = 0.08
 node5.query_param("mode").value = "absolute"
 
 _editor.add_node(node5, -286.72853890757, 8.1097481433396)
 
-var node6 = ::archgraph::nodes::scope_size::ScopeSize()
+var node6 = ::archgraph::nodes::split_size::SplitSize()
 node6.query_param("size").value = 1
 node6.query_param("mode").value = "floating"
 

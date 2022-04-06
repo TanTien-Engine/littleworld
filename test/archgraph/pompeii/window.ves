@@ -23,13 +23,13 @@ node3.load_from_file(_editor, "win_mid.ves")
 
 _editor.add_node(node3, 153.3064790489, 217.99241920238)
 
-var node4 = ::archgraph::nodes::scope_size::ScopeSize()
+var node4 = ::archgraph::nodes::split_size::SplitSize()
 node4.query_param("size").value = 0.08
 node4.query_param("mode").value = "absolute"
 
 _editor.add_node(node4, -346.86099471617, 186.02270776046)
 
-var node5 = ::archgraph::nodes::scope_size::ScopeSize()
+var node5 = ::archgraph::nodes::split_size::SplitSize()
 node5.query_param("size").value = 1
 node5.query_param("mode").value = "floating"
 

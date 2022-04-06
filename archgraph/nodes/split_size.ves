@@ -3,9 +3,9 @@ import "blueprint.pin" for Pin
 import "blueprint.node_param" for NodeParam
 import "blueprint.variant" for Variant, VAR_TYPE_NUMBER
 import "blueprint.blueprint" for Blueprint
-import "archgraph.variant" for VAR_TYPE_SCOPE_SIZE, VarScopeSize
+import "archgraph.variant" for VAR_TYPE_SPLIT_SIZE, VarSplitSize
 
-class ScopeSize is Node
+class SplitSize is Node
 {
 	init()
 	{
@@ -15,7 +15,7 @@ class ScopeSize is Node
 			Pin(this, "size", VAR_TYPE_NUMBER),
 		]
 		this.exports = [
-			Pin(this, "size", VAR_TYPE_SCOPE_SIZE),
+			Pin(this, "size", VAR_TYPE_SPLIT_SIZE),
 		]
 
 		this.params.add(NodeParam("size", 0))
@@ -34,6 +34,6 @@ class ScopeSize is Node
 
 		var mode = this.query_param("mode").value
 
-		return Variant(VAR_TYPE_SCOPE_SIZE, VarScopeSize(size, mode))
+		return Variant(VAR_TYPE_SPLIT_SIZE, VarSplitSize(size, mode))
 	}
 }

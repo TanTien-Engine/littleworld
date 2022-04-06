@@ -85,7 +85,7 @@ node13.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_
 
 _editor.add_node(node13, 98.320177976231, 271.43706600048)
 
-var node14 = ::archgraph::nodes::scope_size::ScopeSize()
+var node14 = ::archgraph::nodes::split_size::SplitSize()
 node14.query_param("size").value = 0.1
 node14.query_param("mode").value = "absolute"
 
@@ -101,7 +101,7 @@ var node16 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node16, 478.75920672989, 481.06043359814)
 
-var node17 = ::archgraph::nodes::scope_size::ScopeSize()
+var node17 = ::archgraph::nodes::split_size::SplitSize()
 node17.query_param("size").value = 0.2
 node17.query_param("mode").value = "floating"
 

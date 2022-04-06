@@ -20,7 +20,7 @@ node3.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1
 
 _editor.add_node(node3, -183.12290097267, 89.62587794308)
 
-var node4 = ::archgraph::nodes::scope_size::ScopeSize()
+var node4 = ::archgraph::nodes::split_size::SplitSize()
 node4.query_param("size").value = 0.05
 node4.query_param("mode").value = "absolute"
 
@@ -32,7 +32,7 @@ node5.query_param("repeat").value = true
 
 _editor.add_node(node5, -765.86483834724, -104.82515160602)
 
-var node6 = ::archgraph::nodes::scope_size::ScopeSize()
+var node6 = ::archgraph::nodes::split_size::SplitSize()
 node6.query_param("size").value = 0.1
 node6.query_param("mode").value = "floating"
 
@@ -121,7 +121,7 @@ node21.query_param("t").value.set(0, 0, -2.5)
 
 _editor.add_node(node21, -445.50182159135, 103.89082649067)
 
-var node22 = ::archgraph::nodes::scope_size::ScopeSize()
+var node22 = ::archgraph::nodes::split_size::SplitSize()
 node22.query_param("size").value = 0.1
 node22.query_param("mode").value = "floating"
 

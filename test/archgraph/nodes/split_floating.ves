@@ -35,25 +35,25 @@ node4.query_param("offset").value.set(0, 0)
 
 _editor.add_node(node4, 276.81728691108, 581.818769888)
 
-var node5 = ::archgraph::nodes::scope_size::ScopeSize()
+var node5 = ::archgraph::nodes::split_size::SplitSize()
 node5.query_param("size").value = 0.14295044541359
 node5.query_param("mode").value = "absolute"
 
 _editor.add_node(node5, -468.6218273279, -53.67140736317)
 
-var node6 = ::archgraph::nodes::scope_size::ScopeSize()
+var node6 = ::archgraph::nodes::split_size::SplitSize()
 node6.query_param("size").value = 0.34215292334557
 node6.query_param("mode").value = "floating"
 
 _editor.add_node(node6, -331.56660744591, -48.819687739646)
 
-var node7 = ::archgraph::nodes::scope_size::ScopeSize()
+var node7 = ::archgraph::nodes::split_size::SplitSize()
 node7.query_param("size").value = 0.18117268383503
 node7.query_param("mode").value = "absolute"
 
 _editor.add_node(node7, -329.37802416186, -174.64528322536)
 
-var node8 = ::archgraph::nodes::scope_size::ScopeSize()
+var node8 = ::archgraph::nodes::split_size::SplitSize()
 node8.query_param("size").value = 0.42847087979317
 node8.query_param("mode").value = "floating"
 
