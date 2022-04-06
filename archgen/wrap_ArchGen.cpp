@@ -113,11 +113,15 @@ void w_ArchTools_calc_geo_mat()
 	sm::cube* aabb = (sm::cube*)ves_toforeign(1);
 	sm::mat4* scope = (sm::mat4*)ves_toforeign(2);
 
-	auto c = aabb->Center();
-	auto mat_t = sm::mat4::Translated(c.x, c.y, c.z);
+	auto size = aabb->Size();
+	const float sx = 1.0f / size.x;
+	const float sy = 1.0f / size.y;
+	const float sz = 1.0f / size.z;
 
-	auto sz = aabb->Size();
-	auto mat_s = sm::mat4::Scaled(1.0f / sz.x, 1.0f / sz.y, 1.0f / sz.z);
+	auto mat_s = sm::mat4::Scaled(sx, sy, sz);
+
+	auto c = aabb->Center();
+	auto mat_t = sm::mat4::Translated(c.x * sx, c.y * sy, c.z * sz);
 
 	ves_pop(ves_argnum());
 
