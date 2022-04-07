@@ -160,7 +160,7 @@ MeshBuilder::Gen(const ur::Device& dev, const std::string& filepath,
 					if (!attrib.texcoords.empty())
 					{
 						tx = attrib.texcoords[2 * idx.texcoord_index + 0];
-						ty = 1.0 - attrib.texcoords[2 * idx.texcoord_index + 1];
+						ty = attrib.texcoords[2 * idx.texcoord_index + 1];
 					}
 					else
 					{
