@@ -37,7 +37,9 @@ class Geometry
 		new.color = this.color.clone()
 		new.texture = this.texture
 
-		new.scope = this.scope
+		if (this.scope) {
+			new.scope = this.scope.clone()		
+		}
 
 		new.uv_gpu = this.uv_gpu
 		new.uv_props0.set(this.uv_props0.x, this.uv_props0.y, this.uv_props0.z, this.uv_props0.w)
