@@ -35,27 +35,16 @@ class Split is Node
 		this.params.add(NodeParam("repeat", false))
 
 		this.layout()
-
-		this.children = nil
-	}
-
-	on_pin_dirty(pin)
-	{
-		super.on_pin_dirty(pin)
-		
-		this.children = nil		
 	}
 
 	calc_value(idx)
 	{
-		if (!this.children) {
-			this.build_children()
-		}
-		if (!this.children) {
+		var children = this.build_children()
+		if (!children) {
 			return nil
 		}
 
-		var geos = this.children[idx]
+		var geos = children[idx]
 		if (geos.count > 1) {
 			return Variant(VAR_TYPE_ARRAY, geos)
 		} else if (geos.count == 1) {
@@ -83,28 +72,30 @@ class Split is Node
 
 	build_children()
 	{
-		this.children = []
+		var children = []
 		for (var i in 0 .. this.exports.count) {
-			this.children.add([])
+			children.add([])
 		}
 
 		var v_geo = Blueprint.calc_input_value(this, 0)
 		if (v_geo)
 		{
-			this.build_children(v_geo)
+			this.build_children(v_geo, children)
 		}
 		else
 		{
 			var rects = this.build_rects(1, 1)
 			for (var i in 0 .. rects.count) {
 				for (var r in rects[i]) {
-					this.children[i].add(this.create_geo(r))
+					children[i].add(this.create_geo(r))
 				}
 			}
 		}
+
+		return children
 	}	
 
-	build_children(v_geo)
+	build_children(v_geo, children)
 	{
 		var in_geos = VariantHelper.flatten_values(v_geo, VAR_TYPE_GEOMETRY)
 		for (var geo in in_geos) {
@@ -127,7 +118,7 @@ class Split is Node
 
 						for (var i in 0 .. rects.count) {
 							for (var r in rects[i]) {
-								this.children[i].add(this.create_geo(r, face, points, ori_p, dir_x, dir_y))
+								children[i].add(this.create_geo(r, face, points, ori_p, dir_x, dir_y))
 							}
 						}						
 					}
