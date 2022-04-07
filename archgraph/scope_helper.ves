@@ -20,11 +20,7 @@ class ScopeHelper
 		// s
 		var lx = x.length()
 		var ly = y.length()
-		if (vert) {
-			mat.scale(lx, ly, 1.0)
-		} else {
-			mat.scale(lx, ly, 1.0)
-		}
+		mat.scale(lx, ly, 1.0)
 
 		// r
 		var z = x.cross(y)
