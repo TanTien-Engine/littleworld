@@ -5,9 +5,9 @@ _editor.add_node(node0, 117.15444493852, 42.36663679465)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(-0.095408383728146, 0.95339324556551, -0.91133942950671)
-node1.cam.yaw = -301.5
-node1.cam.pitch = -24.8
+node1.cam.position.set(0.69420684098653, 1.7911715573768, 3.446572950301)
+node1.cam.yaw = -452.5
+node1.cam.pitch = -33.8
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -27,7 +27,7 @@ node3.query_param("vertices").value = [ 0, 0, 1, 0, 1.5, 1, 1, 1.5, 0, 1 ]
 _editor.add_node(node3, -893.7493020985, 87.87626446753)
 
 var node4 = ::archgraph::nodes::extrude::Extrude()
-node4.query_param("distance").value = 0.758121073246
+node4.query_param("distance").value = 1
 
 _editor.add_node(node4, -751.23086951796, 78.64081792681)
 
@@ -35,56 +35,62 @@ var node5 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node5, -73.38287221901, 62.88124554074)
 
-var node6 = ::blueprint::nodes::subgraph::Subgraph()
-node6.load_from_file(_editor, "grill.ves")
+var node6 = ::blueprint::nodes::integer::Integer()
 
-_editor.add_node(node6, -302.41677138672, 262.17731381836)
+node6.value = 0
 
-var node7 = ::blueprint::nodes::integer::Integer()
+_editor.add_node(node6, -698.95563964844, -86.13761962891)
 
-node7.value = 0
+var node7 = ::archgraph::nodes::comp::Comp()
+node7.query_param("selector").value = "face6"
 
-_editor.add_node(node7, -698.95563964844, -86.13761962891)
+node7.on_param_dirty()
 
-var node8 = ::blueprint::nodes::subgraph::Subgraph()
-node8.load_from_file(_editor, "wood.ves")
-node8.set_prop_value("hori", false)
+_editor.add_node(node7, -583.59151944247, 139.89687832919)
 
-_editor.add_node(node8, -298.22229003906, 147.30731689453)
+var node8 = ::blueprint::nodes::number::Number()
 
-var node9 = ::archgraph::nodes::comp::Comp()
-node9.query_param("selector").value = "face6"
+node8.value = 0.08538818359375
 
-node9.on_param_dirty()
+_editor.add_node(node8, -516.68493833033, -88.65346979849)
 
-_editor.add_node(node9, -583.59151944247, 139.89687832919)
+var node9 = ::blueprint::nodes::integer::Integer()
 
-var node10 = ::blueprint::nodes::number::Number()
+node9.value = 1
 
-node10.value = 0.08538818359375
+_editor.add_node(node9, -513.65468753133, -153.88197282805)
 
-_editor.add_node(node10, -516.68493833033, -88.65346979849)
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "window.ves")
 
-var node11 = ::blueprint::nodes::integer::Integer()
+_editor.add_node(node10, -299.53900317383, 106.9981640625)
 
-node11.value = 1
+var node11 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node11.query_param("size").value.set(1.5, 1, 1)
 
-_editor.add_node(node11, -513.65468753133, -153.88197282805)
+_editor.add_node(node11, -666.32938899911, -250.81303808484)
 
-var node12 = ::blueprint::nodes::subgraph::Subgraph()
-node12.load_from_file(_editor, "window.ves")
+var node12 = ::archgraph::nodes::comp::Comp()
+node12.query_param("selector").value = "side"
 
-_editor.add_node(node12, -295.54600317383, -23.4398359375)
+node12.on_param_dirty()
 
+_editor.add_node(node12, -512.41240304639, -232.15875537446)
+
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "door.ves")
+
+_editor.add_node(node13, -302.83855712891, -7.9793706054699)
+
+Blueprint.connect(node11, "geo", node12, "geo")
 Blueprint.connect(node3, "geo", node4, "geo")
-Blueprint.connect(node4, "geo", node9, "geo")
-Blueprint.connect(node9, "front", node12, "facade")
-Blueprint.connect(node10, "v", node12, "win_frame_width")
-Blueprint.connect(node11, "v", node12, "win_type")
-Blueprint.connect(node12, "geo", node5, "in1")
+Blueprint.connect(node4, "geo", node7, "geo")
+Blueprint.connect(node7, "front", node10, "facade")
+Blueprint.connect(node8, "v", node10, "win_frame_width")
+Blueprint.connect(node9, "v", node10, "win_type")
 Blueprint.connect(node4, "geo", node2, "geo")
-Blueprint.connect(node2, "side", node8, "facade")
-Blueprint.connect(node2, "side", node6, "facade")
-Blueprint.connect(node7, "v", node6, "type")
+Blueprint.connect(node2, "side", node13, "facade")
+Blueprint.connect(node2, "side", node5, "in0")
+Blueprint.connect(node13, "geo", node5, "in1")
 Blueprint.connect(node5, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")

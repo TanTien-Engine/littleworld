@@ -1,0 +1,74 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -630.872096523, -64.762577521748)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = "geometry"
+
+_editor.add_node(node1, 245.85255122445, 333.17933519416)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "single_door.ves")
+
+_editor.add_node(node2, 154.21521753979, 79.62755276279)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "double_door.ves")
+
+_editor.add_node(node3, 152.84147257701, -30.61307287754)
+
+var node4 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node4, 496.82644628099, 122.26033057851)
+
+var node5 = ::archgraph::nodes::scale_scope::ScaleScope()
+node5.query_param("s").value.set(1, 1, 0.1)
+
+_editor.add_node(node5, 211.68727603629, -164.07645208185)
+
+var node6 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node6, -167.3885434994, 89.266488067379)
+
+var node7 = ::blueprint::nodes::compare::Compare()
+
+node7.cmp = "less"
+
+_editor.add_node(node7, 197.69918444925, 205.26187608405)
+
+var node8 = ::blueprint::nodes::number::Number()
+
+node8.value = 1.2
+
+_editor.add_node(node8, 63.965148925781, 173.70664978027)
+
+var node9 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node9, 353.24184499693, 133.38837350893)
+
+var node10 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node10, -254.42666071111, 284.82100053267)
+
+var node11 = ::blueprint::nodes::list_flatten::ListFlatten()
+
+_editor.add_node(node11, -391.66692005504, 292.2163252397)
+
+Blueprint.connect(node10, "curr_item", node6, "geo")
+Blueprint.connect(node6, "sx", node7, "a")
+Blueprint.connect(node8, "v", node7, "b")
+Blueprint.connect(node10, "curr_item", node5, "geo")
+Blueprint.connect(node7, "out", node9, "cond")
+Blueprint.connect(node2, "geo", node9, "true")
+Blueprint.connect(node3, "geo", node9, "false")
+Blueprint.connect(node9, "result", node4, "geo")
+Blueprint.connect(node5, "geo", node4, "pos")
+Blueprint.connect(node0, "var", node11, "list")
+Blueprint.connect(node11, "list", node10, "items")
+Blueprint.connect(node4, "geo", node10, "eval")
+Blueprint.connect(node10, "result", node1, "var")

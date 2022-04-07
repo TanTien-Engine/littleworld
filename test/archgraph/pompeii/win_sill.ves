@@ -31,6 +31,7 @@ _editor.add_node(node4, 13.32471191102, 185.66410325499)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
 node5.load_from_file(_editor, "stone_block.ves")
+node5.set_prop_value("hori", true)
 
 _editor.add_node(node5, -41.163024902344, -9.9890899658203)
 

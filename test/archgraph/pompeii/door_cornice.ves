@@ -1,0 +1,74 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, 111.82673415738, -152.0361762244)
+
+var node1 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node1, 567.67056278428, -51.96162986208)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "geo"
+node2.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node2, 706.74, -41.46)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "stone_block_tex.ves")
+
+_editor.add_node(node3, 117.09572625783, -28.32518952425)
+
+var node4 = ::archgraph::nodes::mesh_file::MeshFile()
+node4.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/door-cornice.01.simple.obj")
+
+_editor.add_node(node4, -202.83643528648, 61.305238934429)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node5, 366.79999044165, 3.7576053668098)
+
+var node6 = ::archgraph::nodes::scale_scope::ScaleScope()
+node6.query_param("s").value.set(1.2, 1, 0.2)
+
+_editor.add_node(node6, 251.2938296158, -178.08897727273)
+
+var node7 = ::archgraph::nodes::mesh_file::MeshFile()
+node7.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/door-cornice.02.triangle.obj")
+
+_editor.add_node(node7, -203.13377651863, 16.851368766218)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node8, 117.4432260602, 75.953106339797)
+
+var node9 = ::blueprint::nodes::number::Number()
+
+node9.value = 0
+
+_editor.add_node(node9, -73.160438612115, 110.16904679319)
+
+var node10 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node10, -75.414388070511, 31.280995174782)
+
+var node11 = ::archgraph::nodes::translate_scope::TranslateScope()
+node11.query_param("t").value.set(0, 0, 0.5)
+
+_editor.add_node(node11, 393.28841885653, -181.7231056907)
+
+Blueprint.connect(node4, "geo", node10, "in0")
+Blueprint.connect(node7, "geo", node10, "in1")
+Blueprint.connect(node9, "v", node8, "rand")
+Blueprint.connect(node10, "list", node8, "items")
+Blueprint.connect(node8, "tex", node5, "geo")
+Blueprint.connect(node3, "tex", node5, "texture")
+Blueprint.connect(node0, "var", node6, "geo")
+Blueprint.connect(node6, "geo", node11, "geo")
+Blueprint.connect(node5, "geo", node1, "geo")
+Blueprint.connect(node11, "geo", node1, "pos")
+Blueprint.connect(node1, "geo", node2, "var")

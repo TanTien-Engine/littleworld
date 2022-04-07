@@ -1,0 +1,27 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -322.3380676608, 267.6027437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 104.19838, 263.89592)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "door_beam.ves")
+
+_editor.add_node(node2, -115.00154876709, 298.61096191406)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "door_cornice.ves")
+
+_editor.add_node(node3, -112.80154418945, 212.81097106934)
+
+Blueprint.connect(node0, "var", node3, "facade")
+Blueprint.connect(node3, "geo", node1, "var")
+Blueprint.connect(node0, "var", node2, "facade")

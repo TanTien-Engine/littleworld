@@ -1,0 +1,306 @@
+var node0 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node0, 460.76097701546, -629.72752659887)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node1, 697.44830121468, -596.05287017797)
+
+var node2 = ::blueprint::nodes::input::Input()
+
+node2.var_name = "type"
+node2.var_type = "int"
+
+_editor.add_node(node2, -891.19190860904, -9.0982464218979)
+
+var node3 = ::blueprint::nodes::switch_f::SwitchF()
+
+_editor.add_node(node3, 63.475379272058, -85.689435728709)
+
+var node4 = ::blueprint::nodes::store::Store()
+
+node4.var_name = "type"
+
+_editor.add_node(node4, -748.38741850339, -7.3438615674979)
+
+var node5 = ::blueprint::nodes::load::Load()
+
+node5.var_name = "type"
+
+_editor.add_node(node5, -92.680602728122, 17.791569020931)
+
+var node6 = ::blueprint::nodes::switch_f::SwitchF()
+
+_editor.add_node(node6, 1041.6277603561, -791.32745619513)
+
+var node7 = ::blueprint::nodes::load::Load()
+
+node7.var_name = "type"
+
+_editor.add_node(node7, 898.16467687874, -741.01631689184)
+
+var node8 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node8, 475.88197301546, -1061.7701485989)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node9, 669.62705721468, -951.64835217797)
+
+var node10 = ::archgraph::nodes::mesh_file::MeshFile()
+node10.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_noble_1/single-door.noble.1.obj")
+
+_editor.add_node(node10, -486.03528870224, -56.703584787659)
+
+var node11 = ::archgraph::nodes::mesh_file::MeshFile()
+node11.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_noble_1/single-door.noble.2.obj")
+
+_editor.add_node(node11, -486.23528565048, -102.90363361579)
+
+var node12 = ::blueprint::nodes::subgraph::Subgraph()
+node12.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node12, -142.782006574, -56.989799719749)
+
+var node13 = ::blueprint::nodes::input::Input()
+
+node13.var_name = "rand"
+node13.var_type = "num"
+
+_editor.add_node(node13, -890.89357914837, -81.023503986998)
+
+var node14 = ::blueprint::nodes::store::Store()
+
+node14.var_name = "rand"
+
+_editor.add_node(node14, -754.92429472409, -80.794603754998)
+
+var node15 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node15, -355.51918305038, -84.154329416566)
+
+var node16 = ::blueprint::nodes::load::Load()
+
+node16.var_name = "rand"
+
+_editor.add_node(node16, -358.51918305038, -18.154329416566)
+
+var node17 = ::rendergraph::nodes::texture::Texture()
+node17.query_param("unif_name").value = "u_tex"
+node17.gamma_correction = false
+node17.mipmap = false
+node17.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_noble_1/single-door.noble.1.c.jpg")
+node17.set_sampler("linear_repeat")
+
+_editor.add_node(node17, -839.46411941813, -539.6910629473)
+
+var node18 = ::rendergraph::nodes::texture::Texture()
+node18.query_param("unif_name").value = "u_tex"
+node18.gamma_correction = false
+node18.mipmap = false
+node18.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_noble_1/single-door.noble.2.c.jpg")
+node18.set_sampler("linear_repeat")
+
+_editor.add_node(node18, -630.09779334391, -542.61926040824)
+
+var node19 = ::rendergraph::nodes::texture::Texture()
+node19.query_param("unif_name").value = "u_tex"
+node19.gamma_correction = false
+node19.mipmap = false
+node19.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_noble_1/single-door.noble.3.c.jpg")
+node19.set_sampler("linear_repeat")
+
+_editor.add_node(node19, -416.33919038981, -541.1551657305)
+
+var node20 = ::rendergraph::nodes::texture::Texture()
+node20.query_param("unif_name").value = "u_tex"
+node20.gamma_correction = false
+node20.mipmap = false
+node20.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_noble_1/single-door.noble.4.c.jpg")
+node20.set_sampler("linear_repeat")
+
+_editor.add_node(node20, -204.04468304118, -539.69106133597)
+
+var node21 = ::rendergraph::nodes::texture::Texture()
+node21.query_param("unif_name").value = "u_tex"
+node21.gamma_correction = false
+node21.mipmap = false
+node21.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_noble_1/single-door.noble.5.c.jpg")
+node21.set_sampler("linear_repeat")
+
+_editor.add_node(node21, 14.119393498863, -538.16256100394)
+
+var node22 = ::rendergraph::nodes::texture::Texture()
+node22.query_param("unif_name").value = "u_tex"
+node22.gamma_correction = false
+node22.mipmap = false
+node22.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_noble_1/single-door.noble.6.c.jpg")
+node22.set_sampler("linear_repeat")
+
+_editor.add_node(node22, 224.58082656332, -532.31641578949)
+
+var node23 = ::blueprint::nodes::load::Load()
+
+node23.var_name = "rand"
+
+_editor.add_node(node23, 460.99077605611, -520.42846518508)
+
+var node24 = ::blueprint::nodes::load::Load()
+
+node24.var_name = "rand"
+
+_editor.add_node(node24, 475.55138568345, -948.67417332333)
+
+var node25 = ::blueprint::nodes::subgraph::Subgraph()
+node25.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node25, -138.10214657401, -219.78478971974)
+
+var node26 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node26, -349.83932305039, -300.94931941656)
+
+var node27 = ::blueprint::nodes::load::Load()
+
+node27.var_name = "rand"
+
+_editor.add_node(node27, -343.83932305039, -201.94931941656)
+
+var node28 = ::archgraph::nodes::mesh_file::MeshFile()
+node28.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.1.obj")
+
+_editor.add_node(node28, -513.44621332245, -200.27139983719)
+
+var node29 = ::archgraph::nodes::mesh_file::MeshFile()
+node29.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.2.obj")
+
+_editor.add_node(node29, -512.11522394256, -248.18738958328)
+
+var node30 = ::archgraph::nodes::mesh_file::MeshFile()
+node30.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.3.obj")
+
+_editor.add_node(node30, -513.43922076873, -295.76540447586)
+
+var node31 = ::archgraph::nodes::mesh_file::MeshFile()
+node31.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.4.obj")
+
+_editor.add_node(node31, -512.10822345428, -343.68139837234)
+
+var node32 = ::archgraph::nodes::mesh_file::MeshFile()
+node32.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.5.obj")
+
+_editor.add_node(node32, -515.12222345428, -389.6043923909)
+
+var node33 = ::rendergraph::nodes::texture::Texture()
+node33.query_param("unif_name").value = "u_tex"
+node33.gamma_correction = false
+node33.mipmap = false
+node33.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.1.c.jpg")
+node33.set_sampler("linear_repeat")
+
+_editor.add_node(node33, -839.03794844, -964.3938335225)
+
+var node34 = ::rendergraph::nodes::texture::Texture()
+node34.query_param("unif_name").value = "u_tex"
+node34.gamma_correction = false
+node34.mipmap = false
+node34.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.2.c.jpg")
+node34.set_sampler("linear_repeat")
+
+_editor.add_node(node34, -629.67165257086, -959.56228266312)
+
+var node35 = ::rendergraph::nodes::texture::Texture()
+node35.query_param("unif_name").value = "u_tex"
+node35.gamma_correction = false
+node35.mipmap = false
+node35.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.3.c.jpg")
+node35.set_sampler("linear_repeat")
+
+_editor.add_node(node35, -415.47382719977, -961.17282014359)
+
+var node36 = ::rendergraph::nodes::texture::Texture()
+node36.query_param("unif_name").value = "u_tex"
+node36.gamma_correction = false
+node36.mipmap = false
+node36.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.4.c.jpg")
+node36.set_sampler("linear_repeat")
+
+_editor.add_node(node36, -201.27599394415, -963.32768252359)
+
+var node37 = ::rendergraph::nodes::texture::Texture()
+node37.query_param("unif_name").value = "u_tex"
+node37.gamma_correction = false
+node37.mipmap = false
+node37.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.5.c.jpg")
+node37.set_sampler("linear_repeat")
+
+_editor.add_node(node37, 15.02032707333, -966.3570816575)
+
+var node38 = ::rendergraph::nodes::texture::Texture()
+node38.query_param("unif_name").value = "u_tex"
+node38.gamma_correction = false
+node38.mipmap = false
+node38.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/single-door_normal_1/single-door.normal.6.c.jpg")
+node38.set_sampler("linear_repeat")
+
+_editor.add_node(node38, 231.5228015532, -966.35698985625)
+
+var node39 = ::blueprint::nodes::subgraph::Subgraph()
+node39.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node39, 917.60122314453, -289.48436035156)
+
+var node40 = ::blueprint::nodes::output::Output()
+
+node40.var_name = "geo"
+node40.var_type = "array"
+
+_editor.add_node(node40, 1105.151184082, -277.38436035156)
+
+Blueprint.connect(node33, "tex", node8, "in0")
+Blueprint.connect(node34, "tex", node8, "in1")
+Blueprint.connect(node35, "tex", node8, "in2")
+Blueprint.connect(node36, "tex", node8, "in3")
+Blueprint.connect(node37, "tex", node8, "in4")
+Blueprint.connect(node38, "tex", node8, "in5")
+Blueprint.connect(node28, "geo", node26, "in0")
+Blueprint.connect(node29, "geo", node26, "in1")
+Blueprint.connect(node30, "geo", node26, "in2")
+Blueprint.connect(node31, "geo", node26, "in3")
+Blueprint.connect(node32, "geo", node26, "in4")
+Blueprint.connect(node24, "var", node9, "rand")
+Blueprint.connect(node8, "list", node9, "items")
+Blueprint.connect(node17, "tex", node0, "in0")
+Blueprint.connect(node18, "tex", node0, "in1")
+Blueprint.connect(node19, "tex", node0, "in2")
+Blueprint.connect(node20, "tex", node0, "in3")
+Blueprint.connect(node21, "tex", node0, "in4")
+Blueprint.connect(node22, "tex", node0, "in5")
+Blueprint.connect(node13, "var", node14, "var")
+Blueprint.connect(node14, "var", node27, "var")
+Blueprint.connect(node27, "var", node25, "rand")
+Blueprint.connect(node26, "list", node25, "items")
+Blueprint.connect(node14, "var", node23, "var")
+Blueprint.connect(node23, "var", node1, "rand")
+Blueprint.connect(node0, "list", node1, "items")
+Blueprint.connect(node14, "var", node16, "var")
+Blueprint.connect(node10, "geo", node15, "in0")
+Blueprint.connect(node11, "geo", node15, "in1")
+Blueprint.connect(node16, "var", node12, "rand")
+Blueprint.connect(node15, "list", node12, "items")
+Blueprint.connect(node2, "var", node4, "var")
+Blueprint.connect(node4, "var", node7, "var")
+Blueprint.connect(node7, "var", node6, "type")
+Blueprint.connect(node1, "tex", node6, "default")
+Blueprint.connect(node1, "tex", node6, "case0")
+Blueprint.connect(node9, "tex", node6, "case1")
+Blueprint.connect(node4, "var", node5, "var")
+Blueprint.connect(node5, "var", node3, "type")
+Blueprint.connect(node12, "tex", node3, "default")
+Blueprint.connect(node12, "tex", node3, "case0")
+Blueprint.connect(node25, "tex", node3, "case1")
+Blueprint.connect(node3, "result", node39, "geo")
+Blueprint.connect(node6, "result", node39, "texture")
+Blueprint.connect(node39, "geo", node40, "var")

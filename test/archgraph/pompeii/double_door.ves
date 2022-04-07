@@ -1,0 +1,158 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "rand"
+node0.var_type = "num"
+
+_editor.add_node(node0, 463.9722531476, 151.328806218)
+
+var node1 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node1, 487.18139892578, 295.69123535156)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node2, 686.426483125, 351.91303177246)
+
+var node3 = ::blueprint::nodes::input::Input()
+
+node3.var_name = "type"
+node3.var_type = "int"
+
+_editor.add_node(node3, -135.65172521307, 728.0977635831)
+
+var node4 = ::blueprint::nodes::switch_f::SwitchF()
+
+_editor.add_node(node4, 434.30874078924, 687.47118030895)
+
+var node5 = ::archgraph::nodes::mesh_file::MeshFile()
+node5.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/double-door_noble_1/double-door_noble_1.obj")
+
+_editor.add_node(node5, 284.85612487793, 679.81268310547)
+
+var node6 = ::archgraph::nodes::mesh_file::MeshFile()
+node6.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/double-door_noble_2/double-door_noble_2.obj")
+
+_editor.add_node(node6, 284.85614013672, 632.81268310547)
+
+var node7 = ::blueprint::nodes::store::Store()
+
+node7.var_name = "type"
+
+_editor.add_node(node7, 7.152764892578, 729.8521484375)
+
+var node8 = ::blueprint::nodes::load::Load()
+
+node8.var_name = "type"
+
+_editor.add_node(node8, 282.15275878906, 730.95218505859)
+
+var node9 = ::rendergraph::nodes::texture::Texture()
+node9.query_param("unif_name").value = "u_tex"
+node9.gamma_correction = false
+node9.mipmap = false
+node9.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/double-door_noble_1/double-door_noble_1.1.c.jpg")
+node9.set_sampler("linear_repeat")
+
+_editor.add_node(node9, -233.74721679688, 319.55217895508)
+
+var node10 = ::rendergraph::nodes::texture::Texture()
+node10.query_param("unif_name").value = "u_tex"
+node10.gamma_correction = false
+node10.mipmap = false
+node10.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/double-door_noble_1/double-door_noble_1.2.c.jpg")
+node10.set_sampler("linear_repeat")
+
+_editor.add_node(node10, -24.747253417969, 317.35216064453)
+
+var node11 = ::rendergraph::nodes::texture::Texture()
+node11.query_param("unif_name").value = "u_tex"
+node11.gamma_correction = false
+node11.mipmap = false
+node11.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/double-door_noble_1/double-door_noble_1.3.c.jpg")
+node11.set_sampler("linear_repeat")
+
+_editor.add_node(node11, 196.35275268555, 318.45218505859)
+
+var node12 = ::blueprint::nodes::switch_f::SwitchF()
+
+_editor.add_node(node12, 1029.3959422664, 156.6384457553)
+
+var node13 = ::blueprint::nodes::load::Load()
+
+node13.var_name = "type"
+
+_editor.add_node(node13, 885.93285878906, 206.94958505859)
+
+var node14 = ::rendergraph::nodes::texture::Texture()
+node14.query_param("unif_name").value = "u_tex"
+node14.gamma_correction = false
+node14.mipmap = false
+node14.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/double-door_noble_2/double-door_noble_2.1.c.jpg")
+node14.set_sampler("linear_repeat")
+
+_editor.add_node(node14, -236.18976611328, -53.660063842773)
+
+var node15 = ::rendergraph::nodes::texture::Texture()
+node15.query_param("unif_name").value = "u_tex"
+node15.gamma_correction = false
+node15.mipmap = false
+node15.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/double-door_noble_2/double-door_noble_2.2.c.jpg")
+node15.set_sampler("linear_repeat")
+
+_editor.add_node(node15, -25.891755371094, -60.315061889648)
+
+var node16 = ::rendergraph::nodes::texture::Texture()
+node16.query_param("unif_name").value = "u_tex"
+node16.gamma_correction = false
+node16.mipmap = false
+node16.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/double-door_noble_2/double-door_noble_2.3.c.jpg")
+node16.set_sampler("linear_repeat")
+
+_editor.add_node(node16, 199.04719921875, -58.984046020508)
+
+var node17 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node17, 471.35015492578, -66.50424664844)
+
+var node18 = ::blueprint::nodes::subgraph::Subgraph()
+node18.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node18, 670.595239125, -10.28245022754)
+
+var node19 = ::blueprint::nodes::subgraph::Subgraph()
+node19.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node19, 907.18773193359, 568.781640625)
+
+var node20 = ::blueprint::nodes::output::Output()
+
+node20.var_name = "geo"
+node20.var_type = "array"
+
+_editor.add_node(node20, 1095.0149869052, 578.38164728338)
+
+Blueprint.connect(node14, "tex", node17, "in0")
+Blueprint.connect(node15, "tex", node17, "in1")
+Blueprint.connect(node16, "tex", node17, "in2")
+Blueprint.connect(node9, "tex", node1, "in0")
+Blueprint.connect(node10, "tex", node1, "in1")
+Blueprint.connect(node11, "tex", node1, "in2")
+Blueprint.connect(node3, "var", node7, "var")
+Blueprint.connect(node7, "var", node13, "var")
+Blueprint.connect(node7, "var", node8, "var")
+Blueprint.connect(node8, "var", node4, "type")
+Blueprint.connect(node5, "geo", node4, "default")
+Blueprint.connect(node5, "geo", node4, "case0")
+Blueprint.connect(node6, "geo", node4, "case1")
+Blueprint.connect(node0, "var", node18, "rand")
+Blueprint.connect(node17, "list", node18, "items")
+Blueprint.connect(node0, "var", node2, "rand")
+Blueprint.connect(node1, "list", node2, "items")
+Blueprint.connect(node13, "var", node12, "type")
+Blueprint.connect(node2, "tex", node12, "default")
+Blueprint.connect(node2, "tex", node12, "case0")
+Blueprint.connect(node18, "tex", node12, "case1")
+Blueprint.connect(node4, "result", node19, "geo")
+Blueprint.connect(node12, "result", node19, "texture")
+Blueprint.connect(node19, "geo", node20, "var")

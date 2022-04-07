@@ -1,0 +1,38 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "rand"
+node0.var_type = "num"
+
+_editor.add_node(node0, 748.6522531476, 210.728806218)
+
+var node1 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node1, 736.59048983487, 94.385450227593)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "geo"
+node2.var_type = "geometry"
+
+_editor.add_node(node2, 1147.884880744, 191.19335545455)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node3, 949.326483125, 181.41303177246)
+
+var node4 = ::archgraph::nodes::mesh_file::MeshFile()
+node4.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/wood-cross.01.obj")
+
+_editor.add_node(node4, 597.13941236764, 122.90726527695)
+
+var node5 = ::archgraph::nodes::mesh_file::MeshFile()
+node5.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/wood-cross.02.obj")
+
+_editor.add_node(node5, 598.53803549522, 74.507196095364)
+
+Blueprint.connect(node4, "geo", node1, "in0")
+Blueprint.connect(node5, "geo", node1, "in1")
+Blueprint.connect(node0, "var", node3, "rand")
+Blueprint.connect(node1, "list", node3, "items")
+Blueprint.connect(node3, "tex", node2, "var")
