@@ -1,0 +1,125 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -684.70263292273, 90.990975453768)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 583.73590545454, -99.606673636368)
+
+var node2 = ::archgraph::nodes::mesh_file::MeshFile()
+node2.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/interior/counter.obj")
+
+_editor.add_node(node2, -664.82063306214, 450.89063037174)
+
+var node3 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node3, 448.04195976673, -109.73227397017)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node4, -463.26921164773, 428.21009382768)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.mipmap = false
+node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/windows/special_window.c.jpg")
+node5.set_sampler("linear_repeat")
+
+_editor.add_node(node5, -709.79815391351, 345.40018028701)
+
+var node6 = ::archgraph::nodes::split::Split()
+node6.query_param("axis").value = "vert"
+node6.query_param("repeat").value = false
+
+_editor.add_node(node6, -531.51029940518, 43.268198610874)
+
+var node7 = ::archgraph::nodes::split_size::SplitSize()
+node7.query_param("size").value = 1.3
+node7.query_param("mode").value = "absolute"
+
+_editor.add_node(node7, -678.91029330167, 15.768192507358)
+
+var node8 = ::archgraph::nodes::split::Split()
+node8.query_param("axis").value = "hori"
+node8.query_param("repeat").value = false
+
+_editor.add_node(node8, -372.18934299326, -56.873478890016)
+
+var node9 = ::archgraph::nodes::split_size::SplitSize()
+node9.query_param("size").value = 1.5
+node9.query_param("mode").value = "absolute"
+
+_editor.add_node(node9, -528.91635856141, -65.178436348083)
+
+var node10 = ::archgraph::nodes::split_size::SplitSize()
+node10.query_param("size").value = 1
+node10.query_param("mode").value = "relative"
+
+_editor.add_node(node10, -527.18037084154, -155.84408644999)
+
+var node11 = ::archgraph::nodes::split::Split()
+node11.query_param("axis").value = "hori"
+node11.query_param("repeat").value = true
+
+_editor.add_node(node11, 162.44000365659, -137.75074135168)
+
+var node12 = ::archgraph::nodes::split_size::SplitSize()
+node12.query_param("size").value = 1.1
+node12.query_param("mode").value = "floating"
+
+_editor.add_node(node12, 17.047474409651, -170.78461092571)
+
+var node13 = ::archgraph::nodes::translate_scope::TranslateScope()
+node13.query_param("t").value.set(0, 0, -0.5)
+
+_editor.add_node(node13, 301.87552001953, -138.68928635476)
+
+var node14 = ::archgraph::nodes::split::Split()
+node14.query_param("axis").value = "hori"
+node14.query_param("repeat").value = false
+
+_editor.add_node(node14, -371.07186586926, -202.68325983903)
+
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node15, -27.472154175812, -70.586925821603)
+
+var node16 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node16, -240.69016436112, -102.9705502849)
+
+var node17 = ::blueprint::nodes::number::Number()
+
+node17.value = 0
+
+_editor.add_node(node17, -238.21082526593, -18.698583968738)
+
+Blueprint.connect(node2, "geo", node4, "geo")
+Blueprint.connect(node5, "tex", node4, "texture")
+Blueprint.connect(node0, "var", node6, "parent")
+Blueprint.connect(node7, "size", node6, "size0")
+Blueprint.connect(node6, "child0", node14, "parent")
+Blueprint.connect(node10, "size", node14, "size0")
+Blueprint.connect(node9, "size", node14, "size1")
+Blueprint.connect(node6, "child0", node8, "parent")
+Blueprint.connect(node9, "size", node8, "size0")
+Blueprint.connect(node10, "size", node8, "size1")
+Blueprint.connect(node8, "child1", node16, "in0")
+Blueprint.connect(node14, "child0", node16, "in1")
+Blueprint.connect(node17, "v", node15, "rand")
+Blueprint.connect(node16, "list", node15, "items")
+Blueprint.connect(node15, "tex", node11, "parent")
+Blueprint.connect(node12, "size", node11, "size0")
+Blueprint.connect(node11, "child0", node13, "geo")
+Blueprint.connect(node4, "geo", node3, "geo")
+Blueprint.connect(node13, "geo", node3, "pos")
+Blueprint.connect(node3, "geo", node1, "var")

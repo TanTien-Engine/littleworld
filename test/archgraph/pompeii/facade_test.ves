@@ -5,14 +5,14 @@ _editor.add_node(node0, 117.15444493852, 42.36663679465)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(0.69420684098653, 1.7911715573768, 3.446572950301)
-node1.cam.yaw = -452.5
-node1.cam.pitch = -33.8
+node1.cam.position.set(6.912050143376, 0.38862422051825, 6.655337200724)
+node1.cam.yaw = -489.8
+node1.cam.pitch = -13.7
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
 
-_editor.add_node(node1, -70.038536874961, -85.660860599241)
+_editor.add_node(node1, -69.427765038597, -156.20977359098)
 
 var node2 = ::archgraph::nodes::comp::Comp()
 node2.query_param("selector").value = "side"
@@ -66,7 +66,7 @@ node10.load_from_file(_editor, "window.ves")
 _editor.add_node(node10, -299.53900317383, 106.9981640625)
 
 var node11 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
-node11.query_param("size").value.set(1.5, 1, 1)
+node11.query_param("size").value.set(10, 5, 5)
 
 _editor.add_node(node11, -666.32938899911, -250.81303808484)
 
@@ -82,7 +82,14 @@ node13.load_from_file(_editor, "door.ves")
 
 _editor.add_node(node13, -302.83855712891, -7.9793706054699)
 
+var node14 = ::blueprint::nodes::subgraph::Subgraph()
+node14.load_from_file(_editor, "shop_opening.ves")
+
+_editor.add_node(node14, -309.09689608487, -128.52476917614)
+
 Blueprint.connect(node11, "geo", node12, "geo")
+Blueprint.connect(node12, "side", node14, "facade")
+Blueprint.connect(node14, "geo", node5, "in1")
 Blueprint.connect(node3, "geo", node4, "geo")
 Blueprint.connect(node4, "geo", node7, "geo")
 Blueprint.connect(node7, "front", node10, "facade")
@@ -90,7 +97,5 @@ Blueprint.connect(node8, "v", node10, "win_frame_width")
 Blueprint.connect(node9, "v", node10, "win_type")
 Blueprint.connect(node4, "geo", node2, "geo")
 Blueprint.connect(node2, "side", node13, "facade")
-Blueprint.connect(node2, "side", node5, "in0")
-Blueprint.connect(node13, "geo", node5, "in1")
 Blueprint.connect(node5, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")

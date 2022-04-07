@@ -1,0 +1,14 @@
+var node0 = ::blueprint::nodes::number::Number()
+
+node0.value = 1.4
+
+_editor.add_node(node0, -155, 133)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "door_w"
+node1.var_type = "num"
+
+_editor.add_node(node1, -19, 145)
+
+Blueprint.connect(node0, "v", node1, "var")
