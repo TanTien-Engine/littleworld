@@ -20,6 +20,7 @@ class SplitSize is Node
 
 		this.params.add(NodeParam("size", 0))
 		this.params.add(NodeParam("mode", "absolute", { "combo" : [ "absolute", "relative", "floating" ] }))
+		this.params.add(NodeParam("scale", 1.0))
 
 		this.layout()
 	}
@@ -34,6 +35,9 @@ class SplitSize is Node
 
 		var mode = this.query_param("mode").value
 
-		return Variant(VAR_TYPE_SPLIT_SIZE, VarSplitSize(size, mode))
+		var s_sz = VarSplitSize(size, mode)
+		s_sz.scale = this.query_param("scale").value
+
+		return Variant(VAR_TYPE_SPLIT_SIZE, s_sz)
 	}
 }

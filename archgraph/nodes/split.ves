@@ -8,12 +8,33 @@ import "blueprint.variant_helper" for VariantHelper
 import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SPLIT_SIZE
 import "archgraph.geometry" for Geometry
 import "archgraph.scope_helper" for ScopeHelper
-import "maths.vector" for Vector3, Vector4
+import "maths.vector" for Vector3
 import "archgen" for ScopeTools
 import "geometry" for PolyPoint, PolyFace, Polytope
 import "math" for Math
 
 var CHILD_IDX_OFFSET = 1
+
+class SplitSize
+{
+	init(size, scale)
+	{
+		this.size  = size
+		this.scale = scale
+	}
+}
+
+class SplitRect
+{
+	init(x, y, w, h)
+	{
+		this.x = x
+		this.y = y
+		this.w = w
+		this.h = h
+		this.s = 1.0
+	}
+}
 
 class Split is Node
 {
@@ -153,7 +174,7 @@ class Split is Node
 			return
 		}
 
-		var rect = Vector4(0, 0, width, height)
+		var rect = SplitRect(0, 0, width, height)
 
 		for (var _ in dst_sizes) {
 			rects.add([])
@@ -166,8 +187,10 @@ class Split is Node
 				for (var i in 0..dst_sizes[0].count) {				
 					for (var j in 0..dst_sizes.count) {
 						var sz = dst_sizes[j][i]
-						rects[j].add(Vector4(x, rect.y, sz, rect.w))
-						x = x + sz
+						var sr = SplitRect(x, rect.y, sz.size, rect.h)
+						sr.s = sz.scale
+						rects[j].add(sr)
+						x = x + sz.size
 					}
 				}
 			}
@@ -177,8 +200,10 @@ class Split is Node
 				for (var i in 0..dst_sizes[0].count) {				
 					for (var j in 0..dst_sizes.count) {				
 						var sz = dst_sizes[j][i]
-						rects[j].add(Vector4(rect.x, y, rect.z, sz))
-						y = y + sz
+						var sr = SplitRect(rect.x, y, rect.w, sz.size)
+						sr.s = sz.scale
+						rects[j].add(sr)
+						y = y + sz.size
 					}
 				}
 			}
@@ -191,8 +216,10 @@ class Split is Node
 				for (var i in 0 .. dst_sizes.count) 
 				{
 					var sz = dst_sizes[i]
-					rects[i].add(Vector4(x, rect.y, sz, rect.w))
-					x = x + sz
+					var sr = SplitRect(x, rect.y, sz.size, rect.h)
+					sr.s = sz.scale
+					rects[i].add(sr)
+					x = x + sz.size
 				}
 			}
 			else
@@ -201,8 +228,10 @@ class Split is Node
 				for (var i in 0 .. dst_sizes.count) 
 				{
 					var sz = dst_sizes[i]
-					rects[i].add(Vector4(rect.x, y, rect.z, sz))
-					y = y + sz
+					var sr = SplitRect(rect.x, y, rect.w, sz.size)
+					sr.s = sz.scale
+					rects[i].add(sr)
+					y = y + sz.size
 				}
 			}
 		}
@@ -273,11 +302,11 @@ class Split is Node
 		for (var sz in src) 
 		{
 			if (sz.mode == "absolute") {
-				dst.add(sz.size)
+				dst.add(SplitSize(sz.size, sz.scale))
 			} else if (sz.mode == "relative") {
-				dst.add(sz.size * tot_len)
+				dst.add(SplitSize(sz.size * tot_len, sz.scale))
 			} else if (sz.mode == "floating") {
-				dst.add(-sz.size)
+				dst.add(SplitSize(-sz.size, sz.scale))
 				floating_num = floating_num + 1
 			}
 		}
@@ -289,10 +318,10 @@ class Split is Node
 			var tot_floating = 0
 			for (var sz in dst) 
 			{
-				if (sz > 0) {
-					avaliable = avaliable - sz
+				if (sz.size > 0) {
+					avaliable = avaliable - sz.size
 				} else {
-					tot_floating = tot_floating - sz
+					tot_floating = tot_floating - sz.size
 				}
 			}
 			if (avaliable > 0 and tot_floating > 0)
@@ -300,18 +329,18 @@ class Split is Node
 				if (floating_num == 1)
 				{
 					for (var i in 0..dst.count) {
-						if (dst[i] < 0) {
-							var len = -dst[i]
-							dst[i] = Math.min(len, avaliable)
+						if (dst[i].size < 0) {
+							var len = -dst[i].size
+							dst[i].size = Math.min(len, avaliable)
 						}
 					}
 				}
 				else
 				{
 					for (var i in 0..dst.count) {
-						if (dst[i] < 0) {
-							var len = -dst[i]
-							dst[i] = Math.min(len, avaliable * len / tot_floating)
+						if (dst[i].size < 0) {
+							var len = -dst[i].size
+							dst[i].size = Math.min(len, avaliable * len / tot_floating)
 						}
 					}
 				}
@@ -319,8 +348,8 @@ class Split is Node
 			else
 			{
 				for (var i in 0..dst.count) {
-					if (dst[i] < 0) {
-						dst[i] = 0
+					if (dst[i].size < 0) {
+						dst[i].size = 0
 					}
 				}
 			}
@@ -331,16 +360,16 @@ class Split is Node
 		{
 			var len = 0
 			var idx = 0
-			while (idx < dst.count and len + dst[idx] < length) {
-				len = len + dst[idx]
+			while (idx < dst.count and len + dst[idx].size < length) {
+				len = len + dst[idx].size
 				idx = idx + 1
 			}
 
 			if (idx < dst.count)
 			{
-				dst[idx] = length - len
+				dst[idx].size = length - len
 				for (var i in idx + 1 .. dst.count) {
-					dst[i] = 0
+					dst[i].size = 0
 				}
 			}
 		}
@@ -348,7 +377,7 @@ class Split is Node
 		// calc tot len
 		var len = 0
 		for (var sz in dst) {
-			len = len + sz
+			len = len + sz.size
 		}
 
 		return len
@@ -381,9 +410,9 @@ class Split is Node
 	create_geo(rect)
 	{
 		var xmin = rect.x
-		var xmax = rect.x + rect.z
+		var xmax = rect.x + rect.w
 		var zmin = rect.y
-		var zmax = rect.y + rect.w
+		var zmax = rect.y + rect.h
 		var y = 0
 
 		var points = []
@@ -401,17 +430,32 @@ class Split is Node
 
 	create_geo(rect, face, points, ori_p, dir_x, dir_y)
 	{
+		var x_min = rect.x
+		var x_max = x_min + rect.w
+		var y_min = rect.y
+		var y_max = y_min + rect.h
+
+		var axis = this.query_param("axis").value
+		if (axis == "hori") {
+			var h_dx = rect.w * (rect.s - 1.0) / 2
+			x_min = x_min - h_dx
+			x_max = x_max + h_dx
+		} else {
+			var h_dy = rect.h * (rect.s - 1.0) / 2
+			y_min = y_min - h_dy
+			y_max = y_max + h_dy		
+		}
+
 		var pts = []
-		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x,          rect.y + rect.w, ori_p, dir_x, dir_y)))		
-		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x,          rect.y,          ori_p, dir_x, dir_y)))
-		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x + rect.z, rect.y,          ori_p, dir_x, dir_y)))
-		pts.add(PolyPoint.init(this.coordinate_mapping(rect.x + rect.z, rect.y + rect.w, ori_p, dir_x, dir_y)))		
+		pts.add(PolyPoint.init(this.coordinate_mapping(x_min, y_max, ori_p, dir_x, dir_y)))		
+		pts.add(PolyPoint.init(this.coordinate_mapping(x_min, y_min, ori_p, dir_x, dir_y)))
+		pts.add(PolyPoint.init(this.coordinate_mapping(x_max, y_min, ori_p, dir_x, dir_y)))
+		pts.add(PolyPoint.init(this.coordinate_mapping(x_max, y_max, ori_p, dir_x, dir_y)))		
 
 		var f = PolyFace.init([ 0, 1, 2, 3 ], [])
 		var poly = Polytope.init(pts, [ f ])
 
 	    var geo = Geometry([ poly ])
-	    var axis = this.query_param("axis").value
 	    geo.scope = ScopeHelper.calc_mat(poly, f, axis == "hori")
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
