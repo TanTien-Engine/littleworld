@@ -4,7 +4,7 @@ import "maths" for Matrix44, Maths
 
 class ScopeHelper
 {
-	static calc_mat(poly, face, vert)
+	static calc_mat(poly, face, vert, parent)
 	{
 		var map = ScopeTools.face_mapping(poly, face)
 		if (!map) {
@@ -17,10 +17,16 @@ class ScopeHelper
 
 		var mat = Matrix44.init()
 
+		var lz = 1.0
+		if (parent) {
+			var srt = parent.decompose()
+			lz = srt[2]
+		}
+
 		// s
 		var lx = x.length()
 		var ly = y.length()
-		mat.scale(lx, ly, 1.0)
+		mat.scale(lx, ly, lz)
 
 		// r
 		var z = x.cross(y)
