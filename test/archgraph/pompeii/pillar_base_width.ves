@@ -1,0 +1,39 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "height"
+node0.var_type = "num"
+
+_editor.add_node(node0, -313, 83)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "width"
+node1.var_type = "num"
+
+_editor.add_node(node1, 107, 37)
+
+var node2 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node2, -169, 50)
+
+var node3 = ::blueprint::nodes::integer::Integer()
+
+node3.value = 8
+
+_editor.add_node(node3, -302, -4)
+
+var node4 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node4, -27, 26)
+
+var node5 = ::blueprint::nodes::number::Number()
+
+node5.value = 1.34
+
+_editor.add_node(node5, -166, -22)
+
+Blueprint.connect(node0, "var", node2, "a")
+Blueprint.connect(node3, "v", node2, "b")
+Blueprint.connect(node2, "v", node4, "a")
+Blueprint.connect(node5, "v", node4, "b")
+Blueprint.connect(node4, "v", node1, "var")

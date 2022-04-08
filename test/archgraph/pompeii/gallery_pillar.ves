@@ -1,0 +1,33 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -153.53604482953, 103.31039187722)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 455.65986075765, 72.74719327067)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "pillar.ves")
+
+_editor.add_node(node2, 32.725086558949, 112.89935233376)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "grey_wall_color.ves")
+
+_editor.add_node(node3, 35, 26)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node4, 275, 63)
+
+Blueprint.connect(node0, "var", node2, "facade")
+Blueprint.connect(node2, "geo", node4, "geo")
+Blueprint.connect(node3, "color", node4, "color")
+Blueprint.connect(node4, "geo", node1, "var")

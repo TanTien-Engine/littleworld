@@ -1,0 +1,44 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, 26.880114157382, -327.51543804258)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 515.35838, -228.15408)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "wood_tex.ves")
+
+_editor.add_node(node2, -182.42197265625, -159.65528411865)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node3, 73.295051757813, -124.79627648926)
+
+var node4 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node4, 379.43806396484, -223.80531005859)
+
+var node5 = ::archgraph::nodes::scale_scope::ScaleScope()
+node5.query_param("s").value.set(1, 1, 0.07)
+
+_editor.add_node(node5, 190.45205637393, -336.17029451485)
+
+var node6 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node6.query_param("size").value.set(1, 1, 1)
+
+_editor.add_node(node6, -150.63203027344, -57.632838867189)
+
+Blueprint.connect(node6, "geo", node3, "geo")
+Blueprint.connect(node2, "tex", node3, "texture")
+Blueprint.connect(node0, "var", node5, "geo")
+Blueprint.connect(node3, "geo", node4, "geo")
+Blueprint.connect(node5, "geo", node4, "pos")
+Blueprint.connect(node4, "geo", node1, "var")

@@ -1,0 +1,42 @@
+var node0 = ::blueprint::nodes::number::Number()
+
+node0.value = 1.4
+
+_editor.add_node(node0, -250, 175)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "spacing"
+node1.var_type = "num"
+
+_editor.add_node(node1, -112, 187)
+
+var node2 = ::blueprint::nodes::number::Number()
+
+node2.value = 1.0
+
+_editor.add_node(node2, -249.4811, 104.5187)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "banister_height"
+node3.var_type = "num"
+
+_editor.add_node(node3, -111.4811, 116.5187)
+
+var node4 = ::blueprint::nodes::number::Number()
+
+node4.value = 1.5
+
+_editor.add_node(node4, -245.47712, 31.30301)
+
+var node5 = ::blueprint::nodes::output::Output()
+
+node5.var_name = "depth"
+node5.var_type = "num"
+
+_editor.add_node(node5, -107.47712, 43.30301)
+
+Blueprint.connect(node4, "v", node5, "var")
+Blueprint.connect(node2, "v", node3, "var")
+Blueprint.connect(node0, "v", node1, "var")

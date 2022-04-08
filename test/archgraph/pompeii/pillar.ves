@@ -1,0 +1,51 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, 21.918500625018, 128.76493733177)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 292.65986075765, 125.74719327067)
+
+var node2 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node2, 159.4267062507, 105.10638136154)
+
+var node3 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node3, -488.94012367503, 16.228005781528)
+
+var node4 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node4, -361.35746808411, -3.3296732284234)
+
+var node5 = ::blueprint::nodes::integer::Integer()
+
+node5.value = 8
+
+_editor.add_node(node5, -492.53236776204, -60.406091139366)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "pillar_single.ves")
+
+_editor.add_node(node6, -26.783081138342, 41.404669087101)
+
+var node7 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node7, -229.5390441313, -65.679277410534)
+
+Blueprint.connect(node2, "curr_item", node3, "geo")
+Blueprint.connect(node3, "sy", node4, "a")
+Blueprint.connect(node5, "v", node4, "b")
+Blueprint.connect(node4, "v", node7, "a")
+Blueprint.connect(node3, "sx", node7, "b")
+Blueprint.connect(node2, "curr_item", node6, "facade")
+Blueprint.connect(node7, "v", node6, "d")
+Blueprint.connect(node0, "var", node2, "items")
+Blueprint.connect(node6, "geo", node2, "eval")
+Blueprint.connect(node2, "result", node1, "var")

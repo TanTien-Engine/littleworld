@@ -1,0 +1,56 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node0, -297.2, 123)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node1, 132.904, 27.053)
+
+var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
+node2.query_param("axes").value = "xy"
+node2.query_param("scale").value.set(1, 1)
+node2.query_param("offset").value.set(0, 0)
+node2.query_param("uw_factor").value = 1
+node2.query_param("gpu").value = true
+
+_editor.add_node(node2, -104.126, 65.153)
+
+var node3 = ::blueprint::nodes::number::Number()
+
+node3.value = 0
+
+_editor.add_node(node3, -327.40331894952, -86.385457018126)
+
+var node4 = ::blueprint::nodes::input::Input()
+
+node4.var_name = "geo"
+node4.var_type = "geometry"
+
+_editor.add_node(node4, -493.65463988249, 156.83359546504)
+
+var node5 = ::blueprint::nodes::output::Output()
+
+node5.var_name = "geo"
+node5.var_type = "geometry"
+
+_editor.add_node(node5, 322.83377685547, 36.41466064453)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "grey_wall_color.ves")
+
+_editor.add_node(node6, -542.09201660156, 79.834857177734)
+
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "dirtmap_tex.ves")
+
+_editor.add_node(node7, -142.79201660156, -77.465127563477)
+
+Blueprint.connect(node4, "var", node0, "geo")
+Blueprint.connect(node6, "color", node0, "color")
+Blueprint.connect(node0, "geo", node2, "geo")
+Blueprint.connect(node3, "v", node7, "rand")
+Blueprint.connect(node2, "geo", node1, "geo")
+Blueprint.connect(node7, "tex", node1, "texture")
+Blueprint.connect(node1, "geo", node5, "var")

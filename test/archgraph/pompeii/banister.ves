@@ -1,0 +1,84 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -284.9380676608, -285.6972562244)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 515.35838, -228.15408)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "wood_tex.ves")
+
+_editor.add_node(node2, -182.42197265625, -159.65528411865)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "wood_cross.ves")
+
+_editor.add_node(node3, -181.32196655273, -71.655297851562)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node4, 63.978051757813, -110.15527648926)
+
+var node5 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node5, 379.43806396484, -223.80531005859)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "gallery_props.ves")
+
+_editor.add_node(node6, -640.19083395943, -319.90007513148)
+
+var node7 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node7, -425.67241145936, -350.43191804606)
+
+var node8 = ::blueprint::nodes::number::Number()
+
+node8.value = 0.5
+
+_editor.add_node(node8, -588.70772306584, -412.03972665284)
+
+var node9 = ::archgraph::nodes::split::Split()
+node9.query_param("axis").value = "vert"
+node9.query_param("repeat").value = true
+
+_editor.add_node(node9, -137.16684875488, -336.30691223145)
+
+var node10 = ::archgraph::nodes::split_size::SplitSize()
+node10.query_param("size").value = 0
+node10.query_param("mode").value = "floating"
+
+_editor.add_node(node10, -283.46685256958, -362.70691223145)
+
+var node11 = ::archgraph::nodes::split::Split()
+node11.query_param("axis").value = "hori"
+node11.query_param("repeat").value = true
+
+_editor.add_node(node11, 52.044799804688, -337.45556640625)
+
+var node12 = ::archgraph::nodes::scale_scope::ScaleScope()
+node12.query_param("s").value.set(1, 1, 0.05)
+
+_editor.add_node(node12, 190.45205637393, -336.17029451485)
+
+Blueprint.connect(node6, "banister_height", node7, "a")
+Blueprint.connect(node8, "v", node7, "b")
+Blueprint.connect(node7, "v", node10, "size")
+Blueprint.connect(node3, "geo", node4, "geo")
+Blueprint.connect(node2, "tex", node4, "texture")
+Blueprint.connect(node0, "var", node9, "parent")
+Blueprint.connect(node10, "size", node9, "size0")
+Blueprint.connect(node9, "child0", node11, "parent")
+Blueprint.connect(node10, "size", node11, "size0")
+Blueprint.connect(node11, "child0", node12, "geo")
+Blueprint.connect(node4, "geo", node5, "geo")
+Blueprint.connect(node12, "geo", node5, "pos")
+Blueprint.connect(node5, "geo", node1, "var")

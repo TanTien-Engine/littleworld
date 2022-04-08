@@ -1,0 +1,196 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "rand"
+node0.var_type = "num"
+
+_editor.add_node(node0, 748.6522531476, 210.728806218)
+
+var node1 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node1, 753.75504368578, -29.93040940844)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "tex"
+node2.var_type = "texture"
+
+_editor.add_node(node2, 1147.884880744, 191.19335545455)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node3, 949.326483125, 181.41303177246)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.mipmap = false
+node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.01.jpg")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -216.38142261406, 381.16957536688)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.mipmap = false
+node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.02.jpg")
+node5.set_sampler("linear_repeat")
+
+_editor.add_node(node5, -5.5660537439063, 382.99701874341)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "u_tex"
+node6.gamma_correction = false
+node6.mipmap = false
+node6.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.03.jpg")
+node6.set_sampler("linear_repeat")
+
+_editor.add_node(node6, 204.29131133472, 382.99702787997)
+
+var node7 = ::rendergraph::nodes::texture::Texture()
+node7.query_param("unif_name").value = "u_tex"
+node7.gamma_correction = false
+node7.mipmap = false
+node7.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.04.jpg")
+node7.set_sampler("linear_repeat")
+
+_editor.add_node(node7, 421.22247559342, 382.99702820947)
+
+var node8 = ::rendergraph::nodes::texture::Texture()
+node8.query_param("unif_name").value = "u_tex"
+node8.gamma_correction = false
+node8.mipmap = false
+node8.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.05.jpg")
+node8.set_sampler("linear_repeat")
+
+_editor.add_node(node8, -210.70745359831, 43.452567677922)
+
+var node9 = ::rendergraph::nodes::texture::Texture()
+node9.query_param("unif_name").value = "u_tex"
+node9.gamma_correction = false
+node9.mipmap = false
+node9.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.06.jpg")
+node9.set_sampler("linear_repeat")
+
+_editor.add_node(node9, 1.507831432125, 45.810514238031)
+
+var node10 = ::rendergraph::nodes::texture::Texture()
+node10.query_param("unif_name").value = "u_tex"
+node10.gamma_correction = false
+node10.mipmap = false
+node10.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.07.jpg")
+node10.set_sampler("linear_repeat")
+
+_editor.add_node(node10, 216.08103608487, 48.168442996906)
+
+var node11 = ::rendergraph::nodes::texture::Texture()
+node11.query_param("unif_name").value = "u_tex"
+node11.gamma_correction = false
+node11.mipmap = false
+node11.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.08.jpg")
+node11.set_sampler("linear_repeat")
+
+_editor.add_node(node11, 428.29632601309, 45.81050999925)
+
+var node12 = ::rendergraph::nodes::texture::Texture()
+node12.query_param("unif_name").value = "u_tex"
+node12.gamma_correction = false
+node12.mipmap = false
+node12.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.09.jpg")
+node12.set_sampler("linear_repeat")
+
+_editor.add_node(node12, -213.06547212003, -312.59754609464)
+
+var node13 = ::rendergraph::nodes::texture::Texture()
+node13.query_param("unif_name").value = "u_tex"
+node13.gamma_correction = false
+node13.mipmap = false
+node13.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.10.jpg")
+node13.set_sampler("linear_repeat")
+
+_editor.add_node(node13, 3.8657552932189, -314.95547240463)
+
+var node14 = ::rendergraph::nodes::texture::Texture()
+node14.query_param("unif_name").value = "u_tex"
+node14.gamma_correction = false
+node14.mipmap = false
+node14.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.11.jpg")
+node14.set_sampler("linear_repeat")
+
+_editor.add_node(node14, 225.51280791675, -310.23959350586)
+
+var node15 = ::rendergraph::nodes::texture::Texture()
+node15.query_param("unif_name").value = "u_tex"
+node15.gamma_correction = false
+node15.mipmap = false
+node15.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.12.jpg")
+node15.set_sampler("linear_repeat")
+
+_editor.add_node(node15, 449.51785947088, -305.5236886578)
+
+var node16 = ::rendergraph::nodes::texture::Texture()
+node16.query_param("unif_name").value = "u_tex"
+node16.gamma_correction = false
+node16.mipmap = false
+node16.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.13.jpg")
+node16.set_sampler("linear_repeat")
+
+_editor.add_node(node16, -210.70749113306, -607.34095184887)
+
+var node17 = ::rendergraph::nodes::texture::Texture()
+node17.query_param("unif_name").value = "u_tex"
+node17.gamma_correction = false
+node17.mipmap = false
+node17.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.14.jpg")
+node17.set_sampler("linear_repeat")
+
+_editor.add_node(node17, 3.8657510544375, -609.69893707463)
+
+var node18 = ::rendergraph::nodes::texture::Texture()
+node18.query_param("unif_name").value = "u_tex"
+node18.gamma_correction = false
+node18.mipmap = false
+node18.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.15.jpg")
+node18.set_sampler("linear_repeat")
+
+_editor.add_node(node18, 229.33486964209, -614.41481842228)
+
+var node19 = ::rendergraph::nodes::texture::Texture()
+node19.query_param("unif_name").value = "u_tex"
+node19.gamma_correction = false
+node19.mipmap = false
+node19.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.16.jpg")
+node19.set_sampler("linear_repeat")
+
+_editor.add_node(node19, 458.0557958562, -616.77278504541)
+
+var node20 = ::rendergraph::nodes::texture::Texture()
+node20.query_param("unif_name").value = "u_tex"
+node20.gamma_correction = false
+node20.mipmap = false
+node20.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.17.jpg")
+node20.set_sampler("linear_repeat")
+
+_editor.add_node(node20, -198.91771123403, -956.31725650341)
+
+Blueprint.connect(node4, "tex", node1, "in0")
+Blueprint.connect(node5, "tex", node1, "in1")
+Blueprint.connect(node6, "tex", node1, "in2")
+Blueprint.connect(node7, "tex", node1, "in3")
+Blueprint.connect(node8, "tex", node1, "in4")
+Blueprint.connect(node9, "tex", node1, "in5")
+Blueprint.connect(node10, "tex", node1, "in6")
+Blueprint.connect(node11, "tex", node1, "in7")
+Blueprint.connect(node12, "tex", node1, "in8")
+Blueprint.connect(node13, "tex", node1, "in9")
+Blueprint.connect(node14, "tex", node1, "in10")
+Blueprint.connect(node15, "tex", node1, "in11")
+Blueprint.connect(node16, "tex", node1, "in12")
+Blueprint.connect(node17, "tex", node1, "in13")
+Blueprint.connect(node18, "tex", node1, "in14")
+Blueprint.connect(node19, "tex", node1, "in15")
+Blueprint.connect(node20, "tex", node1, "in16")
+Blueprint.connect(node0, "var", node3, "rand")
+Blueprint.connect(node1, "list", node3, "items")
+Blueprint.connect(node3, "tex", node2, "var")

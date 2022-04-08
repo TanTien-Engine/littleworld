@@ -5,14 +5,14 @@ _editor.add_node(node0, 117.15444493852, 42.36663679465)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(6.912050143376, 0.38862422051825, 6.655337200724)
-node1.cam.yaw = -489.8
-node1.cam.pitch = -13.7
+node1.cam.position.set(6.4600519330484, 1.2927203088992, -5.2969785641909)
+node1.cam.yaw = -591.4
+node1.cam.pitch = -13.3
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
 
-_editor.add_node(node1, -69.427765038597, -156.20977359098)
+_editor.add_node(node1, -76.427765038597, -116.10977359098)
 
 var node2 = ::archgraph::nodes::comp::Comp()
 node2.query_param("selector").value = "side"
@@ -56,7 +56,7 @@ _editor.add_node(node8, -516.68493833033, -88.65346979849)
 
 var node9 = ::blueprint::nodes::integer::Integer()
 
-node9.value = 1
+node9.value = 0
 
 _editor.add_node(node9, -513.65468753133, -153.88197282805)
 
@@ -66,16 +66,16 @@ node10.load_from_file(_editor, "window.ves")
 _editor.add_node(node10, -299.53900317383, 106.9981640625)
 
 var node11 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
-node11.query_param("size").value.set(10, 5, 5)
+node11.query_param("size").value.set(10, 2.5, 5)
 
 _editor.add_node(node11, -666.32938899911, -250.81303808484)
 
 var node12 = ::archgraph::nodes::comp::Comp()
-node12.query_param("selector").value = "side"
+node12.query_param("selector").value = "face6"
 
 node12.on_param_dirty()
 
-_editor.add_node(node12, -512.41240304639, -232.15875537446)
+_editor.add_node(node12, -509.01149395548, -279.20239173809)
 
 var node13 = ::blueprint::nodes::subgraph::Subgraph()
 node13.load_from_file(_editor, "door.ves")
@@ -83,12 +83,12 @@ node13.load_from_file(_editor, "door.ves")
 _editor.add_node(node13, -302.83855712891, -7.9793706054699)
 
 var node14 = ::blueprint::nodes::subgraph::Subgraph()
-node14.load_from_file(_editor, "shop_opening.ves")
+node14.load_from_file(_editor, "gallery.ves")
 
-_editor.add_node(node14, -309.09689608487, -128.52476917614)
+_editor.add_node(node14, -305.00482177734, -183.27758789062)
 
 Blueprint.connect(node11, "geo", node12, "geo")
-Blueprint.connect(node12, "side", node14, "facade")
+Blueprint.connect(node12, "front", node14, "facade")
 Blueprint.connect(node14, "geo", node5, "in1")
 Blueprint.connect(node3, "geo", node4, "geo")
 Blueprint.connect(node4, "geo", node7, "geo")

@@ -28,41 +28,29 @@ node4.value = 1
 
 _editor.add_node(node4, -327.40331894952, -86.385457018126)
 
-var node5 = ::blueprint::nodes::combine::Combine()
+var node5 = ::blueprint::nodes::input::Input()
 
-_editor.add_node(node5, -494.55077423735, 31.658559523474)
+node5.var_name = "geo"
+node5.var_type = "geometry"
 
-var node6 = ::blueprint::nodes::number::Number()
+_editor.add_node(node5, -487.60463988249, 145.94359546504)
 
-node6.value = 0.85508626699448
+var node6 = ::blueprint::nodes::output::Output()
 
-_editor.add_node(node6, -633.63722074579, -18.015146741168)
+node6.var_name = "geo"
+node6.var_type = "geometry"
 
-var node7 = ::blueprint::nodes::input::Input()
+_editor.add_node(node6, 322.83377685547, 36.41466064453)
 
-node7.var_name = "geo"
-node7.var_type = "geometry"
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "grey_wall_color.ves")
 
-_editor.add_node(node7, -493.65463988249, 156.83359546504)
+_editor.add_node(node7, -539.33856567383, 66.971625366211)
 
-var node8 = ::blueprint::nodes::output::Output()
-
-node8.var_name = "geo"
-node8.var_type = "geometry"
-
-_editor.add_node(node8, 322.83377685547, 36.41466064453)
-
-var node9 = ::blueprint::nodes::number3::Number3()
-
-node9.value.set(0.87134808301926, 0, 0)
-
-_editor.add_node(node9, -491.63845258866, -106.3401724273)
-
-Blueprint.connect(node6, "v", node5, "xyz")
-Blueprint.connect(node7, "var", node0, "geo")
-Blueprint.connect(node5, "xyz", node0, "color")
+Blueprint.connect(node5, "var", node0, "geo")
+Blueprint.connect(node7, "color", node0, "color")
 Blueprint.connect(node0, "geo", node2, "geo")
 Blueprint.connect(node4, "v", node3, "rand")
 Blueprint.connect(node2, "geo", node1, "geo")
 Blueprint.connect(node3, "tex", node1, "texture")
-Blueprint.connect(node1, "geo", node8, "var")
+Blueprint.connect(node1, "geo", node6, "var")

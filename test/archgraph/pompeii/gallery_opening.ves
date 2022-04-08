@@ -1,0 +1,179 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, 738.92764322164, -16.218789503611)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 1181.5704545188, -77.484704188301)
+
+var node2 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node2, 1026.6266199733, -92.789715097392)
+
+var node3 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node3, -880.91983471074, -57.87520661157)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "pillar_base_width.ves")
+
+_editor.add_node(node4, -536.82892561983, -82.999173553719)
+
+var node5 = ::blueprint::nodes::subtract::Subtract()
+
+_editor.add_node(node5, -731.40743801653, -92.569421487603)
+
+var node6 = ::blueprint::nodes::number::Number()
+
+node6.value = 0.20009155571461
+
+_editor.add_node(node6, -875.92808353645, -140.72644281309)
+
+var node7 = ::archgraph::nodes::split::Split()
+node7.query_param("axis").value = "hori"
+node7.query_param("repeat").value = false
+
+_editor.add_node(node7, -22.404071829076, -181.00188579534)
+
+var node8 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node8, -349.48181919066, -119.23882557262)
+
+var node9 = ::blueprint::nodes::integer::Integer()
+
+node9.value = 2
+
+_editor.add_node(node9, -488.32477043719, -163.04049605693)
+
+var node10 = ::archgraph::nodes::split_size::SplitSize()
+node10.query_param("size").value = 0
+node10.query_param("mode").value = "absolute"
+node10.query_param("scale").value = 1
+
+_editor.add_node(node10, -179.1362475851, -57.951434605305)
+
+var node11 = ::archgraph::nodes::split_size::SplitSize()
+node11.query_param("size").value = 0
+node11.query_param("mode").value = "floating"
+node11.query_param("scale").value = 1
+
+_editor.add_node(node11, -177.54834375339, -142.52671634836)
+
+var node12 = ::archgraph::nodes::split_size::SplitSize()
+node12.query_param("size").value = 100
+node12.query_param("mode").value = "floating"
+node12.query_param("scale").value = 1
+
+_editor.add_node(node12, -178.60059129102, -228.61457061925)
+
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "gallery_props.ves")
+
+_editor.add_node(node13, -388.9875, -273.24248657227)
+
+var node14 = ::archgraph::nodes::split_size::SplitSize()
+node14.query_param("size").value = 0
+node14.query_param("mode").value = "absolute"
+node14.query_param("scale").value = 1
+
+_editor.add_node(node14, -180.12129642056, -315.98516863987)
+
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "gallery_pillar.ves")
+
+_editor.add_node(node15, 227.97835246211, 62.965585559879)
+
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "gallery_pillar.ves")
+
+_editor.add_node(node16, 229.23216246211, -434.97954444012)
+
+var node17 = ::blueprint::nodes::subgraph::Subgraph()
+node17.load_from_file(_editor, "gallery_opening_section.ves")
+
+_editor.add_node(node17, 225.61214152461, -21.450538021049)
+
+var node18 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node18, 863.48972526484, -198.1938655357)
+
+var node19 = ::archgraph::nodes::split::Split()
+node19.query_param("axis").value = "hori"
+node19.query_param("repeat").value = true
+
+_editor.add_node(node19, 326.61272651811, -250.6356229581)
+
+var node20 = ::archgraph::nodes::split_size::SplitSize()
+node20.query_param("size").value = 0
+node20.query_param("mode").value = "absolute"
+node20.query_param("scale").value = 1
+
+_editor.add_node(node20, 179.0435824149, -249.56287369621)
+
+var node21 = ::archgraph::nodes::split_size::SplitSize()
+node21.query_param("size").value = 0
+node21.query_param("mode").value = "floating"
+node21.query_param("scale").value = 1.2
+
+_editor.add_node(node21, 177.47520170116, -336.04880725745)
+
+var node22 = ::blueprint::nodes::subgraph::Subgraph()
+node22.load_from_file(_editor, "gallery_pillar.ves")
+
+_editor.add_node(node22, 522.01201246211, -184.59945444012)
+
+var node23 = ::blueprint::nodes::subgraph::Subgraph()
+node23.load_from_file(_editor, "gallery_opening_section.ves")
+
+_editor.add_node(node23, 519.64580152461, -269.01557802106)
+
+var node24 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node24, 709.11188964844, -222.13043212891)
+
+var node25 = ::archgraph::nodes::split::Split()
+node25.query_param("axis").value = "hori"
+node25.query_param("repeat").value = false
+
+_editor.add_node(node25, -20.046230002473, -391.89532368245)
+
+Blueprint.connect(node13, "spacing", node21, "size")
+Blueprint.connect(node13, "spacing", node11, "size")
+Blueprint.connect(node2, "curr_item", node3, "geo")
+Blueprint.connect(node3, "sy", node5, "a")
+Blueprint.connect(node6, "v", node5, "b")
+Blueprint.connect(node5, "v", node4, "height")
+Blueprint.connect(node4, "width", node8, "a")
+Blueprint.connect(node9, "v", node8, "b")
+Blueprint.connect(node8, "v", node20, "size")
+Blueprint.connect(node8, "v", node14, "size")
+Blueprint.connect(node2, "curr_item", node25, "parent")
+Blueprint.connect(node12, "size", node25, "size0")
+Blueprint.connect(node14, "size", node25, "size1")
+Blueprint.connect(node25, "child0", node19, "parent")
+Blueprint.connect(node20, "size", node19, "size0")
+Blueprint.connect(node21, "size", node19, "size1")
+Blueprint.connect(node19, "child1", node23, "facade")
+Blueprint.connect(node19, "child0", node22, "facade")
+Blueprint.connect(node22, "geo", node24, "in0")
+Blueprint.connect(node23, "geo", node24, "in1")
+Blueprint.connect(node25, "child1", node16, "facade")
+Blueprint.connect(node24, "list", node18, "in0")
+Blueprint.connect(node16, "geo", node18, "in1")
+Blueprint.connect(node8, "v", node10, "size")
+Blueprint.connect(node2, "curr_item", node7, "parent")
+Blueprint.connect(node10, "size", node7, "size0")
+Blueprint.connect(node11, "size", node7, "size1")
+Blueprint.connect(node12, "size", node7, "size2")
+Blueprint.connect(node14, "size", node7, "size3")
+Blueprint.connect(node7, "child1", node17, "facade")
+Blueprint.connect(node7, "child0", node15, "facade")
+Blueprint.connect(node0, "var", node2, "items")
+Blueprint.connect(node18, "list", node2, "eval")
+Blueprint.connect(node2, "result", node1, "var")
