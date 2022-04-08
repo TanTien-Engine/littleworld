@@ -64,6 +64,7 @@ class TranslateScope is Node
 				mat.transform_mat4(v_geo.value.scope)
 
 				v_geo.value.scope = mat
+				v_geo.value.scope_dz = t.z
 			}
 		}
 	}

@@ -139,7 +139,7 @@ class Split is Node
 
 						for (var i in 0 .. rects.count) {
 							for (var r in rects[i]) {
-								children[i].add(this.create_geo(r, face, points, ori_p, dir_x, dir_y, geo.scope))
+								children[i].add(this.create_geo(r, face, points, ori_p, dir_x, dir_y, geo))
 							}
 						}						
 					}
@@ -428,7 +428,7 @@ class Split is Node
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
 
-	create_geo(rect, face, points, ori_p, dir_x, dir_y, parent_scope)
+	create_geo(rect, face, points, ori_p, dir_x, dir_y, parent)
 	{
 		var x_min = rect.x
 		var x_max = x_min + rect.w
@@ -456,7 +456,8 @@ class Split is Node
 		var poly = Polytope.init(pts, [ f ])
 
 	    var geo = Geometry([ poly ])
-	    geo.scope = ScopeHelper.calc_mat(poly, f, axis == "hori", parent_scope)
+	    geo.scope = ScopeHelper.calc_mat(poly, f, axis == "hori", parent)
+	    geo.scope_dz = parent.scope_dz
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
 

@@ -18,9 +18,14 @@ class ScopeHelper
 		var mat = Matrix44.init()
 
 		var lz = 1.0
-		if (parent) {
-			var srt = parent.decompose()
-			lz = srt[2]
+		var dz = 0.0
+		if (parent) 
+		{
+			if (parent.scope) {
+				var srt = parent.scope.decompose()
+				lz = srt[2]
+			}
+			dz = parent.scope_dz
 		}
 
 		// s
@@ -35,7 +40,7 @@ class ScopeHelper
 
 		// t
 		var co = o.add(x).add(y).add(o).mul(0.5)		
-		mat.translate(co.x, co.y, co.z)
+		mat.translate(co.x, co.y, co.z + dz)
 
 		return mat
 	}

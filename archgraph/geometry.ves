@@ -17,8 +17,9 @@ class Geometry
 		this.color = Vector3(1, 1, 1)
 		this.texture = nil
 
-		// context
+		// scope
 		this.scope = nil
+		this.scope_dz = 0
 
 		// uv mapping
 		this.uv_gpu = false
@@ -40,6 +41,7 @@ class Geometry
 		if (this.scope) {
 			new.scope = this.scope.clone()		
 		}
+		new.scope_dz = this.scope_dz
 
 		new.uv_gpu = this.uv_gpu
 		new.uv_props0.set(this.uv_props0.x, this.uv_props0.y, this.uv_props0.z, this.uv_props0.w)
