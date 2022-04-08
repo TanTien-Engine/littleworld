@@ -26,7 +26,7 @@ class ScopeSize is Node
 	calc_value(idx)
 	{
 		var v_geo = Blueprint.calc_input_value(this, 0)
-		if (!v_geo or v_geo.type != VAR_TYPE_GEOMETRY) {
+		if (!v_geo or v_geo.type != VAR_TYPE_GEOMETRY or !v_geo.value.scope) {
 			return nil
 		}
 
