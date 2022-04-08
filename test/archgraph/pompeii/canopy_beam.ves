@@ -1,0 +1,52 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -37.347158569891, 99.148198321055)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 250.85292545455, 169.01410181818)
+
+var node2 = ::archgraph::nodes::mesh_file::MeshFile()
+node2.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/specific/pompeii/canopy/canopy_cloth_support.hd.obj")
+
+_editor.add_node(node2, -443.36363636364, 330.90909090909)
+
+var node3 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node3, 111.45454545455, 157.81818181818)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.mipmap = false
+node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/wood.c.01.h.jpg")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -338.63636363636, 77.818181818182)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node5, -84.909090909091, 187.18181818182)
+
+var node6 = ::archgraph::nodes::setup_projection::SetupProjection()
+node6.query_param("axes").value = "zy"
+node6.query_param("scale").value.set(1, 1)
+node6.query_param("offset").value.set(0, 0)
+node6.query_param("uw_factor").value = 1
+node6.query_param("gpu").value = true
+
+_editor.add_node(node6, -308.09090909091, 262.25181818182)
+
+Blueprint.connect(node2, "geo", node6, "geo")
+Blueprint.connect(node6, "geo", node5, "geo")
+Blueprint.connect(node4, "tex", node5, "texture")
+Blueprint.connect(node5, "geo", node3, "geo")
+Blueprint.connect(node0, "var", node3, "pos")
+Blueprint.connect(node3, "geo", node1, "var")

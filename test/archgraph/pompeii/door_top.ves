@@ -10,7 +10,7 @@ var node1 = ::blueprint::nodes::output::Output()
 node1.var_name = "geo"
 node1.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node1, 104.19838, 263.89592)
+_editor.add_node(node1, 218.24796677686, 184.55707702479)
 
 var node2 = ::blueprint::nodes::subgraph::Subgraph()
 node2.load_from_file(_editor, "door_beam.ves")
@@ -22,6 +22,18 @@ node3.load_from_file(_editor, "door_cornice.ves")
 
 _editor.add_node(node3, -112.80154418945, 212.81097106934)
 
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "canopy.ves")
+
+_editor.add_node(node4, -112.590428376, 113.13969824925)
+
+var node5 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node5, 81.624436938073, 164.37937284107)
+
+Blueprint.connect(node0, "var", node4, "facade")
 Blueprint.connect(node0, "var", node3, "facade")
-Blueprint.connect(node3, "geo", node1, "var")
+Blueprint.connect(node3, "geo", node5, "in0")
+Blueprint.connect(node4, "geo", node5, "in1")
+Blueprint.connect(node5, "list", node1, "var")
 Blueprint.connect(node0, "var", node2, "facade")
