@@ -26,21 +26,18 @@ _editor.add_node(node3, -708.5254270293, -355.37317529834)
 var node4 = ::archgraph::nodes::split_size::SplitSize()
 node4.query_param("size").value = 0
 node4.query_param("mode").value = "absolute"
-node4.query_param("scale").value = 1
 
 _editor.add_node(node4, -459.2824270293, -254.62718292774)
 
 var node5 = ::archgraph::nodes::split_size::SplitSize()
 node5.query_param("size").value = 10
 node5.query_param("mode").value = "floating"
-node5.query_param("scale").value = 1
 
 _editor.add_node(node5, -457.00067871875, -367.96609804492)
 
 var node6 = ::archgraph::nodes::split_size::SplitSize()
 node6.query_param("size").value = 0
 node6.query_param("mode").value = "absolute"
-node6.query_param("scale").value = 1
 
 _editor.add_node(node6, -455.21728277585, -480.93604545288)
 
@@ -213,6 +210,10 @@ node38.query_param("gpu").value = true
 
 _editor.add_node(node38, 97.151212646483, -667.18507714844)
 
+var node39 = ::blueprint::nodes::negate::Negate()
+
+_editor.add_node(node39, 61.302197265622, -456.33757019043)
+
 Blueprint.connect(node26, "v", node25, "x")
 Blueprint.connect(node26, "v", node25, "y")
 Blueprint.connect(node23, "depth", node25, "z")
@@ -228,7 +229,8 @@ Blueprint.connect(node18, "width", node29, "var")
 Blueprint.connect(node29, "var", node32, "var")
 Blueprint.connect(node32, "var", node33, "a")
 Blueprint.connect(node34, "v", node33, "b")
-Blueprint.connect(node33, "v", node35, "z")
+Blueprint.connect(node33, "v", node39, "v")
+Blueprint.connect(node39, "v", node35, "z")
 Blueprint.connect(node29, "var", node30, "var")
 Blueprint.connect(node22, "v", node19, "x")
 Blueprint.connect(node20, "v", node19, "y")

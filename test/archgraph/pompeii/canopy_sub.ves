@@ -26,7 +26,6 @@ _editor.add_node(node3, 38, 93)
 var node4 = ::archgraph::nodes::split_size::SplitSize()
 node4.query_param("size").value = 10
 node4.query_param("mode").value = "floating"
-node4.query_param("scale").value = 1
 
 _editor.add_node(node4, -135, 5)
 
@@ -52,7 +51,6 @@ _editor.add_node(node8, 441.22700805664, 114.17993774414)
 var node9 = ::archgraph::nodes::split_size::SplitSize()
 node9.query_param("size").value = 0
 node9.query_param("mode").value = "absolute"
-node9.query_param("scale").value = 1
 
 _editor.add_node(node9, -133.9552154541, 113.82412719727)
 

@@ -48,14 +48,12 @@ _editor.add_node(node7, -83.28827377259, -210.48234991037)
 var node8 = ::archgraph::nodes::split_size::SplitSize()
 node8.query_param("size").value = 2
 node8.query_param("mode").value = "floating"
-node8.query_param("scale").value = 1
 
 _editor.add_node(node8, -235.37863922876, -246.3644345118)
 
 var node9 = ::archgraph::nodes::split_size::SplitSize()
 node9.query_param("size").value = 1
 node9.query_param("mode").value = "floating"
-node9.query_param("scale").value = 1
 
 _editor.add_node(node9, -238.83581428511, -362.47532174628)
 
@@ -86,44 +84,8 @@ node15.load_from_file(_editor, "pillar_material.ves")
 
 _editor.add_node(node15, 286.43249791712, -317.61297653034)
 
-var node16 = ::archgraph::nodes::scale_scope::ScaleScope()
-node16.query_param("s").value.set(1, 1, 1)
-
-_editor.add_node(node16, 265.49801879883, 34.065339355468)
-
-var node17 = ::blueprint::nodes::combine::Combine()
-
-_editor.add_node(node17, 113.43638020785, 14.269310866881)
-
-var node18 = ::blueprint::nodes::number::Number()
-
-node18.value = 1
-
-_editor.add_node(node18, -27.590489196777, 36.957244873047)
-
-var node19 = ::archgraph::nodes::scale_scope::ScaleScope()
-node19.query_param("s").value.set(1, 1, 1)
-
-_editor.add_node(node19, 323.92907059883, -532.11955904453)
-
-var node20 = ::blueprint::nodes::combine::Combine()
-
-_editor.add_node(node20, 171.86743200785, -551.91558753312)
-
-var node21 = ::blueprint::nodes::number::Number()
-
-node21.value = 1
-
-_editor.add_node(node21, 30.840562603223, -529.22765352696)
-
 Blueprint.connect(node13, "geo", node6, "geo")
 Blueprint.connect(node12, "geo", node15, "geo")
-Blueprint.connect(node2, "var", node20, "x")
-Blueprint.connect(node21, "v", node20, "y")
-Blueprint.connect(node21, "v", node20, "z")
-Blueprint.connect(node2, "var", node17, "x")
-Blueprint.connect(node18, "v", node17, "y")
-Blueprint.connect(node18, "v", node17, "z")
 Blueprint.connect(node2, "var", node4, "x")
 Blueprint.connect(node5, "v", node4, "y")
 Blueprint.connect(node2, "var", node4, "z")
@@ -132,14 +94,10 @@ Blueprint.connect(node4, "xyz", node3, "s")
 Blueprint.connect(node3, "geo", node7, "parent")
 Blueprint.connect(node8, "size", node7, "size0")
 Blueprint.connect(node9, "size", node7, "size1")
-Blueprint.connect(node7, "child1", node19, "geo")
-Blueprint.connect(node20, "xyz", node19, "s")
 Blueprint.connect(node15, "geo", node11, "geo")
-Blueprint.connect(node19, "geo", node11, "pos")
-Blueprint.connect(node7, "child0", node16, "geo")
-Blueprint.connect(node17, "xyz", node16, "s")
+Blueprint.connect(node7, "child1", node11, "pos")
 Blueprint.connect(node6, "geo", node10, "geo")
-Blueprint.connect(node16, "geo", node10, "pos")
+Blueprint.connect(node7, "child0", node10, "pos")
 Blueprint.connect(node10, "geo", node14, "in0")
 Blueprint.connect(node11, "geo", node14, "in1")
 Blueprint.connect(node14, "list", node1, "var")

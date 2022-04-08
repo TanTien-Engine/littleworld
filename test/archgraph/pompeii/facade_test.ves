@@ -5,9 +5,9 @@ _editor.add_node(node0, 357.65031270712, 27.490603736799)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(6.7493804520852, 1.4796114710164, -8.2059819865811)
-node1.cam.yaw = -593.2
-node1.cam.pitch = -9.9
+node1.cam.position.set(4.3364913906459, 1.0420261498964, -6.5761689042182)
+node1.cam.yaw = -621
+node1.cam.pitch = -14.4
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -68,7 +68,7 @@ _editor.add_node(node10, -299.53900317383, 106.9981640625)
 var node11 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
 node11.query_param("size").value.set(10, 2.5, 5)
 
-_editor.add_node(node11, -666.32938899911, -250.81303808484)
+_editor.add_node(node11, -886.54938899911, -308.89303808484)
 
 var node12 = ::archgraph::nodes::comp::Comp()
 node12.query_param("selector").value = "face6"
@@ -96,16 +96,35 @@ _editor.add_node(node15, -307.052421875, -446.80734985352)
 var node16 = ::archgraph::nodes::split_size::SplitSize()
 node16.query_param("size").value = 1
 node16.query_param("mode").value = "absolute"
-node16.query_param("scale").value = 1
 
 _editor.add_node(node16, -444.59069824219, -459.18496704102)
 
+var node17 = ::blueprint::nodes::subgraph::Subgraph()
+node17.load_from_file(_editor, "columns.ves")
+
+_editor.add_node(node17, -549.64667729492, -795.74546811524)
+
+var node18 = ::archgraph::nodes::comp::Comp()
+node18.query_param("selector").value = "side"
+
+node18.on_param_dirty()
+
+_editor.add_node(node18, -769.84731171875, -653.78610124512)
+
+var node19 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node19, -537.65577890625, -692.72337744141)
+
+Blueprint.connect(node19, "curr_item", node17, "facade")
+Blueprint.connect(node11, "geo", node18, "geo")
+Blueprint.connect(node18, "side", node19, "items")
+Blueprint.connect(node17, "geo", node19, "eval")
 Blueprint.connect(node11, "geo", node12, "geo")
 Blueprint.connect(node12, "front", node15, "parent")
 Blueprint.connect(node16, "size", node15, "size0")
 Blueprint.connect(node15, "child0", node13, "facade")
-Blueprint.connect(node13, "geo", node5, "in1")
 Blueprint.connect(node12, "front", node14, "facade")
+Blueprint.connect(node14, "geo", node5, "in1")
 Blueprint.connect(node3, "geo", node4, "geo")
 Blueprint.connect(node4, "geo", node7, "geo")
 Blueprint.connect(node7, "front", node10, "facade")

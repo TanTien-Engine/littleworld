@@ -11,8 +11,8 @@ _editor.add_node(node1, 376.24664846417, -70.066589496217)
 var node2 = ::blueprint::nodes::camera3d::Camera3d()
 
 node2.cam.position.set(0.56906331964532, 1.533746219573, 1.7059844790994)
-node2.cam.yaw = -90.7
-node2.cam.pitch = -56.3
+node2.cam.yaw = -90
+node2.cam.pitch = -36.6
 node2.cam.zoom = 45
 node2.cam.update_vectors()
 node2.speed = 0.22097560763359
@@ -32,6 +32,8 @@ var node4 = ::archgraph::nodes::setup_projection::SetupProjection()
 node4.query_param("axes").value = "xz"
 node4.query_param("scale").value.set(1, 1)
 node4.query_param("offset").value.set(0, 0)
+node4.query_param("uw_factor").value = 0
+node4.query_param("gpu").value = false
 
 _editor.add_node(node4, 276.81728691108, 581.818769888)
 

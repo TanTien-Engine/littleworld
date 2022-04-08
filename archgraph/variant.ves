@@ -9,7 +9,5 @@ class VarSplitSize
 
 		// absolute, relative, floating
 		this.mode = mode
-
-		this.scale = 1.0
 	}
 }
