@@ -1,7 +1,7 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.node_param" for NodeParam
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER3
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geo_helper" for GeoHelper
@@ -16,7 +16,9 @@ class ScaleScope is Node
 
 		this.imports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
-			Pin(this, "s", VAR_TYPE_NUMBER3),			
+			Pin(this, "x", VAR_TYPE_NUMBER),
+			Pin(this, "y", VAR_TYPE_NUMBER),
+			Pin(this, "z", VAR_TYPE_NUMBER),
 		]
 		this.exports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
@@ -37,10 +39,20 @@ class ScaleScope is Node
 		var out_geo = GeoHelper.clone_geo(in_geo)
 
 		var s = this.query_param("s").value
-		var v_s = Blueprint.calc_input_value(this, "s")
-		if (v_s) {
-			s = v_s.value
+
+		var v_x = Blueprint.calc_input_value(this, "x")
+		if (v_x) {
+			s.x = v_x.value
 		}
+		var v_y = Blueprint.calc_input_value(this, "y")
+		if (v_y) {
+			s.y = v_y.value
+		}
+		var v_z = Blueprint.calc_input_value(this, "z")
+		if (v_z) {
+			s.z = v_z.value
+		}	
+
 
 		this.scale_scope(out_geo, s)
 
