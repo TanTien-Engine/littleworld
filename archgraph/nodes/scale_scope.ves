@@ -6,6 +6,7 @@ import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geo_helper" for GeoHelper
 import "maths.vector" for Vector3
+import "archgen" for ScopeTools
 import "maths" for Matrix44
 
 class ScaleScope is Node
@@ -25,6 +26,7 @@ class ScaleScope is Node
 		]
 
 		this.params.add(NodeParam("s", Vector3(1, 1, 1)))
+		this.params.add(NodeParam("anchor", "left", { "combo" : [ "left", "right", "center" ] }))
 
 		this.layout()
 	}
@@ -53,18 +55,19 @@ class ScaleScope is Node
 			s.z = v_z.value
 		}	
 
+		var anchor = this.query_param("anchor").value
 
-		this.scale_scope(out_geo, s)
+		this.scale_scope(out_geo, s, anchor)
 
 		return out_geo
 	}
 
-	scale_scope(v_geo, s)
+	scale_scope(v_geo, s, anchor)
 	{
 		if (v_geo.type == VAR_TYPE_ARRAY)
 		{
 			for (var geo in v_geo.value) {
-				this.scale_scope(geo, s)
+				this.scale_scope(geo, s, anchor)
 			}
 		}
 		else if (v_geo.type == VAR_TYPE_GEOMETRY)
@@ -72,7 +75,22 @@ class ScaleScope is Node
 			if (v_geo.value.scope) 
 			{
 				var mat = Matrix44.init()
+
 				mat.scale(s.x, s.y, s.z)
+
+				if (anchor == "right")
+				{
+					var sz_x = ScopeTools.get_scope_size(v_geo.value.scope)[0]
+					var dx = - (s.x - 1.0) * sz_x
+					mat.translate(dx, 0, 0)
+				}
+				else if (anchor == "center")
+				{
+					var sz_x = ScopeTools.get_scope_size(v_geo.value.scope)[0]
+					var dx = - (s.x - 1.0) * 0.5 * sz_x
+					mat.translate(dx, 0, 0)				
+				}
+
 				mat.transform_mat4(v_geo.value.scope)
 
 				v_geo.value.scope = mat
