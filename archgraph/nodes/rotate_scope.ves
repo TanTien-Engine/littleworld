@@ -25,8 +25,7 @@ class RotateScope is Node
 		]
 
 		this.params.add(NodeParam("r", Vector3(0, 0, 0)))
-		this.params.add(NodeParam("anchor", "none", { "combo" : [ "none", "x_min", "x_max" ] }))		
-
+		this.params.add(NodeParam("anchor", "left", { "combo" : [ "left", "right", "center" ] }))
 		this.layout()
 	}
 
@@ -54,17 +53,19 @@ class RotateScope is Node
 			r.z = v_z.value
 		}
 
-		this.rotate_scope(out_geo, r)
+		var anchor = this.query_param("anchor").value
+
+		this.rotate_scope(out_geo, r, anchor)
 
 		return out_geo
 	}
 
-	rotate_scope(v_geo, r)
+	rotate_scope(v_geo, r, anchor)
 	{
 		if (v_geo.type == VAR_TYPE_ARRAY)
 		{
 			for (var geo in v_geo.value) {
-				this.rotate_scope(geo, r)
+				this.rotate_scope(geo, r, anchor)
 			}
 		}
 		else if (v_geo.type == VAR_TYPE_GEOMETRY)
@@ -73,22 +74,21 @@ class RotateScope is Node
 			{
 				var mat = Matrix44.init()
 
-				var anchor = this.query_param("anchor").value
-				if (anchor == "x_min")
+				if (anchor == "left")
 				{
-					mat.translate(0.5, 0, 0)
 					mat.rotate(r.x, r.y, r.z)
-					mat.translate(-0.5, 0, 0)
 				}
-				else if (anchor == "x_max")
+				else if (anchor == "right")
+				{
+					mat.translate(-1, 0, 0)
+					mat.rotate(r.x, r.y, r.z)
+					mat.translate(1, 0, 0)
+				}
+				else if (anchor == "center")
 				{
 					mat.translate(-0.5, 0, 0)
 					mat.rotate(r.x, r.y, r.z)
 					mat.translate(0.5, 0, 0)
-				}
-				else
-				{
-					mat.rotate(r.x, r.y, r.z)
 				}
 
 				mat.transform_mat4(v_geo.value.scope)
