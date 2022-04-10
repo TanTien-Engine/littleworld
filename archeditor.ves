@@ -20,6 +20,11 @@ class Archeditor is Editor
 		for (var node in BP_NODES) {
 			super.add_popup_node(node)
 		}
+
+		import "editor.rendernodes" for RENDER_NODES
+		for (var node in RENDER_NODES) {
+			super.add_popup_node(node)
+		}
 		
 		import "archnodes" for ARCH_NODES
 		for (var node in ARCH_NODES) {

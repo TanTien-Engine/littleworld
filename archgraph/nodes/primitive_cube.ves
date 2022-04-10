@@ -4,9 +4,9 @@ import "blueprint.variant" for Variant
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
+import "maths.vector" for Vector3
 import "geometry" for PolyFace, Polytope
 import "maths" for Plane
-import "maths.vector" for Vector3
 
 class PrimitiveCube is Node
 {
@@ -25,7 +25,7 @@ class PrimitiveCube is Node
 
 	calc_value(idx)
 	{
-		var size = this.query_param("size").value		
+		var size = this.query_param("size").value
 
 		var hx = size.x * 0.5
 		var hy = size.y * 0.5
