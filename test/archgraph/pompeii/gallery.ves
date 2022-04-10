@@ -1,56 +1,42 @@
-var node0 = ::blueprint::nodes::input::Input()
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
 
-node0.var_name = "facade"
-node0.var_type = "geometry"
+_editor.add_node(node0, 361.03150258512, 119.9298767508)
 
-_editor.add_node(node0, -192.5380676608, 112.5027437756)
+var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-var node1 = ::blueprint::nodes::output::Output()
+node1.cam.position.set(6.8203363221457, 0.97270854738157, -5.4274283013183)
+node1.cam.yaw = -585.3
+node1.cam.pitch = -13.5
+node1.cam.zoom = 45
+node1.cam.update_vectors()
+node1.speed = 0.22097560763359
 
-node1.var_name = "geo"
-node1.var_type = [ "geometry", "array" ]
+_editor.add_node(node1, 166.239292608, -38.54653363483)
 
-_editor.add_node(node1, 508.99838, 106.59592)
+var node2 = ::blueprint::nodes::merge::Merge()
 
-var node2 = ::blueprint::nodes::subgraph::Subgraph()
-node2.load_from_file(_editor, "gallery_front.ves")
+_editor.add_node(node2, 170.49418542759, 140.44448549689)
 
-_editor.add_node(node2, 164.99618835449, 135.96100158691)
+var node3 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node3.query_param("size").value.set(10, 2.5, 5)
 
-var node3 = ::archgraph::nodes::translate_scope::TranslateScope()
-node3.query_param("t").value.set(0, 0, 1)
+_editor.add_node(node3, -407.56922912111, 125.83103492916)
 
-_editor.add_node(node3, -27.503810119629, -10.339031982422)
+var node4 = ::archgraph::nodes::comp::Comp()
+node4.query_param("selector").value = "face6"
 
-var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "wood.ves")
-node4.set_prop_value("hori", false)
+node4.on_param_dirty()
 
-_editor.add_node(node4, 166.0962097168, 38.061009216309)
+_editor.add_node(node4, -248.21369407748, 92.99130127591)
 
-var node5 = ::blueprint::nodes::merge::Merge()
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/gallery.ves")
 
-_editor.add_node(node5, 364.09618682861, 83.16099243164)
+_editor.add_node(node5, -40.1735546875, 149.43326599121)
 
-var node6 = ::blueprint::nodes::subgraph::Subgraph()
-node6.load_from_file(_editor, "gallery_props.ves")
-
-_editor.add_node(node6, -487.3037902832, -16.938999176025)
-
-var node7 = ::blueprint::nodes::combine::Combine()
-
-_editor.add_node(node7, -163.90379638672, -56.539025878906)
-
-var node8 = ::blueprint::nodes::negate::Negate()
-
-_editor.add_node(node8, -306.90377807617, -38.939013671875)
-
-Blueprint.connect(node6, "depth", node8, "v")
-Blueprint.connect(node8, "v", node7, "z")
-Blueprint.connect(node0, "var", node3, "geo")
-Blueprint.connect(node7, "xyz", node3, "t")
-Blueprint.connect(node3, "geo", node4, "facade")
-Blueprint.connect(node0, "var", node2, "facade")
-Blueprint.connect(node2, "geo", node5, "in0")
-Blueprint.connect(node4, "geo", node5, "in1")
-Blueprint.connect(node5, "list", node1, "var")
+Blueprint.connect(node3, "geo", node4, "geo")
+Blueprint.connect(node4, "front", node5, "facade")
+Blueprint.connect(node5, "geo", node2, "in0")
+Blueprint.connect(node2, "list", node0, "geos")
+Blueprint.connect(node1, "this", node0, "view_cam")

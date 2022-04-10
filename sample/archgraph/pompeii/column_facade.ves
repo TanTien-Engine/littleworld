@@ -1,0 +1,179 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -1576.9551007187, 27.925991709479)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 673.03474363636, -39.98589818182)
+
+var node2 = ::archgraph::nodes::split::Split()
+node2.query_param("axis").value = "vert"
+node2.query_param("repeat").value = false
+
+_editor.add_node(node2, -233.12396694215, -6.3801652892562)
+
+var node3 = ::archgraph::nodes::split_size::SplitSize()
+node3.query_param("size").value = 10
+node3.query_param("mode").value = "floating"
+
+_editor.add_node(node3, -390, 37)
+
+var node4 = ::archgraph::nodes::split_size::SplitSize()
+node4.query_param("size").value = 0
+node4.query_param("mode").value = "absolute"
+
+_editor.add_node(node4, -391.38904132231, -48.823570247934)
+
+var node5 = ::archgraph::nodes::split_size::SplitSize()
+node5.query_param("size").value = 0.4
+node5.query_param("mode").value = "absolute"
+
+_editor.add_node(node5, -393.18596206612, -134.64524884298)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "gazebo_props.ves")
+
+_editor.add_node(node6, -1204.0375146484, -152.17256469727)
+
+var node7 = ::blueprint::nodes::store::Store()
+
+node7.var_name = "beam_width"
+
+_editor.add_node(node7, -1019.1344634684, -152.17255758949)
+
+var node8 = ::blueprint::nodes::load::Load()
+
+node8.var_name = "beam_width"
+
+_editor.add_node(node8, -681.868671875, -14.58555053711)
+
+var node9 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node9, -548.76881835937, -43.625576171876)
+
+var node10 = ::blueprint::nodes::integer::Integer()
+
+node10.value = 2
+
+_editor.add_node(node10, -683.07872558594, -70.245579833985)
+
+var node11 = ::blueprint::nodes::subgraph::Subgraph()
+node11.load_from_file(_editor, "columns.ves")
+
+_editor.add_node(node11, 172.09408569336, 116.53517456055)
+
+var node12 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node12, 534.48844493519, -65.418961958454)
+
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "gallery_shelves.ves")
+
+_editor.add_node(node13, 239.55141052246, -4.1858532714851)
+
+var node14 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node14, -1430.5299638672, 148.24309521484)
+
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "pillar_base_width.ves")
+
+_editor.add_node(node15, -1211.3762714077, 263.49124800728)
+
+var node16 = ::archgraph::nodes::translate_scope::TranslateScope()
+node16.query_param("t").value.set(-0.0209375, 0, 0.209375)
+
+_editor.add_node(node16, -562.9328918457, 183.73950195312)
+
+var node17 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node17, -873.9574751421, 250.7856056907)
+
+var node18 = ::blueprint::nodes::negate::Negate()
+
+_editor.add_node(node18, -722.55658824574, 256.6480213956)
+
+var node19 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node19, -1027.2122130859, 225.10505576172)
+
+var node20 = ::blueprint::nodes::integer::Integer()
+
+node20.value = 2
+
+_editor.add_node(node20, -1161.5561523437, 176.78405761719)
+
+var node21 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node21, -880.5771484375, 175.11193847656)
+
+var node22 = ::archgraph::nodes::scale_scope::ScaleScope()
+node22.query_param("s").value.set(1, 1, 5)
+node22.query_param("anchor").value = "left"
+
+_editor.add_node(node22, 51.68347167969, -52.965820312503)
+
+var node23 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node23.query_param("size").value.set(1, 1, 1)
+
+_editor.add_node(node23, -51.00189301758, -475.46591668233)
+
+var node24 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node24, 328.30014358428, -262.21094166208)
+
+var node25 = ::blueprint::nodes::subgraph::Subgraph()
+node25.load_from_file(_editor, "wall_material.ves")
+
+_editor.add_node(node25, 139.11900092451, -443.41036123115)
+
+var node26 = ::archgraph::nodes::scale_scope::ScaleScope()
+node26.query_param("s").value.set(1, 1, 0.35)
+node26.query_param("anchor").value = "left"
+
+_editor.add_node(node26, 167.56895248779, -294.56998989746)
+
+var node27 = ::blueprint::nodes::subgraph::Subgraph()
+node27.load_from_file(_editor, "wall_props.ves")
+
+_editor.add_node(node27, -20.624910097655, -291.57628041016)
+
+Blueprint.connect(node23, "geo", node25, "geo")
+Blueprint.connect(node6, "beam_width", node7, "var")
+Blueprint.connect(node7, "var", node8, "var")
+Blueprint.connect(node8, "var", node9, "a")
+Blueprint.connect(node10, "v", node9, "b")
+Blueprint.connect(node9, "v", node4, "size")
+Blueprint.connect(node0, "var", node14, "geo")
+Blueprint.connect(node14, "sy", node15, "height")
+Blueprint.connect(node15, "width", node19, "a")
+Blueprint.connect(node20, "v", node19, "b")
+Blueprint.connect(node19, "v", node21, "a")
+Blueprint.connect(node14, "sz", node21, "b")
+Blueprint.connect(node19, "v", node17, "a")
+Blueprint.connect(node14, "sx", node17, "b")
+Blueprint.connect(node17, "v", node18, "v")
+Blueprint.connect(node0, "var", node16, "geo")
+Blueprint.connect(node18, "v", node16, "x")
+Blueprint.connect(node21, "v", node16, "z")
+Blueprint.connect(node16, "geo", node2, "parent")
+Blueprint.connect(node3, "size", node2, "size0")
+Blueprint.connect(node4, "size", node2, "size1")
+Blueprint.connect(node5, "size", node2, "size2")
+Blueprint.connect(node2, "child2", node26, "geo")
+Blueprint.connect(node27, "depth", node26, "z")
+Blueprint.connect(node25, "geo", node24, "geo")
+Blueprint.connect(node26, "geo", node24, "pos")
+Blueprint.connect(node2, "child1", node22, "geo")
+Blueprint.connect(node22, "geo", node13, "facade")
+Blueprint.connect(node2, "child0", node11, "facade")
+Blueprint.connect(node11, "geo", node12, "in0")
+Blueprint.connect(node13, "geo", node12, "in1")
+Blueprint.connect(node24, "geo", node12, "in2")
+Blueprint.connect(node12, "list", node1, "var")

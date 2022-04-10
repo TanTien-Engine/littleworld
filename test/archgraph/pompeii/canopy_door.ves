@@ -5,9 +5,9 @@ _editor.add_node(node0, 361.03150258512, 119.9298767508)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(7.0303016207433, 3.6883176727168, -5.340345717446)
-node1.cam.yaw = -597.7
-node1.cam.pitch = -37
+node1.cam.position.set(6.8402986553409, 1.3738202609343, -7.0811918561745)
+node1.cam.yaw = -609.7
+node1.cam.pitch = -16.1
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -31,15 +31,15 @@ node4.on_param_dirty()
 _editor.add_node(node4, -366.79369407748, 151.07130127591)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/shop_doors.ves")
+node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/door.ves")
 
-_editor.add_node(node5, -28.794821796365, 82.793811499439)
+_editor.add_node(node5, -20.24936725091, 88.70290240853)
 
 var node6 = ::archgraph::nodes::split::Split()
 node6.query_param("axis").value = "hori"
 node6.query_param("repeat").value = false
 
-_editor.add_node(node6, -216.79959563336, 37.659195887753)
+_editor.add_node(node6, -213.163231997, 44.93192316048)
 
 var node7 = ::archgraph::nodes::split_size::SplitSize()
 node7.query_param("size").value = 1
@@ -47,24 +47,10 @@ node7.query_param("mode").value = "absolute"
 
 _editor.add_node(node7, -350.70150836419, 32.55430597298)
 
-var node8 = ::blueprint::nodes::integer::Integer()
-
-node8.value = 2
-
-_editor.add_node(node8, -483.6617668729, 40.57289823566)
-
-var node9 = ::blueprint::nodes::integer::Integer()
-
-node9.value = 1
-
-_editor.add_node(node9, -216.53659057617, -61.387603759767)
-
-Blueprint.connect(node8, "v", node7, "size")
 Blueprint.connect(node3, "geo", node4, "geo")
 Blueprint.connect(node4, "side", node6, "parent")
 Blueprint.connect(node7, "size", node6, "size0")
 Blueprint.connect(node6, "child0", node5, "facade")
-Blueprint.connect(node9, "v", node5, "type")
 Blueprint.connect(node4, "side", node2, "in0")
 Blueprint.connect(node5, "geo", node2, "in1")
 Blueprint.connect(node2, "list", node0, "geos")

@@ -1,0 +1,34 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "pos"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -469.36155576824, -115.11321176159)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "pos"
+node1.var_type = "geometry"
+
+_editor.add_node(node1, 19.550702560048, -97.903709979097)
+
+var node2 = ::archgraph::nodes::scale_scope::ScaleScope()
+node2.query_param("s").value.set(1, 1, 1)
+node2.query_param("anchor").value = "left"
+
+_editor.add_node(node2, -289.83216168726, -233.27104833234)
+
+var node3 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node3, -433.80965300959, -253.74254113668)
+
+var node4 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node4, -122.83487956512, -120.59052292464)
+
+Blueprint.connect(node4, "curr_item", node3, "geo")
+Blueprint.connect(node4, "curr_item", node2, "geo")
+Blueprint.connect(node3, "sx", node2, "z")
+Blueprint.connect(node0, "var", node4, "items")
+Blueprint.connect(node2, "geo", node4, "eval")
+Blueprint.connect(node4, "result", node1, "var")

@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -949.4271893055, 123.49149727604)
+_editor.add_node(node0, -782.3585942642, 82.953480747109)
 
 var node1 = ::blueprint::nodes::output::Output()
 
@@ -21,11 +21,11 @@ _editor.add_node(node2, 58.707849884033, 14.464892578125)
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
 node3.load_from_file(_editor, "pillar_base_width.ves")
 
-_editor.add_node(node3, -617.93215393066, -0.7650997924805)
+_editor.add_node(node3, -463.50488120339, -18.728736156117)
 
 var node4 = ::archgraph::nodes::scope_size::ScopeSize()
 
-_editor.add_node(node4, -801.93215393066, 0.2348925781246)
+_editor.add_node(node4, -647.5048812034, -17.728743785512)
 
 var node5 = ::archgraph::nodes::split_size::SplitSize()
 node5.query_param("size").value = 0
@@ -35,13 +35,13 @@ _editor.add_node(node5, -116.19215393066, 6.7648925781246)
 
 var node6 = ::blueprint::nodes::multiply::Multiply()
 
-_editor.add_node(node6, -428.5561472168, -52.511014892578)
+_editor.add_node(node6, -261.28341994407, -103.42010580167)
 
 var node7 = ::blueprint::nodes::integer::Integer()
 
 node7.value = 3
 
-_editor.add_node(node7, -569.47712890625, -86.259001159668)
+_editor.add_node(node7, -393.11349254261, -134.44081934149)
 
 var node8 = ::archgraph::nodes::split_size::SplitSize()
 node8.query_param("size").value = 0
@@ -54,19 +54,13 @@ node9.load_from_file(_editor, "pillar.ves")
 
 _editor.add_node(node9, 277.23515625, 65.399543609619)
 
-var node10 = ::archgraph::nodes::translate_scope::TranslateScope()
-node10.query_param("t").value.set(0, 0, 0)
-
-_editor.add_node(node10, -713.57718310547, 208.67326049805)
-
-Blueprint.connect(node0, "var", node10, "geo")
 Blueprint.connect(node0, "var", node4, "geo")
 Blueprint.connect(node4, "sy", node3, "height")
 Blueprint.connect(node3, "width", node6, "a")
 Blueprint.connect(node7, "v", node6, "b")
 Blueprint.connect(node6, "v", node8, "size")
 Blueprint.connect(node3, "width", node5, "size")
-Blueprint.connect(node10, "geo", node2, "parent")
+Blueprint.connect(node0, "var", node2, "parent")
 Blueprint.connect(node5, "size", node2, "size0")
 Blueprint.connect(node8, "size", node2, "size1")
 Blueprint.connect(node2, "child0", node9, "facade")

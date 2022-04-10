@@ -1,0 +1,14 @@
+var node0 = ::blueprint::nodes::number::Number()
+
+node0.value = 0.35
+
+_editor.add_node(node0, 1.09108251953, 19.56699365234)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "depth"
+node1.var_type = "num"
+
+_editor.add_node(node1, 137, 28.5)
+
+Blueprint.connect(node0, "v", node1, "var")
