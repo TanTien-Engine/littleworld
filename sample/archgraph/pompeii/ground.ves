@@ -1,0 +1,46 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -402.6380676608, 286.3027437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 259.46356115703, 218.32117578512)
+
+var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
+node2.query_param("axes").value = "xz"
+node2.query_param("scale").value.set(12, 12)
+node2.query_param("offset").value.set(0, 0)
+node2.query_param("uw_factor").value = 0
+node2.query_param("gpu").value = true
+
+_editor.add_node(node2, -248.83998901367, 223.22998901367)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node3, 51.664119744358, 205.7899503068)
+
+var node4 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node4, 152.57736022271, 87.74587443117)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.mipmap = false
+node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/streets/trottoir.02.color.jpg")
+node5.set_sampler("linear_repeat")
+
+_editor.add_node(node5, -284.57763826172, 42.884003613281)
+
+Blueprint.connect(node0, "var", node2, "geo")
+Blueprint.connect(node2, "geo", node3, "geo")
+Blueprint.connect(node5, "tex", node3, "texture")
+Blueprint.connect(node3, "geo", node4, "in0")
+Blueprint.connect(node3, "geo", node1, "var")

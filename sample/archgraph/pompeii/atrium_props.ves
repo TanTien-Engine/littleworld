@@ -1,0 +1,28 @@
+var node0 = ::blueprint::nodes::number::Number()
+
+node0.value = 2.8
+
+_editor.add_node(node0, -119, 204)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "atrium_offset"
+node1.var_type = "num"
+
+_editor.add_node(node1, 24, 215)
+
+var node2 = ::blueprint::nodes::number::Number()
+
+node2.value = 2.1
+
+_editor.add_node(node2, -115.8987, 133.8791)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "gardenway_width"
+node3.var_type = "num"
+
+_editor.add_node(node3, 27.1013, 144.8791)
+
+Blueprint.connect(node2, "v", node3, "var")
+Blueprint.connect(node0, "v", node1, "var")

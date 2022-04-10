@@ -1,9 +1,12 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.variant" for Variant
+import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
+import "maths.vector" for Vector2, Vector3
 import "geometry" for PolyPoint, PolyFace, Polytope
+import "maths" for Matrix44
 
 class PrimitiveQuad is Node
 {
@@ -15,15 +18,24 @@ class PrimitiveQuad is Node
 			Pin(this, "geo", VAR_TYPE_GEOMETRY),
 		]
 
+		this.params.add(NodeParam("size", Vector2(1, 1)))
+
 		this.layout()
 	}
 
 	calc_value(idx)
 	{
-		var xmin = 0
-		var xmax = 1
-		var zmin = 0
-		var zmax = 1
+		var size = this.query_param("size").value
+
+		var hx = size.x * 0.5
+		var hz = size.y * 0.5
+
+		var pos = Vector3(0, 0, 0)
+
+		var xmin = pos.x - hx
+		var xmax = pos.x + hx
+		var zmin = pos.z - hz
+		var zmax = pos.z + hz
 		var y = 0
 
 		var points = []
@@ -36,6 +48,18 @@ class PrimitiveQuad is Node
 		var poly = Polytope.init(points, [ face ])
 
 	    var geo = Geometry([ poly ])
+		geo.scope = this.calc_scope_mat(size)
+
 		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+
+	calc_scope_mat(size)
+	{
+		var mat = Matrix44.init()
+
+		mat.from_vectors([0, 0, 1], [0, 1, 0])
+		mat.scale(size.x, 1.0, size.y)
+
+		return mat	
 	}
 }

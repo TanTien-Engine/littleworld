@@ -1,0 +1,82 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -402.6380676608, 286.3027437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 497.81904115703, 306.89922578512)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "u_tex"
+node2.gamma_correction = false
+node2.mipmap = false
+node2.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/garden/lawn.jpg")
+node2.set_sampler("linear_repeat")
+
+_editor.add_node(node2, -250.72177495425, 733.17523746395)
+
+var node3 = ::archgraph::nodes::setup_projection::SetupProjection()
+node3.query_param("axes").value = "xz"
+node3.query_param("scale").value.set(15, 15)
+node3.query_param("offset").value.set(0, 0)
+node3.query_param("uw_factor").value = 0
+node3.query_param("gpu").value = true
+
+_editor.add_node(node3, -248.83998901367, 223.22998901367)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node4, -17.587810255642, 742.0897803068)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.mipmap = false
+node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/garden/meadow_with_alpha.png")
+node5.set_sampler("linear_repeat")
+
+_editor.add_node(node5, -123.83673432617, 57.099036401367)
+
+var node6 = ::archgraph::nodes::translate::Translate()
+node6.query_param("t").value.set(0, 0.032101102173328, 0)
+
+_editor.add_node(node6, -90.889092041016, 257.7805390625)
+
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node7, 131.56423437936, 177.4585265378)
+
+var node8 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node8, 347.44907022271, 187.59749443117)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "../../../assets/archgraph/color.ves")
+
+_editor.add_node(node9, 85.390289425782, 606.38314518359)
+
+var node10 = ::blueprint::nodes::number3::Number3()
+
+node10.value.set(1, 0, 0)
+
+_editor.add_node(node10, -69.758912658691, 473.02783203125)
+
+Blueprint.connect(node0, "var", node3, "geo")
+Blueprint.connect(node3, "geo", node9, "geo")
+Blueprint.connect(node10, "v3", node9, "color")
+Blueprint.connect(node3, "geo", node6, "geo")
+Blueprint.connect(node6, "geo", node7, "geo")
+Blueprint.connect(node5, "tex", node7, "texture")
+Blueprint.connect(node3, "geo", node4, "geo")
+Blueprint.connect(node2, "tex", node4, "texture")
+Blueprint.connect(node4, "geo", node8, "in0")
+Blueprint.connect(node7, "geo", node8, "in1")
+Blueprint.connect(node4, "geo", node1, "var")
