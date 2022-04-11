@@ -56,4 +56,14 @@ class MeshFile is Node
 
 		this.mesh = nil
 	}
+
+	get_title()
+	{
+		if (this.filepath != "") {
+			var name = Filesystem.get_filename(this.filepath)
+			return "mesh_%(name)"
+		} else {
+			return super.get_title()
+		}
+	}
 }
