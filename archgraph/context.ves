@@ -4,6 +4,11 @@ class Context
 {
 	init()
 	{
+		this.random = nil
+	}
+
+	reset()
+	{
 		var seed = 11
 		this.random = Random.init(seed)
 	}

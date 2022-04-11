@@ -1,5 +1,6 @@
 import "editor.editor" for Editor
 import "archgraph.nodes.mesh_file" for MeshFile
+import "archgraph.context" for CONTEXT
 import "filesystem" for Filesystem
 import "gui" for GUI
 
@@ -43,6 +44,8 @@ class Archeditor is Editor
 
 	rebuild_all()
 	{
+		CONTEXT.reset()
+		
 		var scene = this.scene_stack.root()
 		for (var node in scene.nodes) {
 			var bp_node = node.components["bp"]
