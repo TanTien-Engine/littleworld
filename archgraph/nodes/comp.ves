@@ -7,7 +7,7 @@ import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
 import "maths.vector" for Vector3
 import "archgen" for ScopeTools
-import "geometry" for Polytope
+import "geometry" for Polytope, PolyPoint, PolyFace
 import "maths" for Matrix44, Maths
 import "math" for Math
 
@@ -235,10 +235,18 @@ class Comp is Node
 		return angle * 180 / Math.pi() - 90
 	}
 
-	create_children(idx, points, faces)
+	create_children(idx, _points, faces)
 	{
-		for (var face in faces) 
+		for (var _face in faces) 
 		{
+			var border = _face.get_border()
+
+			var points = []
+			for (var i in border) {
+				points.add(PolyPoint.init(_points[i].get_pos()))
+			}
+
+			var face = PolyFace.init([ 0, 1, 2, 3 ], [])
 			var poly = Polytope.init(points, [ face ])
 
 			var geo = Geometry([ poly ])

@@ -4,6 +4,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
 
 class Extrude is Node
 {
@@ -32,26 +33,33 @@ class Extrude is Node
 
 		var distance = this.query_param("distance").value
 
-		this.extrude(v_geo, distance)
-
-		return v_geo
+		return this.extrude(v_geo, distance)
 	}
 
 	extrude(v_geo, distance)
 	{
 		if (v_geo.type == VAR_TYPE_ARRAY)
 		{
+			var geos = []
 			for (var v in v_geo.value) {
-				this.extrude(v, distance)
+				geos.add(this.extrude(v, distance))
 			}
+			return Variant(geos)
 		}
 		else if (v_geo.type == VAR_TYPE_GEOMETRY)
 		{
+			var polys = []
+
 			var mesh = v_geo.value.mesh
-			for (var poly in mesh.polys) {
-				poly.extrude(distance)
+			for (var poly in mesh.polys) 
+			{
+				var new_poly = poly.clone()
+				new_poly.extrude(distance)
+				polys.add(new_poly)
 			}
-			mesh.rebuild()
+
+			var geo = Geometry(polys)
+			return Variant(VAR_TYPE_GEOMETRY, geo)
 		}
 	}
 }
