@@ -1,6 +1,6 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for VAR_TYPE_ARRAY, VAR_TYPE_NUMBER
+import "blueprint.variant" for VAR_TYPE_ARRAY, VAR_TYPE_NUMBER, VAR_TYPE_NUMBER2
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
@@ -24,6 +24,7 @@ class SetupProjection is Node
 
 		this.imports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "scale", VAR_TYPE_NUMBER2),
 		]
 		this.exports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
@@ -62,8 +63,13 @@ class SetupProjection is Node
 			axes_idx = 5
 		}
 
-		var scale     = this.query_param("scale").value
-		var scale2    = this.query_param("scale2").value		
+		var scale = this.query_param("scale").value
+		var v_scale = Blueprint.calc_input_value(this, "scale")
+		if (v_scale) {
+			scale = v_scale.value
+		}
+
+		var scale2    = this.query_param("scale2").value
 		var offset    = this.query_param("offset").value
 		var uw_factor = this.query_param("uw_factor").value
 		var gpu       = this.query_param("gpu").value
