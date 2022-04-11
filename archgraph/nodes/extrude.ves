@@ -1,6 +1,6 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
@@ -14,6 +14,7 @@ class Extrude is Node
 
 		this.imports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "dist", VAR_TYPE_NUMBER),
 		]
 		this.exports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
@@ -32,6 +33,10 @@ class Extrude is Node
 		}
 
 		var distance = this.query_param("distance").value
+		var v_dist = Blueprint.calc_input_value(this, 1)
+		if (v_dist) {
+			distance = v_dist.value
+		}
 
 		return this.extrude(v_geo, distance)
 	}
