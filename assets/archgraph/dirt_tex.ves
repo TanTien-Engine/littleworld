@@ -1,0 +1,40 @@
+var node0 = ::blueprint::nodes::field_set::FieldSet()
+node0.query_param("name").value = "dirt_tex"
+
+_editor.add_node(node0, -141.04288496892, 197.67782304919)
+
+var node1 = ::blueprint::nodes::input::Input()
+
+node1.var_name = "geo"
+node1.var_type = "geometry"
+
+_editor.add_node(node1, -286.8, 265.5)
+
+var node2 = ::blueprint::nodes::input::Input()
+
+node2.var_name = "dirt_tex"
+node2.var_type = "texture"
+
+_editor.add_node(node2, -277.82159688546, 174.59452906222)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "geo"
+node3.var_type = "geometry"
+
+_editor.add_node(node3, 139.3397308927, 260.11122874121)
+
+var node4 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node4, -1.4641076429206, 242.12331807937)
+
+var node5 = ::blueprint::nodes::list_flatten::ListFlatten()
+
+_editor.add_node(node5, -144.4134765625, 267.38516845703)
+
+Blueprint.connect(node4, "curr_item", node0, "value")
+Blueprint.connect(node2, "var", node0, "field")
+Blueprint.connect(node1, "var", node5, "list")
+Blueprint.connect(node5, "list", node4, "items")
+Blueprint.connect(node0, "value", node4, "eval")
+Blueprint.connect(node4, "result", node3, "var")

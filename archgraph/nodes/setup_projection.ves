@@ -31,6 +31,7 @@ class SetupProjection is Node
 
 		this.params.add(NodeParam("axes", "xy", { "combo" : [ "xy", "xz", "yx", "yz", "zx", "zy" ] }))
 		this.params.add(NodeParam("scale", Vector2(1, 1)))
+		this.params.add(NodeParam("scale2", Vector2(1, 1)))		
 		this.params.add(NodeParam("offset", Vector2(0, 0)))
 		this.params.add(NodeParam("uw_factor", 0.0))
 		this.params.add(NodeParam("gpu", false))
@@ -62,21 +63,22 @@ class SetupProjection is Node
 		}
 
 		var scale     = this.query_param("scale").value
+		var scale2    = this.query_param("scale2").value		
 		var offset    = this.query_param("offset").value
 		var uw_factor = this.query_param("uw_factor").value
 		var gpu       = this.query_param("gpu").value
 
-		this.setup_proj(v_geo, axes_idx, scale, offset, uw_factor, gpu)
+		this.setup_proj(v_geo, axes_idx, scale, scale2, offset, uw_factor, gpu)
 
 		return v_geo
 	}
 
-	setup_proj(v_geo, axes, scale, offset, uw_factor, gpu)
+	setup_proj(v_geo, axes, scale, scale2, offset, uw_factor, gpu)
 	{
 		if (v_geo.type == VAR_TYPE_ARRAY)
 		{
 			for (var v in v_geo.value) {
-				this.setup_proj(v, axes, scale, offset, uw_factor, gpu)
+				this.setup_proj(v, axes, scale, scale2, offset, uw_factor, gpu)
 			}
 		}
 		else if (v_geo.type == VAR_TYPE_GEOMETRY)
@@ -86,6 +88,7 @@ class SetupProjection is Node
 				var geo = v_geo.value
 				geo.uv_gpu = true
 				geo.uv_props0.set(scale.x, scale.y, offset.x, offset.y)
+				geo.uv2_props.set(scale2.x, scale2.y, offset.x, offset.y)				
 				geo.uv_props1.set(axes, uw_factor, 1.0, 1.0)				
 			}
 			else

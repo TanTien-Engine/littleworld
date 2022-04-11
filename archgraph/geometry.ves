@@ -16,6 +16,7 @@ class Geometry
 		// material
 		this.color = Vector3(1, 1, 1)
 		this.texture = nil
+		this.bump_tex = nil
 
 		// scope
 		this.scope = nil
@@ -24,6 +25,7 @@ class Geometry
 		this.uv_gpu = false
 		this.uv_props0 = Vector4(1, 1, 0, 0)	// scalc_x, scale_y, offset_x, offset_y
 		this.uv_props1 = Vector4(0, 0, 1, 1)	// axis, uw_factor, tex_w, tex_h
+		this.uv2_props = Vector4(1, 1, 0, 0)	// scalc_x, scale_y, offset_x, offset_y		
 	}
 
 	clone()
