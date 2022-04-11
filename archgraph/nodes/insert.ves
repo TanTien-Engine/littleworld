@@ -1,6 +1,6 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_PIN
 import "blueprint.variant_helper" for VariantHelper
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
@@ -15,7 +15,7 @@ class Insert is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY, VAR_TYPE_PIN ]),
 			Pin(this, "pos", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
 		]
 		this.exports = [
@@ -40,17 +40,39 @@ class Insert is Node
 		var geos = []
 
 		var positions = VariantHelper.flatten_values(v_pos, VAR_TYPE_GEOMETRY)
-		var in_geos = VariantHelper.flatten_values(v_geo, VAR_TYPE_GEOMETRY)		
-		for (var pos in positions)
+		if (v_geo.type == VAR_TYPE_PIN)
 		{
-			if (pos.scope)
+			for (var pos in positions)
 			{
-				for (var geo in in_geos)
+				if (pos.scope)
 				{
-					var aabb = geo.mesh.aabb
-					var new = geo.clone()
-					new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, pos.scope))
-					geos.add(Variant(VAR_TYPE_GEOMETRY, new))
+					var pin = v_geo.value
+					var v_geo_real = Blueprint.calc_input_value(pin.node, pin.slot_idx)
+					var in_geos = VariantHelper.flatten_values(v_geo_real, VAR_TYPE_GEOMETRY)
+					for (var geo in in_geos)
+					{
+						var aabb = geo.mesh.aabb
+						var new = geo.clone()
+						new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, pos.scope))
+						geos.add(Variant(VAR_TYPE_GEOMETRY, new))
+					}
+				}
+			}
+		}
+		else
+		{
+			var in_geos = VariantHelper.flatten_values(v_geo, VAR_TYPE_GEOMETRY)
+			for (var pos in positions)
+			{
+				if (pos.scope)
+				{
+					for (var geo in in_geos)
+					{
+						var aabb = geo.mesh.aabb
+						var new = geo.clone()
+						new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, pos.scope))
+						geos.add(Variant(VAR_TYPE_GEOMETRY, new))
+					}
 				}
 			}
 		}

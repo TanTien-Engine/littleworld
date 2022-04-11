@@ -1,0 +1,71 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ANY, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_helper" for NodeHelper
+import "archgraph.context" for CONTEXT
+
+class RandSelect is Node
+{
+	init() 
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "in0", VAR_TYPE_ANY),
+			Pin(this, "in1", VAR_TYPE_ANY),
+		]
+		this.exports = [
+			Pin(this, "out", VAR_TYPE_ANY),
+		]
+
+		this.layout()
+	}
+
+	on_pin_dirty(pin)
+	{
+		if (pin == this.exports[0]) {
+			for (var pin in this.imports) {
+				Blueprint.send_pin_dirty(pin)
+			}
+		} else if (pin.is_input) {
+			Blueprint.send_pin_dirty(this.exports[0])
+		}
+	}
+
+	calc_value(idx)
+	{
+		var v_items = []
+		for (var i in 0..this.imports.count) {
+			var v = Blueprint.calc_input_value(this, i)
+			if (v) {
+				v_items.add(v)
+			}
+		}
+
+		if (v_items.isEmpty) {
+			return nil
+		}
+
+		var i = CONTEXT.random.int(0, v_items.count)
+		if (i == v_items.count) {
+			i = 0
+		}
+
+		return v_items[i]
+	}
+
+	on_connected(pin)
+	{
+		if (pin.is_input) {
+			NodeHelper.dynamic_imports_update(this)
+		}
+	}
+
+	on_disconnected(pin)
+	{
+		if (pin.is_input) {
+			NodeHelper.dynamic_imports_update(this)
+		}
+	}
+}

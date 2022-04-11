@@ -1,7 +1,7 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.node_param" for NodeParam
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER, VAR_TYPE_PIN
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geo_helper" for GeoHelper
@@ -17,9 +17,9 @@ class ScaleScope is Node
 
 		this.imports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
-			Pin(this, "x", VAR_TYPE_NUMBER),
-			Pin(this, "y", VAR_TYPE_NUMBER),
-			Pin(this, "z", VAR_TYPE_NUMBER),
+			Pin(this, "x", [ VAR_TYPE_NUMBER, VAR_TYPE_PIN ]),
+			Pin(this, "y", [ VAR_TYPE_NUMBER, VAR_TYPE_PIN ]),
+			Pin(this, "z", [ VAR_TYPE_NUMBER, VAR_TYPE_PIN ]),
 		]
 		this.exports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
@@ -40,20 +40,10 @@ class ScaleScope is Node
 
 		var out_geo = GeoHelper.clone_geo(in_geo)
 
-		var s = this.query_param("s").value
-
-		var v_x = Blueprint.calc_input_value(this, "x")
-		if (v_x) {
-			s.x = v_x.value
+		var s = nil
+		if (!this.is_input_lazy_eval()) {
+			s = this.calc_input_val()
 		}
-		var v_y = Blueprint.calc_input_value(this, "y")
-		if (v_y) {
-			s.y = v_y.value
-		}
-		var v_z = Blueprint.calc_input_value(this, "z")
-		if (v_z) {
-			s.z = v_z.value
-		}	
 
 		var anchor = this.query_param("anchor").value
 
@@ -74,6 +64,10 @@ class ScaleScope is Node
 		{
 			if (v_geo.value.scope) 
 			{
+				if (!s) {
+					s = this.calc_input_val()
+				}
+
 				var mat = Matrix44.init()
 
 				mat.scale(s.x, s.y, s.z)
@@ -97,4 +91,56 @@ class ScaleScope is Node
 			}
 		}
 	}
+
+	is_input_lazy_eval()
+	{
+		for (var i in 1..this.imports.count) {
+			var v = Blueprint.calc_input_value(this, i)
+			if (v and v.type == VAR_TYPE_PIN) {
+				return true
+			}
+		}
+		return false
+	}
+
+	calc_input_val(name)
+	{
+		var v = Blueprint.calc_input_value(this, name)
+		if (v)
+		{
+			if (v.type == VAR_TYPE_PIN)
+			{
+				var pin = v.value
+				v = Blueprint.calc_input_value(pin.node, pin.slot_idx)
+			}
+		}
+
+		if (v) {
+			return v.value
+		} else {
+			return nil
+		}
+	}
+
+	calc_input_val()
+	{
+		var s = this.query_param("s").value
+
+		var x = this.calc_input_val("x")
+		if (x) {
+			s.x = x
+		}
+
+		var y = this.calc_input_val("y")
+		if (y) {
+			s.y = y
+		}
+		
+		var z = this.calc_input_val("z")
+		if (z) {
+			s.z = z
+		}
+
+		return s
+	}	
 }

@@ -3,7 +3,7 @@ import "blueprint.pin" for Pin
 import "blueprint.node_param" for NodeParam
 import "blueprint.node_helper" for NodeHelper
 import "blueprint.blueprint" for Blueprint
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_PIN
 import "blueprint.variant_helper" for VariantHelper
 import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SPLIT_SIZE
 import "archgraph.geometry" for Geometry
@@ -147,15 +147,42 @@ class Split is Node
 		return rects
 	}
 
-	build_rects(width, height)
+	calc_src_sizes()
 	{
 		var src_sizes = []
+
 		for (var i in 1..this.imports.count)
 		{
 			var v_size = Blueprint.calc_input_value(this, i)
 			if (v_size and v_size.value) {
-				src_sizes.add(v_size.value)
+				if (v_size.type == VAR_TYPE_PIN) {
+					var pin = v_size.value
+					v_size = Blueprint.calc_input_value(pin.node, pin.slot_idx)
+				} 
+				src_sizes.add(v_size.value)				
 			}
+		}
+
+		return src_sizes
+	}
+
+	is_input_lazy_eval()
+	{
+		for (var i in 1..this.imports.count)
+		{
+			var v_size = Blueprint.calc_input_value(this, i)
+			if (v_size and v_size.type == VAR_TYPE_PIN) {
+				return true
+			}
+		}
+		return false
+	}
+
+	build_rects(width, height)
+	{
+		var src_sizes = nil
+		if (!this.is_input_lazy_eval()) {
+			src_sizes = this.calc_src_sizes()		
 		}
 
 		var rects = []
@@ -239,19 +266,24 @@ class Split is Node
 		var repeat = this.query_param("repeat").value
 		if (repeat)
 		{
+			var src_sizes = src
+			if (!src_sizes) {
+				src_sizes = this.calc_src_sizes()
+			}
+
 			var sizes = []
-			for (var _ in src) {
+			for (var _ in src_sizes) {
 				sizes.add([])
 			}
 
 			var floating = false
-			for (var sz in src) {
+			for (var sz in src_sizes) {
 				if (sz.mode == "floating") {
 					floating = true
 				}
 			}
 
-			if (floating)
+			if (floating and src)
 			{
 				var dst = []
 				var len = this.calc_sizes_single_layer(dst, src, tot, tot)
@@ -292,6 +324,10 @@ class Split is Node
 
 	calc_sizes_single_layer(dst, src, length, tot_len)
 	{
+		if (!src) {
+			src = this.calc_src_sizes()
+		}
+
 		// prepare relative and floating values
 		var floating_num = 0
 		for (var sz in src) 

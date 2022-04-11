@@ -4,5 +4,5 @@ var ARCH_NODES = [
 PrimitiveCube, PrimitiveQuad, PrimitivePolygon, Extrude,
 SplitSize, Split, Comp, Scale, Rotate, Translate, ScaleScope, RotateScope, TranslateScope, ScopeSize,
 SetupProjection,
-MeshFile, Insert,
+MeshFile, Insert, RandSelect, RandNumber,
 ]

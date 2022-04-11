@@ -1,0 +1,12 @@
+import "random" for Random
+
+class Context
+{
+	init()
+	{
+		var seed = 11
+		this.random = Random.init(seed)
+	}
+}
+
+var CONTEXT = Context()
