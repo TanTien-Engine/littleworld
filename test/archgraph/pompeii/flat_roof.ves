@@ -1,0 +1,51 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node0, 412.65225089175, -221.81066896755)
+
+var node1 = ::blueprint::nodes::camera3d::Camera3d()
+
+node1.cam.position.set(7.0555455472384, 6.938608532617, -4.4917843471918)
+node1.cam.yaw = -580.2
+node1.cam.pitch = -45
+node1.cam.zoom = 45
+node1.cam.update_vectors()
+node1.speed = 0.22097560763359
+
+_editor.add_node(node1, 212.84966710554, -328.58809905318)
+
+var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node2.query_param("size").value.set(10, 2.5, 5)
+
+_editor.add_node(node2, -469.5643373069, 40.044720521049)
+
+var node3 = ::archgraph::nodes::comp::Comp()
+node3.query_param("selector").value = "face6"
+
+node3.on_param_dirty()
+
+_editor.add_node(node3, -269.16087589214, 9.0023572659997)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../sample/archgraph/pompeii/flat_roof.ves")
+
+_editor.add_node(node4, -5.4822395381789, -15.440858276991)
+
+var node5 = ::archgraph::nodes::comp::Comp()
+node5.query_param("selector").value = "side"
+
+node5.on_param_dirty()
+
+_editor.add_node(node5, -203.2359765625, -151.72002807617)
+
+var node6 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node6, 215.42401977539, -171.08001098633)
+
+Blueprint.connect(node2, "geo", node5, "geo")
+Blueprint.connect(node2, "geo", node3, "geo")
+Blueprint.connect(node3, "top", node4, "top")
+Blueprint.connect(node4, "geo", node6, "in0")
+Blueprint.connect(node5, "side", node6, "in1")
+Blueprint.connect(node6, "list", node0, "geos")
+Blueprint.connect(node1, "this", node0, "view_cam")

@@ -1,0 +1,93 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -1093.8092171724, -54.092973730035)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 249.39838, 179.19592)
+
+var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node2.query_param("size").value.set(1, 1, 1)
+
+_editor.add_node(node2, -825.21854238876, 196.29805847214)
+
+var node3 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node3, 47.005842121448, 99.423265143322)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "door_beam_tex.ves")
+
+_editor.add_node(node4, -621.66432843971, 73.127230018713)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node5, -360.20678614639, 145.25344382042)
+
+var node6 = ::archgraph::nodes::translate_scope::TranslateScope()
+node6.query_param("t").value.set(0, 0, -0.4)
+
+_editor.add_node(node6, -150.54539991486, -173.80168839304)
+
+var node7 = ::archgraph::nodes::scale_scope::ScaleScope()
+node7.query_param("s").value.set(1.003, 1, 0.3)
+node7.query_param("anchor").value = "left"
+
+_editor.add_node(node7, -369.66717529297, -170.59671020508)
+
+var node8 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node8, -962.18459924802, -113.90315983727)
+
+var node9 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node9, -804.98723563426, -143.00948295553)
+
+var node10 = ::blueprint::nodes::number::Number()
+
+node10.value = 0.03
+
+_editor.add_node(node10, -961.24016310397, -190.70306705542)
+
+var node11 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node11, -657.15085148399, -179.19240328748)
+
+var node12 = ::archgraph::nodes::setup_projection::SetupProjection()
+node12.query_param("axes").value = "zx"
+node12.query_param("scale").value.set(1, 1)
+node12.query_param("scale2").value.set(1, 1)
+node12.query_param("offset").value.set(0.5, 0.5)
+node12.query_param("uw_factor").value = 0
+node12.query_param("gpu").value = false
+
+_editor.add_node(node12, -606.00759504117, 272.10038771458)
+
+var node13 = ::blueprint::nodes::number::Number()
+
+node13.value = 0
+
+_editor.add_node(node13, -831.20285080245, 42.790412902832)
+
+Blueprint.connect(node13, "v", node4, "rand")
+Blueprint.connect(node2, "geo", node12, "geo")
+Blueprint.connect(node12, "geo", node5, "geo")
+Blueprint.connect(node4, "tex", node5, "texture")
+Blueprint.connect(node0, "var", node8, "geo")
+Blueprint.connect(node8, "sx", node9, "a")
+Blueprint.connect(node10, "v", node9, "b")
+Blueprint.connect(node9, "v", node11, "a")
+Blueprint.connect(node8, "sx", node11, "b")
+Blueprint.connect(node0, "var", node7, "geo")
+Blueprint.connect(node11, "v", node7, "x")
+Blueprint.connect(node7, "geo", node6, "geo")
+Blueprint.connect(node5, "geo", node3, "geo")
+Blueprint.connect(node6, "geo", node3, "pos")
+Blueprint.connect(node3, "geo", node1, "var")

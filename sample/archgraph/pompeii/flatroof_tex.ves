@@ -1,0 +1,62 @@
+var node0 = ::rendergraph::nodes::texture::Texture()
+node0.query_param("unif_name").value = "u_tex"
+node0.gamma_correction = false
+node0.mipmap = false
+node0.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/roofs/flatroofs/flatroof0.jpg")
+node0.set_sampler("linear_repeat")
+
+_editor.add_node(node0, -328, 178)
+
+var node1 = ::rendergraph::nodes::texture::Texture()
+node1.query_param("unif_name").value = "u_tex"
+node1.gamma_correction = false
+node1.mipmap = false
+node1.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/roofs/flatroofs/flatroof1.jpg")
+node1.set_sampler("linear_repeat")
+
+_editor.add_node(node1, -116, 177)
+
+var node2 = ::rendergraph::nodes::texture::Texture()
+node2.query_param("unif_name").value = "u_tex"
+node2.gamma_correction = false
+node2.mipmap = false
+node2.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/roofs/flatroofs/flatroof2.jpg")
+node2.set_sampler("linear_repeat")
+
+_editor.add_node(node2, 99, 174)
+
+var node3 = ::rendergraph::nodes::texture::Texture()
+node3.query_param("unif_name").value = "u_tex"
+node3.gamma_correction = false
+node3.mipmap = false
+node3.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/roofs/flatroofs/flatroof3.jpg")
+node3.set_sampler("linear_repeat")
+
+_editor.add_node(node3, -333, -105)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.mipmap = false
+node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/roofs/flatroofs/flatroof4.jpg")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -120, -108)
+
+var node5 = ::archgraph::nodes::rand_select::RandSelect()
+
+_editor.add_node(node5, 325, -36.3)
+
+var node6 = ::blueprint::nodes::output::Output()
+
+node6.var_name = "tex"
+node6.var_type = "texture"
+
+_editor.add_node(node6, 461.05084533691, 11.51900024414)
+
+Blueprint.connect(node0, "tex", node5, "in0")
+Blueprint.connect(node1, "tex", node5, "in1")
+Blueprint.connect(node2, "tex", node5, "in2")
+Blueprint.connect(node3, "tex", node5, "in3")
+Blueprint.connect(node4, "tex", node5, "in4")
+Blueprint.connect(node5, "out", node6, "var")
