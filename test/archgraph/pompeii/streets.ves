@@ -1,0 +1,83 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node0, 326.71144247993, -148.08665217482)
+
+var node1 = ::blueprint::nodes::camera3d::Camera3d()
+
+node1.cam.position.set(5.2367282523741, 3.2999700196725, -0.36404678193725)
+node1.cam.yaw = -744.9
+node1.cam.pitch = -32.7
+node1.cam.zoom = 45
+node1.cam.update_vectors()
+node1.speed = 0.22097560763359
+
+_editor.add_node(node1, 132.8283234119, -304.23206256045)
+
+var node2 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node2, 136.1741253224, -127.57204342873)
+
+var node3 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+node3.query_param("size").value.set(20, 4)
+
+_editor.add_node(node3, -480.36589363636, -5.6344326446329)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../sample/archgraph/pompeii/street_ground.ves")
+
+_editor.add_node(node4, -119.45454545455, -123.54545454545)
+
+var node5 = ::archgraph::nodes::split::Split()
+node5.query_param("axis").value = "vert"
+node5.query_param("repeat").value = false
+
+_editor.add_node(node5, -315, -146.5)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "../../../sample/archgraph/pompeii/streets_props.ves")
+
+_editor.add_node(node6, -669.11570247934, -158.0041322314)
+
+var node7 = ::archgraph::nodes::split_size::SplitSize()
+node7.query_param("size").value = 0
+node7.query_param("mode").value = "absolute"
+
+_editor.add_node(node7, -478.19834710744, -104.45041322314)
+
+var node8 = ::archgraph::nodes::split_size::SplitSize()
+node8.query_param("size").value = 10
+node8.query_param("mode").value = "floating"
+
+_editor.add_node(node8, -481.17954049587, -193.44474297521)
+
+var node9 = ::archgraph::nodes::split_size::SplitSize()
+node9.query_param("size").value = 0
+node9.query_param("mode").value = "absolute"
+
+_editor.add_node(node9, -480.38135041322, -285.63856115703)
+
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "../../../sample/archgraph/pompeii/sidewalk.ves")
+
+_editor.add_node(node10, -120.97988614169, -36.700770291415)
+
+var node11 = ::blueprint::nodes::subgraph::Subgraph()
+node11.load_from_file(_editor, "../../../sample/archgraph/pompeii/sidewalk.ves")
+
+_editor.add_node(node11, -121.2869952326, -209.98204301869)
+
+Blueprint.connect(node6, "stone_width", node9, "size")
+Blueprint.connect(node6, "stone_width", node7, "size")
+Blueprint.connect(node3, "geo", node5, "parent")
+Blueprint.connect(node7, "size", node5, "size0")
+Blueprint.connect(node8, "size", node5, "size1")
+Blueprint.connect(node9, "size", node5, "size2")
+Blueprint.connect(node5, "child2", node11, "facade")
+Blueprint.connect(node5, "child0", node10, "facade")
+Blueprint.connect(node5, "child1", node4, "geo")
+Blueprint.connect(node10, "geo", node2, "in0")
+Blueprint.connect(node4, "geo", node2, "in1")
+Blueprint.connect(node11, "geo", node2, "in2")
+Blueprint.connect(node2, "list", node0, "geos")
+Blueprint.connect(node1, "this", node0, "view_cam")

@@ -1,0 +1,72 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, 298.96689101689, -92.388991761591)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 565.84372936138, -27.185707621069)
+
+var node2 = ::archgraph::nodes::mesh_file::MeshFile()
+node2.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/streets/stoneA.obj")
+
+_editor.add_node(node2, -321, 19)
+
+var node3 = ::archgraph::nodes::mesh_file::MeshFile()
+node3.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/streets/stoneB.obj")
+
+_editor.add_node(node3, -319, -28)
+
+var node4 = ::archgraph::nodes::mesh_file::MeshFile()
+node4.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/streets/stoneC.obj")
+
+_editor.add_node(node4, -319, -74)
+
+var node5 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node5, -189, -35)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node6, -8, 26)
+
+var node7 = ::blueprint::nodes::number::Number()
+
+node7.value = 0
+
+_editor.add_node(node7, -189.30578512397, 55.0826446281)
+
+var node8 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node8, 434.49060856499, -38.090533433509)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node9, 244.70166015625, -6.1622009277345)
+
+var node10 = ::rendergraph::nodes::texture::Texture()
+node10.query_param("unif_name").value = "u_tex"
+node10.gamma_correction = false
+node10.mipmap = false
+node10.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/streets/streets.color.jpg")
+node10.set_sampler("null")
+
+_editor.add_node(node10, -3.3892489346591, -104.16220092773)
+
+Blueprint.connect(node2, "geo", node5, "in0")
+Blueprint.connect(node3, "geo", node5, "in1")
+Blueprint.connect(node4, "geo", node5, "in2")
+Blueprint.connect(node7, "v", node6, "rand")
+Blueprint.connect(node5, "list", node6, "items")
+Blueprint.connect(node6, "tex", node9, "geo")
+Blueprint.connect(node10, "tex", node9, "texture")
+Blueprint.connect(node9, "geo", node8, "geo")
+Blueprint.connect(node0, "var", node8, "pos")
+Blueprint.connect(node8, "geo", node1, "var")

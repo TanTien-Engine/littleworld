@@ -1,0 +1,54 @@
+var node0 = ::blueprint::nodes::number::Number()
+
+node0.value = 0.3
+
+_editor.add_node(node0, -250, 175)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "sidewalk_height"
+node1.var_type = "num"
+
+_editor.add_node(node1, -111, 234)
+
+var node2 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node2, -116, 138)
+
+var node3 = ::blueprint::nodes::number::Number()
+
+node3.value = 1.7
+
+_editor.add_node(node3, -246, 101)
+
+var node4 = ::blueprint::nodes::output::Output()
+
+node4.var_name = "stone_width"
+node4.var_type = "num"
+
+_editor.add_node(node4, 19, 181)
+
+var node5 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node5, 19, 116)
+
+var node6 = ::blueprint::nodes::number::Number()
+
+node6.value = 2.2
+
+_editor.add_node(node6, -113, 68)
+
+var node7 = ::blueprint::nodes::output::Output()
+
+node7.var_name = "stone_length"
+node7.var_type = "num"
+
+_editor.add_node(node7, 156, 125)
+
+Blueprint.connect(node0, "v", node2, "a")
+Blueprint.connect(node3, "v", node2, "b")
+Blueprint.connect(node2, "v", node5, "a")
+Blueprint.connect(node6, "v", node5, "b")
+Blueprint.connect(node5, "v", node7, "var")
+Blueprint.connect(node2, "v", node4, "var")
+Blueprint.connect(node0, "v", node1, "var")

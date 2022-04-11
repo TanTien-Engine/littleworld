@@ -1,0 +1,74 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "geo"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -136.4380676608, 201.6027437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = "geometry"
+
+_editor.add_node(node1, 991.57593233933, 100.68724927333)
+
+var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
+node2.query_param("axes").value = "xz"
+node2.query_param("scale").value.set(12, 12)
+node2.query_param("scale2").value.set(60, 60)
+node2.query_param("offset").value.set(0, 0)
+node2.query_param("uw_factor").value = 0
+node2.query_param("gpu").value = true
+
+_editor.add_node(node2, 5.2753941875556, 96.201027231746)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node3, 263.5006887768, 90.434731219719)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.mipmap = false
+node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/streets/streets.color.jpg")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -28.512080987045, -73.488498413907)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "../../../assets/archgraph/bump_tex.ves")
+
+_editor.add_node(node5, 535.5, 89.3)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "u_tex"
+node6.gamma_correction = false
+node6.mipmap = false
+node6.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/streets/streets.bump.jpg")
+node6.set_sampler("linear_repeat")
+
+_editor.add_node(node6, 274.61166992187, -64.892959594727)
+
+var node7 = ::rendergraph::nodes::texture::Texture()
+node7.query_param("unif_name").value = "u_tex"
+node7.gamma_correction = false
+node7.mipmap = false
+node7.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/dirtmaps/dirtmap.07.jpg")
+node7.set_sampler("linear_repeat")
+
+_editor.add_node(node7, 525.9109984375, -81.472783105468)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "../../../assets/archgraph/dirt_tex.ves")
+
+_editor.add_node(node8, 801.92348413086, 90.964962695313)
+
+Blueprint.connect(node0, "var", node2, "geo")
+Blueprint.connect(node2, "geo", node3, "geo")
+Blueprint.connect(node4, "tex", node3, "texture")
+Blueprint.connect(node3, "geo", node5, "geo")
+Blueprint.connect(node6, "tex", node5, "bump_tex")
+Blueprint.connect(node5, "geo", node8, "geo")
+Blueprint.connect(node7, "tex", node8, "dirt_tex")
+Blueprint.connect(node8, "geo", node1, "var")
