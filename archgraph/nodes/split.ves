@@ -14,6 +14,7 @@ import "math" for Math
 import "maths" for Matrix44, Float3
 
 var CHILD_IDX_OFFSET = 1
+var MAX_FLOAT_SIZE = 65535
 
 class SplitRect
 {
@@ -332,11 +333,19 @@ class Split is Node
 		var floating_num = 0
 		for (var sz in src) 
 		{
-			if (sz.mode == "absolute") {
+			if (sz.mode == "absolute") 
+			{
 				dst.add(sz.size)
-			} else if (sz.mode == "relative") {
+			} 
+			else if (sz.mode == "relative") 
+			{
 				dst.add(sz.size * tot_len)
-			} else if (sz.mode == "floating") {
+			} 
+			else if (sz.mode == "floating") 
+			{
+				if (sz.size == 0) {
+					sz.size = MAX_FLOAT_SIZE
+				}
 				dst.add(-sz.size)
 				floating_num = floating_num + 1
 			}
