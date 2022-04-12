@@ -21,4 +21,9 @@ foreign class ScopeTools
 	foreign static get_scope_size(scope)
 }
 
+foreign class RoofExtrude
+{
+	foreign static hip(poly, distance)
+}
+
 );

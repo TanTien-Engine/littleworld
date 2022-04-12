@@ -1,5 +1,6 @@
 #include "wrap_ArchGen.h"
 #include "MeshBuilder.h"
+#include "RoofExtrude.h"
 #include "modules/render/Render.h"
 #include "modules/script/TransHelper.h"
 
@@ -192,6 +193,20 @@ void w_ScopeTools_get_scope_size()
 	tt::return_list(std::vector<float>{ s.x, s.y, s.z });
 }
 
+void w_RoofExtrude_hip()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+	float dist = ves_tonumber(2);
+
+	ves_pop(ves_argnum());
+
+	ves_pushnil();
+	ves_import_class("geometry", "Polytope");
+	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
+	proxy->obj = archgen::RoofExtrude::Hip(poly, dist);
+	ves_pop(1);
+}
+
 }
 
 namespace archgen
@@ -207,6 +222,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 	if (strcmp(signature, "static ScopeTools.face_mapping(_,_)") == 0) return w_ScopeTools_face_mapping;
 	if (strcmp(signature, "static ScopeTools.calc_insert_mat(_,_)") == 0) return w_ScopeTools_calc_insert_mat;
 	if (strcmp(signature, "static ScopeTools.get_scope_size(_)") == 0) return w_ScopeTools_get_scope_size;
+
+	if (strcmp(signature, "static RoofExtrude.hip(_,_)") == 0) return w_RoofExtrude_hip;
 
 	return nullptr;
 }

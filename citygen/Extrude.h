@@ -1,12 +1,17 @@
 #pragma once
 
+#include <SM_Vector.h>
+
 #include <memory>
+#include <map>
 
 namespace gs { class Polygon2D; }
 namespace pm3 { class Polytope; }
 
 namespace citygen
 {
+
+class StraightSkeleton;
 
 class Extrude
 {
