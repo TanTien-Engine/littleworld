@@ -1,7 +1,7 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
 import "blueprint.node_param" for NodeParam
-import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER3
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geo_helper" for GeoHelper
@@ -14,7 +14,8 @@ class Rotate is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),		
+			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
+			Pin(this, "r", VAR_TYPE_NUMBER3),
 		]
 		this.exports = [
 			Pin(this, "geo", [ VAR_TYPE_GEOMETRY, VAR_TYPE_ARRAY ]),
@@ -35,6 +36,11 @@ class Rotate is Node
 		var out_geo = GeoHelper.clone_geo(in_geo)
 
 		var r = this.query_param("r").value
+		var v_r = Blueprint.calc_input_value(this, "r")
+		if (v_r) {
+			r = v_r.value
+		}
+
 		this.rotate_geo(out_geo, r)
 		
 		return out_geo
