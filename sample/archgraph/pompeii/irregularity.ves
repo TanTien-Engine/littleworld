@@ -1,0 +1,152 @@
+var node0 = ::blueprint::nodes::number::Number()
+
+node0.value = 0.6
+
+_editor.add_node(node0, -172.91999816895, 313.90002441406)
+
+var node1 = ::blueprint::nodes::store::Store()
+
+node1.var_name = "prob"
+
+_editor.add_node(node1, -34.980002288818, 317.53001220703)
+
+var node2 = ::blueprint::nodes::store::Store()
+
+node2.var_name = "scale"
+
+_editor.add_node(node2, -28.254224462373, 177.31174320703)
+
+var node3 = ::archgraph::nodes::rand_number::RandNumber()
+node3.query_param("min").value = 0
+node3.query_param("max").value = 3
+
+_editor.add_node(node3, -165.48612426758, 154.47172119141)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "probability.ves")
+
+_editor.add_node(node4, -506.5, -309.4)
+
+var node5 = ::blueprint::nodes::load::Load()
+
+node5.var_name = "prob"
+
+_editor.add_node(node5, -694.5, -309.4)
+
+var node6 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node6, -246, -75.5)
+
+var node7 = ::blueprint::nodes::number::Number()
+
+node7.value = 0
+
+_editor.add_node(node7, -400.95041322314, -187.9132231405)
+
+var node8 = ::blueprint::nodes::input::Input()
+
+node8.var_name = "v"
+node8.var_type = "num"
+
+_editor.add_node(node8, -1073.0439194457, -221.80062582726)
+
+var node9 = ::archgraph::nodes::rand_number::RandNumber()
+node9.query_param("min").value = 0
+node9.query_param("max").value = 1
+
+_editor.add_node(node9, -563.44570393208, -101.45794047206)
+
+var node10 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node10, -402.28884055398, -113.85461728435)
+
+var node11 = ::blueprint::nodes::load::Load()
+
+node11.var_name = "scale"
+
+_editor.add_node(node11, -566.75160608213, -177.49097940744)
+
+var node12 = ::blueprint::nodes::output::Output()
+
+node12.var_name = "irr1"
+node12.var_type = "num"
+
+_editor.add_node(node12, -104.59457876663, -56.482723267611)
+
+var node13 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node13, -207.98763, -441.45966)
+
+var node14 = ::blueprint::nodes::number::Number()
+
+node14.value = 0
+
+_editor.add_node(node14, -362.93804322314, -553.8728831405)
+
+var node15 = ::archgraph::nodes::rand_number::RandNumber()
+node15.query_param("min").value = 0
+node15.query_param("max").value = 1
+
+_editor.add_node(node15, -525.43333393208, -467.41760047206)
+
+var node16 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node16, -364.27647055398, -479.81427728435)
+
+var node17 = ::blueprint::nodes::load::Load()
+
+node17.var_name = "scale"
+
+_editor.add_node(node17, -528.73923608213, -543.45063940744)
+
+var node18 = ::blueprint::nodes::output::Output()
+
+node18.var_name = "irr2"
+node18.var_type = "num"
+
+_editor.add_node(node18, -67.58220876663, -424.44238326761)
+
+var node19 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node19, -685.58061523437, -436.4167755127)
+
+var node20 = ::blueprint::nodes::number::Number()
+
+node20.value = 0.5
+
+_editor.add_node(node20, -983.5805175781, -483.91674804688)
+
+var node21 = ::blueprint::nodes::negate::Negate()
+
+_editor.add_node(node21, -838.68056640625, -444.91676025391)
+
+var node22 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node22, -687.67061523437, -504.4407755127)
+
+Blueprint.connect(node20, "v", node21, "v")
+Blueprint.connect(node8, "var", node22, "a")
+Blueprint.connect(node20, "v", node22, "b")
+Blueprint.connect(node8, "var", node19, "a")
+Blueprint.connect(node21, "v", node19, "b")
+Blueprint.connect(node19, "v", node15, "min")
+Blueprint.connect(node22, "v", node15, "max")
+Blueprint.connect(node8, "var", node9, "max")
+Blueprint.connect(node3, "val", node2, "var")
+Blueprint.connect(node2, "var", node17, "var")
+Blueprint.connect(node15, "val", node16, "a")
+Blueprint.connect(node17, "var", node16, "b")
+Blueprint.connect(node2, "var", node11, "var")
+Blueprint.connect(node9, "val", node10, "a")
+Blueprint.connect(node11, "var", node10, "b")
+Blueprint.connect(node0, "v", node1, "var")
+Blueprint.connect(node1, "var", node5, "var")
+Blueprint.connect(node5, "var", node4, "p")
+Blueprint.connect(node4, "b", node13, "cond")
+Blueprint.connect(node16, "v", node13, "true")
+Blueprint.connect(node14, "v", node13, "false")
+Blueprint.connect(node13, "result", node18, "var")
+Blueprint.connect(node4, "b", node6, "cond")
+Blueprint.connect(node10, "v", node6, "true")
+Blueprint.connect(node7, "v", node6, "false")
+Blueprint.connect(node6, "result", node12, "var")

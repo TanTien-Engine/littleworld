@@ -1,0 +1,42 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -332.4380676608, 169.6027437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 205.39838, 136.19592)
+
+var node2 = ::archgraph::nodes::split::Split()
+node2.query_param("axis").value = "hori"
+node2.query_param("repeat").value = true
+
+_editor.add_node(node2, -178, 106)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "ridge_brick.ves")
+
+_editor.add_node(node3, 6, 134)
+
+var node4 = ::archgraph::nodes::split_size::SplitSize()
+node4.query_param("size").value = 0
+node4.query_param("mode").value = "floating"
+
+_editor.add_node(node4, -324, 81)
+
+var node5 = ::blueprint::nodes::number::Number()
+
+node5.value = 1
+
+_editor.add_node(node5, -469, 88)
+
+Blueprint.connect(node5, "v", node4, "size")
+Blueprint.connect(node0, "var", node2, "parent")
+Blueprint.connect(node4, "size", node2, "size0")
+Blueprint.connect(node2, "child0", node3, "facade")
+Blueprint.connect(node3, "geo", node1, "var")

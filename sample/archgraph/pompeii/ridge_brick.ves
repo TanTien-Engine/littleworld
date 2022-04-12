@@ -1,0 +1,38 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -64.4380676608, 71.6027437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 221.39838, 152.19592)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "brick.ves")
+
+_editor.add_node(node2, -368, 193)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node3, -116, 163)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "sloped_roof_tex.ves")
+
+_editor.add_node(node4, -366, 83)
+
+var node5 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node5, 72, 141)
+
+Blueprint.connect(node2, "round", node3, "geo")
+Blueprint.connect(node4, "tex", node3, "texture")
+Blueprint.connect(node3, "geo", node5, "geo")
+Blueprint.connect(node0, "var", node5, "pos")
+Blueprint.connect(node5, "geo", node1, "var")

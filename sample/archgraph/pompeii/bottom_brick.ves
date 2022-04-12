@@ -1,0 +1,165 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -247.01241026035, -351.74533285851)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 538.59608134926, -111.95571519631)
+
+var node2 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node2, 408.35999382974, -122.97081854592)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "brick.ves")
+
+_editor.add_node(node3, -921.19225297408, 249.16594061733)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node4, -258.83770751953, 105.18081665039)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "sloped_roof_tex.ves")
+
+_editor.add_node(node5, -350.77159181705, 319.95766852513)
+
+var node6 = ::archgraph::nodes::scale_scope::ScaleScope()
+node6.query_param("s").value.set(1, 1, 0.1)
+node6.query_param("anchor").value = "left"
+
+_editor.add_node(node6, -106.22722667806, -411.10565217004)
+
+var node7 = ::archgraph::nodes::translate_scope::TranslateScope()
+node7.query_param("t").value.set(0, 0, 0.5)
+
+_editor.add_node(node7, 47.922046918743, -404.46130814765)
+
+var node8 = ::archgraph::nodes::rotate::Rotate()
+node8.query_param("r").value.set(-0.043611111111111, 0, 0)
+
+_editor.add_node(node8, 84.331072979459, 7.270790771886)
+
+var node9 = ::archgraph::nodes::scale::Scale()
+node9.query_param("s").value.set(1, 1.02, 1)
+
+_editor.add_node(node9, -70.433069832427, 74.005523337715)
+
+var node10 = ::blueprint::nodes::combine::Combine()
+
+_editor.add_node(node10, -67.13352971901, -92.161260729381)
+
+var node11 = ::blueprint::nodes::number::Number()
+
+node11.value = -2.5
+
+_editor.add_node(node11, -320.4074555079, -20.488401360985)
+
+var node12 = ::blueprint::nodes::radians::Radians()
+
+_editor.add_node(node12, -195.41600745418, -11.609214576882)
+
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "irregularity.ves")
+
+_editor.add_node(node13, -290.92808792117, -108.82824254254)
+
+var node14 = ::blueprint::nodes::integer::Integer()
+
+node14.value = 5
+
+_editor.add_node(node14, -616.91180723523, -103.86086718097)
+
+var node15 = ::blueprint::nodes::radians::Radians()
+
+_editor.add_node(node15, -472.85803223552, -95.167981021099)
+
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "irregularity.ves")
+
+_editor.add_node(node16, -290.12383059721, -218.03472510484)
+
+var node17 = ::blueprint::nodes::integer::Integer()
+
+node17.value = 3
+
+_editor.add_node(node17, -616.10754991127, -213.06734974327)
+
+var node18 = ::blueprint::nodes::radians::Radians()
+
+_editor.add_node(node18, -472.05377491156, -204.3744635834)
+
+var node19 = ::blueprint::nodes::lazy_eval::LazyEval()
+
+_editor.add_node(node19, 226.13594922676, 51.38556573143)
+
+var node20 = ::blueprint::nodes::store::Store()
+
+node20.var_name = "tex"
+
+_editor.add_node(node20, -165.08972268853, 310.5440804978)
+
+var node21 = ::blueprint::nodes::load::Load()
+
+node21.var_name = "tex"
+
+_editor.add_node(node21, -450.21370816822, 56.82507929526)
+
+var node22 = ::blueprint::nodes::subgraph::Subgraph()
+node22.load_from_file(_editor, "roof_bricks_props.ves")
+
+_editor.add_node(node22, -918.64233061097, 94.323051078883)
+
+var node23 = ::archgraph::nodes::setup_projection::SetupProjection()
+node23.query_param("axes").value = "xz"
+node23.query_param("scale").value.set(1, 1)
+node23.query_param("scale2").value.set(1, 1)
+node23.query_param("offset").value.set(-0.1, -0.2)
+node23.query_param("uw_factor").value = 0
+node23.query_param("gpu").value = true
+
+_editor.add_node(node23, -560.90816650391, 143.72082519531)
+
+var node24 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node24, -725.31514115767, 34.247816606)
+
+var node25 = ::blueprint::nodes::number2::Number2()
+
+node25.value.set(7.85, 11)
+
+_editor.add_node(node25, -868.04250266335, -13.024913441053)
+
+Blueprint.connect(node17, "v", node18, "v")
+Blueprint.connect(node18, "v", node16, "v")
+Blueprint.connect(node14, "v", node15, "v")
+Blueprint.connect(node15, "v", node13, "v")
+Blueprint.connect(node11, "v", node12, "v")
+Blueprint.connect(node12, "v", node10, "x")
+Blueprint.connect(node13, "irr2", node10, "y")
+Blueprint.connect(node16, "irr2", node10, "z")
+Blueprint.connect(node5, "tex", node20, "var")
+Blueprint.connect(node20, "var", node21, "var")
+Blueprint.connect(node0, "var", node22, "facade")
+Blueprint.connect(node22, "width", node24, "a")
+Blueprint.connect(node25, "v2", node24, "b")
+Blueprint.connect(node3, "bottom", node23, "geo")
+Blueprint.connect(node24, "v", node23, "scale")
+Blueprint.connect(node23, "geo", node4, "geo")
+Blueprint.connect(node21, "var", node4, "texture")
+Blueprint.connect(node4, "geo", node9, "geo")
+Blueprint.connect(node9, "geo", node8, "geo")
+Blueprint.connect(node10, "xyz", node8, "r")
+Blueprint.connect(node8, "geo", node19, "val")
+Blueprint.connect(node0, "var", node6, "geo")
+Blueprint.connect(node6, "geo", node7, "geo")
+Blueprint.connect(node19, "pin", node2, "geo")
+Blueprint.connect(node7, "geo", node2, "pos")
+Blueprint.connect(node2, "geo", node1, "var")

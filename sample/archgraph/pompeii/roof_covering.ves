@@ -1,0 +1,73 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -451.6763676608, 157.7130437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 537.82608, 47.42692)
+
+var node2 = ::archgraph::nodes::extrude::Extrude()
+node2.query_param("distance").value = 0.05
+
+_editor.add_node(node2, -302.846, 149.718)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "sloped_roof_tex.ves")
+
+_editor.add_node(node3, 103.18690330579, -7.8057256198346)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node4, 357.8814, 37.7409)
+
+var node5 = ::archgraph::nodes::setup_projection::SetupProjection()
+node5.query_param("axes").value = "xz"
+node5.query_param("scale").value.set(1, 1)
+node5.query_param("scale2").value.set(1, 1)
+node5.query_param("offset").value.set(0.1, -0.23)
+node5.query_param("uw_factor").value = 0
+node5.query_param("gpu").value = true
+
+_editor.add_node(node5, -132.7721, -8.4277)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "roof_bricks_props.ves")
+
+_editor.add_node(node6, -614.55584464586, 5.5223073407639)
+
+var node7 = ::blueprint::nodes::combine::Combine()
+
+_editor.add_node(node7, -415.29138183594, -118.2834777832)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "roof_props.ves")
+
+_editor.add_node(node8, -613.11782811693, -113.58926290717)
+
+var node9 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node9, -275.98559671197, -149.59752736998)
+
+var node10 = ::blueprint::nodes::number::Number()
+
+node10.value = 11
+
+_editor.add_node(node10, -418.29138183594, -236.2834777832)
+
+Blueprint.connect(node6, "width", node7, "x")
+Blueprint.connect(node8, "brick_length", node7, "y")
+Blueprint.connect(node7, "xy", node9, "a")
+Blueprint.connect(node10, "v", node9, "b")
+Blueprint.connect(node0, "var", node2, "geo")
+Blueprint.connect(node2, "geo", node5, "geo")
+Blueprint.connect(node9, "v", node5, "scale")
+Blueprint.connect(node5, "geo", node4, "geo")
+Blueprint.connect(node3, "tex", node4, "texture")
+Blueprint.connect(node4, "geo", node1, "var")

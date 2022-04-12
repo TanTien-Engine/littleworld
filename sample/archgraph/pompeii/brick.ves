@@ -1,0 +1,39 @@
+var node0 = ::archgraph::nodes::mesh_file::MeshFile()
+node0.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/roofs/roofcovering/roofcovering_round-brick.obj")
+
+_editor.add_node(node0, -190, 222)
+
+var node1 = ::archgraph::nodes::mesh_file::MeshFile()
+node1.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/roofs/roofcovering/roofcovering_bottom-brick.obj")
+
+_editor.add_node(node1, -194, 164)
+
+var node2 = ::archgraph::nodes::mesh_file::MeshFile()
+node2.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/roofs/roofcovering/roofcovering_triangle-brick.obj")
+
+_editor.add_node(node2, -196, 109)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "round"
+node3.var_type = "geometry"
+
+_editor.add_node(node3, -43, 221.5)
+
+var node4 = ::blueprint::nodes::output::Output()
+
+node4.var_name = "bottom"
+node4.var_type = "geometry"
+
+_editor.add_node(node4, -49, 163.5)
+
+var node5 = ::blueprint::nodes::output::Output()
+
+node5.var_name = "triangle"
+node5.var_type = "geometry"
+
+_editor.add_node(node5, -47, 106.5)
+
+Blueprint.connect(node2, "geo", node5, "var")
+Blueprint.connect(node1, "geo", node4, "var")
+Blueprint.connect(node0, "geo", node3, "var")

@@ -1,0 +1,69 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -527.4380676608, 307.6027437756)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "roof_props.ves")
+
+_editor.add_node(node1, -416, 102)
+
+var node2 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node2, -395, 296.5)
+
+var node3 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node3, -199, 245.5)
+
+var node4 = ::blueprint::nodes::round::Round()
+
+_editor.add_node(node4, -57.945861816406, 255.90878295898)
+
+var node5 = ::blueprint::nodes::output::Output()
+
+node5.var_name = "col"
+node5.var_type = "int"
+
+_editor.add_node(node5, 87.054138183594, 257.40878295898)
+
+var node6 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node6, -197.94586181641, 163.40878295898)
+
+var node7 = ::blueprint::nodes::round::Round()
+
+_editor.add_node(node7, -57.945861816406, 172.40878295898)
+
+var node8 = ::blueprint::nodes::output::Output()
+
+node8.var_name = "row"
+node8.var_type = "int"
+
+_editor.add_node(node8, 86.156138183594, 173.41711347656)
+
+var node9 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node9, -132.78716003005, 358.0696093163)
+
+var node10 = ::blueprint::nodes::output::Output()
+
+node10.var_name = "width"
+node10.var_type = "num"
+
+_editor.add_node(node10, 1.4611892642875, 369.75234224132)
+
+Blueprint.connect(node0, "var", node2, "geo")
+Blueprint.connect(node2, "sy", node6, "a")
+Blueprint.connect(node1, "brick_length", node6, "b")
+Blueprint.connect(node6, "v", node7, "v")
+Blueprint.connect(node7, "v", node8, "var")
+Blueprint.connect(node2, "sx", node3, "a")
+Blueprint.connect(node1, "brick_width", node3, "b")
+Blueprint.connect(node3, "v", node4, "v")
+Blueprint.connect(node2, "sx", node9, "a")
+Blueprint.connect(node4, "v", node9, "b")
+Blueprint.connect(node9, "v", node10, "var")
+Blueprint.connect(node4, "v", node5, "var")

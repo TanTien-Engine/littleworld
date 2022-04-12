@@ -1,0 +1,28 @@
+var node0 = ::archgraph::nodes::rand_number::RandNumber()
+node0.query_param("min").value = 0.6
+node0.query_param("max").value = 0.8
+
+_editor.add_node(node0, -127, 208)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "brick_width"
+node1.var_type = "num"
+
+_editor.add_node(node1, 29, 229)
+
+var node2 = ::archgraph::nodes::rand_number::RandNumber()
+node2.query_param("min").value = 0.9
+node2.query_param("max").value = 1.1
+
+_editor.add_node(node2, -124.68772727273, 98.577363636363)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "brick_length"
+node3.var_type = "num"
+
+_editor.add_node(node3, 31.312272727273, 119.57736363636)
+
+Blueprint.connect(node2, "val", node3, "var")
+Blueprint.connect(node0, "val", node1, "var")

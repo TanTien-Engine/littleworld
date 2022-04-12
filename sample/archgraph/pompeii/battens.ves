@@ -1,0 +1,176 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -961.55500980961, 548.79199997395)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 603.74459358745, 439.096299521)
+
+var node2 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node2, -843.91928902618, 296.16288890996)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "roof_bricks_props.ves")
+
+_editor.add_node(node3, -894.18926217071, 172.08291088262)
+
+var node4 = ::blueprint::nodes::divide::Divide()
+
+_editor.add_node(node4, -697.44101330465, 228.90827149721)
+
+var node5 = ::blueprint::nodes::number::Number()
+
+node5.value = 0.1
+
+_editor.add_node(node5, -964.09806195638, 472.42579091517)
+
+var node6 = ::blueprint::nodes::store::Store()
+
+node6.var_name = "width"
+
+_editor.add_node(node6, -827.4270596328, 473.17709299086)
+
+var node7 = ::blueprint::nodes::number::Number()
+
+node7.value = 0.03
+
+_editor.add_node(node7, -965.3985195754, 404.256949989)
+
+var node8 = ::blueprint::nodes::store::Store()
+
+node8.var_name = "height"
+
+_editor.add_node(node8, -829.41053070718, 405.00825206469)
+
+var node9 = ::blueprint::nodes::subtract::Subtract()
+
+_editor.add_node(node9, -564.91811726707, 206.11339129858)
+
+var node10 = ::blueprint::nodes::load::Load()
+
+node10.var_name = "width"
+
+_editor.add_node(node10, -697.03394793858, 171.77010280686)
+
+var node11 = ::blueprint::nodes::load::Load()
+
+node11.var_name = "width"
+
+_editor.add_node(node11, -382.91924413265, 504.71085265377)
+
+var node12 = ::blueprint::nodes::store::Store()
+
+node12.var_name = "distance"
+
+_editor.add_node(node12, -432.72426031443, 208.05926286681)
+
+var node13 = ::blueprint::nodes::store::Store()
+
+node13.var_name = "facade"
+
+_editor.add_node(node13, -830.85045176101, 549.34007074025)
+
+var node14 = ::blueprint::nodes::load::Load()
+
+node14.var_name = "facade"
+
+_editor.add_node(node14, -1102.3389067342, 296.18551822379)
+
+var node15 = ::blueprint::nodes::load::Load()
+
+node15.var_name = "distance"
+
+_editor.add_node(node15, -375.92541347001, 408.5857794496)
+
+var node16 = ::blueprint::nodes::load::Load()
+
+node16.var_name = "facade"
+
+_editor.add_node(node16, -402.34197452861, 702.69152693279)
+
+var node17 = ::archgraph::nodes::split::Split()
+node17.query_param("axis").value = "vert"
+node17.query_param("repeat").value = true
+
+_editor.add_node(node17, -93.06049579435, 455.35941816427)
+
+var node18 = ::archgraph::nodes::split_size::SplitSize()
+node18.query_param("size").value = 0
+node18.query_param("mode").value = "absolute"
+
+_editor.add_node(node18, -249.94868878454, 485.13877175556)
+
+var node19 = ::archgraph::nodes::split_size::SplitSize()
+node19.query_param("size").value = 0
+node19.query_param("mode").value = "absolute"
+
+_editor.add_node(node19, -247.87725240724, 390.415849824)
+
+var node20 = ::archgraph::nodes::extrude::Extrude()
+node20.query_param("distance").value = 0
+
+_editor.add_node(node20, 62.089671741832, 424.37913929333)
+
+var node21 = ::blueprint::nodes::load::Load()
+
+node21.var_name = "height"
+
+_editor.add_node(node21, -87.910328258167, 357.37913929333)
+
+var node22 = ::blueprint::nodes::subgraph::Subgraph()
+node22.load_from_file(_editor, "roof_wood.ves")
+node22.set_prop_value("hori", true)
+
+_editor.add_node(node22, 415.90785356001, 437.37910877575)
+
+var node23 = ::archgraph::nodes::translate_scope::TranslateScope()
+node23.query_param("t").value.set(0, 0, -0.03)
+
+_editor.add_node(node23, -264.63901796635, 642.32166288564)
+
+var node24 = ::blueprint::nodes::load::Load()
+
+node24.var_name = "height"
+
+_editor.add_node(node24, -520.68151875062, 640.38241775792)
+
+var node25 = ::blueprint::nodes::negate::Negate()
+
+_editor.add_node(node25, -396.32004475572, 640.75773868335)
+
+Blueprint.connect(node7, "v", node8, "var")
+Blueprint.connect(node8, "var", node24, "var")
+Blueprint.connect(node24, "var", node25, "v")
+Blueprint.connect(node8, "var", node21, "var")
+Blueprint.connect(node5, "v", node6, "var")
+Blueprint.connect(node6, "var", node11, "var")
+Blueprint.connect(node11, "var", node18, "size")
+Blueprint.connect(node6, "var", node10, "var")
+Blueprint.connect(node0, "var", node13, "var")
+Blueprint.connect(node13, "var", node16, "var")
+Blueprint.connect(node16, "var", node23, "geo")
+Blueprint.connect(node25, "v", node23, "z")
+Blueprint.connect(node13, "var", node14, "var")
+Blueprint.connect(node14, "var", node3, "facade")
+Blueprint.connect(node14, "var", node2, "geo")
+Blueprint.connect(node2, "sy", node4, "a")
+Blueprint.connect(node3, "row", node4, "b")
+Blueprint.connect(node4, "v", node9, "a")
+Blueprint.connect(node10, "var", node9, "b")
+Blueprint.connect(node9, "v", node12, "var")
+Blueprint.connect(node12, "var", node15, "var")
+Blueprint.connect(node15, "var", node19, "size")
+Blueprint.connect(node23, "geo", node17, "parent")
+Blueprint.connect(node18, "size", node17, "size0")
+Blueprint.connect(node19, "size", node17, "size1")
+Blueprint.connect(node17, "child0", node20, "geo")
+Blueprint.connect(node21, "var", node20, "dist")
+Blueprint.connect(node20, "geo", node22, "geo")
+Blueprint.connect(node22, "geo", node1, "var")
