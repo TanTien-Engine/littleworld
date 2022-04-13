@@ -5,26 +5,26 @@ _editor.add_node(node0, 563.90225089175, -116.54066896755)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(2.3387391717293, 5.3232880596898, -3.3022804153594)
-node1.cam.yaw = -593.8
-node1.cam.pitch = -52.7
+node1.cam.position.set(2.5262981677961, 4.386557061562, -3.6335756930535)
+node1.cam.yaw = -597.6
+node1.cam.pitch = -37.9
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
 
-_editor.add_node(node1, 364.55835230464, -223.31809905318)
+_editor.add_node(node1, 364.55835230464, -224.64909905318)
 
 var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
 node2.query_param("size").value.set(5, 2, 2.5)
 
-_editor.add_node(node2, -808.90198569157, -74.645166781732)
+_editor.add_node(node2, -961.25623169157, -74.645166781732)
 
 var node3 = ::archgraph::nodes::comp::Comp()
 node3.query_param("selector").value = "face6"
 
 node3.on_param_dirty()
 
-_editor.add_node(node3, -568.03087589214, 131.212357266)
+_editor.add_node(node3, -734.93087589214, 173.412357266)
 
 var node4 = ::archgraph::nodes::comp::Comp()
 node4.query_param("selector").value = "side"
@@ -40,37 +40,47 @@ _editor.add_node(node5, 366.67401977539, -65.81001098633)
 var node6 = ::blueprint::nodes::subgraph::Subgraph()
 node6.load_from_file(_editor, "../../../sample/archgraph/pompeii/roof_covering.ves")
 
-_editor.add_node(node6, -33.26, -87.140000000002)
+_editor.add_node(node6, 21.376363636364, 94.405454545452)
 
-var node7 = ::blueprint::nodes::subgraph::Subgraph()
-node7.load_from_file(_editor, "../../../sample/archgraph/pompeii/rafters.ves")
+var node7 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node7, -28.052399550453, 100.87907867694)
+_editor.add_node(node7, 233.94855162824, 3.360126748061)
 
-var node8 = ::blueprint::nodes::subgraph::Subgraph()
-node8.load_from_file(_editor, "../../../sample/archgraph/pompeii/battens.ves")
+var node8 = ::archgraph::nodes::scale_scope::ScaleScope()
+node8.query_param("s").value.set(1, 1.1, 1)
+node8.query_param("anchor").value = "left"
 
-_editor.add_node(node8, -32.380239257809, -0.086942138671816)
+_editor.add_node(node8, -172.30750040304, 24.248355884395)
 
-var node9 = ::blueprint::nodes::merge::Merge()
+var node9 = ::archgraph::nodes::roof::Roof()
+node9.query_param("distance").value = 0.65254855155945
+node9.query_param("type").value = "hip"
+node9.query_param("idx").value = 0
 
-_editor.add_node(node9, 172.13036981006, -5.7307823428481)
+_editor.add_node(node9, -584.72934570312, 124.22571119218)
 
-var node10 = ::archgraph::nodes::scale_scope::ScaleScope()
-node10.query_param("s").value.set(1, 1.1, 1)
-node10.query_param("anchor").value = "left"
+var node10 = ::archgraph::nodes::comp::Comp()
+node10.query_param("selector").value = "normal_y"
 
-_editor.add_node(node10, -408.19015869141, 45.810339355469)
+node10.on_param_dirty()
+
+_editor.add_node(node10, -416.29242104608, 117.40059802739)
+
+var node11 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node11, -240.15955281028, 212.98678185954)
 
 Blueprint.connect(node2, "geo", node4, "geo")
 Blueprint.connect(node2, "geo", node3, "geo")
-Blueprint.connect(node3, "top", node10, "geo")
-Blueprint.connect(node10, "geo", node8, "facade")
-Blueprint.connect(node10, "geo", node7, "facade")
-Blueprint.connect(node7, "geo", node9, "in0")
-Blueprint.connect(node8, "geo", node9, "in1")
-Blueprint.connect(node9, "list", node5, "in0")
+Blueprint.connect(node3, "top", node9, "geo")
+Blueprint.connect(node9, "geo", node10, "geo")
+Blueprint.connect(node10, "horizontal", node11, "in0")
+Blueprint.connect(node10, "aslant", node11, "in1")
+Blueprint.connect(node10, "nutant", node11, "in2")
+Blueprint.connect(node11, "list", node8, "geo")
+Blueprint.connect(node8, "geo", node6, "facade")
+Blueprint.connect(node6, "geo", node7, "in0")
+Blueprint.connect(node7, "list", node5, "in0")
 Blueprint.connect(node4, "side", node5, "in1")
-Blueprint.connect(node10, "geo", node6, "facade")
 Blueprint.connect(node5, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")
