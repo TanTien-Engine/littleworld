@@ -21,9 +21,9 @@ _editor.add_node(node3, 483.73494412408, 49.911624359376)
 
 var node4 = ::blueprint::nodes::camera3d::Camera3d()
 
-node4.cam.position.set(1.019438271432, 1.8039852803028, 0.73914307443089)
-node4.cam.yaw = -143.7
-node4.cam.pitch = -50.4
+node4.cam.position.set(2.0530345260445, 3.8829107612743, 2.5172022235235)
+node4.cam.yaw = -125
+node4.cam.pitch = -58.3
 node4.cam.zoom = 45
 node4.cam.update_vectors()
 node4.speed = 0.22097560763359
@@ -41,11 +41,11 @@ _editor.add_node(node5, -33.954545454546, -140.87272727273)
 
 var node6 = ::archgraph::nodes::setup_projection::SetupProjection()
 node6.query_param("axes").value = "xz"
-node6.query_param("scale").value.set(1, 0.56043827533722)
+node6.query_param("scale").value.set(1, 1)
 node6.query_param("scale2").value.set(1, 1)
 node6.query_param("offset").value.set(0, 0)
-node6.query_param("uw_factor").value = 1
-node6.query_param("gpu").value = false
+node6.query_param("uw_factor").value = 0
+node6.query_param("gpu").value = true
 
 _editor.add_node(node6, -65.439444027047, 87.352667167543)
 
@@ -57,10 +57,12 @@ _editor.add_node(node7, -914.45668862371, 174.93539970815)
 var node8 = ::archgraph::nodes::extrude::Extrude()
 node8.query_param("distance").value = 0.44318306446075
 
-_editor.add_node(node8, -760.37344791016, 158.93212430664)
+_editor.add_node(node8, -765.37344791016, 177.93212430664)
 
 var node9 = ::archgraph::nodes::roof::Roof()
-node9.query_param("distance").value = 0.23146091401577
+node9.query_param("distance").value = 0.3425720334053
+node9.query_param("type").value = "hip"
+node9.query_param("idx").value = 0
 
 _editor.add_node(node9, -332.83148032862, 361.24700404968)
 
@@ -75,7 +77,12 @@ var node11 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node11, 242.45581054688, 375.34759521484)
 
-Blueprint.connect(node7, "geo", node8, "geo")
+var node12 = ::archgraph::nodes::primitive_polygon::PrimitivePolygon()
+node12.query_param("vertices").value = [ 0, 0, 2, 0, 2, 1, 1, 1, 1, 2, 0, 2 ]
+
+_editor.add_node(node12, -913.36988525391, 296.69676757812)
+
+Blueprint.connect(node12, "geo", node8, "geo")
 Blueprint.connect(node8, "geo", node10, "geo")
 Blueprint.connect(node10, "top", node9, "geo")
 Blueprint.connect(node8, "geo", node11, "in0")
@@ -83,7 +90,7 @@ Blueprint.connect(node9, "geo", node11, "in1")
 Blueprint.connect(node11, "list", node6, "geo")
 Blueprint.connect(node6, "geo", node2, "geo")
 Blueprint.connect(node5, "tex", node2, "texture")
+Blueprint.connect(node2, "geo", node3, "geos")
+Blueprint.connect(node4, "this", node3, "view_cam")
 Blueprint.connect(node11, "list", node1, "geo")
 Blueprint.connect(node0, "v3", node1, "color")
-Blueprint.connect(node1, "geo", node3, "geos")
-Blueprint.connect(node4, "this", node3, "view_cam")

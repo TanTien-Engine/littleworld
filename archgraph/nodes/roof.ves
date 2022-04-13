@@ -21,6 +21,8 @@ class Roof is Node
 		]
 
 		this.params.add(NodeParam("distance", 0.0))
+		this.params.add(NodeParam("type", "hip", { "combo" : [ "hip", "pyramid", "shed", "gable"] }))
+		this.params.add(NodeParam("idx", 0, { "region" : 10, "integer" : true }))
 
 		this.layout()
 	}
@@ -40,8 +42,20 @@ class Roof is Node
 		var poly = mesh.polys.front()
 
 		var distance = this.query_param("distance").value
+		var type = this.query_param("type").value
 
-		var roof = RoofExtrude.hip(poly, distance)
+		var roof = nil
+		if (type == "hip") {
+			roof = RoofExtrude.hip(poly, distance)
+		} else if (type == "pyramid") {
+			roof = RoofExtrude.pyramid(poly, distance)
+		} else if (type == "shed") {
+			var idx = this.query_param("idx").value			
+			roof = RoofExtrude.shed(poly, distance, idx)
+		} else if (type == "gable") {
+			roof = RoofExtrude.gable(poly, distance)
+		}
+
 		if (!roof) {
 			return nil
 		}

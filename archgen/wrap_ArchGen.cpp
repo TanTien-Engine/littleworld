@@ -207,6 +207,49 @@ void w_RoofExtrude_hip()
 	ves_pop(1);
 }
 
+void w_RoofExtrude_pyramid()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+	float dist = ves_tonumber(2);
+
+	ves_pop(ves_argnum());
+
+	ves_pushnil();
+	ves_import_class("geometry", "Polytope");
+	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
+	proxy->obj = archgen::RoofExtrude::Pyramid(poly, dist);
+	ves_pop(1);
+}
+
+void w_RoofExtrude_shed()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+	float dist = ves_tonumber(2);
+	int index = (int)ves_tonumber(3);
+
+	ves_pop(ves_argnum());
+
+	ves_pushnil();
+	ves_import_class("geometry", "Polytope");
+	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
+	proxy->obj = archgen::RoofExtrude::Shed(poly, dist, index);
+	ves_pop(1);
+}
+
+void w_RoofExtrude_gable()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+	float dist = ves_tonumber(2);
+
+	ves_pop(ves_argnum());
+
+	ves_pushnil();
+	ves_import_class("geometry", "Polytope");
+	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
+	proxy->obj = archgen::RoofExtrude::Gable(poly, dist);
+	ves_pop(1);
+}
+
 }
 
 namespace archgen
@@ -224,6 +267,9 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 	if (strcmp(signature, "static ScopeTools.get_scope_size(_)") == 0) return w_ScopeTools_get_scope_size;
 
 	if (strcmp(signature, "static RoofExtrude.hip(_,_)") == 0) return w_RoofExtrude_hip;
+	if (strcmp(signature, "static RoofExtrude.pyramid(_,_)") == 0) return w_RoofExtrude_pyramid;
+	if (strcmp(signature, "static RoofExtrude.shed(_,_,_)") == 0) return w_RoofExtrude_shed;
+	if (strcmp(signature, "static RoofExtrude.gable(_,_)") == 0) return w_RoofExtrude_gable;
 
 	return nullptr;
 }

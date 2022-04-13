@@ -24,6 +24,9 @@ foreign class ScopeTools
 foreign class RoofExtrude
 {
 	foreign static hip(poly, distance)
+	foreign static pyramid(poly, distance)
+	foreign static shed(poly, distance, index)
+	foreign static gable(poly, distance)
 }
 
 );
