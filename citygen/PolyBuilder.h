@@ -33,6 +33,7 @@ private:
     std::vector<pm3::Polytope::FacePtr>  m_faces;
 
 	std::map<sm::vec2, size_t> m_pos2idx;
+    std::map<sm::vec3, size_t> m_pos3idx;
 
 }; // PolyBuilder
 

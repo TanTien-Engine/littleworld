@@ -72,10 +72,8 @@ std::vector<size_t> PolyBuilder::AddPoints(const std::vector<sm::vec3>& points)
     {
         size_t idx = 0;
 
-        auto p2 = sm::vec2(p.x, p.z);
-
-        auto itr = m_pos2idx.find(p2);
-        if (itr != m_pos2idx.end()) 
+        auto itr = m_pos3idx.find(p);
+        if (itr != m_pos3idx.end())
         {
             idx = itr->second;
         } 
@@ -83,7 +81,7 @@ std::vector<size_t> PolyBuilder::AddPoints(const std::vector<sm::vec3>& points)
         {
             auto vert = std::make_shared<pm3::Polytope::Point>(p);
             idx = m_verts.size();
-            m_pos2idx.insert({ p2, idx });
+            m_pos3idx.insert({ p, idx });
             m_verts.push_back(vert);
         }
 
