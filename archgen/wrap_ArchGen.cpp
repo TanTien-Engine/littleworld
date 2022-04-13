@@ -148,6 +148,50 @@ void w_ScopeTools_get_scope_size()
 	tt::return_list(std::vector<float>{ s.x, s.y, s.z });
 }
 
+void w_ScopeTools_comp_edges()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+
+	auto mats = archgen::ScopeTools::CalcEdgesMapping(*poly);
+	
+	ves_pop(ves_argnum());
+
+	const int num = (int)(mats.size());
+	ves_newlist(num);
+	for (int i = 0; i < num; ++i)
+	{
+		ves_pushnil();
+		ves_import_class("maths", "Matrix44");
+		sm::mat4* mat = (sm::mat4*)ves_set_newforeign(1, 2, sizeof(sm::mat4));
+		*mat = mats[i];
+		ves_pop(1);
+		ves_seti(-2, i);
+		ves_pop(1);
+	}
+}
+
+void w_ScopeTools_comp_face_edges()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+
+	auto mats = archgen::ScopeTools::CalcFaceEdgesMapping(*poly);
+	
+	ves_pop(ves_argnum());
+
+	const int num = (int)(mats.size());
+	ves_newlist(num);
+	for (int i = 0; i < num; ++i)
+	{
+		ves_pushnil();
+		ves_import_class("maths", "Matrix44");
+		sm::mat4* mat = (sm::mat4*)ves_set_newforeign(1, 2, sizeof(sm::mat4));
+		*mat = mats[i];
+		ves_pop(1);
+		ves_seti(-2, i);
+		ves_pop(1);
+	}
+}
+
 void w_RoofExtrude_hip()
 {
 	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
@@ -220,6 +264,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 	if (strcmp(signature, "static ScopeTools.face_mapping(_,_)") == 0) return w_ScopeTools_face_mapping;
 	if (strcmp(signature, "static ScopeTools.calc_insert_mat(_,_)") == 0) return w_ScopeTools_calc_insert_mat;
 	if (strcmp(signature, "static ScopeTools.get_scope_size(_)") == 0) return w_ScopeTools_get_scope_size;
+	if (strcmp(signature, "static ScopeTools.comp_edges(_)") == 0) return w_ScopeTools_comp_edges;
+	if (strcmp(signature, "static ScopeTools.comp_face_edges(_)") == 0) return w_ScopeTools_comp_face_edges;
 
 	if (strcmp(signature, "static RoofExtrude.hip(_,_)") == 0) return w_RoofExtrude_hip;
 	if (strcmp(signature, "static RoofExtrude.pyramid(_,_)") == 0) return w_RoofExtrude_pyramid;

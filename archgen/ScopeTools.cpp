@@ -2,6 +2,39 @@
 
 #include <SM_Matrix.h>
 #include <SM_Rect.h>
+#include <SM_Calc.h>
+#include <halfedge/Utility.h>
+
+namespace
+{
+
+class FaceToNorm
+{
+public:
+	sm::vec3 calc_normal(const he::loop3* face)
+	{
+		auto itr = face2norm.find(face);
+		if (itr != face2norm.end()) 
+		{
+			return itr->second;
+		} 
+		else 
+		{
+			sm::Plane plane;
+			he::Utility::LoopToPlane(*face, plane);
+			auto& n = plane.normal;
+
+			face2norm.insert({ face, n });
+			return n;
+		}
+	}
+
+private:
+	std::map<const he::loop3*, sm::vec3> face2norm;
+
+}; // FaceToNorm
+
+}
 
 namespace archgen
 {
@@ -53,6 +86,85 @@ bool ScopeTools::CalcFaceMapping(const pm3::Polytope& poly, const pm3::Polytope:
 	y = dy;
 
 	return true;
+}
+
+std::vector<sm::mat4> ScopeTools::CalcEdgesMapping(const pm3::Polytope& poly)
+{
+	std::vector<sm::mat4> mats;
+
+	auto topo = const_cast<pm3::Polytope&>(poly).GetTopoPoly();
+
+	FaceToNorm f2n;
+
+	std::set<he::edge3*> checked_edges;
+
+	auto first_edge = topo->GetEdges().Head();
+	auto curr_edge = first_edge;
+	do {
+		if (!curr_edge->twin ||
+			checked_edges.find(curr_edge) != checked_edges.end() ||
+			checked_edges.find(curr_edge->twin) != checked_edges.end()) {
+			curr_edge = curr_edge->linked_next;
+			continue;
+		}
+
+		checked_edges.insert(curr_edge);
+		checked_edges.insert(curr_edge->twin);
+
+		auto& p0 = curr_edge->vert->position;
+		auto& p1 = curr_edge->next->vert->position;
+
+		sm::mat4 mat;
+
+		mat.Scale(sm::dis_pos3_to_pos3(p0, p1), 1.0f, 1.0f);
+
+		sm::vec3 norm = (f2n.calc_normal(curr_edge->loop) + f2n.calc_normal(curr_edge->twin->loop)).Normalized();
+		sm::vec3 dir_x = (p1 - p0).Normalized();
+		sm::vec3 dir_y = norm;
+		sm::vec3 dir_z = dir_x.Cross(dir_y);
+		mat = sm::mat4(sm::mat3(dir_x, dir_y, dir_z)) * mat;
+
+		mat.Translate(p0.x, p0.y, p0.z);
+
+		mats.push_back(mat);
+
+		curr_edge = curr_edge->linked_next;
+	} while (curr_edge != first_edge);
+
+	return mats;
+}
+
+std::vector<sm::mat4> ScopeTools::CalcFaceEdgesMapping(const pm3::Polytope& poly)
+{
+	std::vector<sm::mat4> mats;
+
+	auto topo = const_cast<pm3::Polytope&>(poly).GetTopoPoly();
+
+	FaceToNorm f2n;
+
+	auto first_edge = topo->GetEdges().Head();
+	auto curr_edge = first_edge;
+	do {
+		auto& p0 = curr_edge->vert->position;
+		auto& p1 = curr_edge->next->vert->position;
+
+		sm::mat4 mat;
+
+		mat.Scale(sm::dis_pos3_to_pos3(p0, p1), 1.0f, 1.0f);
+
+		sm::vec3 dir_x = (p1 - p0).Normalized();
+		sm::vec3 dir_y = f2n.calc_normal(curr_edge->loop);
+		sm::vec3 dir_z = dir_x.Cross(dir_y);
+		mat = sm::mat4(sm::mat3(dir_x, dir_y, dir_z)) * mat;
+
+		mat.Translate(p0.x, p0.y, p0.z);
+
+		mats.push_back(mat);
+
+		curr_edge = curr_edge->linked_next;
+	} while (curr_edge != first_edge);
+
+	return mats;
 }
 
 sm::mat4 ScopeTools::CalcInsertMat(const sm::cube& aabb, const sm::mat4& scope)

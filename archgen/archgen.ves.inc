@@ -19,6 +19,9 @@ foreign class ScopeTools
 	foreign static face_mapping(poly, face)
 	foreign static calc_insert_mat(aabb, scope)
 	foreign static get_scope_size(scope)
+
+	foreign static comp_edges(poly)
+	foreign static comp_face_edges(poly)
 }
 
 foreign class RoofExtrude

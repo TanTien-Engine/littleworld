@@ -29,7 +29,7 @@ class Comp is Node
 			Pin(this, "bottom", VAR_TYPE_GEOMETRY),
 		]
 
-		this.params.add(NodeParam("selector", "face6", { "combo" : [ "face6", "normal_y", "side" ] }))
+		this.params.add(NodeParam("selector", "face6", { "combo" : [ "face6", "normal_y", "side", "edges", "face_edges", "roof_edges" ] }))
 
 		this.layout()
 
@@ -77,6 +77,21 @@ class Comp is Node
 		else if (selector == "side")
 		{
 			this.exports.add(Pin(this, "side", VAR_TYPE_GEOMETRY))
+		}
+		else if (selector == "edges")
+		{
+			this.exports.add(Pin(this, "all", VAR_TYPE_GEOMETRY))
+		}
+		else if (selector == "face_edges")
+		{
+			this.exports.add(Pin(this, "all", VAR_TYPE_GEOMETRY))
+		}		
+		else if (selector == "roof_edges")
+		{
+			this.exports.add(Pin(this, "eave",   VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "hip",    VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "valley", VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "ridge",  VAR_TYPE_GEOMETRY))
 		}
 
 		this.layout()
@@ -160,7 +175,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0..6) {
 					if (!faces6[i].isEmpty) {
-						this.create_children(i, points, faces6[i])
+						this.create_face_children(i, points, faces6[i])
 					}
 				}
 			}
@@ -198,7 +213,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0..4) {
 					if (!faces4[i].isEmpty) {
-						this.create_children(i, points, faces4[i])
+						this.create_face_children(i, points, faces4[i])
 					}
 				}
 			}
@@ -222,9 +237,39 @@ class Comp is Node
 
 				var points = poly.get_points()
 				if (!faces.isEmpty) {
-					this.create_children(0, points, faces)
+					this.create_face_children(0, points, faces)
 				}
 			}
+		}
+		else if (selector == "edges")
+		{
+			var children = []
+
+			for (var poly in v_geo.value.mesh.polys) 
+			{
+				var mats = ScopeTools.comp_edges(poly)
+				var v_geos = this.create_edge_children(mats)
+				for (var v in v_geos) {
+					children.add(v)
+				}
+			}
+
+			this.children.add(children)
+		}
+		else if (selector == "face_edges")
+		{
+			var children = []
+
+			for (var poly in v_geo.value.mesh.polys) 
+			{
+				var mats = ScopeTools.comp_face_edges(poly)
+				var v_geos = this.create_edge_children(mats)
+				for (var v in v_geos) {
+					children.add(v)
+				}
+			}
+
+			this.children.add(children)
 		}
 	}
 
@@ -235,7 +280,21 @@ class Comp is Node
 		return angle
 	}
 
-	create_children(idx, _points, faces)
+	create_edge_children(scope_mats)
+	{
+		var children = []
+
+		for (var mat in scope_mats)
+		{
+			var geo = Geometry([])
+			geo.scope = mat
+			children.add(Variant(VAR_TYPE_GEOMETRY, geo))
+		}
+
+		return children
+	}
+
+	create_face_children(idx, _points, faces)
 	{
 		for (var _face in faces) 
 		{
@@ -255,24 +314,23 @@ class Comp is Node
 			var poly = Polytope.init(points, [ face ])
 
 			var geo = Geometry([ poly ])
-			geo.scope = this.calc_scope_mat(poly, face)
+
+			var map = ScopeTools.face_mapping(poly, face)
+			if (map)
+			{
+				var o = Vector3(map[0], map[1], map[2])
+				var x = Vector3(map[3], map[4], map[5])
+				var y = Vector3(map[6], map[7], map[8])
+				geo.scope = this.calc_scope_mat(o, x, y)
+			}
 
 			var v_geo = Variant(VAR_TYPE_GEOMETRY, geo)
 			this.children[idx].add(v_geo)
 		}
 	}
 
-	calc_scope_mat(poly, face)
+	calc_scope_mat(o, x, y)
 	{
-		var map = ScopeTools.face_mapping(poly, face)
-		if (!map) {
-			return nil
-		}
-
-		var o = Vector3(map[0], map[1], map[2])
-		var x = Vector3(map[3], map[4], map[5])
-		var y = Vector3(map[6], map[7], map[8])
-
 		var mat = Matrix44.init()
 
 		// s
@@ -282,12 +340,12 @@ class Comp is Node
 
 		// r
 		var z = x.cross(y)
-		var rot_mat = Maths.calc_rot_mat([ 0, 0, 1 ], [ z.x, z.y, z.z ])		
+		var rot_mat = Maths.calc_rot_mat([ 0, 0, 1 ], [ z.x, z.y, z.z ])
 		mat.transform_mat4(rot_mat)
 
 		// t
 		mat.translate(o.x, o.y, o.z)
 
 		return mat
-	}		
+	}
 }
