@@ -246,7 +246,12 @@ class Comp is Node
 				points.add(PolyPoint.init(_points[i].get_pos()))
 			}
 
-			var face = PolyFace.init([ 0, 1, 2, 3 ], [])
+			var indices = []
+			for (var i in 0..points.count) {
+				indices.add(i)
+			}
+
+			var face = PolyFace.init(indices, [])
 			var poly = Polytope.init(points, [ face ])
 
 			var geo = Geometry([ poly ])
