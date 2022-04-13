@@ -186,16 +186,7 @@ RoofExtrude::Shed(const std::shared_ptr<pm3::Polytope>& poly, float distance, in
     sm::vec3 x_dir = (p1 - p0).Normalized();
     sm::vec3 z_dir = x_dir.Cross(y_dir);
 
-    sm::mat4 mt;
-    mt.c[0][0] = x_dir.x;
-    mt.c[0][1] = x_dir.y;
-    mt.c[0][2] = x_dir.z;
-    mt.c[1][0] = y_dir.x;
-    mt.c[1][1] = y_dir.y;
-    mt.c[1][2] = y_dir.z;
-    mt.c[2][0] = z_dir.x;
-    mt.c[2][1] = z_dir.y;
-    mt.c[2][2] = z_dir.z;
+    sm::mat4 mt(sm::mat3(x_dir, y_dir, z_dir));
     mt.Translate(p0.x, p0.y, p0.z);
 
     std::vector<sm::vec3> rot_border;
