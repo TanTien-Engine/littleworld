@@ -1,0 +1,49 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
+import "archgen" for GroundEditor
+
+class Offset is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+		this.exports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+
+		this.params.add(NodeParam("distance", 0.0))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo or !v_geo.value) {
+			return nil
+		}
+
+		var distance = this.query_param("distance").value
+		if (distance < 0.01 and distance > -0.01) {
+			return v_geo
+		}
+
+		var poly = v_geo.value.mesh.polys.front()
+		var new_geo = GroundEditor.offset(poly, -distance)
+		if (!new_geo) {
+			return nil
+		}
+
+	    var geo = Geometry([ new_geo ])
+		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+}

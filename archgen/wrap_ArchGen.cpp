@@ -2,6 +2,7 @@
 #include "MeshBuilder.h"
 #include "RoofEditor.h"
 #include "ScopeTools.h"
+#include "PolytopeTools.h"
 #include "modules/render/Render.h"
 #include "modules/script/TransHelper.h"
 
@@ -226,18 +227,30 @@ void w_ScopeTools_comp_roof_edges()
 	}
 }
 
+void return_polytope(const std::shared_ptr<pm3::Polytope>& poly)
+{
+	if (poly)
+	{
+		ves_pop(ves_argnum());
+
+		ves_pushnil();
+		ves_import_class("geometry", "Polytope");
+		auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
+		proxy->obj = poly;
+		ves_pop(1);
+	}
+	else
+	{
+		ves_set_nil(0);
+	}
+}
+
 void w_RoofEditor_hip()
 {
 	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
 	float dist = ves_tonumber(2);
 
-	ves_pop(ves_argnum());
-
-	ves_pushnil();
-	ves_import_class("geometry", "Polytope");
-	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
-	proxy->obj = archgen::RoofEditor::Hip(poly, dist);
-	ves_pop(1);
+	return_polytope(archgen::RoofEditor::Hip(poly, dist));
 }
 
 void w_RoofEditor_pyramid()
@@ -245,13 +258,7 @@ void w_RoofEditor_pyramid()
 	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
 	float dist = ves_tonumber(2);
 
-	ves_pop(ves_argnum());
-
-	ves_pushnil();
-	ves_import_class("geometry", "Polytope");
-	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
-	proxy->obj = archgen::RoofEditor::Pyramid(poly, dist);
-	ves_pop(1);
+	return_polytope(archgen::RoofEditor::Pyramid(poly, dist));
 }
 
 void w_RoofEditor_shed()
@@ -260,13 +267,7 @@ void w_RoofEditor_shed()
 	float dist = ves_tonumber(2);
 	int index = (int)ves_tonumber(3);
 
-	ves_pop(ves_argnum());
-
-	ves_pushnil();
-	ves_import_class("geometry", "Polytope");
-	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
-	proxy->obj = archgen::RoofEditor::Shed(poly, dist, index);
-	ves_pop(1);
+	return_polytope(archgen::RoofEditor::Shed(poly, dist, index));
 }
 
 void w_RoofEditor_gable()
@@ -274,13 +275,7 @@ void w_RoofEditor_gable()
 	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
 	float dist = ves_tonumber(2);
 
-	ves_pop(ves_argnum());
-
-	ves_pushnil();
-	ves_import_class("geometry", "Polytope");
-	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
-	proxy->obj = archgen::RoofEditor::Gable(poly, dist);
-	ves_pop(1);
+	return_polytope(archgen::RoofEditor::Gable(poly, dist));
 }
 
 void w_RoofEditor_offset()
@@ -289,13 +284,15 @@ void w_RoofEditor_offset()
 	auto base = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(2))->obj;
 	float dist = ves_tonumber(3);
 
-	ves_pop(ves_argnum());
+	return_polytope(archgen::RoofEditor::Offset(*poly, *base, dist));
+}
 
-	ves_pushnil();
-	ves_import_class("geometry", "Polytope");
-	auto proxy = (tt::Proxy<pm3::Polytope>*)ves_set_newforeign(0, 1, sizeof(tt::Proxy<pm3::Polytope>));
-	proxy->obj = archgen::RoofEditor::Offset(*poly, *base, dist);
-	ves_pop(1);
+void w_GroundEditor_offset()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+	float dist = ves_tonumber(2);
+
+	return_polytope(archgen::PolytopeTools::Offset(*poly, dist));
 }
 
 }
@@ -322,6 +319,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 	if (strcmp(signature, "static RoofEditor.shed(_,_,_)") == 0) return w_RoofEditor_shed;
 	if (strcmp(signature, "static RoofEditor.gable(_,_)") == 0) return w_RoofEditor_gable;
 	if (strcmp(signature, "static RoofEditor.offset(_,_,_)") == 0) return w_RoofEditor_offset;
+
+	if (strcmp(signature, "static GroundEditor.offset(_,_)") == 0) return w_GroundEditor_offset;
 
 	return nullptr;
 }

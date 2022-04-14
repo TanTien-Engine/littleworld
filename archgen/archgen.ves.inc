@@ -37,4 +37,9 @@ foreign class RoofEditor
 	foreign static offset(poly, base, distance)
 }
 
+foreign class GroundEditor
+{
+	foreign static offset(poly, distance)
+}
+
 );
