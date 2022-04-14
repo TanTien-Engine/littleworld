@@ -1,0 +1,92 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
+import "archgen" for ScopeTools
+
+class CompRoof is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "roof", VAR_TYPE_GEOMETRY),
+			Pin(this, "base", VAR_TYPE_GEOMETRY),			
+		]
+		this.exports = [
+			Pin(this, "eave",   VAR_TYPE_GEOMETRY),
+			Pin(this, "hip",    VAR_TYPE_GEOMETRY),
+			Pin(this, "valley", VAR_TYPE_GEOMETRY),
+			Pin(this, "ridge",  VAR_TYPE_GEOMETRY),
+		]
+
+		this.layout()
+	}
+
+	on_pin_dirty(pin)
+	{
+		super.on_pin_dirty(pin)
+		
+		this.children = nil
+	}
+
+	on_param_dirty()
+	{
+		super.on_param_dirty()
+
+		this.children = nil
+	}
+
+	calc_value(idx)
+	{
+		if (!this.children) {
+			this.build_children()
+		}
+
+		if (!this.children) {
+			return nil
+		}
+
+		var geos = this.children[idx]
+		if (geos.count == 1) {
+			return geos[0]
+		} else {
+			return Variant(VAR_TYPE_ARRAY, geos)
+		}
+	}
+
+	build_children()
+	{
+		var v_roof = Blueprint.calc_input_value(this, 0)
+		if (!v_roof or !v_roof.value) {
+			return
+		}
+
+		var v_base = Blueprint.calc_input_value(this, 1)
+		if (!v_base or !v_base.value) {
+			return
+		}
+
+		var roof = v_roof.value.mesh.polys.front()
+		var base = v_base.value.mesh.polys.front()
+		var mats = ScopeTools.comp_roof_edges(roof, base)
+
+		this.children = []
+		for (var i in 0..4) 
+		{
+			var children = []
+
+			for (var mat in mats[i])
+			{
+				var geo = Geometry([])
+				geo.scope = mat
+				children.add(Variant(VAR_TYPE_GEOMETRY, geo))
+			}
+
+			this.children.add(children)
+		}
+	}
+}

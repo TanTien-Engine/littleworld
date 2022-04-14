@@ -7,7 +7,7 @@ import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
 import "archgen" for RoofExtrude
 
-class Roof is Node
+class ExtrudeRoof is Node
 {
 	init()
 	{

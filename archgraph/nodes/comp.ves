@@ -29,7 +29,7 @@ class Comp is Node
 			Pin(this, "bottom", VAR_TYPE_GEOMETRY),
 		]
 
-		this.params.add(NodeParam("selector", "face6", { "combo" : [ "face6", "normal_y", "side", "edges", "face_edges", "roof_edges" ] }))
+		this.params.add(NodeParam("selector", "face6", { "combo" : [ "face6", "normal_y", "side", "edges", "face_edges" ] }))
 
 		this.layout()
 
@@ -85,13 +85,6 @@ class Comp is Node
 		else if (selector == "face_edges")
 		{
 			this.exports.add(Pin(this, "all", VAR_TYPE_GEOMETRY))
-		}		
-		else if (selector == "roof_edges")
-		{
-			this.exports.add(Pin(this, "eave",   VAR_TYPE_GEOMETRY))
-			this.exports.add(Pin(this, "hip",    VAR_TYPE_GEOMETRY))
-			this.exports.add(Pin(this, "valley", VAR_TYPE_GEOMETRY))
-			this.exports.add(Pin(this, "ridge",  VAR_TYPE_GEOMETRY))
 		}
 
 		this.layout()

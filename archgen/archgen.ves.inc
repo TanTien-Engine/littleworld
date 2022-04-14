@@ -22,6 +22,7 @@ foreign class ScopeTools
 
 	foreign static comp_edges(poly)
 	foreign static comp_face_edges(poly)
+	foreign static comp_roof_edges(roof, base)
 }
 
 foreign class RoofExtrude

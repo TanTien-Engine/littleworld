@@ -167,6 +167,92 @@ std::vector<sm::mat4> ScopeTools::CalcFaceEdgesMapping(const pm3::Polytope& poly
 	return mats;
 }
 
+void ScopeTools::CalcRoofEdgesMapping(const pm3::Polytope& roof, const pm3::Polytope& base, 
+	                                  std::vector<sm::mat4>& eave, std::vector<sm::mat4>& hip,
+	                                  std::vector<sm::mat4>& valley, std::vector<sm::mat4>& ridge)
+{
+	auto topo_base = const_cast<pm3::Polytope&>(base).GetTopoPoly();
+	auto& faces = topo_base->GetLoops();
+	if (faces.Size() != 1) {
+		return;
+	}
+
+	sm::Plane base_plane;
+	he::Utility::LoopToPlane(*faces.Head(), base_plane);
+
+	auto topo_roof = const_cast<pm3::Polytope&>(roof).GetTopoPoly();
+
+	FaceToNorm f2n;
+
+	std::set<he::edge3*> checked_edges;
+
+	auto first_edge = topo_roof->GetEdges().Head();
+	auto curr_edge = first_edge;
+	do {
+		if (checked_edges.find(curr_edge) != checked_edges.end()) {
+			curr_edge = curr_edge->linked_next;
+			continue;
+		}
+
+		const auto& p0 = curr_edge->vert->position;
+		const auto& p1 = curr_edge->next->vert->position;
+
+		sm::mat4 mat;
+
+		mat.Scale(sm::dis_pos3_to_pos3(p0, p1), 1.0f, 1.0f);
+
+		bool is_valley = false;
+
+		sm::vec3 norm;
+		if (curr_edge->twin)
+		{
+			checked_edges.insert(curr_edge);
+			checked_edges.insert(curr_edge->twin);
+
+			auto n0 = f2n.calc_normal(curr_edge->loop);
+			auto n1 = f2n.calc_normal(curr_edge->twin->loop);
+			norm = (n0 + n1).Normalized();
+
+			if (n0.Cross(n1).Dot(p1 - p0) > 0) {
+				is_valley = true;
+			}
+		}
+		else
+		{
+			checked_edges.insert(curr_edge);
+
+			norm = f2n.calc_normal(curr_edge->loop);
+		}
+
+		sm::vec3 dir_x = (p1 - p0).Normalized();
+		sm::vec3 dir_y = norm;
+		sm::vec3 dir_z = dir_x.Cross(dir_y);
+		mat = sm::mat4(sm::mat3(dir_x, dir_y, dir_z)) * mat;
+
+		mat.Translate(p0.x, p0.y, p0.z);
+
+		if (curr_edge->twin) 
+		{
+			if (base_plane.GetDistance(p0) > SM_LARGE_EPSILON &&
+				base_plane.GetDistance(p1) > SM_LARGE_EPSILON) {
+				ridge.push_back(mat);
+			} else {
+				if (is_valley) {
+					valley.push_back(mat);
+				} else {
+					hip.push_back(mat);
+				}
+			}
+		} 
+		else 
+		{
+			eave.push_back(mat);
+		}
+
+		curr_edge = curr_edge->linked_next;
+	} while (curr_edge != first_edge);
+}
+
 sm::mat4 ScopeTools::CalcInsertMat(const sm::cube& aabb, const sm::mat4& scope)
 {
 	auto size = aabb.Size();
