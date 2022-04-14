@@ -99,13 +99,12 @@ class Comp is Node
 
 	calc_value(idx)
 	{
-		var v_geo = Blueprint.calc_input_value(this, 0)
-		if (!v_geo or !v_geo.value) {
-			return nil
+		if (!this.children) {
+			this.build_children()
 		}
 
 		if (!this.children) {
-			this.build_children()
+			return nil
 		}
 
 		var geos = this.children[idx]

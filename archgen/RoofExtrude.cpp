@@ -240,7 +240,6 @@ RoofExtrude::Shed(const std::shared_ptr<pm3::Polytope>& poly, float distance, in
         }
     }
 
-    std::reverse(roof_border.begin(), roof_border.end());
     builder.AddFace(roof_border);
 
     auto polytope = builder.CreatePolytope();
