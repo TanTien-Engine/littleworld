@@ -21,9 +21,9 @@ _editor.add_node(node3, 483.73494412408, 49.911624359376)
 
 var node4 = ::blueprint::nodes::camera3d::Camera3d()
 
-node4.cam.position.set(2.0530345260445, 3.8829107612743, 2.5172022235235)
-node4.cam.yaw = -125
-node4.cam.pitch = -58.3
+node4.cam.position.set(1.4002214037546, 2.2098629995318, 1.4132746876765)
+node4.cam.yaw = -138.6
+node4.cam.pitch = -42.8
 node4.cam.zoom = 45
 node4.cam.update_vectors()
 node4.speed = 0.22097560763359
@@ -59,9 +59,9 @@ node8.query_param("distance").value = 0.44318306446075
 
 _editor.add_node(node8, -765.37344791016, 177.93212430664)
 
-var node9 = ::archgraph::nodes::roof::Roof()
-node9.query_param("distance").value = 0.3425720334053
-node9.query_param("type").value = "hip"
+var node9 = ::archgraph::nodes::extrude_roof::ExtrudeRoof()
+node9.query_param("distance").value = 0.14257201552391
+node9.query_param("type").value = "pyramid"
 node9.query_param("idx").value = 0
 
 _editor.add_node(node9, -332.83148032862, 361.24700404968)
@@ -82,7 +82,7 @@ node12.query_param("vertices").value = [ 0, 0, 2, 0, 2, 1, 1, 1, 1, 2, 0, 2 ]
 
 _editor.add_node(node12, -913.36988525391, 296.69676757812)
 
-Blueprint.connect(node12, "geo", node8, "geo")
+Blueprint.connect(node7, "geo", node8, "geo")
 Blueprint.connect(node8, "geo", node10, "geo")
 Blueprint.connect(node10, "top", node9, "geo")
 Blueprint.connect(node8, "geo", node11, "in0")

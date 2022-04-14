@@ -52,7 +52,7 @@ node8.query_param("anchor").value = "left"
 
 _editor.add_node(node8, -172.30750040304, 24.248355884395)
 
-var node9 = ::archgraph::nodes::roof::Roof()
+var node9 = ::archgraph::nodes::extrude_roof::ExtrudeRoof()
 node9.query_param("distance").value = 0.65254855155945
 node9.query_param("type").value = "hip"
 node9.query_param("idx").value = 0
