@@ -5,7 +5,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
-import "archgen" for RoofExtrude
+import "archgen" for RoofEditor
 
 class ExtrudeRoof is Node
 {
@@ -46,14 +46,14 @@ class ExtrudeRoof is Node
 
 		var roof = nil
 		if (type == "hip") {
-			roof = RoofExtrude.hip(poly, distance)
+			roof = RoofEditor.hip(poly, distance)
 		} else if (type == "pyramid") {
-			roof = RoofExtrude.pyramid(poly, distance)
+			roof = RoofEditor.pyramid(poly, distance)
 		} else if (type == "shed") {
 			var idx = this.query_param("idx").value			
-			roof = RoofExtrude.shed(poly, distance, idx)
+			roof = RoofEditor.shed(poly, distance, idx)
 		} else if (type == "gable") {
-			roof = RoofExtrude.gable(poly, distance)
+			roof = RoofEditor.gable(poly, distance)
 		}
 
 		if (!roof) {

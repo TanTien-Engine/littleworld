@@ -1,40 +1,10 @@
 #include "ScopeTools.h"
+#include "PolytopeTools.h"
 
+#include <halfedge/Utility.h>
 #include <SM_Matrix.h>
 #include <SM_Rect.h>
 #include <SM_Calc.h>
-#include <halfedge/Utility.h>
-
-namespace
-{
-
-class FaceToNorm
-{
-public:
-	sm::vec3 calc_normal(const he::loop3* face)
-	{
-		auto itr = face2norm.find(face);
-		if (itr != face2norm.end()) 
-		{
-			return itr->second;
-		} 
-		else 
-		{
-			sm::Plane plane;
-			he::Utility::LoopToPlane(*face, plane);
-			auto& n = plane.normal;
-
-			face2norm.insert({ face, n });
-			return n;
-		}
-	}
-
-private:
-	std::map<const he::loop3*, sm::vec3> face2norm;
-
-}; // FaceToNorm
-
-}
 
 namespace archgen
 {
@@ -94,7 +64,7 @@ std::vector<sm::mat4> ScopeTools::CalcEdgesMapping(const pm3::Polytope& poly)
 
 	auto topo = const_cast<pm3::Polytope&>(poly).GetTopoPoly();
 
-	FaceToNorm f2n;
+	FaceNormalCache f2n;
 
 	std::set<he::edge3*> checked_edges;
 
@@ -118,7 +88,7 @@ std::vector<sm::mat4> ScopeTools::CalcEdgesMapping(const pm3::Polytope& poly)
 
 		mat.Scale(sm::dis_pos3_to_pos3(p0, p1), 1.0f, 1.0f);
 
-		sm::vec3 norm = (f2n.calc_normal(curr_edge->loop) + f2n.calc_normal(curr_edge->twin->loop)).Normalized();
+		sm::vec3 norm = (f2n.GetNormal(curr_edge->loop) + f2n.GetNormal(curr_edge->twin->loop)).Normalized();
 		sm::vec3 dir_x = (p1 - p0).Normalized();
 		sm::vec3 dir_y = norm;
 		sm::vec3 dir_z = dir_x.Cross(dir_y);
@@ -140,7 +110,7 @@ std::vector<sm::mat4> ScopeTools::CalcFaceEdgesMapping(const pm3::Polytope& poly
 
 	auto topo = const_cast<pm3::Polytope&>(poly).GetTopoPoly();
 
-	FaceToNorm f2n;
+	FaceNormalCache f2n;
 
 	auto first_edge = topo->GetEdges().Head();
 	auto curr_edge = first_edge;
@@ -153,7 +123,7 @@ std::vector<sm::mat4> ScopeTools::CalcFaceEdgesMapping(const pm3::Polytope& poly
 		mat.Scale(sm::dis_pos3_to_pos3(p0, p1), 1.0f, 1.0f);
 
 		sm::vec3 dir_x = (p1 - p0).Normalized();
-		sm::vec3 dir_y = f2n.calc_normal(curr_edge->loop);
+		sm::vec3 dir_y = f2n.GetNormal(curr_edge->loop);
 		sm::vec3 dir_z = dir_x.Cross(dir_y);
 		mat = sm::mat4(sm::mat3(dir_x, dir_y, dir_z)) * mat;
 
@@ -182,7 +152,7 @@ void ScopeTools::CalcRoofEdgesMapping(const pm3::Polytope& roof, const pm3::Poly
 
 	auto topo_roof = const_cast<pm3::Polytope&>(roof).GetTopoPoly();
 
-	FaceToNorm f2n;
+	FaceNormalCache f2n;
 
 	std::set<he::edge3*> checked_edges;
 
@@ -209,8 +179,8 @@ void ScopeTools::CalcRoofEdgesMapping(const pm3::Polytope& roof, const pm3::Poly
 			checked_edges.insert(curr_edge);
 			checked_edges.insert(curr_edge->twin);
 
-			auto n0 = f2n.calc_normal(curr_edge->loop);
-			auto n1 = f2n.calc_normal(curr_edge->twin->loop);
+			auto n0 = f2n.GetNormal(curr_edge->loop);
+			auto n1 = f2n.GetNormal(curr_edge->twin->loop);
 			norm = (n0 + n1).Normalized();
 
 			if (n0.Cross(n1).Dot(p1 - p0) > 0) {
@@ -221,7 +191,7 @@ void ScopeTools::CalcRoofEdgesMapping(const pm3::Polytope& roof, const pm3::Poly
 		{
 			checked_edges.insert(curr_edge);
 
-			norm = f2n.calc_normal(curr_edge->loop);
+			norm = f2n.GetNormal(curr_edge->loop);
 		}
 
 		sm::vec3 dir_x = (p1 - p0).Normalized();

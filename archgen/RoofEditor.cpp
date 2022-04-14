@@ -1,8 +1,10 @@
-#include "RoofExtrude.h"
+#include "RoofEditor.h"
 #include "RoofSkeleton.h"
+#include "PolytopeTools.h"
 #include "../citygen/PolyBuilder.h"
 
 #include <polymesh3/Polytope.h>
+#include <halfedge/Utility.h>
 #include <SM_Calc.h>
 
 namespace
@@ -50,7 +52,7 @@ bool flatting_face(const std::shared_ptr<pm3::Polytope>& poly, const pm3::Polyto
 namespace archgen
 {
 
-std::shared_ptr<pm3::Polytope> RoofExtrude::
+std::shared_ptr<pm3::Polytope> RoofEditor::
 Hip(const std::shared_ptr<pm3::Polytope>& poly, float distance)
 {
     if (poly->Faces().size() != 1) {
@@ -107,7 +109,7 @@ Hip(const std::shared_ptr<pm3::Polytope>& poly, float distance)
 }
 
 std::shared_ptr<pm3::Polytope>
-RoofExtrude::Pyramid(const std::shared_ptr<pm3::Polytope>& poly, float distance)
+RoofEditor::Pyramid(const std::shared_ptr<pm3::Polytope>& poly, float distance)
 {
     if (poly->Faces().size() != 1) {
         return nullptr;
@@ -154,7 +156,7 @@ RoofExtrude::Pyramid(const std::shared_ptr<pm3::Polytope>& poly, float distance)
 }
 
 std::shared_ptr<pm3::Polytope>
-RoofExtrude::Shed(const std::shared_ptr<pm3::Polytope>& poly, float distance, int index)
+RoofEditor::Shed(const std::shared_ptr<pm3::Polytope>& poly, float distance, int index)
 {
     if (poly->Faces().size() != 1) {
         return nullptr;
@@ -251,7 +253,7 @@ RoofExtrude::Shed(const std::shared_ptr<pm3::Polytope>& poly, float distance, in
 }
 
 std::shared_ptr<pm3::Polytope>
-RoofExtrude::Gable(const std::shared_ptr<pm3::Polytope>& poly, float distance)
+RoofEditor::Gable(const std::shared_ptr<pm3::Polytope>& poly, float distance)
 {
     if (poly->Faces().size() != 1) {
         return nullptr;
@@ -325,6 +327,71 @@ RoofExtrude::Gable(const std::shared_ptr<pm3::Polytope>& poly, float distance)
     polytope->BuildFromTopo();
 
     return polytope;
+}
+
+std::shared_ptr<pm3::Polytope>
+RoofEditor::Offset(const pm3::Polytope& roof, const pm3::Polytope& base, float distance)
+{
+    std::shared_ptr<pm3::Polytope> ret = std::make_shared<pm3::Polytope>(roof);
+
+    auto topo_base = const_cast<pm3::Polytope&>(base).GetTopoPoly();
+    auto& faces = topo_base->GetLoops();
+    if (faces.Size() != 1) {
+        return ret;
+    }
+
+    std::set<he::edge3*> checked_edges;
+
+    sm::Plane base_plane;
+    he::Utility::LoopToPlane(*faces.Head(), base_plane);
+
+    auto topo_roof = ret->GetTopoPoly();
+
+	auto first_edge = topo_roof->GetEdges().Head();
+	auto curr_edge = first_edge;
+	do {
+		if (!curr_edge->twin || 
+            checked_edges.find(curr_edge) != checked_edges.end()) {
+			curr_edge = curr_edge->linked_next;
+			continue;
+		}
+
+        checked_edges.insert(curr_edge);
+        checked_edges.insert(curr_edge->twin);
+
+        const auto& p0 = curr_edge->vert->position;
+        const auto& p1 = curr_edge->next->vert->position;
+
+        const bool p0_btm = base_plane.GetDistance(p0) < SM_LARGE_EPSILON;
+        const bool p1_btm = base_plane.GetDistance(p1) < SM_LARGE_EPSILON;
+        if ((p0_btm && p1_btm) || (!p0_btm && !p1_btm)) {
+            curr_edge = curr_edge->linked_next;
+            continue;
+        }
+
+        FaceNormalCache f2n;
+
+        auto n0 = f2n.GetNormal(curr_edge->loop);
+        auto n1 = f2n.GetNormal(curr_edge->twin->loop);
+
+        sm::vec3 dir = n0.Cross(n1);
+        if (n0.Cross(n1).Dot(p1 - p0) > 0) {
+            dir = -dir;
+        }
+
+        const float dist = distance * (p1 - p0).Length();
+        if (p0_btm) {
+            curr_edge->vert->position += dir * dist;
+        } else {
+            curr_edge->next->vert->position -= dir * dist;
+        }
+
+		curr_edge = curr_edge->linked_next;
+	} while (curr_edge != first_edge);
+
+    ret->BuildFromTopo();
+
+    return ret;
 }
 
 }

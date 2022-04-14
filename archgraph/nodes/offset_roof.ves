@@ -1,0 +1,54 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant
+import "blueprint.blueprint" for Blueprint
+import "blueprint.node_param" for NodeParam
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
+import "archgen" for RoofEditor
+
+class OffsetRoof is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "roof", VAR_TYPE_GEOMETRY),
+			Pin(this, "base", VAR_TYPE_GEOMETRY),
+		]
+		this.exports = [
+			Pin(this, "roof", VAR_TYPE_GEOMETRY),
+		]
+
+		this.params.add(NodeParam("distance", 0.0))
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_roof = Blueprint.calc_input_value(this, 0)
+		if (!v_roof or !v_roof.value) {
+			return nil
+		}
+
+		var v_base = Blueprint.calc_input_value(this, 1)
+		if (!v_base or !v_base.value) {
+			return nil
+		}
+
+		var roof = v_roof.value.mesh.polys.front()
+		var base = v_base.value.mesh.polys.front()
+
+		var distance = this.query_param("distance").value
+		var new_roof = RoofEditor.offset(roof, base, distance)
+
+		if (!new_roof) {
+			return nil
+		}
+
+	    var geo = Geometry([ new_roof ])
+		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+}

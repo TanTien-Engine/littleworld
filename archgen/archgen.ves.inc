@@ -25,12 +25,16 @@ foreign class ScopeTools
 	foreign static comp_roof_edges(roof, base)
 }
 
-foreign class RoofExtrude
-{
+foreign class RoofEditor
+{	
+	// extrude
 	foreign static hip(poly, distance)
 	foreign static pyramid(poly, distance)
 	foreign static shed(poly, distance, index)
 	foreign static gable(poly, distance)
+
+	// offset
+	foreign static offset(poly, base, distance)
 }
 
 );
