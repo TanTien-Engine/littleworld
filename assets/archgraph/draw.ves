@@ -237,7 +237,7 @@ _editor.add_node(node5, -195.94676722514, 399.52227467053)
 
 var node6 = ::blueprint::nodes::number3::Number3()
 
-node6.value.set(5.9766573905945, 5.6433238983154, 5.3099908828735)
+node6.value.set(100, 100, 100)
 
 _editor.add_node(node6, -196.83918751185, 60.928765348153)
 
