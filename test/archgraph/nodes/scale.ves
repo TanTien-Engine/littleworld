@@ -1,4 +1,5 @@
 var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node0.query_param("size").value.set(1, 1, 1)
 
 _editor.add_node(node0, -496.38737000597, 151.24332383666)
 
@@ -20,9 +21,9 @@ _editor.add_node(node3, 346.84159412408, 61.185194359376)
 
 var node4 = ::blueprint::nodes::camera3d::Camera3d()
 
-node4.cam.position.set(-0.81465546405321, 2.9112991685465, 2.9569581669327)
-node4.cam.yaw = -54.2
-node4.cam.pitch = -40.7
+node4.cam.position.set(-1.688927047298, 4.0718257010531, 3.0033998853237)
+node4.cam.yaw = -43.3
+node4.cam.pitch = -41.9
 node4.cam.zoom = 45
 node4.cam.update_vectors()
 node4.speed = 0.22097560763359

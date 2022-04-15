@@ -10,9 +10,9 @@ _editor.add_node(node1, 245.21438749328, -204.30107415503)
 
 var node2 = ::blueprint::nodes::camera3d::Camera3d()
 
-node2.cam.position.set(1.3925370222562, 2.2241024403298, 2.3402147545985)
-node2.cam.yaw = -109.8
-node2.cam.pitch = -55.5
+node2.cam.position.set(1.6179649222299, 2.5209976633072, 3.0482888753474)
+node2.cam.yaw = -111
+node2.cam.pitch = -46.2
 node2.cam.zoom = 45
 node2.cam.update_vectors()
 node2.speed = 0.22097560763359
@@ -31,8 +31,10 @@ _editor.add_node(node3, -260.48636363636, -303.74909090909)
 var node4 = ::archgraph::nodes::setup_projection::SetupProjection()
 node4.query_param("axes").value = "xy"
 node4.query_param("scale").value.set(0.47155559062958, 0.43822225928307)
+node4.query_param("scale2").value.set(1, 1)
 node4.query_param("offset").value.set(0, 0)
 node4.query_param("uw_factor").value = 0
+node4.query_param("gpu").value = false
 
 _editor.add_node(node4, -264.44, -113.74)
 
@@ -54,7 +56,7 @@ node7.query_param("distance").value = 0.67500680685043
 _editor.add_node(node7, -892.79423715684, 56.066596399479)
 
 var node8 = ::archgraph::nodes::split_size::SplitSize()
-node8.query_param("size").value = 0.52407771348953
+node8.query_param("size").value = 0.62378066778183
 node8.query_param("mode").value = "floating"
 
 _editor.add_node(node8, -750.14025781373, -145.58033395068)
@@ -83,7 +85,7 @@ _editor.add_node(node12, -422.86339665167, -82.890020150321)
 
 Blueprint.connect(node6, "geo", node7, "geo")
 Blueprint.connect(node7, "geo", node5, "geo")
-Blueprint.connect(node5, "back", node11, "parent")
+Blueprint.connect(node5, "front", node11, "parent")
 Blueprint.connect(node8, "size", node11, "size0")
 Blueprint.connect(node9, "size", node11, "size1")
 Blueprint.connect(node10, "size", node11, "size2")

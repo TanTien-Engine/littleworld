@@ -3,46 +3,55 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -114.15444988289, 72.917826234346)
+_editor.add_node(node0, -265.97263170107, 54.736008052528)
 
 var node1 = ::blueprint::nodes::output::Output()
 
 node1.var_name = "geo"
 node1.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node1, 334.53563414155, 126.22736609511)
+_editor.add_node(node1, 443.62654323246, 148.04554791329)
 
 var node2 = ::archgraph::nodes::insert::Insert()
 
-_editor.add_node(node2, 195.02879433689, 119.90959034755)
+_editor.add_node(node2, 304.1197034278, 141.72777216573)
 
 var node3 = ::blueprint::nodes::input::Input()
 
 node3.var_name = "d"
 node3.var_type = "num"
 
-_editor.add_node(node3, -114.31621754755, 8.4882891386202)
+_editor.add_node(node3, -266.13439936573, -9.693529043198)
 
 var node4 = ::archgraph::nodes::scale_scope::ScaleScope()
-node4.query_param("s").value.set(1, 1, 1)
+node4.query_param("s").value.set(1.3841932897119, 1, 1.3841932897119)
 node4.query_param("anchor").value = "left"
 
-_editor.add_node(node4, 28.913002406703, 10.450385339862)
+_editor.add_node(node4, -122.90517941148, -7.7314328419562)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
 node5.load_from_file(_editor, "pillar_material.ves")
 
-_editor.add_node(node5, -20.87730562026, 174.00997488279)
+_editor.add_node(node5, -197.97730562026, 303.80997488279)
 
 var node6 = ::archgraph::nodes::mesh_file::MeshFile()
 node6.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/columns/base.01.attic.obj")
 
-_editor.add_node(node6, -208, 175)
+_editor.add_node(node6, -385.1, 304.8)
+
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "../../../assets/archgraph/center.ves")
+node7.set_prop_value("x", true)
+node7.set_prop_value("y", false)
+node7.set_prop_value("z", true)
+
+_editor.add_node(node7, 67.225707240239, 62.579747572021)
 
 Blueprint.connect(node6, "geo", node5, "geo")
 Blueprint.connect(node0, "var", node4, "geo")
 Blueprint.connect(node3, "var", node4, "x")
 Blueprint.connect(node3, "var", node4, "z")
+Blueprint.connect(node4, "geo", node7, "pos")
 Blueprint.connect(node5, "geo", node2, "geo")
-Blueprint.connect(node4, "geo", node2, "pos")
+Blueprint.connect(node7, "pos", node2, "pos")
 Blueprint.connect(node2, "geo", node1, "var")

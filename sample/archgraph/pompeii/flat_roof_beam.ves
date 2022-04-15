@@ -64,7 +64,7 @@ var node12 = ::archgraph::nodes::setup_projection::SetupProjection()
 node12.query_param("axes").value = "zx"
 node12.query_param("scale").value.set(1, 1)
 node12.query_param("scale2").value.set(1, 1)
-node12.query_param("offset").value.set(0.5, 0.5)
+node12.query_param("offset").value.set(0, 0)
 node12.query_param("uw_factor").value = 0
 node12.query_param("gpu").value = false
 

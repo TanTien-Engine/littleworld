@@ -1,4 +1,5 @@
 var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node0.query_param("size").value.set(1, 1, 1)
 
 _editor.add_node(node0, -496.38737000597, 151.24332383666)
 
@@ -25,9 +26,9 @@ _editor.add_node(node4, 483.73494412408, 49.911624359376)
 
 var node5 = ::blueprint::nodes::camera3d::Camera3d()
 
-node5.cam.position.set(2.1520538682852, 1.6261085640573, 1.6412237672144)
-node5.cam.yaw = -140.9
-node5.cam.pitch = -30.8
+node5.cam.position.set(2.7281564608218, 2.6996540234042, 2.3676424351192)
+node5.cam.yaw = -138.1
+node5.cam.pitch = -39.5
 node5.cam.zoom = 45
 node5.cam.update_vectors()
 node5.speed = 0.22097560763359
@@ -41,13 +42,15 @@ node6.mipmap = false
 node6.init_texture("../../../../tantien/samples/rendergraph/learnopengl/resources/textures/bricks2.jpg")
 node6.set_sampler("linear_repeat")
 
-_editor.add_node(node6, -42.136363636364, -74.509090909091)
+_editor.add_node(node6, -67.546363636364, -109.59909090909)
 
 var node7 = ::archgraph::nodes::setup_projection::SetupProjection()
 node7.query_param("axes").value = "xy"
 node7.query_param("scale").value.set(1, 1)
+node7.query_param("scale2").value.set(1, 1)
 node7.query_param("offset").value.set(0, 0)
 node7.query_param("uw_factor").value = 1
+node7.query_param("gpu").value = false
 
 _editor.add_node(node7, -42.9, 114.4)
 

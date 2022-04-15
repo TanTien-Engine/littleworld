@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -377.27444988289, -67.882173765654)
+_editor.add_node(node0, -612.57674139303, -33.156749272791)
 
 var node1 = ::blueprint::nodes::output::Output()
 
@@ -17,13 +17,13 @@ var node2 = ::blueprint::nodes::input::Input()
 node2.var_name = "d"
 node2.var_type = "num"
 
-_editor.add_node(node2, -375.87681450131, -134.58614566774)
+_editor.add_node(node2, -612.87681450131, -121.58614566774)
 
 var node3 = ::archgraph::nodes::scale_scope::ScaleScope()
-node3.query_param("s").value.set(1, 1, 1)
+node3.query_param("s").value.set(0.040625, 1, 0.040625)
 node3.query_param("anchor").value = "left"
 
-_editor.add_node(node3, -231.7869975933, -130.34961466014)
+_editor.add_node(node3, -468.7869975933, -117.34961466014)
 
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
 node4.load_from_file(_editor, "pillar_material.ves")
@@ -75,12 +75,21 @@ node13.load_from_file(_editor, "pillar_material.ves")
 
 _editor.add_node(node13, 286.43249791712, -317.61297653034)
 
+var node14 = ::blueprint::nodes::subgraph::Subgraph()
+node14.load_from_file(_editor, "../../../assets/archgraph/center.ves")
+node14.set_prop_value("x", true)
+node14.set_prop_value("y", false)
+node14.set_prop_value("z", true)
+
+_editor.add_node(node14, -269.15771186495, -64.527593045485)
+
 Blueprint.connect(node11, "geo", node4, "geo")
 Blueprint.connect(node10, "geo", node13, "geo")
 Blueprint.connect(node0, "var", node3, "geo")
 Blueprint.connect(node2, "var", node3, "x")
 Blueprint.connect(node2, "var", node3, "z")
-Blueprint.connect(node3, "geo", node5, "parent")
+Blueprint.connect(node3, "geo", node14, "pos")
+Blueprint.connect(node14, "pos", node5, "parent")
 Blueprint.connect(node6, "size", node5, "size0")
 Blueprint.connect(node7, "size", node5, "size1")
 Blueprint.connect(node13, "geo", node9, "geo")

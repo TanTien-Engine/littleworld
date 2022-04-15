@@ -1,6 +1,7 @@
 var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node0.query_param("size").value.set(1, 1, 1)
 
-_editor.add_node(node0, -501.88437730373, 510.39239492098)
+_editor.add_node(node0, -696.60967730373, 520.64109492098)
 
 var node1 = ::blueprint::nodes::number3::Number3()
 
@@ -11,7 +12,7 @@ _editor.add_node(node1, -397.0667108, 191.1691773)
 var node2 = ::blueprint::nodes::subgraph::Subgraph()
 node2.load_from_file(_editor, "../../../assets/archgraph/color.ves")
 
-_editor.add_node(node2, -204.53961989091, 199.54254093636)
+_editor.add_node(node2, -189.53961989091, 227.54254093636)
 
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
 node3.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
@@ -25,10 +26,10 @@ _editor.add_node(node4, 672.76152388742, 468.38882485205)
 
 var node5 = ::blueprint::nodes::camera3d::Camera3d()
 
-node5.cam.position.set(1.7784148354474, 3.1255982045915, -0.79602718500538)
-node5.cam.yaw = -233.1
-node5.cam.pitch = -55.3
-node5.cam.zoom = 37
+node5.cam.position.set(1.4437473500693, 3.4729114199272, 2.9634004861963)
+node5.cam.yaw = -106.1
+node5.cam.pitch = -51.8
+node5.cam.zoom = 45
 node5.cam.update_vectors()
 node5.speed = 0.22097560763359
 
@@ -46,32 +47,34 @@ _editor.add_node(node6, -602.91694993636, 174.39674209091)
 var node7 = ::archgraph::nodes::setup_projection::SetupProjection()
 node7.query_param("axes").value = "xy"
 node7.query_param("scale").value.set(1, 1)
+node7.query_param("scale2").value.set(1, 1)
 node7.query_param("offset").value.set(0, 0)
 node7.query_param("uw_factor").value = 0
+node7.query_param("gpu").value = false
 
-_editor.add_node(node7, -397.3374108, 55.741777300001)
+_editor.add_node(node7, -399.3374108, 2.7417773000009)
 
 var node8 = ::archgraph::nodes::comp::Comp()
 node8.query_param("selector").value = "side"
 
 node8.on_param_dirty()
 
-_editor.add_node(node8, -340.16796810952, 521.27315828024)
+_editor.add_node(node8, -534.89326810952, 531.52185828024)
 
 var node9 = ::archgraph::nodes::primitive_polygon::PrimitivePolygon()
 node9.query_param("vertices").value = [ 0, 0, 1, 0, 1.5, 1, 1, 1.5, 0, 1 ]
 
-_editor.add_node(node9, -649.20240678593, 578.78212979766)
+_editor.add_node(node9, -843.92770678593, 589.03082979766)
 
 var node10 = ::archgraph::nodes::extrude::Extrude()
 node10.query_param("distance").value = 0.76719564199448
 
-_editor.add_node(node10, -503.04761056906, 572.27395598421)
+_editor.add_node(node10, -697.77291056906, 582.52265598421)
 
 var node11 = ::archgraph::nodes::mesh_file::MeshFile()
 node11.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/primitives/cylinder.vert.8.notop.tex.obj")
 
-_editor.add_node(node11, -65.06615023666, 496.69977049267)
+_editor.add_node(node11, -79.70715023666, 523.05357049267)
 
 var node12 = ::archgraph::nodes::insert::Insert()
 
@@ -89,13 +92,13 @@ var node14 = ::archgraph::nodes::split_size::SplitSize()
 node14.query_param("size").value = 0.1
 node14.query_param("mode").value = "absolute"
 
-_editor.add_node(node14, -336.37933932367, 439.18076081079)
+_editor.add_node(node14, -531.10463932367, 449.42946081079)
 
 var node15 = ::archgraph::nodes::split::Split()
 node15.query_param("axis").value = "hori"
 node15.query_param("repeat").value = true
 
-_editor.add_node(node15, -189.52782010314, 391.06341300523)
+_editor.add_node(node15, -377.65312010314, 411.21211300523)
 
 var node16 = ::blueprint::nodes::merge::Merge()
 
@@ -105,12 +108,18 @@ var node17 = ::archgraph::nodes::split_size::SplitSize()
 node17.query_param("size").value = 0.2
 node17.query_param("mode").value = "floating"
 
-_editor.add_node(node17, -338.07825035442, 349.72322541158)
+_editor.add_node(node17, -532.80355035442, 359.97192541158)
 
 var node18 = ::archgraph::nodes::scale_scope::ScaleScope()
 node18.query_param("s").value.set(1, 1, 0.1)
+node18.query_param("anchor").value = "left"
 
-_editor.add_node(node18, -60.728296920166, 410.14367675781)
+_editor.add_node(node18, -240.05359692017, 393.99237675781)
+
+var node19 = ::archgraph::nodes::translate_scope::TranslateScope()
+node19.query_param("t").value.set(0, 0, -0.5)
+
+_editor.add_node(node19, -88.47548828125, 402.62365722656)
 
 Blueprint.connect(node9, "geo", node10, "geo")
 Blueprint.connect(node10, "geo", node8, "geo")
@@ -118,8 +127,9 @@ Blueprint.connect(node8, "side", node15, "parent")
 Blueprint.connect(node14, "size", node15, "size0")
 Blueprint.connect(node17, "size", node15, "size1")
 Blueprint.connect(node15, "child0", node18, "geo")
+Blueprint.connect(node18, "geo", node19, "geo")
 Blueprint.connect(node11, "geo", node12, "geo")
-Blueprint.connect(node18, "geo", node12, "pos")
+Blueprint.connect(node19, "geo", node12, "pos")
 Blueprint.connect(node12, "geo", node3, "geo")
 Blueprint.connect(node13, "tex", node3, "texture")
 Blueprint.connect(node10, "geo", node16, "in0")

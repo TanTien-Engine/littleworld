@@ -1,4 +1,5 @@
 var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node0.query_param("size").value.set(1, 1, 1)
 
 _editor.add_node(node0, -622.11737000597, 233.63332383666)
 
@@ -14,14 +15,14 @@ _editor.add_node(node2, 633.78616082408, 268.55768297938)
 
 var node3 = ::blueprint::nodes::camera3d::Camera3d()
 
-node3.cam.position.set(2.1672904949374, 0.77892340876592, 1.7334221843901)
-node3.cam.yaw = -129.4
-node3.cam.pitch = -18.9
+node3.cam.position.set(3.7137006409802, 2.2146731602923, 3.6818552851539)
+node3.cam.yaw = -127.5
+node3.cam.pitch = -28.7
 node3.cam.zoom = 45
 node3.cam.update_vectors()
 node3.speed = 0.22097560763359
 
-_editor.add_node(node3, 423.37362768754, 131.81328426243)
+_editor.add_node(node3, 423.37362768754, 130.20277426243)
 
 var node4 = ::rendergraph::nodes::texture::Texture()
 node4.query_param("unif_name").value = "u_tex"
@@ -35,11 +36,12 @@ _editor.add_node(node4, -304.34336363636, 46.611909090909)
 var node5 = ::archgraph::nodes::setup_projection::SetupProjection()
 node5.query_param("axes").value = "xy"
 node5.query_param("scale").value.set(1, 1)
+node5.query_param("scale2").value.set(1, 1)
 node5.query_param("offset").value.set(0, 0)
 node5.query_param("uw_factor").value = 1
 node5.query_param("gpu").value = false
 
-_editor.add_node(node5, -112.112, 141.02)
+_editor.add_node(node5, -102.212, 91.52)
 
 var node6 = ::archgraph::nodes::scale::Scale()
 node6.query_param("s").value.set(1, 0.22425401210785, 1)
@@ -54,6 +56,7 @@ _editor.add_node(node7, 182.25113058, 407.91663183)
 var node8 = ::archgraph::nodes::setup_projection::SetupProjection()
 node8.query_param("axes").value = "xy"
 node8.query_param("scale").value.set(1, 1)
+node8.query_param("scale2").value.set(1, 1)
 node8.query_param("offset").value.set(0, 0)
 node8.query_param("uw_factor").value = 1
 node8.query_param("gpu").value = true
@@ -63,7 +66,7 @@ _editor.add_node(node8, -107.10586942, 348.62263183)
 var node9 = ::archgraph::nodes::translate::Translate()
 node9.query_param("t").value.set(1.2, 0, 0)
 
-_editor.add_node(node9, -282.14577832031, 385.00117480469)
+_editor.add_node(node9, -273.34577832031, 399.30117480469)
 
 var node10 = ::blueprint::nodes::merge::Merge()
 

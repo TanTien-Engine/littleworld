@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, 21.918500625018, 128.76493733177)
+_editor.add_node(node0, -97.081499374982, 154.76493733177)
 
 var node1 = ::blueprint::nodes::output::Output()
 
@@ -33,11 +33,11 @@ _editor.add_node(node5, -492.53236776204, -60.406091139366)
 var node6 = ::blueprint::nodes::subgraph::Subgraph()
 node6.load_from_file(_editor, "pillar_single.ves")
 
-_editor.add_node(node6, -26.783081138342, 41.404669087101)
+_editor.add_node(node6, -33.146717501978, 33.222850905283)
 
 var node7 = ::blueprint::nodes::divide::Divide()
 
-_editor.add_node(node7, -229.5390441313, -65.679277410534)
+_editor.add_node(node7, -226.81177140403, -65.679277410534)
 
 Blueprint.connect(node2, "curr_item", node3, "geo")
 Blueprint.connect(node3, "sy", node4, "a")

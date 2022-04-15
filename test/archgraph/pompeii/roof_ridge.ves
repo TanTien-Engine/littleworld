@@ -5,14 +5,14 @@ _editor.add_node(node0, 670.19591089175, 244.85777503245)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(-3.2359695078269, 3.7099123436965, 4.1407438171389)
-node1.cam.yaw = -771.1
-node1.cam.pitch = -26.2
+node1.cam.position.set(2.9635997124024, 7.2156684334857, 8.5856950702431)
+node1.cam.yaw = -812.7
+node1.cam.pitch = -39.9
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
 
-_editor.add_node(node1, 470.85201230464, 136.74934494682)
+_editor.add_node(node1, 470.85201230464, 140.04934494682)
 
 var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
 node2.query_param("size").value.set(5, 2, 2.5)
@@ -80,14 +80,14 @@ node13.load_from_file(_editor, "../../../sample/archgraph/pompeii/ridge_bricks.v
 _editor.add_node(node13, 95.5093440051, 464.0820379537)
 
 var node14 = ::archgraph::nodes::scale_scope::ScaleScope()
-node14.query_param("s").value.set(1, 0.3, 0.3)
+node14.query_param("s").value.set(1, 0.3030863404274, 0.29004687070847)
 node14.query_param("anchor").value = "left"
 
-_editor.add_node(node14, -128.25133246195, 393.16003214949)
+_editor.add_node(node14, -110.10422502393, 426.70713958751)
 
 var node15 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node15, -264.29386875279, 442.8823750258)
+_editor.add_node(node15, -269.79386875279, 442.8823750258)
 
 Blueprint.connect(node2, "geo", node4, "geo")
 Blueprint.connect(node2, "geo", node3, "geo")
@@ -97,7 +97,7 @@ Blueprint.connect(node3, "top", node12, "base")
 Blueprint.connect(node12, "hip", node15, "in0")
 Blueprint.connect(node12, "ridge", node15, "in1")
 Blueprint.connect(node15, "list", node14, "geo")
-Blueprint.connect(node14, "geo", node13, "facade")
+Blueprint.connect(node15, "list", node13, "facade")
 Blueprint.connect(node9, "geo", node10, "geo")
 Blueprint.connect(node10, "horizontal", node11, "in0")
 Blueprint.connect(node10, "aslant", node11, "in1")

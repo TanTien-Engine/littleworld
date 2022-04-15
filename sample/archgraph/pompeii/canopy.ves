@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -572.1061405346, 136.18630850386)
+_editor.add_node(node0, -316.5541405346, 154.82030850386)
 
 var node1 = ::blueprint::nodes::output::Output()
 
@@ -21,34 +21,28 @@ var node3 = ::archgraph::nodes::scale_scope::ScaleScope()
 node3.query_param("s").value.set(1.2, 3.5, 1)
 node3.query_param("anchor").value = "center"
 
-_editor.add_node(node3, -425.40222610563, 35.47533125622)
+_editor.add_node(node3, -169.85022610563, 54.10933125622)
 
 var node4 = ::blueprint::nodes::number::Number()
 
 node4.value = 1.2
 
-_editor.add_node(node4, -574.4173176144, 70.26446816141)
+_editor.add_node(node4, -318.8653176144, 88.89846816141)
 
 var node5 = ::blueprint::nodes::number::Number()
 
 node5.value = 3.5
 
-_editor.add_node(node5, -570.5647473664, 4.793030144881)
+_editor.add_node(node5, -315.0127473664, 23.427030144881)
 
-var node6 = ::blueprint::nodes::subgraph::Subgraph()
-node6.load_from_file(_editor, "../../../assets/archgraph/align_back.ves")
+var node6 = ::archgraph::nodes::translate_scope::TranslateScope()
+node6.query_param("t").value.set(0, -0.2, 0)
 
-_editor.add_node(node6, -68.72142938195, 113.57357780496)
-
-var node7 = ::archgraph::nodes::translate_scope::TranslateScope()
-node7.query_param("t").value.set(0, -0.2, 0)
-
-_editor.add_node(node7, -273.49947729492, 37.147995361328)
+_editor.add_node(node6, -17.94747729492, 55.781995361328)
 
 Blueprint.connect(node0, "var", node3, "geo")
 Blueprint.connect(node4, "v", node3, "x")
 Blueprint.connect(node5, "v", node3, "y")
-Blueprint.connect(node3, "geo", node7, "geo")
-Blueprint.connect(node7, "geo", node6, "pos")
-Blueprint.connect(node6, "pos", node2, "facade")
+Blueprint.connect(node3, "geo", node6, "geo")
+Blueprint.connect(node6, "geo", node2, "facade")
 Blueprint.connect(node2, "geo", node1, "var")

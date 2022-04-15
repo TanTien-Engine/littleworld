@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -114.15444988289, 72.917826234346)
+_editor.add_node(node0, -339.54889015336, 81.797001154092)
 
 var node1 = ::blueprint::nodes::output::Output()
 
@@ -21,13 +21,13 @@ var node3 = ::blueprint::nodes::input::Input()
 node3.var_name = "d"
 node3.var_type = "num"
 
-_editor.add_node(node3, -113.73942782265, 5.0660376481396)
+_editor.add_node(node3, -339.13386809312, 13.945212567886)
 
 var node4 = ::archgraph::nodes::scale_scope::ScaleScope()
-node4.query_param("s").value.set(1, 1, 1)
+node4.query_param("s").value.set(0.03125, 1, 0.03125)
 node4.query_param("anchor").value = "left"
 
-_editor.add_node(node4, 28.913002406703, 10.450385339862)
+_editor.add_node(node4, -196.48143786377, 19.329560259608)
 
 var node5 = ::archgraph::nodes::mesh_file::MeshFile()
 node5.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/columns/pillar.01.simple.obj")
@@ -39,10 +39,19 @@ node6.load_from_file(_editor, "pillar_material.ves")
 
 _editor.add_node(node6, -20.87730562026, 174.00997488279)
 
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "../../../assets/archgraph/center.ves")
+node7.set_prop_value("x", true)
+node7.set_prop_value("y", false)
+node7.set_prop_value("z", true)
+
+_editor.add_node(node7, -6.2525482750942, 62.598399986474)
+
 Blueprint.connect(node5, "geo", node6, "geo")
 Blueprint.connect(node0, "var", node4, "geo")
 Blueprint.connect(node3, "var", node4, "x")
 Blueprint.connect(node3, "var", node4, "z")
+Blueprint.connect(node4, "geo", node7, "pos")
 Blueprint.connect(node6, "geo", node2, "geo")
-Blueprint.connect(node4, "geo", node2, "pos")
+Blueprint.connect(node7, "pos", node2, "pos")
 Blueprint.connect(node2, "geo", node1, "var")

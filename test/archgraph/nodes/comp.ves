@@ -1,4 +1,5 @@
 var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node0.query_param("size").value.set(1, 1, 1)
 
 _editor.add_node(node0, -433.68737000597, 190.84332383666)
 
@@ -25,14 +26,14 @@ _editor.add_node(node4, 483.73494412408, 49.911624359376)
 
 var node5 = ::blueprint::nodes::camera3d::Camera3d()
 
-node5.cam.position.set(2.3559046933331, 0.97335576403011, 1.2659530603394)
-node5.cam.yaw = -171.1
-node5.cam.pitch = -28.1
+node5.cam.position.set(1.1367583593867, 2.3340046076347, 3.5777927047247)
+node5.cam.yaw = -98.5
+node5.cam.pitch = -37.1
 node5.cam.zoom = 45
 node5.cam.update_vectors()
 node5.speed = 0.22097560763359
 
-_editor.add_node(node5, 273.32241098754, -86.83277435757)
+_editor.add_node(node5, 275.74241098754, -86.83277435757)
 
 var node6 = ::rendergraph::nodes::texture::Texture()
 node6.query_param("unif_name").value = "u_tex"
@@ -46,8 +47,10 @@ _editor.add_node(node6, -423.28636363636, -297.14909090909)
 var node7 = ::archgraph::nodes::setup_projection::SetupProjection()
 node7.query_param("axes").value = "xy"
 node7.query_param("scale").value.set(1, 1)
+node7.query_param("scale2").value.set(1, 1)
 node7.query_param("offset").value.set(0, 0)
 node7.query_param("uw_factor").value = 0
+node7.query_param("gpu").value = false
 
 _editor.add_node(node7, -459.14, -192.94)
 
@@ -56,23 +59,23 @@ node8.query_param("selector").value = "face6"
 
 node8.on_param_dirty()
 
-_editor.add_node(node8, -283.42550626631, 214.72408719592)
+_editor.add_node(node8, -272.53550626631, 214.72408719592)
 
 var node9 = ::archgraph::nodes::primitive_polygon::PrimitivePolygon()
 node9.query_param("vertices").value = [ 0, 0, 1, 0, 1.5, 1, 1, 1.5, 0, 1 ]
 
-_editor.add_node(node9, -581.00539948817, 259.23305871334)
+_editor.add_node(node9, -595.52539948817, 308.84305871334)
 
 var node10 = ::archgraph::nodes::extrude::Extrude()
-node10.query_param("distance").value = 0.42056241631508
+node10.query_param("distance").value = 0.55856221914291
 
-_editor.add_node(node10, -434.8506032713, 252.72488489989)
+_editor.add_node(node10, -437.2706032713, 291.44488489989)
 
 Blueprint.connect(node9, "geo", node10, "geo")
 Blueprint.connect(node10, "geo", node8, "geo")
 Blueprint.connect(node7, "geo", node3, "geo")
 Blueprint.connect(node6, "tex", node3, "texture")
-Blueprint.connect(node8, "back", node2, "geo")
+Blueprint.connect(node8, "front", node2, "geo")
 Blueprint.connect(node1, "v3", node2, "color")
 Blueprint.connect(node2, "geo", node4, "geos")
 Blueprint.connect(node5, "this", node4, "view_cam")

@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, 51.06673415738, -109.0361762244)
+_editor.add_node(node0, 291.97582506647, -87.217994406218)
 
 var node1 = ::archgraph::nodes::insert::Insert()
 
@@ -35,7 +35,7 @@ var node6 = ::archgraph::nodes::scale_scope::ScaleScope()
 node6.query_param("s").value.set(1.2, 1, 0.2)
 node6.query_param("anchor").value = "center"
 
-_editor.add_node(node6, 183.5338296158, -178.08897727273)
+_editor.add_node(node6, 424.44292052489, -148.99806818182)
 
 var node7 = ::archgraph::nodes::mesh_file::MeshFile()
 node7.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/facades/doors/door-cornice.02.triangle.obj")
@@ -57,11 +57,6 @@ var node10 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node10, -75.414388070511, 31.280995174782)
 
-var node11 = ::blueprint::nodes::subgraph::Subgraph()
-node11.load_from_file(_editor, "../../../assets/archgraph/align_back.ves")
-
-_editor.add_node(node11, 366.37949768066, -95.372401733398)
-
 Blueprint.connect(node4, "geo", node10, "in0")
 Blueprint.connect(node7, "geo", node10, "in1")
 Blueprint.connect(node9, "v", node8, "rand")
@@ -69,7 +64,6 @@ Blueprint.connect(node10, "list", node8, "items")
 Blueprint.connect(node8, "tex", node5, "geo")
 Blueprint.connect(node3, "tex", node5, "texture")
 Blueprint.connect(node0, "var", node6, "geo")
-Blueprint.connect(node6, "geo", node11, "pos")
 Blueprint.connect(node5, "geo", node1, "geo")
-Blueprint.connect(node11, "pos", node1, "pos")
+Blueprint.connect(node6, "geo", node1, "pos")
 Blueprint.connect(node1, "geo", node2, "var")
