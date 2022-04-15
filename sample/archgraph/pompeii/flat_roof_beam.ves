@@ -37,7 +37,7 @@ node6.query_param("t").value.set(0, 0, -0.4)
 _editor.add_node(node6, -150.54539991486, -173.80168839304)
 
 var node7 = ::archgraph::nodes::scale_scope::ScaleScope()
-node7.query_param("s").value.set(1.003, 1, 0.3)
+node7.query_param("s").value.set(1.0180446371436, 1, 0.3)
 node7.query_param("anchor").value = "left"
 
 _editor.add_node(node7, -369.66717529297, -170.59671020508)
@@ -52,7 +52,7 @@ _editor.add_node(node9, -804.98723563426, -143.00948295553)
 
 var node10 = ::blueprint::nodes::number::Number()
 
-node10.value = 0.03
+node10.value = 0.18
 
 _editor.add_node(node10, -961.24016310397, -190.70306705542)
 
@@ -64,7 +64,7 @@ var node12 = ::archgraph::nodes::setup_projection::SetupProjection()
 node12.query_param("axes").value = "zx"
 node12.query_param("scale").value.set(1, 1)
 node12.query_param("scale2").value.set(1, 1)
-node12.query_param("offset").value.set(0, 0)
+node12.query_param("offset").value.set(1, 0)
 node12.query_param("uw_factor").value = 0
 node12.query_param("gpu").value = false
 

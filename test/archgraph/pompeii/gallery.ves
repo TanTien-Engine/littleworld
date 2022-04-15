@@ -5,9 +5,9 @@ _editor.add_node(node0, 361.03150258512, 119.9298767508)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(-3.2864189018561, 3.8763557386312, 9.3572418753978)
-node1.cam.yaw = -41
-node1.cam.pitch = -20
+node1.cam.position.set(-1.9797046127319, 4.2547647767958, 8.5671036714917)
+node1.cam.yaw = -40.4
+node1.cam.pitch = -27.7
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359

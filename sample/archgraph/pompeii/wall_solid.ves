@@ -12,55 +12,55 @@ _editor.add_node(node1, 173.22971147168, -28.664446039357)
 
 var node2 = ::archgraph::nodes::insert::Insert()
 
-_editor.add_node(node2, 580.78696278428, -142.49382986208)
+_editor.add_node(node2, 640.29109501569, -46.626061267038)
 
-var node3 = ::archgraph::nodes::translate_scope::TranslateScope()
-node3.query_param("t").value.set(0, 0, -0.5)
+var node3 = ::blueprint::nodes::load::Load()
 
-_editor.add_node(node3, 395.25723716458, -182.65185076029)
+node3.var_name = "wall_depth"
 
-var node4 = ::blueprint::nodes::load::Load()
+_editor.add_node(node3, 117.85112335427, -186.74262818457)
 
-node4.var_name = "wall_depth"
+var node4 = ::blueprint::nodes::number::Number()
 
-_editor.add_node(node4, 117.85112335427, -186.74262818457)
+node4.value = 0.35
 
-var node5 = ::blueprint::nodes::number::Number()
+_editor.add_node(node4, -408.90891748047, 62.56699365234)
 
-node5.value = 0.35
+var node5 = ::blueprint::nodes::store::Store()
 
-_editor.add_node(node5, -408.90891748047, 62.56699365234)
+node5.var_name = "wall_depth"
 
-var node6 = ::blueprint::nodes::store::Store()
+_editor.add_node(node5, -273.49894307962, 63.47607346413)
 
-node6.var_name = "wall_depth"
+var node6 = ::blueprint::nodes::output::Output()
 
-_editor.add_node(node6, -273.49894307962, 63.47607346413)
+node6.var_name = "geo"
+node6.var_type = [ "geometry", "array" ]
 
-var node7 = ::blueprint::nodes::output::Output()
+_editor.add_node(node6, 779.36053223141, -36.124431404958)
 
-node7.var_name = "geo"
-node7.var_type = [ "geometry", "array" ]
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "wall_material.ves")
 
-_editor.add_node(node7, 719.8564, -131.9922)
+_editor.add_node(node7, 379.97044012451, -0.088229431152389)
 
-var node8 = ::blueprint::nodes::subgraph::Subgraph()
-node8.load_from_file(_editor, "wall_material.ves")
+var node8 = ::archgraph::nodes::scale_scope::ScaleScope()
+node8.query_param("s").value.set(1, 1, 0.35)
+node8.query_param("anchor").value = "left"
 
-_editor.add_node(node8, 379.97044012451, -0.088229431152389)
+_editor.add_node(node8, 250.00482550382, -195.67236374512)
 
-var node9 = ::archgraph::nodes::scale_scope::ScaleScope()
-node9.query_param("s").value.set(1, 1, 0.35)
-node9.query_param("anchor").value = "left"
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "../../../assets/archgraph/align_front.ves")
 
-_editor.add_node(node9, 250.00482550382, -195.67236374512)
+_editor.add_node(node9, 433.78106058925, -116.64579987329)
 
-Blueprint.connect(node5, "v", node6, "var")
-Blueprint.connect(node6, "var", node4, "var")
-Blueprint.connect(node1, "geo", node8, "geo")
-Blueprint.connect(node0, "var", node9, "geo")
-Blueprint.connect(node4, "var", node9, "z")
-Blueprint.connect(node9, "geo", node3, "geo")
-Blueprint.connect(node8, "geo", node2, "geo")
-Blueprint.connect(node3, "geo", node2, "pos")
-Blueprint.connect(node2, "geo", node7, "var")
+Blueprint.connect(node4, "v", node5, "var")
+Blueprint.connect(node5, "var", node3, "var")
+Blueprint.connect(node1, "geo", node7, "geo")
+Blueprint.connect(node0, "var", node8, "geo")
+Blueprint.connect(node3, "var", node8, "z")
+Blueprint.connect(node8, "geo", node9, "pos")
+Blueprint.connect(node7, "geo", node2, "geo")
+Blueprint.connect(node9, "pos", node2, "pos")
+Blueprint.connect(node2, "geo", node6, "var")

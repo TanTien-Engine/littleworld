@@ -5,9 +5,9 @@ _editor.add_node(node0, 424.89326066175, -45.359379447547)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(-5.076403799619, 7.3741675989654, 11.246733798104)
-node1.cam.yaw = -45.2
-node1.cam.pitch = -29.1
+node1.cam.position.set(-2.955587198268, 7.42941695983, 8.6820783683703)
+node1.cam.yaw = -39.5
+node1.cam.pitch = -37.9
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -80,7 +80,6 @@ Blueprint.connect(node9, "child0", node5, "facade")
 Blueprint.connect(node6, "v", node5, "win_frame_width")
 Blueprint.connect(node7, "v", node5, "win_type")
 Blueprint.connect(node5, "geo", node2, "in0")
-Blueprint.connect(node8, "side", node2, "in1")
 Blueprint.connect(node3, "geo", node4, "geo")
 Blueprint.connect(node2, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")

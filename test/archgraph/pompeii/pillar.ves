@@ -6,8 +6,8 @@ _editor.add_node(node0, 270.17040258512, 152.8759767508)
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
 node1.cam.position.set(-0.46451709186184, 1.2516805175256, 6.7764785600737)
-node1.cam.yaw = -59.4
-node1.cam.pitch = -29.1
+node1.cam.yaw = -61.8
+node1.cam.pitch = -25.7
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -29,7 +29,7 @@ _editor.add_node(node3, -609.13088416012, 184.15064011889)
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
 node4.load_from_file(_editor, "../../../sample/archgraph/pompeii/pillar.ves")
 
-_editor.add_node(node4, -66.295648242646, 189.75496852423)
+_editor.add_node(node4, -212.46052769077, 199.31715689934)
 
 var node5 = ::blueprint::nodes::merge::Merge()
 
@@ -42,21 +42,15 @@ node6.query_param("repeat").value = false
 _editor.add_node(node6, -409.18423184482, 127.86395818537)
 
 var node7 = ::archgraph::nodes::split_size::SplitSize()
-node7.query_param("size").value = 0.071117483079433
+node7.query_param("size").value = 0.50445079803467
 node7.query_param("mode").value = "absolute"
 
 _editor.add_node(node7, -573.40059941017, 33.591186523436)
 
-var node8 = ::archgraph::nodes::translate_scope::TranslateScope()
-node8.query_param("t").value.set(0, 0, 0)
-
-_editor.add_node(node8, -337.7011385831, -54.09487082742)
-
 Blueprint.connect(node2, "geo", node3, "geo")
 Blueprint.connect(node3, "front", node6, "parent")
 Blueprint.connect(node7, "size", node6, "size0")
-Blueprint.connect(node6, "child0", node8, "geo")
-Blueprint.connect(node8, "geo", node4, "facade")
+Blueprint.connect(node6, "child0", node4, "facade")
 Blueprint.connect(node3, "front", node5, "in0")
 Blueprint.connect(node4, "geo", node5, "in1")
 Blueprint.connect(node5, "list", node0, "geos")

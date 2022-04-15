@@ -50,16 +50,16 @@ node8.query_param("selector").value = "side"
 
 node8.on_param_dirty()
 
-_editor.add_node(node8, -367.59270730537, 394.18692033608)
+_editor.add_node(node8, -366.68361639628, 404.18692033608)
 
 var node9 = ::blueprint::nodes::subgraph::Subgraph()
 node9.load_from_file(_editor, "flat_roof_beam.ves")
 
-_editor.add_node(node9, -268.53665018327, 294.88879735054)
+_editor.add_node(node9, -420.35483200145, 294.88879735054)
 
 var node10 = ::blueprint::nodes::for_each_f::ForEachF()
 
-_editor.add_node(node10, -224.38817617846, 384.48452490651)
+_editor.add_node(node10, -223.47908526937, 394.48452490651)
 
 var node11 = ::archgraph::nodes::extrude::Extrude()
 node11.query_param("distance").value = 0.19087117910385
