@@ -27,16 +27,20 @@ var node4 = ::archgraph::nodes::split_size::SplitSize()
 node4.query_param("size").value = 0
 node4.query_param("mode").value = "floating"
 
-_editor.add_node(node4, -324, 81)
+_editor.add_node(node4, -469.38795805712, 82.113553116561)
 
-var node5 = ::blueprint::nodes::number::Number()
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "roof_props.ves")
 
-node5.value = 1
+_editor.add_node(node5, -661.88998090957, 110.77233595745)
 
-_editor.add_node(node5, -469, 88)
+var node6 = ::blueprint::nodes::lazy_eval::LazyEval()
 
-Blueprint.connect(node5, "v", node4, "size")
+_editor.add_node(node6, -331.5598061571, 105.18405741432)
+
+Blueprint.connect(node5, "brick_length", node4, "size")
+Blueprint.connect(node4, "size", node6, "val")
 Blueprint.connect(node0, "var", node2, "parent")
-Blueprint.connect(node4, "size", node2, "size0")
+Blueprint.connect(node6, "pin", node2, "size0")
 Blueprint.connect(node2, "child0", node3, "facade")
 Blueprint.connect(node3, "geo", node1, "var")
