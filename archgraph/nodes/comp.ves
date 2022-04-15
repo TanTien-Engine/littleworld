@@ -132,10 +132,10 @@ class Comp is Node
 			}
 
 			var normals = []
-			normals.add(Vector3( 0,  0, -1))
 			normals.add(Vector3( 0,  0,  1))
-			normals.add(Vector3(-1,  0,  0))
+			normals.add(Vector3( 0,  0, -1))
 			normals.add(Vector3( 1,  0,  0))
+			normals.add(Vector3(-1,  0,  0))
 			normals.add(Vector3( 0,  1,  0))
 			normals.add(Vector3( 0, -1,  0))
 
