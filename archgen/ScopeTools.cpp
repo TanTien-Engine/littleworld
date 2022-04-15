@@ -223,21 +223,34 @@ void ScopeTools::CalcRoofEdgesMapping(const pm3::Polytope& roof, const pm3::Poly
 	} while (curr_edge != first_edge);
 }
 
-sm::mat4 ScopeTools::CalcInsertMat(const sm::cube& aabb, const sm::mat4& scope)
+sm::mat4 ScopeTools::CalcInsertMat(const sm::cube& aabb, const sm::mat4& geo_mat, const sm::mat4& scope_mat)
 {
-	auto size = aabb.Size();
+	auto min = aabb.min;
+	auto max = aabb.max;
+
+	sm::cube new_aabb;
+	new_aabb.Combine(geo_mat * sm::vec3(min[0], min[1], min[2]));
+	new_aabb.Combine(geo_mat * sm::vec3(min[0], min[1], max[2]));
+	new_aabb.Combine(geo_mat * sm::vec3(min[0], max[1], min[2]));
+	new_aabb.Combine(geo_mat * sm::vec3(min[0], max[1], max[2]));
+	new_aabb.Combine(geo_mat * sm::vec3(max[0], min[1], min[2]));
+	new_aabb.Combine(geo_mat * sm::vec3(max[0], min[1], max[2]));
+	new_aabb.Combine(geo_mat * sm::vec3(max[0], max[1], min[2]));
+	new_aabb.Combine(geo_mat * sm::vec3(max[0], max[1], max[2]));
+
+	auto size = new_aabb.Size();
 	const float sx = 1.0f / size.x;
 	const float sy = 1.0f / size.y;
 	const float sz = 1.0f / size.z;
 
 	auto mat_s = sm::mat4::Scaled(sx, sy, sz);
 
-	auto c = aabb.Center();
+	auto c = new_aabb.Center();
 	auto mat_t = sm::mat4::Translated(-c.x, -c.y, -c.z);
 
 	auto mat_o = sm::mat4::Translated(0.5f, 0.5f, 0.0f);
 
-	return scope * mat_o * mat_s * mat_t;
+	return scope_mat * mat_o * mat_s * mat_t;
 }
 
 }

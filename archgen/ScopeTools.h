@@ -19,7 +19,8 @@ public:
 		std::vector<sm::mat4>& eave, std::vector<sm::mat4>& hip,
 		std::vector<sm::mat4>& valley, std::vector<sm::mat4>& ridge);
 
-	static sm::mat4 CalcInsertMat(const sm::cube& aabb, const sm::mat4& scope);
+	static sm::mat4 CalcInsertMat(const sm::cube& aabb, 
+		const sm::mat4& geo_mat, const sm::mat4& scope_mat);
 
 }; // ScopeTools
 

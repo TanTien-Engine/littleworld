@@ -127,15 +127,16 @@ void w_ScopeTools_face_mapping()
 
 void w_ScopeTools_calc_insert_mat()
 {
-	sm::cube* aabb = (sm::cube*)ves_toforeign(1);
-	sm::mat4* scope = (sm::mat4*)ves_toforeign(2);
+	sm::cube* aabb      = (sm::cube*)ves_toforeign(1);
+	sm::mat4* geo_mat   = (sm::mat4*)ves_toforeign(2);
+	sm::mat4* scope_mat = (sm::mat4*)ves_toforeign(3);
 
 	ves_pop(ves_argnum());
 
 	ves_pushnil();
 	ves_import_class("maths", "Matrix44");
 	sm::mat4* mat = (sm::mat4*)ves_set_newforeign(0, 1, sizeof(sm::mat4));
-	*mat = archgen::ScopeTools::CalcInsertMat(*aabb, *scope);
+	*mat = archgen::ScopeTools::CalcInsertMat(*aabb, *geo_mat, *scope_mat);
 	ves_pop(1);
 }
 
@@ -308,7 +309,7 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 	if (strcmp(signature, "static MeshBuilder.build_mesh_from_file(_,_)") == 0) return w_MeshBuilder_build_mesh_from_file;
 
 	if (strcmp(signature, "static ScopeTools.face_mapping(_,_)") == 0) return w_ScopeTools_face_mapping;
-	if (strcmp(signature, "static ScopeTools.calc_insert_mat(_,_)") == 0) return w_ScopeTools_calc_insert_mat;
+	if (strcmp(signature, "static ScopeTools.calc_insert_mat(_,_,_)") == 0) return w_ScopeTools_calc_insert_mat;
 	if (strcmp(signature, "static ScopeTools.get_scope_size(_)") == 0) return w_ScopeTools_get_scope_size;
 	if (strcmp(signature, "static ScopeTools.comp_edges(_)") == 0) return w_ScopeTools_comp_edges;
 	if (strcmp(signature, "static ScopeTools.comp_face_edges(_)") == 0) return w_ScopeTools_comp_face_edges;

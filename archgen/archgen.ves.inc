@@ -17,7 +17,7 @@ foreign class MeshBuilder
 foreign class ScopeTools
 {
 	foreign static face_mapping(poly, face)
-	foreign static calc_insert_mat(aabb, scope)
+	foreign static calc_insert_mat(aabb, geo_mat, scope_mat)
 	foreign static get_scope_size(scope)
 
 	foreign static comp_edges(poly)

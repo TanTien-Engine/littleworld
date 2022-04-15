@@ -53,7 +53,7 @@ class Insert is Node
 					{
 						var aabb = geo.mesh.aabb
 						var new = geo.clone()
-						new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, pos.scope))
+						new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, geo.trans, pos.scope))
 						geos.add(Variant(VAR_TYPE_GEOMETRY, new))
 					}
 				}
@@ -70,7 +70,7 @@ class Insert is Node
 					{
 						var aabb = geo.mesh.aabb
 						var new = geo.clone()
-						new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, pos.scope))
+						new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, geo.trans, pos.scope))
 						geos.add(Variant(VAR_TYPE_GEOMETRY, new))
 					}
 				}
