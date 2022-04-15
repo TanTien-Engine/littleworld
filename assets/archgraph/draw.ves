@@ -102,9 +102,7 @@ void main()
 
 	vs_out.frag_pos = vec3(world_pos);
 
-    vec3 normal = mat3(transpose(inverse(model))) * aNormal;  
-//    vs_out.normal = normal;
-    vs_out.normal = aNormal;
+    vs_out.normal = transpose(inverse(mat3(model))) * aNormal;
 
     calc_uv(world_pos);
 
@@ -147,7 +145,7 @@ uniform sampler2D dirt_tex;
 vec3 calc_normal()
 {
     if (!use_bumpmap) {
-        return fs_in.normal;
+        return normalize( fs_in.normal );
     }
 
     // Bump mapping 
