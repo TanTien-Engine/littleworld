@@ -245,12 +245,9 @@ sm::mat4 ScopeTools::CalcInsertMat(const sm::cube& aabb, const sm::mat4& geo_mat
 
 	auto mat_s = sm::mat4::Scaled(sx, sy, sz);
 
-	auto c = new_aabb.Center();
-	auto mat_t = sm::mat4::Translated(-c.x, -c.y, -c.z);
+	auto mat_t = sm::mat4::Translated(-new_aabb.xmin, -new_aabb.ymin, -new_aabb.zmin);
 
-	auto mat_o = sm::mat4::Translated(0.5f, 0.5f, 0.0f);
-
-	return scope_mat * mat_o * mat_s * mat_t;
+	return scope_mat * mat_s * mat_t;
 }
 
 }

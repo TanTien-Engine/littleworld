@@ -12,7 +12,7 @@ _editor.add_node(node1, -245.66278172012, -148.35749437468)
 
 var node2 = ::blueprint::nodes::number::Number()
 
-node2.value = -0.5
+node2.value = -1.0
 
 _editor.add_node(node2, -384.52879175031, -168.89226383137)
 

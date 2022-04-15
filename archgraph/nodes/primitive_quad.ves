@@ -25,17 +25,13 @@ class PrimitiveQuad is Node
 
 	calc_value(idx)
 	{
+		var pos = Vector3(0, 0, 0)
 		var size = this.query_param("size").value
 
-		var hx = size.x * 0.5
-		var hz = size.y * 0.5
-
-		var pos = Vector3(0, 0, 0)
-
-		var xmin = pos.x - hx
-		var xmax = pos.x + hx
-		var zmin = pos.z - hz
-		var zmax = pos.z + hz
+		var xmin = pos.x
+		var xmax = pos.x + size.x
+		var zmin = pos.z
+		var zmax = pos.z + size.y
 		var y = 0
 
 		var points = []

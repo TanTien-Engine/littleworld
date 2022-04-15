@@ -1,0 +1,75 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "pos"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -578.86568799964, 103.72976344502)
+
+var node1 = ::archgraph::nodes::translate_scope::TranslateScope()
+node1.query_param("t").value.set(-0.5, 0, 0)
+
+_editor.add_node(node1, -432.52228585235, 24.039199840196)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "pos"
+node2.var_type = "geometry"
+
+_editor.add_node(node2, 429.55070256005, 149.36901729363)
+
+var node3 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node3, -295.03909074768, 112.20562070048)
+
+var node4 = ::blueprint::nodes::property::Property()
+
+node4.var_name = "x"
+node4.var_type = "bool"
+
+_editor.add_node(node4, -438.38996040006, 145.68417007595)
+
+var node5 = ::blueprint::nodes::property::Property()
+
+node5.var_name = "y"
+node5.var_type = "bool"
+
+_editor.add_node(node5, -156.29379210555, 158.61429779946)
+
+var node6 = ::blueprint::nodes::property::Property()
+
+node6.var_name = "z"
+node6.var_type = "bool"
+
+_editor.add_node(node6, 139.35647836778, 168.17217909173)
+
+var node7 = ::archgraph::nodes::translate_scope::TranslateScope()
+node7.query_param("t").value.set(0, -0.5, 0)
+
+_editor.add_node(node7, -149.52393874491, 34.22729901375)
+
+var node8 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node8, -3.7762808303235, 147.18710830379)
+
+var node9 = ::archgraph::nodes::translate_scope::TranslateScope()
+node9.query_param("t").value.set(0, 0, -0.5)
+
+_editor.add_node(node9, 141.99473894104, 35.212175046808)
+
+var node10 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node10, 279.56057867381, 129.08107524594)
+
+Blueprint.connect(node0, "var", node1, "geo")
+Blueprint.connect(node4, "var", node3, "cond")
+Blueprint.connect(node1, "geo", node3, "true")
+Blueprint.connect(node0, "var", node3, "false")
+Blueprint.connect(node3, "result", node7, "geo")
+Blueprint.connect(node5, "var", node8, "cond")
+Blueprint.connect(node7, "geo", node8, "true")
+Blueprint.connect(node3, "result", node8, "false")
+Blueprint.connect(node8, "result", node9, "geo")
+Blueprint.connect(node6, "var", node10, "cond")
+Blueprint.connect(node9, "geo", node10, "true")
+Blueprint.connect(node8, "result", node10, "false")
+Blueprint.connect(node10, "result", node2, "var")
