@@ -7,6 +7,7 @@
 #include <unirender/ComponentDataType.h>
 #include <unirender/VertexInputAttribute.h>
 #include <polymesh3/Polytope.h>
+#include <model/BrushBuilder.h>
 
 #include <../../tinyobjloader/tiny_obj_loader.h>
 
@@ -77,7 +78,7 @@ MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::P
 	std::vector<Vertex> vertices;
 	for (auto& poly : polys)
 	{
-		auto& points = poly->Points();
+		auto& pts = poly->Points();
 
 		auto& faces = poly->Faces();
 		for (auto& f : faces) 
@@ -87,27 +88,18 @@ MeshBuilder::Gen(const ur::Device& dev, const std::vector<std::shared_ptr<pm3::P
 
 			auto& uv = uv_map ? *uv_map : f->tex_map;
 
-			auto& polyline = f->border;
-			if (polyline.size() > 2) 
+			auto tris_idx = model::BrushBuilder::Triangulation(pts, f->border, f->holes);
+			for (auto& idx : tris_idx) 
 			{
-				for (auto& i : polyline) {
-					aabb.Combine(points[i]->pos);
-				}
+				auto& pos = pts[idx]->pos;
 
-				for (size_t i = 1, n = polyline.size() - 1; i < n; ++i) 
-				{
-					Vertex tri[3];
-					tri[0].pos = points[polyline[0]]->pos;
-					tri[1].pos = points[polyline[i]]->pos;
-					tri[2].pos = points[polyline[i + 1]]->pos;
-					for (auto& p : tri) 
-					{
-						p.normal = normal;
-						p.texcoord = uv.CalcTexCoords(p.pos, 1, 1);
+				Vertex v;
+				v.pos = pos;
+				v.normal = normal;
+				v.texcoord = uv.CalcTexCoords(v.pos, 1, 1);
+				vertices.push_back(v);
 
-						vertices.push_back(p);
-					}
-				}
+				aabb.Combine(pos);
 			}
 		}
 	}
