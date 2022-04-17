@@ -203,6 +203,8 @@ class Split is Node
 
 		var rect = SplitRect(0, 0, width, height)
 
+		var MIN_SIZE = 0.0001
+
 		for (var _ in dst_sizes) {
 			rects.add([])
 		}
@@ -214,8 +216,10 @@ class Split is Node
 				for (var i in 0..dst_sizes[0].count) {				
 					for (var j in 0..dst_sizes.count) {
 						var sz = dst_sizes[j][i]
-						var sr = SplitRect(x, rect.y, sz.size, rect.h)
-						rects[j].add(sr)
+						if (sz.size > MIN_SIZE) {
+							var sr = SplitRect(x, rect.y, sz.size, rect.h)
+							rects[j].add(sr)
+						}
 						x = x + sz.size
 					}
 				}
@@ -223,11 +227,13 @@ class Split is Node
 			else
 			{
 				var y = rect.y
-				for (var i in 0..dst_sizes[0].count) {				
-					for (var j in 0..dst_sizes.count) {				
+				for (var i in 0..dst_sizes[0].count) {
+					for (var j in 0..dst_sizes.count) {
 						var sz = dst_sizes[j][i]
-						var sr = SplitRect(rect.x, y, rect.w, sz.size)
-						rects[j].add(sr)
+						if (sz.size > MIN_SIZE) {
+							var sr = SplitRect(rect.x, y, rect.w, sz.size)
+							rects[j].add(sr)
+						}
 						y = y + sz.size
 					}
 				}
@@ -241,8 +247,10 @@ class Split is Node
 				for (var i in 0 .. dst_sizes.count) 
 				{
 					var sz = dst_sizes[i]
-					var sr = SplitRect(x, rect.y, sz.size, rect.h)
-					rects[i].add(sr)
+					if (sz.size > MIN_SIZE) {
+						var sr = SplitRect(x, rect.y, sz.size, rect.h)
+						rects[i].add(sr)
+					}
 					x = x + sz.size
 				}
 			}
@@ -252,8 +260,10 @@ class Split is Node
 				for (var i in 0 .. dst_sizes.count) 
 				{
 					var sz = dst_sizes[i]
-					var sr = SplitRect(rect.x, y, rect.w, sz.size)
-					rects[i].add(sr)
+					if (sz.size > MIN_SIZE) {
+						var sr = SplitRect(rect.x, y, rect.w, sz.size)
+						rects[i].add(sr)
+					}
 					y = y + sz.size
 				}
 			}
