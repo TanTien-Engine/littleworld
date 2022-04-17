@@ -19,7 +19,7 @@ void PolyBuilder::AddFace(const std::vector<sm::vec2>& border, const std::vector
     m_faces.push_back(face);
 }
 
-void PolyBuilder::AddFace(const std::vector<sm::vec3>& border)
+void PolyBuilder::AddFace(const std::vector<sm::vec3>& border, const std::vector<std::vector<sm::vec3>>& holes)
 {
     if (border.empty()) {
         return;
@@ -28,6 +28,10 @@ void PolyBuilder::AddFace(const std::vector<sm::vec3>& border)
     auto face = std::make_shared<pm3::Polytope::Face>();
 
     face->border = AddPoints(border);
+
+    for (auto& hole : holes) {
+        face->holes.push_back(AddPoints(hole));
+    }
 
     m_faces.push_back(face);
 }

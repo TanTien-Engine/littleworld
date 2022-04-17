@@ -173,6 +173,10 @@ RoofEditor::Shed(const std::shared_ptr<pm3::Polytope>& poly, float distance, int
         return nullptr;
     }
 
+    if (!face->holes.empty()) {
+        return ShedWithHoles(poly->Points(), face, normal, distance);
+    }
+
     std::vector<sm::vec3> border;
     border.reserve(face->border.size());
 
@@ -392,6 +396,47 @@ RoofEditor::Offset(const pm3::Polytope& roof, const pm3::Polytope& base, float d
     ret->BuildFromTopo();
 
     return ret;
+}
+
+std::shared_ptr<pm3::Polytope>
+RoofEditor::ShedWithHoles(const std::vector<pm3::Polytope::PointPtr>& pts,
+                          const pm3::Polytope::FacePtr& face, const sm::vec3& normal, float distance)
+{
+    std::vector<sm::vec3> border, border2;
+    border.reserve(face->border.size());
+    border2.reserve(face->border.size());
+    for (auto idx : face->border) 
+    {
+        auto p = pts[idx]->pos;
+        border.push_back(p);
+        border2.push_back(p + normal * distance);
+    }
+
+    std::vector<std::vector<sm::vec3>> holes;
+    holes.reserve(face->holes.size());
+    for (auto& hole : face->holes) 
+    {
+        std::vector<sm::vec3> poly;
+        poly.reserve(hole.size());
+        for (auto idx : hole) {
+            poly.push_back(pts[idx]->pos);
+        }
+        holes.push_back(poly);
+    }
+
+    citygen::PolyBuilder builder;
+    builder.AddFace(border2, holes);
+    for (int i = 0, n = border.size(); i < n; ++i) {
+        int j = (i + 1) % n;
+        builder.AddFace({ border[i], border[j], border2[j], border2[i] });
+    }
+    
+    auto polytope = builder.CreatePolytope();
+
+    polytope->GetTopoPoly();
+    polytope->BuildFromTopo();
+
+    return polytope;
 }
 
 }

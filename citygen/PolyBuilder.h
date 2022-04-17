@@ -17,7 +17,7 @@ public:
 
     void AddFace(const std::vector<sm::vec2>& border, const std::vector<std::vector<sm::vec2>>& holes);
 
-    void AddFace(const std::vector<sm::vec3>& border);
+    void AddFace(const std::vector<sm::vec3>& border, const std::vector<std::vector<sm::vec3>>& holes = {});
 
     std::shared_ptr<pm3::Polytope> CreatePolytope() const;
 
