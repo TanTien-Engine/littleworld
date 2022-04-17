@@ -76,7 +76,9 @@ class Comp is Node
 		}
 		else if (selector == "side")
 		{
-			this.exports.add(Pin(this, "side", VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "side",   VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "border", VAR_TYPE_GEOMETRY))
+			this.exports.add(Pin(this, "inside", VAR_TYPE_GEOMETRY))
 		}
 		else if (selector == "edges")
 		{
@@ -212,24 +214,36 @@ class Comp is Node
 		}
 		else if (selector == "side")
 		{
-			for (var i in 0..1) {
+			for (var i in 0..3) {
 				this.children.add([])
 			}
 
 			for (var poly in v_geo.value.mesh.polys) 
 			{
-				var faces = []
+				var faces3 = []
+				for (var i in 0..3) {
+					faces3.add([])
+				}
+
 				for (var face in poly.get_faces()) 
 				{
 					var angle = this.calc_normal_y_angle(face)
-					if (angle > -78.75 and angle < 78.75) {
-						faces.add(face)
+					if (angle > -78.75 and angle < 78.75) 
+					{
+						faces3[0].add(face)
+						if (poly.is_face_inside(face)) {
+							faces3[2].add(face)
+						} else {
+							faces3[1].add(face)						
+						}
 					}
 				}
 
 				var points = poly.get_points()
-				if (!faces.isEmpty) {
-					this.create_face_children(0, points, faces)
+				for (var i in 0 .. faces3.count) {
+					if (!faces3[i].isEmpty) {
+						this.create_face_children(i, points, faces3[i])
+					}
 				}
 			}
 		}
