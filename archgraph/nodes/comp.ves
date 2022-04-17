@@ -305,18 +305,37 @@ class Comp is Node
 		for (var _face in faces) 
 		{
 			var border = _face.get_border()
+			var holes = _face.get_holes()
 
 			var points = []
 			for (var i in border) {
 				points.add(PolyPoint.init(_points[i].get_pos()))
 			}
-
-			var indices = []
-			for (var i in 0..points.count) {
-				indices.add(i)
+			for (var hole in holes) {
+				for (var i in hole) {
+					points.add(PolyPoint.init(_points[i].get_pos()))
+				}
 			}
 
-			var face = PolyFace.init(indices, [])
+			var border_idx = []
+			var curr_idx = 0
+			for (var i in border) {
+				border_idx.add(curr_idx)
+				curr_idx = curr_idx + 1
+			}
+
+			var holes_idx = []
+			for (var hole in holes) 
+			{
+				var idx = []
+				for (var i in hole) {
+					idx.add(curr_idx)
+					curr_idx = curr_idx + 1
+				}
+				holes_idx.add(idx)
+			}
+
+			var face = PolyFace.init(border_idx, holes_idx)
 			var poly = Polytope.init(points, [ face ])
 
 			var geo = Geometry([ poly ])
