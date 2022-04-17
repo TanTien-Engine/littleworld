@@ -1,0 +1,52 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node0, 534.55494412408, 53.541624359376)
+
+var node1 = ::blueprint::nodes::camera3d::Camera3d()
+
+node1.cam.position.set(-0.99940652738487, 3.4166425855234, 4.0310653914209)
+node1.cam.yaw = -58.3
+node1.cam.pitch = -39.2
+node1.cam.zoom = 45
+node1.cam.update_vectors()
+node1.speed = 0.22097560763359
+
+_editor.add_node(node1, 275.57635539024, -86.83277435757)
+
+var node2 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+node2.query_param("size").value.set(0.22628648579121, 1)
+
+_editor.add_node(node2, -300.0840049328, 115.89808499906)
+
+var node3 = ::archgraph::nodes::primitive_polygon::PrimitivePolygon()
+node3.query_param("vertices").value = [ 0, 0, 2, 0, 2, 1, 1, 2, 0, 2 ]
+
+_editor.add_node(node3, -270.81538338119, 269.56854377812)
+
+var node4 = ::archgraph::nodes::offset::Offset()
+node4.query_param("distance").value = 0.16228349506855
+
+_editor.add_node(node4, 137.39448758314, 186.08590294894)
+
+var node5 = ::blueprint::nodes::number::Number()
+
+node5.value = 0.36004841327667
+
+_editor.add_node(node5, -245.40435606443, -27.990962509282)
+
+var node6 = ::blueprint::nodes::negate::Negate()
+
+_editor.add_node(node6, -107.16242976945, -23.483063523703)
+
+var node7 = ::archgraph::nodes::extrude::Extrude()
+node7.query_param("distance").value = 0.76171469688416
+
+_editor.add_node(node7, 328.44567871094, 228.01904574308)
+
+Blueprint.connect(node5, "v", node6, "v")
+Blueprint.connect(node3, "geo", node4, "geo")
+Blueprint.connect(node6, "v", node4, "dist")
+Blueprint.connect(node4, "border", node7, "geo")
+Blueprint.connect(node7, "geo", node0, "geos")
+Blueprint.connect(node1, "this", node0, "view_cam")

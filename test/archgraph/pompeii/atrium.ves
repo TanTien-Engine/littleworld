@@ -1,0 +1,84 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node0, 230.57040258512, 152.8759767508)
+
+var node1 = ::blueprint::nodes::camera3d::Camera3d()
+
+node1.cam.position.set(12.469836945611, 8.2686969984393, -3.8498825108543)
+node1.cam.yaw = -223.8
+node1.cam.pitch = -42.3
+node1.cam.zoom = 45
+node1.cam.update_vectors()
+node1.speed = 0.22097560763359
+
+_editor.add_node(node1, 27.212569358221, -87.22616356448)
+
+var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node2.query_param("size").value.set(10, 2.5, 5)
+
+_editor.add_node(node2, -652.7141877988, 155.46442335891)
+
+var node3 = ::archgraph::nodes::comp::Comp()
+node3.query_param("selector").value = "side"
+
+node3.on_param_dirty()
+
+_editor.add_node(node3, -352.53223652677, 150.05176709109)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../sample/archgraph/pompeii/column_facade.ves")
+
+_editor.add_node(node4, -99.853165767365, 124.86631377638)
+
+var node5 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node5, -143.05335211448, 245.10255300624)
+
+var node6 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node6, 35.045370483399, 243.40215454102)
+
+var node7 = ::archgraph::nodes::scale_scope::ScaleScope()
+node7.query_param("s").value.set(1.0567433685064, 1, 1)
+node7.query_param("anchor").value = "left"
+
+_editor.add_node(node7, -293.31089837904, 14.635752466771)
+
+var node8 = ::archgraph::nodes::offset::Offset()
+node8.query_param("distance").value = 0
+
+_editor.add_node(node8, -593.01598233263, 419.41255486712)
+
+var node9 = ::archgraph::nodes::primitive_quad::PrimitiveQuad()
+node9.query_param("size").value.set(10, 5)
+
+_editor.add_node(node9, -919.49104858879, 294.91787504441)
+
+var node10 = ::archgraph::nodes::extrude::Extrude()
+node10.query_param("distance").value = 2.5
+
+_editor.add_node(node10, -693.91269085143, 274.39751166746)
+
+var node11 = ::blueprint::nodes::number::Number()
+
+node11.value = 0
+
+_editor.add_node(node11, -926.27105158026, 515.40971790661)
+
+var node12 = ::blueprint::nodes::negate::Negate()
+
+_editor.add_node(node12, -794.45286976207, 526.77337646484)
+
+Blueprint.connect(node11, "v", node12, "v")
+Blueprint.connect(node9, "geo", node10, "geo")
+Blueprint.connect(node10, "geo", node3, "geo")
+Blueprint.connect(node9, "geo", node8, "geo")
+Blueprint.connect(node12, "v", node8, "dist")
+Blueprint.connect(node5, "curr_item", node7, "geo")
+Blueprint.connect(node7, "geo", node4, "facade")
+Blueprint.connect(node3, "side", node5, "items")
+Blueprint.connect(node4, "geo", node5, "eval")
+Blueprint.connect(node5, "result", node6, "in0")
+Blueprint.connect(node8, "all", node0, "geos")
+Blueprint.connect(node1, "this", node0, "view_cam")
