@@ -191,7 +191,6 @@ void main()
 	vec3 ambient = vec3(0.25);
 
 	// diffuse
-	const vec3 LIGHT_POS = vec3(-5.0, -5.0, 10);
 	vec3 light_dir = normalize(light_pos - fs_in.frag_pos);
     float diff = max(dot(normal, light_dir), 0.1);
     vec4 tex_col = calc_tex_color();
@@ -313,7 +312,6 @@ void main()
 	vec3 ambient = vec3(0.25);
 
 	// diffuse
-	const vec3 LIGHT_POS = vec3(-5.0, -5.0, 10);
 	vec3 light_dir = normalize(light_pos - fs_in.frag_pos);
     float diff = max(dot(N, light_dir), 0.1);
     vec3 diffuse = diff * color;
