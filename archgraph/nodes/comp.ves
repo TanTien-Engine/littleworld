@@ -5,6 +5,7 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
+import "archgraph.utility" for Utility
 import "maths.vector" for Vector3
 import "archgen" for ScopeTools
 import "geometry" for Polytope, PolyPoint, PolyFace
@@ -339,38 +340,10 @@ class Comp is Node
 			var poly = Polytope.init(points, [ face ])
 
 			var geo = Geometry([ poly ])
-
-			var map = ScopeTools.face_mapping(poly, face)
-			if (map)
-			{
-				var o = Vector3(map[0], map[1], map[2])
-				var x = Vector3(map[3], map[4], map[5])
-				var y = Vector3(map[6], map[7], map[8])
-				geo.scope = this.calc_scope_mat(o, x, y)
-			}
+			geo.scope = Utility.calc_scope_mat(poly, face)
 
 			var v_geo = Variant(VAR_TYPE_GEOMETRY, geo)
 			this.children[idx].add(v_geo)
 		}
-	}
-
-	calc_scope_mat(o, x, y)
-	{
-		var mat = Matrix44.init()
-
-		// s
-		var lx = x.length()
-		var ly = y.length()
-		mat.scale(lx, ly, 1.0)
-
-		// r
-		var z = x.cross(y)
-		var rot_mat = Maths.calc_rot_mat([ 0, 0, 1 ], [ z.x, z.y, z.z ])
-		mat.transform_mat4(rot_mat)
-
-		// t
-		mat.translate(o.x, o.y, o.z)
-
-		return mat
 	}
 }

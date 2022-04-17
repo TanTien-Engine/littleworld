@@ -4,7 +4,7 @@ import "blueprint.node_param" for NodeParam
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER3
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
-import "archgraph.geo_helper" for GeoHelper
+import "archgraph.utility" for Utility
 import "maths.vector" for Vector3
 
 class Rotate is Node
@@ -33,7 +33,7 @@ class Rotate is Node
 			return nil
 		}
 
-		var out_geo = GeoHelper.clone_geo(in_geo)
+		var out_geo = Utility.clone_geo(in_geo)
 
 		var r = this.query_param("r").value
 		var v_r = Blueprint.calc_input_value(this, "r")

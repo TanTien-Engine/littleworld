@@ -4,7 +4,7 @@ import "blueprint.node_param" for NodeParam
 import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_NUMBER, VAR_TYPE_PIN
 import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
-import "archgraph.geo_helper" for GeoHelper
+import "archgraph.utility" for Utility
 import "maths.vector" for Vector3
 import "maths" for Matrix44
 
@@ -36,7 +36,7 @@ class TranslateScope is Node
 			return nil
 		}
 
-		var out_geo = GeoHelper.clone_geo(in_geo)
+		var out_geo = Utility.clone_geo(in_geo)
 
 		var t = nil
 		if (!this.is_input_lazy_eval()) {

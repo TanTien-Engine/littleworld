@@ -1,0 +1,64 @@
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "maths.vector" for Vector3
+import "archgen" for ScopeTools
+import "maths" for Matrix44, Maths
+
+class Utility
+{
+	static clone_geo(v_geo)
+	{
+		if (v_geo.type == VAR_TYPE_ARRAY)
+		{
+			var geos = []
+			for (var geo in v_geo.value) {
+				geos.add(this.clone_geo(geo))
+			}
+			return Variant(VAR_TYPE_ARRAY, geos)
+		}
+		else if (v_geo.type == VAR_TYPE_GEOMETRY)
+		{
+			var geo = v_geo.value.clone()
+			return Variant(VAR_TYPE_GEOMETRY, geo)
+		}
+		return nil
+	}
+
+	static calc_scope_mat(poly, face)
+	{
+		if (!face) 
+		{
+			var faces = poly.get_faces()
+			if (faces.isEmpty) {
+				return nil
+			}
+			face = faces.front()
+		}
+
+		var map = ScopeTools.face_mapping(poly, face)
+		if (!map) {
+			return nil
+		}
+
+		var o = Vector3(map[0], map[1], map[2])
+		var x = Vector3(map[3], map[4], map[5])
+		var y = Vector3(map[6], map[7], map[8])
+
+		var mat = Matrix44.init()
+
+		// s
+		var lx = x.length()
+		var ly = y.length()
+		mat.scale(lx, ly, 1.0)
+
+		// r
+		var z = x.cross(y)
+		var rot_mat = Maths.calc_rot_mat([ 0, 0, 1 ], [ z.x, z.y, z.z ])
+		mat.transform_mat4(rot_mat)
+
+		// t
+		mat.translate(o.x, o.y, o.z)
+
+		return mat
+	}
+}

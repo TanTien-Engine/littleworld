@@ -5,7 +5,8 @@ import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
-import "archgen" for GroundEditor
+import "archgraph.utility" for Utility
+import "archgen" for GroundEditor, ScopeTools
 import "geometry" for Polytope, PolyFace
 
 class Offset is Node
@@ -74,12 +75,14 @@ class Offset is Node
 	geo_offset_geo(v_geo, distance)
 	{
 		var poly = v_geo.value.mesh.polys.front()
-		var new_geo = GroundEditor.offset(poly, -distance)
-		if (!new_geo) {
+		var new_poly = GroundEditor.offset(poly, -distance)
+		if (!new_poly) {
 			return nil
 		}
 
-	    var geo = Geometry([ new_geo ])
+	    var geo = Geometry([ new_poly ])
+	    geo.scope = Utility.calc_scope_mat(new_poly, nil)
+
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
 
@@ -111,6 +114,8 @@ class Offset is Node
 		var new_poly = Polytope.init(new_pts, [ new_face ])
 
 	    var geo = Geometry([ new_poly ])
+	    geo.scope = Utility.calc_scope_mat(new_poly, new_face)
+
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
 }
