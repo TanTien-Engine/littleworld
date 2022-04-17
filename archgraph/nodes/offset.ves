@@ -1,11 +1,12 @@
 import "blueprint.node" for Node
 import "blueprint.pin" for Pin
-import "blueprint.variant" for Variant
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER
 import "blueprint.blueprint" for Blueprint
 import "blueprint.node_param" for NodeParam
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
 import "archgen" for GroundEditor
+import "geometry" for Polytope, PolyFace
 
 class Offset is Node
 {
@@ -14,10 +15,13 @@ class Offset is Node
 		super.init()
 
 		this.imports = [
-			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+			Pin(this, "geo",  VAR_TYPE_GEOMETRY),
+			Pin(this, "dist", VAR_TYPE_NUMBER),
 		]
 		this.exports = [
-			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+			Pin(this, "all",    VAR_TYPE_GEOMETRY),
+			Pin(this, "inside", VAR_TYPE_GEOMETRY),
+			Pin(this, "border", VAR_TYPE_GEOMETRY),
 		]
 
 		this.params.add(NodeParam("distance", 0.0))
@@ -33,10 +37,42 @@ class Offset is Node
 		}
 
 		var distance = this.query_param("distance").value
+		var v_dist = Blueprint.calc_input_value(this, 1)
+		if (v_dist) {
+			distance = v_dist.value
+		}
 		if (distance < 0.01 and distance > -0.01) {
 			return v_geo
 		}
 
+		if (idx == 0)
+		{
+			return this.geo_offset_geo(v_geo, distance)
+		}
+		else if (idx == 1)
+		{
+			if (distance > 0) {
+				return v_geo
+			} else {
+				return this.geo_offset_geo(v_geo, distance)
+			}
+		}
+		else if (idx == 2)
+		{
+			var poly = v_geo.value.mesh.polys.front()
+			var new_poly = GroundEditor.offset(poly, -distance)
+			if (distance > 0) {
+				return this.geo_border_geo(new_poly, v_geo.value.mesh.polys.front())
+			} else {
+				return this.geo_border_geo(v_geo.value.mesh.polys.front(), new_poly)
+			}
+		}
+
+		return nil
+	}
+
+	geo_offset_geo(v_geo, distance)
+	{
 		var poly = v_geo.value.mesh.polys.front()
 		var new_geo = GroundEditor.offset(poly, -distance)
 		if (!new_geo) {
@@ -44,6 +80,37 @@ class Offset is Node
 		}
 
 	    var geo = Geometry([ new_geo ])
+		return Variant(VAR_TYPE_GEOMETRY, geo)
+	}
+
+	geo_border_geo(outer, inner)
+	{
+		var o_pts = outer.get_points()
+		var i_pts = inner.get_points()
+		var o_face = outer.get_faces().front().get_border()
+		var i_face = inner.get_faces().front().get_border()
+
+		var new_pts = []
+		var new_o_border = []
+		var new_i_border = []
+
+		for (var i in 0 .. o_face.count)
+		{
+			new_pts.add(o_pts[o_face[i]])
+			new_o_border.add(i)
+		}
+
+		for (var i in 0 .. i_face.count)
+		{
+			new_pts.add(i_pts[i_face[i]])
+			new_i_border.add(i + o_face.count)
+		}
+		new_i_border.reverse()
+
+		var new_face = PolyFace.init(new_o_border, [ new_i_border ])
+		var new_poly = Polytope.init(new_pts, [ new_face ])
+
+	    var geo = Geometry([ new_poly ])
 		return Variant(VAR_TYPE_GEOMETRY, geo)
 	}
 }
