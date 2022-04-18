@@ -24,6 +24,17 @@ class Utility
 		return nil
 	}
 
+	static calc_scope_mat_xz(x, z)
+	{
+		var mat = Matrix44.init()
+
+		mat.from_vectors([0, 0, 1], [0, 1, 0])
+		mat.scale(x, 1.0, z)
+		mat.translate(0, 0, z)
+
+		return mat
+	}
+
 	static calc_scope_mat(poly, face)
 	{
 		if (!face) 

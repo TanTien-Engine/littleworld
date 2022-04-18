@@ -7,6 +7,7 @@ import "blueprint.variant" for Variant, VAR_TYPE_ARRAY, VAR_TYPE_PIN
 import "blueprint.variant_helper" for VariantHelper
 import "archgraph.variant" for VAR_TYPE_GEOMETRY, VAR_TYPE_SPLIT_SIZE
 import "archgraph.geometry" for Geometry
+import "archgraph.utility" for Utility
 import "maths.vector" for Vector3
 import "archgen" for ScopeTools
 import "geometry" for PolyPoint, PolyFace, Polytope
@@ -105,11 +106,8 @@ class Split is Node
 		}
 		else
 		{
-			var scope_mat = Matrix44.init()			
-			scope_mat.from_vectors([0, 0, 1], [0, 1, 0])
-
+			var scope_mat = Utility.calc_scope_mat_xz(1, 1)
 			var rects = this.build_rects(scope_mat)
-
 			for (var i in 0 .. rects.count) {
 				for (var r in rects[i]) {
 					children[i].add(this.create_geo(r, scope_mat))
