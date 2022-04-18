@@ -48,9 +48,9 @@ PolytopeTools::Offset(const pm3::Polytope& poly, float dist)
 		auto& p = pts[i]->pos;
 		polyline.push_back(sm::vec2(p.x, p.z));
 	}
-	std::reverse(polyline.begin(), polyline.end());
 
 #ifdef USE_CGAL
+	std::reverse(polyline.begin(), polyline.end());
 	citygen::StraightSkeleton ss(polyline);
 	auto loop2 = ss.Offset(dist);
 #else
@@ -67,8 +67,10 @@ PolytopeTools::Offset(const pm3::Polytope& poly, float dist)
 	}
 
 	citygen::PolyBuilder builder;
-#ifndef USE_CGAL
-	std::reverse(loop3.begin(), loop3.end());
+#ifdef USE_CGAL
+	if (dist > 0) {
+		std::reverse(loop3.begin(), loop3.end());
+	}
 #endif // USE_CGAL
 	builder.AddFace(loop3);
 
