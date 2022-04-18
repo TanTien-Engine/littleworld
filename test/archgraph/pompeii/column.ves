@@ -5,17 +5,17 @@ _editor.add_node(node0, 230.57040258512, 152.8759767508)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(12.469836945611, 8.2686969984393, -3.8498825108543)
-node1.cam.yaw = -223.8
-node1.cam.pitch = -42.3
+node1.cam.position.set(12.45670081304, 8.3922026003458, 8.0576455815082)
+node1.cam.yaw = -140.6
+node1.cam.pitch = -37.4
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
 
-_editor.add_node(node1, 27.212569358221, -87.22616356448)
+_editor.add_node(node1, 28.212569358221, -87.790637494534)
 
 var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
-node2.query_param("size").value.set(10, 2.5, 5)
+node2.query_param("size").value.set(8, 2.5, 4)
 
 _editor.add_node(node2, -521.30922912111, 130.67103492916)
 
@@ -29,7 +29,7 @@ _editor.add_node(node3, -352.53223652677, 150.05176709109)
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
 node4.load_from_file(_editor, "../../../sample/archgraph/pompeii/column_facade.ves")
 
-_editor.add_node(node4, -99.853165767365, 124.86631377638)
+_editor.add_node(node4, -102.85316576736, 144.86631377638)
 
 var node5 = ::blueprint::nodes::for_each_f::ForEachF()
 
@@ -39,14 +39,7 @@ var node6 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node6, 35.045370483399, 243.40215454102)
 
-var node7 = ::archgraph::nodes::scale_scope::ScaleScope()
-node7.query_param("s").value.set(1.0567433685064, 1, 1)
-node7.query_param("anchor").value = "left"
-
-_editor.add_node(node7, -293.31089837904, 14.635752466771)
-
-Blueprint.connect(node5, "curr_item", node7, "geo")
-Blueprint.connect(node7, "geo", node4, "facade")
+Blueprint.connect(node5, "curr_item", node4, "facade")
 Blueprint.connect(node2, "geo", node3, "geo")
 Blueprint.connect(node3, "side", node5, "items")
 Blueprint.connect(node4, "geo", node5, "eval")
