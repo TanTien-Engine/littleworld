@@ -76,7 +76,7 @@ node13.load_from_file(_editor, "pillar_material.ves")
 _editor.add_node(node13, 286.43249791712, -317.61297653034)
 
 var node14 = ::blueprint::nodes::subgraph::Subgraph()
-node14.load_from_file(_editor, "../../../assets/archgraph/center.ves")
+node14.load_from_file(_editor, "../../../assets/archgraph/offset_origin.ves")
 node14.set_prop_value("x", true)
 node14.set_prop_value("y", false)
 node14.set_prop_value("z", true)

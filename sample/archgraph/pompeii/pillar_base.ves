@@ -40,7 +40,7 @@ node6.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_
 _editor.add_node(node6, -385.1, 304.8)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
-node7.load_from_file(_editor, "../../../assets/archgraph/center.ves")
+node7.load_from_file(_editor, "../../../assets/archgraph/offset_origin.ves")
 node7.set_prop_value("x", true)
 node7.set_prop_value("y", false)
 node7.set_prop_value("z", true)
