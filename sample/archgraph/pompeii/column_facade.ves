@@ -10,7 +10,7 @@ var node1 = ::blueprint::nodes::output::Output()
 node1.var_name = "geo"
 node1.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node1, 870.33474363637, 91.114101818184)
+_editor.add_node(node1, 1013.1147436364, 112.89410181818)
 
 var node2 = ::archgraph::nodes::split::Split()
 node2.query_param("axis").value = "vert"
@@ -70,7 +70,7 @@ _editor.add_node(node11, 1.9240856933547, 108.87917456055)
 
 var node12 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node12, 740.1884449352, 61.08103804155)
+_editor.add_node(node12, 882.9684449352, 82.86103804155)
 
 var node13 = ::blueprint::nodes::subgraph::Subgraph()
 node13.load_from_file(_editor, "gallery_shelves.ves")
@@ -126,23 +126,23 @@ _editor.add_node(node23, 190.26470689743, -214.55726445832)
 
 var node24 = ::archgraph::nodes::insert::Insert()
 
-_editor.add_node(node24, 573.55974349929, -218.25528943808)
+_editor.add_node(node24, 700.60974349929, -178.32528943808)
 
 var node25 = ::blueprint::nodes::subgraph::Subgraph()
 node25.load_from_file(_editor, "wall_material.ves")
 
-_editor.add_node(node25, 380.38560083952, -182.50170900714)
+_editor.add_node(node25, 510.74138596349, -138.43947760218)
 
 var node26 = ::archgraph::nodes::scale_scope::ScaleScope()
 node26.query_param("s").value.set(1.0749801620841, 1, 0.35)
 node26.query_param("anchor").value = "left"
 
-_editor.add_node(node26, 434.1245524028, -323.81933767346)
+_editor.add_node(node26, 561.1745524028, -283.88933767346)
 
 var node27 = ::blueprint::nodes::subgraph::Subgraph()
 node27.load_from_file(_editor, "wall_props.ves")
 
-_editor.add_node(node27, 239.31911956942, -399.33802488038)
+_editor.add_node(node27, 330.06911956942, -434.42802488038)
 
 var node28 = ::archgraph::nodes::translate_scope::TranslateScope()
 node28.query_param("t").value.set(0, 0, -0.17)
@@ -184,8 +184,14 @@ var node35 = ::blueprint::nodes::divide::Divide()
 
 _editor.add_node(node35, -204.23649798828, -441.74163447266)
 
+var node36 = ::blueprint::nodes::subgraph::Subgraph()
+node36.load_from_file(_editor, "wall_color.ves")
+
+_editor.add_node(node36, 269.71063842773, -326.78374267578)
+
 Blueprint.connect(node29, "v", node30, "v")
 Blueprint.connect(node23, "geo", node25, "geo")
+Blueprint.connect(node36, "grey", node25, "color")
 Blueprint.connect(node6, "beam_width", node7, "var")
 Blueprint.connect(node7, "var", node8, "var")
 Blueprint.connect(node8, "var", node9, "a")

@@ -8,7 +8,7 @@ _editor.add_node(node0, 112.72377052102, -132.00530349713)
 var node1 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
 node1.query_param("size").value.set(1, 1, 1)
 
-_editor.add_node(node1, 173.22971147168, -28.664446039357)
+_editor.add_node(node1, -25.117395966337, 80.426463051552)
 
 var node2 = ::archgraph::nodes::insert::Insert()
 
@@ -55,9 +55,15 @@ node9.load_from_file(_editor, "../../../assets/archgraph/align_front.ves")
 
 _editor.add_node(node9, 433.78106058925, -116.64579987329)
 
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "wall_color.ves")
+
+_editor.add_node(node10, 79.396985519031, -31.776717383014)
+
 Blueprint.connect(node4, "v", node5, "var")
 Blueprint.connect(node5, "var", node3, "var")
 Blueprint.connect(node1, "geo", node7, "geo")
+Blueprint.connect(node10, "grey", node7, "color")
 Blueprint.connect(node0, "var", node8, "geo")
 Blueprint.connect(node3, "var", node8, "z")
 Blueprint.connect(node8, "geo", node9, "pos")

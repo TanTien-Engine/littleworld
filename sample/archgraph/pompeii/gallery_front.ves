@@ -48,12 +48,12 @@ _editor.add_node(node7, 626.62311200218, 36.662317370419)
 var node8 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
 node8.query_param("size").value.set(1, 1, 1)
 
-_editor.add_node(node8, 227.06418189574, 59.333685446979)
+_editor.add_node(node8, -8.4730081869055, 67.598148256896)
 
 var node9 = ::blueprint::nodes::subgraph::Subgraph()
 node9.load_from_file(_editor, "wall_material.ves")
 
-_editor.add_node(node9, 436.72509135166, 88.642699243229)
+_editor.add_node(node9, 426.07709135166, 75.332699243229)
 
 var node10 = ::blueprint::nodes::merge::Merge()
 
@@ -197,10 +197,16 @@ var node35 = ::blueprint::nodes::print::Print()
 
 _editor.add_node(node35, -416.60308837891, 127.75009155273)
 
+var node36 = ::blueprint::nodes::subgraph::Subgraph()
+node36.load_from_file(_editor, "wall_color.ves")
+
+_editor.add_node(node36, 181.04988098145, 43.429885864258)
+
 Blueprint.connect(node16, "geo", node31, "geo")
 Blueprint.connect(node31, "geo", node14, "geo")
 Blueprint.connect(node13, "tex", node14, "texture")
 Blueprint.connect(node8, "geo", node9, "geo")
+Blueprint.connect(node36, "grey", node9, "color")
 Blueprint.connect(node3, "beam_width", node6, "size")
 Blueprint.connect(node3, "beam_width", node4, "size")
 Blueprint.connect(node0, "var", node19, "geo")

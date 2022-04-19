@@ -11,6 +11,7 @@ _editor.add_node(node1, 132.904, 27.053)
 var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
 node2.query_param("axes").value = "xy"
 node2.query_param("scale").value.set(1, 1)
+node2.query_param("scale2").value.set(1, 1)
 node2.query_param("offset").value.set(0, 0)
 node2.query_param("uw_factor").value = 1
 node2.query_param("gpu").value = true
@@ -38,9 +39,9 @@ node5.var_type = "geometry"
 _editor.add_node(node5, 322.83377685547, 36.41466064453)
 
 var node6 = ::blueprint::nodes::subgraph::Subgraph()
-node6.load_from_file(_editor, "grey_wall_color.ves")
+node6.load_from_file(_editor, "wall_color.ves")
 
-_editor.add_node(node6, -542.09201660156, 79.834857177734)
+_editor.add_node(node6, -538.33544259705, 58.046727951588)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
 node7.load_from_file(_editor, "dirtmap_tex.ves")
@@ -48,7 +49,7 @@ node7.load_from_file(_editor, "dirtmap_tex.ves")
 _editor.add_node(node7, -142.79201660156, -77.465127563477)
 
 Blueprint.connect(node4, "var", node0, "geo")
-Blueprint.connect(node6, "color", node0, "color")
+Blueprint.connect(node6, "grey", node0, "color")
 Blueprint.connect(node0, "geo", node2, "geo")
 Blueprint.connect(node3, "v", node7, "rand")
 Blueprint.connect(node2, "geo", node1, "geo")

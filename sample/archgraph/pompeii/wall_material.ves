@@ -1,7 +1,7 @@
 var node0 = ::blueprint::nodes::subgraph::Subgraph()
 node0.load_from_file(_editor, "../../../assets/archgraph/color.ves")
 
-_editor.add_node(node0, -297.2, 123)
+_editor.add_node(node0, -303.56363636364, 153.90909090909)
 
 var node1 = ::blueprint::nodes::subgraph::Subgraph()
 node1.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
@@ -11,6 +11,7 @@ _editor.add_node(node1, 132.904, 27.053)
 var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
 node2.query_param("axes").value = "xy"
 node2.query_param("scale").value.set(1, 1)
+node2.query_param("scale2").value.set(1, 1)
 node2.query_param("offset").value.set(0, 0)
 node2.query_param("uw_factor").value = 1
 node2.query_param("gpu").value = true
@@ -20,20 +21,20 @@ _editor.add_node(node2, -104.126, 65.153)
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
 node3.load_from_file(_editor, "wall_tex.ves")
 
-_editor.add_node(node3, -142.11125390625, -76.237872192383)
+_editor.add_node(node3, -138.69618662942, -106.29046422845)
 
 var node4 = ::blueprint::nodes::number::Number()
 
 node4.value = 1
 
-_editor.add_node(node4, -327.40331894952, -86.385457018126)
+_editor.add_node(node4, -326.72030549415, -116.43804905419)
 
 var node5 = ::blueprint::nodes::input::Input()
 
 node5.var_name = "geo"
 node5.var_type = "geometry"
 
-_editor.add_node(node5, -487.60463988249, 145.94359546504)
+_editor.add_node(node5, -493.96827624613, 176.85268637413)
 
 var node6 = ::blueprint::nodes::output::Output()
 
@@ -42,13 +43,15 @@ node6.var_type = "geometry"
 
 _editor.add_node(node6, 322.83377685547, 36.41466064453)
 
-var node7 = ::blueprint::nodes::subgraph::Subgraph()
-node7.load_from_file(_editor, "grey_wall_color.ves")
+var node7 = ::blueprint::nodes::input::Input()
 
-_editor.add_node(node7, -539.33856567383, 66.971625366211)
+node7.var_name = "color"
+node7.var_type = "num3"
+
+_editor.add_node(node7, -491.26652892562, 112.45112067609)
 
 Blueprint.connect(node5, "var", node0, "geo")
-Blueprint.connect(node7, "color", node0, "color")
+Blueprint.connect(node7, "var", node0, "color")
 Blueprint.connect(node0, "geo", node2, "geo")
 Blueprint.connect(node4, "v", node3, "rand")
 Blueprint.connect(node2, "geo", node1, "geo")

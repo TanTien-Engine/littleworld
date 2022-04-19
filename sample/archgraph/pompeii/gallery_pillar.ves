@@ -18,9 +18,9 @@ node2.load_from_file(_editor, "pillar.ves")
 _editor.add_node(node2, 32.725086558949, 112.89935233376)
 
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
-node3.load_from_file(_editor, "grey_wall_color.ves")
+node3.load_from_file(_editor, "wall_color.ves")
 
-_editor.add_node(node3, 35, 26)
+_editor.add_node(node3, 32.746055597295, 7.9684447783621)
 
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
 node4.load_from_file(_editor, "../../../assets/archgraph/color.ves")
@@ -29,5 +29,5 @@ _editor.add_node(node4, 275, 63)
 
 Blueprint.connect(node0, "var", node2, "facade")
 Blueprint.connect(node2, "geo", node4, "geo")
-Blueprint.connect(node3, "color", node4, "color")
+Blueprint.connect(node3, "grey", node4, "color")
 Blueprint.connect(node4, "geo", node1, "var")
