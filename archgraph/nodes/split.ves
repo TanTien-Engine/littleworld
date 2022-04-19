@@ -295,12 +295,12 @@ class Split is Node
 			if (floating and src)
 			{
 				var dst = []
-				var len = this.calc_sizes_single_layer(dst, src, tot, tot)
+				var len = this.calc_sizes_single_layer(dst, src, tot, tot, repeat)
 				var num = Math.ceil(tot / len)
 				for (var i in 0..num)
 				{
 					var dst = []
-					this.calc_sizes_single_layer(dst, src, tot / num, tot)
+					this.calc_sizes_single_layer(dst, src, tot / num, tot, repeat)
 					for (var i in 0 .. dst.count) {
 						sizes[i].add(dst[i])
 					}
@@ -312,7 +312,7 @@ class Split is Node
 				while (avaliable > 0)
 				{
 					var dst = []
-					var len = this.calc_sizes_single_layer(dst, src, avaliable, tot)
+					var len = this.calc_sizes_single_layer(dst, src, avaliable, tot, repeat)
 					for (var i in 0 .. dst.count) {
 						sizes[i].add(dst[i])
 					}
@@ -326,12 +326,12 @@ class Split is Node
 		else
 		{
 			var sizes = []
-			this.calc_sizes_single_layer(sizes, src, tot, tot)
+			this.calc_sizes_single_layer(sizes, src, tot, tot, repeat)
 			return sizes
 		}
 	}
 
-	calc_sizes_single_layer(dst, src, length, tot_len)
+	calc_sizes_single_layer(dst, src, length, tot_len, floating_max)
 	{
 		if (!src) {
 			src = this.calc_src_sizes()
@@ -385,10 +385,15 @@ class Split is Node
 				}
 				else
 				{
-					for (var i in 0..dst.count) {
-						if (dst[i] < 0) {
-							var len = -dst[i]
-							dst[i] = Math.min(len, avaliable * len / tot_floating)
+					for (var i in 0..dst.count) 
+					{
+						if (dst[i] < 0) 
+						{
+							var d = avaliable * (-dst[i]) / tot_floating
+							if (floating_max) {
+								d = Math.min(-dst[i], d)
+							}
+							dst[i] = d
 						}
 					}
 				}
