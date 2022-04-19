@@ -37,9 +37,9 @@ class Insert is Node
 			return nil
 		}
 
-		var geos = []
-
 		var positions = VariantHelper.flatten_values(v_pos, VAR_TYPE_GEOMETRY)
+
+		var geos = []
 		if (v_geo.type == VAR_TYPE_PIN)
 		{
 			for (var pos in positions)
@@ -49,30 +49,16 @@ class Insert is Node
 					var pin = v_geo.value
 					var v_geo_real = Blueprint.calc_input_value(pin.node, pin.slot_idx)
 					var in_geos = VariantHelper.flatten_values(v_geo_real, VAR_TYPE_GEOMETRY)
-					for (var geo in in_geos)
-					{
-						var aabb = geo.mesh.aabb
-						var new = geo.clone()
-						new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, geo.trans, pos.scope))
-						geos.add(Variant(VAR_TYPE_GEOMETRY, new))
-					}
+					this.insert_geos(geos, in_geos, pos)
 				}
 			}
 		}
 		else
 		{
 			var in_geos = VariantHelper.flatten_values(v_geo, VAR_TYPE_GEOMETRY)
-			for (var pos in positions)
-			{
-				if (pos.scope)
-				{
-					for (var geo in in_geos)
-					{
-						var aabb = geo.mesh.aabb
-						var new = geo.clone()
-						new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, geo.trans, pos.scope))
-						geos.add(Variant(VAR_TYPE_GEOMETRY, new))
-					}
+			for (var pos in positions) {
+				if (pos.scope) {
+					this.insert_geos(geos, in_geos, pos)
 				}
 			}
 		}
@@ -83,6 +69,17 @@ class Insert is Node
 			return geos[0]
 		} else {
 			return nil
+		}
+	}
+
+	insert_geos(dst_geos, src_geos, pos)
+	{
+		for (var geo in src_geos)
+		{
+			var aabb = geo.mesh.aabb
+			var new = geo.clone()
+			new.trans.transform_mat4(ScopeTools.calc_insert_mat(aabb, geo.trans, pos.scope))
+			dst_geos.add(Variant(VAR_TYPE_GEOMETRY, new))
 		}
 	}
 }
