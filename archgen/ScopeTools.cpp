@@ -225,6 +225,12 @@ void ScopeTools::CalcRoofEdgesMapping(const pm3::Polytope& roof, const pm3::Poly
 
 sm::mat4 ScopeTools::CalcInsertMat(const sm::cube& aabb, const sm::mat4& geo_mat, const sm::mat4& scope_mat)
 {
+	// for faces
+	auto size = aabb.Size();
+	if (size.x == 0 || size.y == 0 || size.z == 0) {
+		return scope_mat;
+	}
+
 	auto min = aabb.min;
 	auto max = aabb.max;
 
@@ -238,7 +244,11 @@ sm::mat4 ScopeTools::CalcInsertMat(const sm::cube& aabb, const sm::mat4& geo_mat
 	new_aabb.Combine(geo_mat * sm::vec3(max[0], max[1], min[2]));
 	new_aabb.Combine(geo_mat * sm::vec3(max[0], max[1], max[2]));
 
-	auto size = new_aabb.Size();
+	size = new_aabb.Size();
+	if (size.x == 0 || size.y == 0 || size.z == 0) {
+		return scope_mat;
+	}
+
 	const float sx = 1.0f / size.x;
 	const float sy = 1.0f / size.y;
 	const float sz = 1.0f / size.z;

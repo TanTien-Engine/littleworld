@@ -1,0 +1,58 @@
+var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node0.query_param("size").value.set(4, 1, 2)
+
+_editor.add_node(node0, -701.38048477373, -146.04412774402)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+
+_editor.add_node(node1, -95.664755862301, -121.19572348205)
+
+var node2 = ::blueprint::nodes::camera3d::Camera3d()
+
+node2.cam.position.set(-1.3684054441003, 7.1725392470885, 4.2824633520373)
+node2.cam.yaw = -45.9
+node2.cam.pitch = -56.9
+node2.cam.zoom = 45
+node2.cam.update_vectors()
+node2.speed = 0.22097560763359
+
+_editor.add_node(node2, -285.04065899882, -261.161142199)
+
+var node3 = ::archgraph::nodes::comp::Comp()
+node3.query_param("selector").value = "side"
+
+node3.on_param_dirty()
+
+_editor.add_node(node3, -541.64193057952, -148.13560938476)
+
+var node4 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node4, -368.68431523367, -65.395133993121)
+
+var node5 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node5.query_param("size").value.set(1, 1, 1)
+
+_editor.add_node(node5, -703.42131553247, -1.5380219096507)
+
+var node6 = ::archgraph::nodes::comp::Comp()
+node6.query_param("selector").value = "side"
+
+node6.on_param_dirty()
+
+_editor.add_node(node6, -550.57001996292, -4.4136060946946)
+
+var node7 = ::archgraph::nodes::comp::Comp()
+node7.query_param("selector").value = "face6"
+
+node7.on_param_dirty()
+
+_editor.add_node(node7, -510.859916946, 179.63476585637)
+
+Blueprint.connect(node5, "geo", node7, "geo")
+Blueprint.connect(node5, "geo", node6, "geo")
+Blueprint.connect(node0, "geo", node3, "geo")
+Blueprint.connect(node6, "side", node4, "geo")
+Blueprint.connect(node3, "side", node4, "pos")
+Blueprint.connect(node4, "geo", node1, "geos")
+Blueprint.connect(node2, "this", node1, "view_cam")
