@@ -6,7 +6,6 @@ import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.utility" for Utility
 import "maths.vector" for Vector3
-import "archgen" for ScopeTools
 import "maths" for Matrix44
 
 class ScaleScope is Node
@@ -74,15 +73,13 @@ class ScaleScope is Node
 
 				if (anchor == "right")
 				{
-					var sz_x = ScopeTools.get_scope_size(v_geo.value.scope)[0]
-					var dx = - (s.x - 1.0) * sz_x
+					var dx = - (s.x - 1.0)
 					mat.translate(dx, 0, 0)
 				}
 				else if (anchor == "center")
 				{
-					var sz_x = ScopeTools.get_scope_size(v_geo.value.scope)[0]
-					var dx = - (s.x - 1.0) * 0.5 * sz_x
-					mat.translate(dx, 0, 0)				
+					var dx = - (s.x - 1.0) * 0.5
+					mat.translate(dx, 0, 0)
 				}
 
 				mat.transform_mat4(v_geo.value.scope)
