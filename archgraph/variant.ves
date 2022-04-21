@@ -1,5 +1,6 @@
 var VAR_TYPE_GEOMETRY   = "geometry"
 var VAR_TYPE_SPLIT_SIZE = "ssize"
+var VAR_TYPE_SRT_VALUE  = "srt_val"
 
 class VarSplitSize
 {
@@ -9,5 +10,15 @@ class VarSplitSize
 
 		// absolute, relative, floating
 		this.mode = mode
+	}
+}
+
+class VarSrtValue
+{
+	init(value, absolute, offset)
+	{
+		this.value    = value
+		this.absolute = absolute
+		this.offset   = offset
 	}
 }
