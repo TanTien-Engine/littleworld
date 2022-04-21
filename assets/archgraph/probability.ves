@@ -1,0 +1,29 @@
+var node0 = ::archgraph::nodes::rand_number::RandNumber()
+node0.query_param("min").value = 0
+node0.query_param("max").value = 1
+
+_editor.add_node(node0, -273, 268.5)
+
+var node1 = ::blueprint::nodes::compare::Compare()
+
+node1.cmp = "less"
+
+_editor.add_node(node1, -105, 229.5)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "b"
+node2.var_type = "bool"
+
+_editor.add_node(node2, 34, 249.5)
+
+var node3 = ::blueprint::nodes::property::Property()
+
+node3.var_name = "p"
+node3.var_type = "num"
+
+_editor.add_node(node3, -259.72457885742, 169.73205566406)
+
+Blueprint.connect(node0, "val", node1, "a")
+Blueprint.connect(node3, "var", node1, "b")
+Blueprint.connect(node1, "out", node2, "var")

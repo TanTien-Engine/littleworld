@@ -1,0 +1,52 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant" for VAR_TYPE_ANY
+import "blueprint.node_helper" for NodeHelper
+
+var CASE_IDX_OFFSET = 1
+
+class Switch is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "default", VAR_TYPE_ANY),
+			Pin(this, "case0",   VAR_TYPE_ANY),
+			Pin(this, "case1",   VAR_TYPE_ANY),
+		]
+		this.exports = [
+			Pin(this, "out", VAR_TYPE_ANY),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		for (var i in CASE_IDX_OFFSET .. this.imports.count - 1)
+		{
+			var v = Blueprint.calc_input_value(this, i)
+			if (v) {
+				return v
+			}
+		}
+		return Blueprint.calc_input_value(this, 0)
+	}
+
+	on_connected(pin)
+	{
+		if (pin.is_input) {
+			NodeHelper.dynamic_imports_update(this, CASE_IDX_OFFSET, "case", VAR_TYPE_ANY)
+		}
+	}
+
+	on_disconnected(pin)
+	{
+		if (pin.is_input) {
+			NodeHelper.dynamic_imports_update(this, CASE_IDX_OFFSET, "case", VAR_TYPE_ANY)
+		}
+	}
+}

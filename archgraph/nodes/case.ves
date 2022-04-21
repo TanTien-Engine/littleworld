@@ -1,0 +1,32 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for VAR_TYPE_ANY, VAR_TYPE_BOOLEAN
+import "blueprint.blueprint" for Blueprint
+
+class Case is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "cond", VAR_TYPE_BOOLEAN),
+			Pin(this, "val",  VAR_TYPE_ANY),
+		]
+		this.exports = [
+			Pin(this, "val", VAR_TYPE_ANY),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_cond = Blueprint.calc_input_value(this, 0)
+		if (v_cond and v_cond.value) {
+			return Blueprint.calc_input_value(this, 1)
+		} else {
+			return nil
+		}
+	}
+}

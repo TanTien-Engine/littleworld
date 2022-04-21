@@ -5,4 +5,5 @@ PrimitiveCube, PrimitiveQuad, PrimitivePolygon, Extrude, ExtrudeRoof, Offset, Of
 SplitSize, Split, Comp, CompRoof, Scale, Rotate, Translate, ScaleScope, RotateScope, TranslateScope, ScopeSize, FlipNormals, SrtValue,
 SetupProjection,
 MeshFile, Insert, RandSelect, RandNumber,
+Switch, Case,
 ]
