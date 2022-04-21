@@ -1,3 +1,4 @@
+import "editor.assets_cache" for ASSETS_CACHE
 import "filesystem" for Filesystem
 import "archgen" for MeshBuilder
 
@@ -19,11 +20,23 @@ class Mesh
 	rebuild()
 	{
 		var info = nil
-		if (this.polys) {
+		if (this.polys) 
+		{
 			info = MeshBuilder.build_mesh_from_poly(this.polys, this.uv_mapping)
-		} else if (this.filepath) {
-			var absolute = Filesystem.get_absolute_path(this.filepath)
-			info = MeshBuilder.build_mesh_from_file(absolute, this.uv_mapping)
+		} 
+		else if (this.filepath) 
+		{
+			var va = ASSETS_CACHE.query(this.filepath)
+			if (va)
+			{
+				info = va
+			}
+			else
+			{
+				var absolute = Filesystem.get_absolute_path(this.filepath)
+				info = MeshBuilder.build_mesh_from_file(absolute, this.uv_mapping)
+				ASSETS_CACHE.add(this.filepath, info)
+			}
 		}
 
 		if (info) {
