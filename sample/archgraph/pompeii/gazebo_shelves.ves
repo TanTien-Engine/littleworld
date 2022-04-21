@@ -1,0 +1,75 @@
+var node0 = ::blueprint::nodes::output::Output()
+
+node0.var_name = "geo"
+node0.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node0, 249.39838, 179.19592)
+
+var node1 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node1, 75.715795343573, 156.19127863104)
+
+var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node2.query_param("size").value.set(1, 1, 1)
+
+_editor.add_node(node2, -308.80238647461, 283.60947265625)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node3, -69.093289462003, 301.33673928001)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "wood_tex.ves")
+
+_editor.add_node(node4, -353.27509377219, 183.54584017667)
+
+var node5 = ::blueprint::nodes::input::Input()
+
+node5.var_name = "facade"
+node5.var_type = "geometry"
+
+_editor.add_node(node5, -293.1050449003, 36.458424748073)
+
+var node6 = ::archgraph::nodes::scale_scope::ScaleScope()
+node6.query_param("s").value.set(1, 1, 1)
+node6.query_param("anchor").value = "center"
+
+_editor.add_node(node6, -135.57743025701, -63.129189049517)
+
+var node7 = ::archgraph::nodes::rand_number::RandNumber()
+node7.query_param("min").value = 0
+node7.query_param("max").value = 0.1
+
+_editor.add_node(node7, -428.08722111213, -58.463221211638)
+
+var node8 = ::archgraph::nodes::rand_number::RandNumber()
+node8.query_param("min").value = 0
+node8.query_param("max").value = 0.05
+
+_editor.add_node(node8, -428.91511341933, -175.57259231892)
+
+var node9 = ::archgraph::nodes::srt_value::SrtValue()
+node9.query_param("value").value = 0
+node9.query_param("absolute").value = true
+node9.query_param("offset").value = true
+
+_editor.add_node(node9, -291.55626532615, -59.833433313217)
+
+var node10 = ::archgraph::nodes::srt_value::SrtValue()
+node10.query_param("value").value = 0
+node10.query_param("absolute").value = true
+node10.query_param("offset").value = true
+
+_editor.add_node(node10, -297.07163746508, -177.14738309074)
+
+Blueprint.connect(node8, "val", node10, "val")
+Blueprint.connect(node7, "val", node9, "val")
+Blueprint.connect(node5, "var", node6, "geo")
+Blueprint.connect(node9, "val", node6, "x")
+Blueprint.connect(node10, "val", node6, "z")
+Blueprint.connect(node2, "geo", node3, "geo")
+Blueprint.connect(node4, "tex", node3, "texture")
+Blueprint.connect(node3, "geo", node1, "geo")
+Blueprint.connect(node6, "geo", node1, "pos")
+Blueprint.connect(node1, "geo", node0, "var")

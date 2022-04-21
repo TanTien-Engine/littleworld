@@ -1,0 +1,156 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -344.1938576608, 195.1607037756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 604.53887586777, -129.09333619835)
+
+var node2 = ::archgraph::nodes::split::Split()
+node2.query_param("axis").value = "hori"
+node2.query_param("repeat").value = false
+
+_editor.add_node(node2, -150.4100812786, 108.47998770576)
+
+var node3 = ::archgraph::nodes::split_size::SplitSize()
+node3.query_param("size").value = 0
+node3.query_param("mode").value = "floating"
+
+_editor.add_node(node3, -338.15351884581, 112.64140015501)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "win_props.ves")
+
+_editor.add_node(node4, -843.86236601506, 108.16482666981)
+
+var node5 = ::archgraph::nodes::split_size::SplitSize()
+node5.query_param("size").value = 0
+node5.query_param("mode").value = "absolute"
+
+_editor.add_node(node5, -352.05247257958, -60.712712563759)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "painted_wall.ves")
+node6.set_prop_value("ground", false)
+
+_editor.add_node(node6, 116.0523202439, 258.93347331906)
+
+var node7 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node7, 467.66388002506, -158.64501448702)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "painted_wall.ves")
+node8.set_prop_value("ground", false)
+
+_editor.add_node(node8, 117.90653511993, -119.59074155698)
+
+var node9 = ::archgraph::nodes::split::Split()
+node9.query_param("axis").value = "vert"
+node9.query_param("repeat").value = false
+
+_editor.add_node(node9, 269.84605876807, 95.753785780498)
+
+var node10 = ::blueprint::nodes::store::Store()
+
+node10.var_name = "width"
+
+_editor.add_node(node10, -654.37972199707, 144.94826197997)
+
+var node11 = ::blueprint::nodes::store::Store()
+
+node11.var_name = "height"
+
+_editor.add_node(node11, -657.20209865234, 80.59824499388)
+
+var node12 = ::blueprint::nodes::load::Load()
+
+node12.var_name = "width"
+
+_editor.add_node(node12, -492.37571745177, -40.199163670071)
+
+var node13 = ::archgraph::nodes::split_size::SplitSize()
+node13.query_param("size").value = 2.0
+node13.query_param("mode").value = "floating"
+
+_editor.add_node(node13, 121.40725439316, 163.02403163086)
+
+var node14 = ::archgraph::nodes::split_size::SplitSize()
+node14.query_param("size").value = 0
+node14.query_param("mode").value = "absolute"
+
+_editor.add_node(node14, 126.10207287497, 72.811832890787)
+
+var node15 = ::blueprint::nodes::load::Load()
+
+node15.var_name = "height"
+
+_editor.add_node(node15, -8.0104536576695, 95.632829145952)
+
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "subtile_window.ves")
+
+_editor.add_node(node16, 490.70734621409, 114.93473065224)
+
+var node17 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node17, 680.4012716911, 130.93064737069)
+
+var node18 = ::blueprint::nodes::subgraph::Subgraph()
+node18.load_from_file(_editor, "painted_wall.ves")
+node18.set_prop_value("ground", false)
+
+_editor.add_node(node18, 489.40776162582, 221.44832240413)
+
+var node19 = ::blueprint::nodes::subgraph::Subgraph()
+node19.load_from_file(_editor, "painted_wall.ves")
+node19.set_prop_value("ground", false)
+
+_editor.add_node(node19, 492.50366507943, 9.1922437768134)
+
+var node20 = ::blueprint::nodes::input::Input()
+
+node20.var_name = "win_type"
+node20.var_type = "int"
+
+_editor.add_node(node20, 311.93138236054, -22.717078847335)
+
+var node21 = ::archgraph::nodes::split_size::SplitSize()
+node21.query_param("size").value = 1.0
+node21.query_param("mode").value = "floating"
+
+_editor.add_node(node21, 124.42128455845, -17.16733217079)
+
+Blueprint.connect(node4, "large_height", node11, "var")
+Blueprint.connect(node11, "var", node15, "var")
+Blueprint.connect(node15, "var", node14, "size")
+Blueprint.connect(node4, "large_width", node10, "var")
+Blueprint.connect(node10, "var", node12, "var")
+Blueprint.connect(node12, "var", node5, "size")
+Blueprint.connect(node0, "var", node2, "parent")
+Blueprint.connect(node3, "size", node2, "size0")
+Blueprint.connect(node5, "size", node2, "size1")
+Blueprint.connect(node3, "size", node2, "size2")
+Blueprint.connect(node2, "child1", node9, "parent")
+Blueprint.connect(node13, "size", node9, "size0")
+Blueprint.connect(node14, "size", node9, "size1")
+Blueprint.connect(node21, "size", node9, "size2")
+Blueprint.connect(node9, "child2", node19, "geo")
+Blueprint.connect(node9, "child0", node18, "geo")
+Blueprint.connect(node9, "child1", node16, "facade")
+Blueprint.connect(node20, "var", node16, "win_type")
+Blueprint.connect(node18, "geo", node17, "in0")
+Blueprint.connect(node16, "geo", node17, "in1")
+Blueprint.connect(node19, "geo", node17, "in2")
+Blueprint.connect(node2, "child2", node8, "geo")
+Blueprint.connect(node2, "child0", node6, "geo")
+Blueprint.connect(node6, "geo", node7, "in0")
+Blueprint.connect(node17, "list", node7, "in1")
+Blueprint.connect(node8, "geo", node7, "in2")
+Blueprint.connect(node7, "list", node1, "var")

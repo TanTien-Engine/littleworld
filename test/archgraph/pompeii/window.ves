@@ -16,7 +16,7 @@ _editor.add_node(node1, 230.10105068463, -203.83578983318)
 
 var node2 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node2, 234.35594350422, -24.844770701457)
+_editor.add_node(node2, 214.07044387988, -12.07241908613)
 
 var node3 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
 node3.query_param("size").value.set(10, 2.5, 5)
@@ -31,54 +31,47 @@ node4.on_param_dirty()
 _editor.add_node(node4, -472.76215388214, 59.066432756)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/window.ves")
+node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/subtile_window.ves")
 
-_editor.add_node(node5, 36.343350864012, -44.094665664914)
+_editor.add_node(node5, 14.555221637866, -9.5341848234413)
 
-var node6 = ::blueprint::nodes::number::Number()
+var node6 = ::blueprint::nodes::integer::Integer()
 
-node6.value = 0.088888891041279
+node6.value = 2
 
-_editor.add_node(node6, -185.36589030804, -59.026296018032)
+_editor.add_node(node6, -183.98422238918, -75.9211119459)
 
-var node7 = ::blueprint::nodes::integer::Integer()
+var node7 = ::archgraph::nodes::comp::Comp()
+node7.query_param("selector").value = "side"
 
-node7.value = 2
+node7.on_param_dirty()
 
-_editor.add_node(node7, -180.97896318557, -137.52892561983)
+_editor.add_node(node7, -470.03531179564, 186.77911344853)
 
-var node8 = ::archgraph::nodes::comp::Comp()
-node8.query_param("selector").value = "side"
+var node8 = ::archgraph::nodes::split::Split()
+node8.query_param("axis").value = "hori"
+node8.query_param("repeat").value = true
 
-node8.on_param_dirty()
+_editor.add_node(node8, -186.03531179564, 54.279113448535)
 
-_editor.add_node(node8, -470.03531179564, 186.77911344853)
+var node9 = ::archgraph::nodes::split_size::SplitSize()
+node9.query_param("size").value = 1
+node9.query_param("mode").value = "floating"
 
-var node9 = ::archgraph::nodes::split::Split()
-node9.query_param("axis").value = "hori"
-node9.query_param("repeat").value = true
-
-_editor.add_node(node9, -186.03531179564, 54.279113448535)
+_editor.add_node(node9, -327.16131179564, 26.352113448535)
 
 var node10 = ::archgraph::nodes::split_size::SplitSize()
 node10.query_param("size").value = 1
 node10.query_param("mode").value = "floating"
 
-_editor.add_node(node10, -327.16131179564, 26.352113448535)
+_editor.add_node(node10, -331.01598140909, -65.532024449464)
 
-var node11 = ::archgraph::nodes::split_size::SplitSize()
-node11.query_param("size").value = 1
-node11.query_param("mode").value = "floating"
-
-_editor.add_node(node11, -331.01598140909, -65.532024449464)
-
-Blueprint.connect(node3, "geo", node8, "geo")
-Blueprint.connect(node8, "side", node9, "parent")
-Blueprint.connect(node10, "size", node9, "size0")
-Blueprint.connect(node11, "size", node9, "size1")
-Blueprint.connect(node9, "child0", node5, "facade")
-Blueprint.connect(node6, "v", node5, "win_frame_width")
-Blueprint.connect(node7, "v", node5, "win_type")
+Blueprint.connect(node3, "geo", node7, "geo")
+Blueprint.connect(node7, "side", node8, "parent")
+Blueprint.connect(node9, "size", node8, "size0")
+Blueprint.connect(node10, "size", node8, "size1")
+Blueprint.connect(node8, "child0", node5, "facade")
+Blueprint.connect(node6, "v", node5, "win_type")
 Blueprint.connect(node5, "geo", node2, "in0")
 Blueprint.connect(node3, "geo", node4, "geo")
 Blueprint.connect(node2, "list", node0, "geos")

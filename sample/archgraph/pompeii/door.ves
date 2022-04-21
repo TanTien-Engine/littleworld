@@ -3,32 +3,32 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -253.22874751473, 0.081648098086916)
+_editor.add_node(node0, -405.92874751473, -121.41835190191)
 
 var node1 = ::blueprint::nodes::output::Output()
 
 node1.var_name = "geo"
 node1.var_type = "geometry"
 
-_editor.add_node(node1, 463.65860122445, -49.206074805841)
+_editor.add_node(node1, 621.84041940627, -102.8424384422)
 
 var node2 = ::archgraph::nodes::split::Split()
 node2.query_param("axis").value = "vert"
 node2.query_param("repeat").value = false
 
-_editor.add_node(node2, -98.584377731526, -122.14144521597)
+_editor.add_node(node2, -100.72796654153, -8.5312382859699)
 
 var node3 = ::archgraph::nodes::split_size::SplitSize()
 node3.query_param("size").value = 1
 node3.query_param("mode").value = "floating"
 
-_editor.add_node(node3, -247.70853612638, -160.66522679822)
+_editor.add_node(node3, -239.92730874608, 20.89674540878)
 
 var node4 = ::archgraph::nodes::split_size::SplitSize()
 node4.query_param("size").value = 0.2
 node4.query_param("mode").value = "floating"
 
-_editor.add_node(node4, -248.17662850417, -245.81591198491)
+_editor.add_node(node4, -240.39540112387, -64.25393977791)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
 node5.load_from_file(_editor, "door_element.ves")
@@ -37,7 +37,7 @@ _editor.add_node(node5, 115.03085545765, -17.62944057539)
 
 var node6 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node6, 321.46831567383, -68.83516560547)
+_editor.add_node(node6, 322.83434258456, -76.348313614486)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
 node7.load_from_file(_editor, "door_top.ves")
@@ -48,20 +48,64 @@ var node8 = ::archgraph::nodes::split_size::SplitSize()
 node8.query_param("size").value = 0
 node8.query_param("mode").value = "absolute"
 
-_editor.add_node(node8, -252.63703644464, -75.007887177502)
+_editor.add_node(node8, -403.23929038904, -204.17227485594)
 
 var node9 = ::blueprint::nodes::number::Number()
 
 node9.value = 0.2493716776371
 
-_editor.add_node(node9, -391.44345364235, -62.986847657536)
+_editor.add_node(node9, -542.04570758675, -192.15123533597)
 
 var node10 = ::blueprint::nodes::subgraph::Subgraph()
 node10.load_from_file(_editor, "stairs.ves")
 
 _editor.add_node(node10, 115.50719898434, 72.249816923192)
 
+var node11 = ::blueprint::nodes::property::Property()
+
+node11.var_name = "top"
+node11.var_type = "bool"
+
+_editor.add_node(node11, 321.43557461826, 15.522433194245)
+
+var node12 = ::archgraph::nodes::split::Split()
+node12.query_param("axis").value = "vert"
+node12.query_param("repeat").value = false
+
+_editor.add_node(node12, -81.903661241008, -300.7063708329)
+
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "door_element.ves")
+
+_editor.add_node(node13, 113.05574801382, -310.39421592936)
+
+var node14 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node14, 314.42846871073, -259.79005965845)
+
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "stairs.ves")
+
+_editor.add_node(node15, 113.53209154051, -220.51495843077)
+
+var node16 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node16, 485.28905417702, -121.30553921786)
+
+var node17 = ::archgraph::nodes::split_size::SplitSize()
+node17.query_param("size").value = 0
+node17.query_param("mode").value = "floating"
+
+_editor.add_node(node17, -232.47662778679, -315.86069636997)
+
 Blueprint.connect(node9, "v", node8, "size")
+Blueprint.connect(node0, "var", node12, "parent")
+Blueprint.connect(node8, "size", node12, "size0")
+Blueprint.connect(node17, "size", node12, "size1")
+Blueprint.connect(node12, "child0", node15, "facade")
+Blueprint.connect(node12, "child1", node13, "facade")
+Blueprint.connect(node15, "geo", node14, "in0")
+Blueprint.connect(node13, "geo", node14, "in1")
 Blueprint.connect(node0, "var", node2, "parent")
 Blueprint.connect(node8, "size", node2, "size0")
 Blueprint.connect(node3, "size", node2, "size1")
@@ -72,4 +116,7 @@ Blueprint.connect(node2, "child1", node5, "facade")
 Blueprint.connect(node10, "geo", node6, "in0")
 Blueprint.connect(node5, "geo", node6, "in1")
 Blueprint.connect(node7, "geo", node6, "in2")
-Blueprint.connect(node6, "list", node1, "var")
+Blueprint.connect(node11, "var", node16, "cond")
+Blueprint.connect(node6, "list", node16, "true")
+Blueprint.connect(node14, "list", node16, "false")
+Blueprint.connect(node16, "result", node1, "var")

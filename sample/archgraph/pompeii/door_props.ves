@@ -1,0 +1,57 @@
+var node0 = ::archgraph::nodes::rand_number::RandNumber()
+node0.query_param("min").value = 0.15
+node0.query_param("max").value = 0.22
+
+_editor.add_node(node0, -374.14619300051, 235.1605185278)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "frame_width"
+node1.var_type = "num"
+
+_editor.add_node(node1, -73.88616601728, 74.174023015619)
+
+var node2 = ::blueprint::nodes::store::Store()
+
+node2.var_name = "frame_width"
+
+_editor.add_node(node2, -231, 255)
+
+var node3 = ::blueprint::nodes::load::Load()
+
+node3.var_name = "frame_width"
+
+_editor.add_node(node3, -218, 74)
+
+var node4 = ::blueprint::nodes::load::Load()
+
+node4.var_name = "frame_width"
+
+_editor.add_node(node4, -219.90122942422, 4.6925749607266)
+
+var node5 = ::blueprint::nodes::output::Output()
+
+node5.var_name = "frame_height"
+node5.var_type = "num"
+
+_editor.add_node(node5, -81.240063123467, 5.4859303876388)
+
+var node6 = ::archgraph::nodes::rand_number::RandNumber()
+node6.query_param("min").value = 0.6
+node6.query_param("max").value = 1.0
+
+_editor.add_node(node6, -219.9364259081, -91.950075010893)
+
+var node7 = ::blueprint::nodes::output::Output()
+
+node7.var_name = "stone_height"
+node7.var_type = "num"
+
+_editor.add_node(node7, -89.164047103641, -63.285037263545)
+
+Blueprint.connect(node6, "val", node7, "var")
+Blueprint.connect(node0, "val", node2, "var")
+Blueprint.connect(node2, "var", node4, "var")
+Blueprint.connect(node4, "var", node5, "var")
+Blueprint.connect(node2, "var", node3, "var")
+Blueprint.connect(node3, "var", node1, "var")

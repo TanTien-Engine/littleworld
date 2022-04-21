@@ -1,0 +1,100 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "geo"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -506.8656193238, -103.8904322653)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = "geometry"
+
+_editor.add_node(node1, 435.04534710341, -135.79525671084)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "wall.ves")
+
+_editor.add_node(node2, -56.126632564324, -126.83866163522)
+
+var node3 = ::archgraph::nodes::split::Split()
+node3.query_param("axis").value = "vert"
+node3.query_param("repeat").value = false
+
+_editor.add_node(node3, -251.11512427743, -202.22764502881)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "wall_props.ves")
+
+_editor.add_node(node4, -835.93839333274, -73.125115134503)
+
+var node5 = ::archgraph::nodes::split_size::SplitSize()
+node5.query_param("size").value = 0
+node5.query_param("mode").value = "absolute"
+
+_editor.add_node(node5, -387.49212091619, -194.6953722741)
+
+var node6 = ::archgraph::nodes::split_size::SplitSize()
+node6.query_param("size").value = 0.81540191173553
+node6.query_param("mode").value = "floating"
+
+_editor.add_node(node6, -384.65889709695, -283.55097489347)
+
+var node7 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node7, 143.36815102317, -172.59374639338)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "wall.ves")
+
+_editor.add_node(node8, -51.356549919696, -232.02444675918)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "wall_color.ves")
+
+_editor.add_node(node9, -300.28160122958, -75.453904080982)
+
+var node10 = ::blueprint::nodes::store::Store()
+
+node10.var_name = "paint_height"
+
+_editor.add_node(node10, -649.00478848544, -93.123626708984)
+
+var node11 = ::blueprint::nodes::load::Load()
+
+node11.var_name = "paint_height"
+
+_editor.add_node(node11, -520.82296475497, -176.76000421697)
+
+var node12 = ::blueprint::nodes::property::Property()
+
+node12.var_name = "ground"
+node12.var_type = "bool"
+
+_editor.add_node(node12, 143.0791975707, -95.381917965523)
+
+var node13 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node13, 296.14848007644, -154.42961965514)
+
+var node14 = ::blueprint::nodes::subgraph::Subgraph()
+node14.load_from_file(_editor, "wall.ves")
+
+_editor.add_node(node14, -45.825806118043, -342.43378560216)
+
+Blueprint.connect(node4, "paint_height", node10, "var")
+Blueprint.connect(node10, "var", node11, "var")
+Blueprint.connect(node11, "var", node5, "size")
+Blueprint.connect(node0, "var", node14, "geo")
+Blueprint.connect(node0, "var", node3, "parent")
+Blueprint.connect(node5, "size", node3, "size0")
+Blueprint.connect(node6, "size", node3, "size1")
+Blueprint.connect(node3, "child1", node8, "geo")
+Blueprint.connect(node3, "child0", node2, "geo")
+Blueprint.connect(node9, "red", node2, "color")
+Blueprint.connect(node2, "geo", node7, "in0")
+Blueprint.connect(node8, "geo", node7, "in1")
+Blueprint.connect(node12, "var", node13, "cond")
+Blueprint.connect(node7, "list", node13, "true")
+Blueprint.connect(node14, "geo", node13, "false")
+Blueprint.connect(node13, "result", node1, "var")

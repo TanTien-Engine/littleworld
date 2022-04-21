@@ -1,0 +1,26 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -220.4380676608, 164.6027437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 249.39838, 179.19592)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "shop_counters.ves")
+
+_editor.add_node(node2, 10, 111)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "shop_opening.ves")
+
+_editor.add_node(node3, 2.3688354492189, 202.02115478516)
+
+Blueprint.connect(node0, "var", node3, "facade")
+Blueprint.connect(node3, "geo", node1, "var")

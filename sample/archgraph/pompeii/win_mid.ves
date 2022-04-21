@@ -92,14 +92,12 @@ node15.var_name = "win_opening"
 
 _editor.add_node(node15, -134.78838353039, -108.48739880112)
 
-var node16 = ::blueprint::nodes::input::Input()
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "win_props.ves")
 
-node16.var_name = "win_frame_width"
-node16.var_type = "num"
+_editor.add_node(node16, -484.38518227821, 66.068743997369)
 
-_editor.add_node(node16, -420.7242247297, 18.669786437484)
-
-Blueprint.connect(node16, "var", node5, "size")
+Blueprint.connect(node16, "frame_width", node5, "size")
 Blueprint.connect(node10, "var", node11, "var")
 Blueprint.connect(node11, "var", node13, "var")
 Blueprint.connect(node11, "var", node12, "var")

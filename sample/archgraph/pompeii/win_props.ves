@@ -1,0 +1,70 @@
+var node0 = ::archgraph::nodes::rand_number::RandNumber()
+node0.query_param("min").value = 0.4
+node0.query_param("max").value = 0.85
+
+_editor.add_node(node0, -6.1461930005129, -93.839481472195)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "small_width"
+node1.var_type = "num"
+
+_editor.add_node(node1, 129.11383398272, -63.825976984381)
+
+var node2 = ::archgraph::nodes::rand_number::RandNumber()
+node2.query_param("min").value = 0.7
+node2.query_param("max").value = 1
+
+_editor.add_node(node2, -6.8266748186947, -207.6242905631)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "small_height"
+node3.var_type = "num"
+
+_editor.add_node(node3, 128.43335216454, -177.61078607529)
+
+var node4 = ::archgraph::nodes::rand_number::RandNumber()
+node4.query_param("min").value = 1
+node4.query_param("max").value = 1.5
+
+_editor.add_node(node4, -290.42459845506, -95.817492381286)
+
+var node5 = ::blueprint::nodes::output::Output()
+
+node5.var_name = "large_width"
+node5.var_type = "num"
+
+_editor.add_node(node5, -155.16457147183, -65.803987893472)
+
+var node6 = ::archgraph::nodes::rand_number::RandNumber()
+node6.query_param("min").value = 0.8
+node6.query_param("max").value = 1.1
+
+_editor.add_node(node6, -291.10508027324, -209.60230147219)
+
+var node7 = ::blueprint::nodes::output::Output()
+
+node7.var_name = "large_height"
+node7.var_type = "num"
+
+_editor.add_node(node7, -155.84505329001, -179.58879698438)
+
+var node8 = ::blueprint::nodes::number::Number()
+
+node8.value = 0.08
+
+_editor.add_node(node8, -288.13906860352, -322.34155273438)
+
+var node9 = ::blueprint::nodes::output::Output()
+
+node9.var_name = "frame_width"
+node9.var_type = "num"
+
+_editor.add_node(node9, -157.13903808594, -312.34153747559)
+
+Blueprint.connect(node8, "v", node9, "var")
+Blueprint.connect(node6, "val", node7, "var")
+Blueprint.connect(node4, "val", node5, "var")
+Blueprint.connect(node2, "val", node3, "var")
+Blueprint.connect(node0, "val", node1, "var")

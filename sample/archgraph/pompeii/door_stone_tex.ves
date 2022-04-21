@@ -1,0 +1,86 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "rand"
+node0.var_type = "num"
+
+_editor.add_node(node0, 748.6522531476, 210.728806218)
+
+var node1 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node1, 673.1102171076, -54.160037375713)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "tex"
+node2.var_type = "texture"
+
+_editor.add_node(node2, 1147.884880744, 191.19335545455)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "rand_select.ves")
+
+_editor.add_node(node3, 949.326483125, 181.41303177246)
+
+var node4 = ::rendergraph::nodes::texture::Texture()
+node4.query_param("unif_name").value = "u_tex"
+node4.gamma_correction = false
+node4.mipmap = false
+node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/DoorStone.1.c.jpg")
+node4.set_sampler("linear_repeat")
+
+_editor.add_node(node4, -133.09463500977, 275.06652832031)
+
+var node5 = ::rendergraph::nodes::texture::Texture()
+node5.query_param("unif_name").value = "u_tex"
+node5.gamma_correction = false
+node5.mipmap = false
+node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/DoorStone.2.c.jpg")
+node5.set_sampler("linear_repeat")
+
+_editor.add_node(node5, 103.82337487793, 275.06654968262)
+
+var node6 = ::rendergraph::nodes::texture::Texture()
+node6.query_param("unif_name").value = "u_tex"
+node6.gamma_correction = false
+node6.mipmap = false
+node6.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/DoorStone.3.c.jpg")
+node6.set_sampler("linear_repeat")
+
+_editor.add_node(node6, 348.72735449219, 277.72857666016)
+
+var node7 = ::rendergraph::nodes::texture::Texture()
+node7.query_param("unif_name").value = "u_tex"
+node7.gamma_correction = false
+node7.mipmap = false
+node7.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/DoorStone.4.c.jpg")
+node7.set_sampler("linear_repeat")
+
+_editor.add_node(node7, -133.18447376367, -403.64216117187)
+
+var node8 = ::rendergraph::nodes::texture::Texture()
+node8.query_param("unif_name").value = "u_tex"
+node8.gamma_correction = false
+node8.mipmap = false
+node8.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/DoorStone.5.c.jpg")
+node8.set_sampler("linear_repeat")
+
+_editor.add_node(node8, 107.74782232715, -398.3274801582)
+
+var node9 = ::rendergraph::nodes::texture::Texture()
+node9.query_param("unif_name").value = "u_tex"
+node9.gamma_correction = false
+node9.mipmap = false
+node9.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/DoorStone.6.c.jpg")
+node9.set_sampler("linear_repeat")
+
+_editor.add_node(node9, 346.90854676172, -400.09902653125)
+
+Blueprint.connect(node4, "tex", node1, "in0")
+Blueprint.connect(node5, "tex", node1, "in1")
+Blueprint.connect(node6, "tex", node1, "in2")
+Blueprint.connect(node7, "tex", node1, "in3")
+Blueprint.connect(node8, "tex", node1, "in4")
+Blueprint.connect(node9, "tex", node1, "in5")
+Blueprint.connect(node0, "var", node3, "rand")
+Blueprint.connect(node1, "list", node3, "items")
+Blueprint.connect(node3, "tex", node2, "var")

@@ -1,56 +1,56 @@
-var node0 = ::blueprint::nodes::number::Number()
+var node0 = ::blueprint::nodes::output::Output()
 
-node0.value = 0.7
+node0.var_name = "protrusion"
+node0.var_type = "num"
 
-_editor.add_node(node0, -119, 204)
+_editor.add_node(node0, 24, 215)
 
-var node1 = ::blueprint::nodes::output::Output()
+var node1 = ::blueprint::nodes::number::Number()
 
-node1.var_name = "protrusion"
-node1.var_type = "num"
+node1.value = 0.1
 
-_editor.add_node(node1, 24, 215)
+_editor.add_node(node1, -115.8987, 133.8791)
 
-var node2 = ::blueprint::nodes::number::Number()
+var node2 = ::blueprint::nodes::output::Output()
 
-node2.value = 0.1
+node2.var_name = "beam_width"
+node2.var_type = "num"
 
-_editor.add_node(node2, -115.8987, 133.8791)
+_editor.add_node(node2, 27.1013, 144.8791)
 
-var node3 = ::blueprint::nodes::output::Output()
+var node3 = ::blueprint::nodes::number::Number()
 
-node3.var_name = "beam_width"
-node3.var_type = "num"
+node3.value = 0.1
 
-_editor.add_node(node3, 27.1013, 144.8791)
+_editor.add_node(node3, -114.24151818182, 64.917918181818)
 
-var node4 = ::blueprint::nodes::number::Number()
+var node4 = ::blueprint::nodes::output::Output()
 
-node4.value = 0.1
+node4.var_name = "tri_width"
+node4.var_type = "num"
 
-_editor.add_node(node4, -114.24151818182, 64.917918181818)
+_editor.add_node(node4, 28.758481818182, 75.917918181818)
 
-var node5 = ::blueprint::nodes::output::Output()
+var node5 = ::blueprint::nodes::number::Number()
 
-node5.var_name = "tri_width"
-node5.var_type = "num"
+node5.value = 0.5
 
-_editor.add_node(node5, 28.758481818182, 75.917918181818)
+_editor.add_node(node5, -114.22515454545, -3.4404454545457)
 
-var node6 = ::blueprint::nodes::number::Number()
+var node6 = ::blueprint::nodes::output::Output()
 
-node6.value = 0.5
+node6.var_name = "tri_space"
+node6.var_type = "num"
 
-_editor.add_node(node6, -114.22515454545, -3.4404454545457)
+_editor.add_node(node6, 28.774845454545, 7.5595545454543)
 
-var node7 = ::blueprint::nodes::output::Output()
+var node7 = ::archgraph::nodes::rand_number::RandNumber()
+node7.query_param("min").value = 0.5
+node7.query_param("max").value = 0.8
 
-node7.var_name = "tri_space"
-node7.var_type = "num"
+_editor.add_node(node7, -117, 226)
 
-_editor.add_node(node7, 28.774845454545, 7.5595545454543)
-
-Blueprint.connect(node6, "v", node7, "var")
-Blueprint.connect(node4, "v", node5, "var")
-Blueprint.connect(node2, "v", node3, "var")
-Blueprint.connect(node0, "v", node1, "var")
+Blueprint.connect(node7, "val", node0, "var")
+Blueprint.connect(node5, "v", node6, "var")
+Blueprint.connect(node3, "v", node4, "var")
+Blueprint.connect(node1, "v", node2, "var")

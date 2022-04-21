@@ -78,35 +78,35 @@ node12.var_type = "geometry"
 
 _editor.add_node(node12, 805.82705221277, -7.7265580522021)
 
-var node13 = ::archgraph::nodes::translate_scope::TranslateScope()
-node13.query_param("t").value.set(0, 0, -0.5)
+var node13 = ::blueprint::nodes::load::Load()
 
-_editor.add_node(node13, 438.58829518901, -184.86550677142)
+node13.var_name = "wall_depth"
 
-var node14 = ::blueprint::nodes::load::Load()
+_editor.add_node(node13, 154.23626222185, -195.24805379927)
 
-node14.var_name = "wall_depth"
+var node14 = ::blueprint::nodes::property::Property()
 
-_editor.add_node(node14, 154.23626222185, -195.24805379927)
+node14.var_name = "hori"
+node14.var_type = "bool"
 
-var node15 = ::blueprint::nodes::property::Property()
+_editor.add_node(node14, 217.66248321533, 189.70577448065)
 
-node15.var_name = "hori"
-node15.var_type = "bool"
+var node15 = ::archgraph::nodes::scale_scope::ScaleScope()
+node15.query_param("s").value.set(1, 1, 0.35)
+node15.query_param("anchor").value = "left"
 
-_editor.add_node(node15, 217.66248321533, 189.70577448065)
+_editor.add_node(node15, 291.93703759685, -195.27506780282)
 
-var node16 = ::archgraph::nodes::scale_scope::ScaleScope()
-node16.query_param("s").value.set(1, 1, 0.35)
-node16.query_param("anchor").value = "left"
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "../../../assets/archgraph/align_front.ves")
 
-_editor.add_node(node16, 291.93703759685, -195.27506780282)
+_editor.add_node(node16, 487.95572645454, -132.81210631799)
 
 Blueprint.connect(node8, "v", node9, "var")
-Blueprint.connect(node9, "var", node14, "var")
-Blueprint.connect(node10, "var", node16, "geo")
-Blueprint.connect(node14, "var", node16, "z")
-Blueprint.connect(node16, "geo", node13, "geo")
+Blueprint.connect(node9, "var", node13, "var")
+Blueprint.connect(node10, "var", node15, "geo")
+Blueprint.connect(node13, "var", node15, "z")
+Blueprint.connect(node15, "geo", node16, "pos")
 Blueprint.connect(node4, "v", node3, "rand")
 Blueprint.connect(node0, "geo", node6, "geo")
 Blueprint.connect(node6, "geo", node5, "geo")
@@ -114,9 +114,9 @@ Blueprint.connect(node3, "tex", node5, "texture")
 Blueprint.connect(node0, "geo", node2, "geo")
 Blueprint.connect(node2, "geo", node1, "geo")
 Blueprint.connect(node3, "tex", node1, "texture")
-Blueprint.connect(node15, "var", node7, "cond")
+Blueprint.connect(node14, "var", node7, "cond")
 Blueprint.connect(node5, "geo", node7, "true")
 Blueprint.connect(node1, "geo", node7, "false")
 Blueprint.connect(node7, "result", node11, "geo")
-Blueprint.connect(node13, "geo", node11, "pos")
+Blueprint.connect(node16, "pos", node11, "pos")
 Blueprint.connect(node11, "geo", node12, "var")

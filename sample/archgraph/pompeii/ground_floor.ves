@@ -1,0 +1,27 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -304.4380676608, 191.6027437756)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 249.39838, 179.19592)
+
+var node2 = ::blueprint::nodes::switch_f::SwitchF()
+
+_editor.add_node(node2, 48.586776859504, 145.05371900826)
+
+var node3 = ::blueprint::nodes::input::Input()
+
+node3.var_name = "type"
+node3.var_type = "int"
+
+_editor.add_node(node3, -116.70676743689, 251.49614217459)
+
+Blueprint.connect(node3, "var", node2, "type")
+Blueprint.connect(node2, "result", node1, "var")

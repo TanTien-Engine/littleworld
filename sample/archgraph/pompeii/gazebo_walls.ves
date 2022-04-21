@@ -1,0 +1,86 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -264.39674534675, 380.20604956073)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 634.13711801653, 229.69963322314)
+
+var node2 = ::archgraph::nodes::split::Split()
+node2.query_param("axis").value = "hori"
+node2.query_param("repeat").value = false
+
+_editor.add_node(node2, 60.078714129512, 186.87844787105)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "wall_props.ves")
+
+_editor.add_node(node3, -436.71936806217, 155.01841718644)
+
+var node4 = ::archgraph::nodes::split_size::SplitSize()
+node4.query_param("size").value = 0
+node4.query_param("mode").value = "absolute"
+
+_editor.add_node(node4, -98.356939697266, 141.90631296187)
+
+var node5 = ::archgraph::nodes::split_size::SplitSize()
+node5.query_param("size").value = 0
+node5.query_param("mode").value = "floating"
+
+_editor.add_node(node5, -96.071700206855, 51.265391331015)
+
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "wall.ves")
+
+_editor.add_node(node6, 275.07759606686, 292.82521758019)
+
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "wall.ves")
+
+_editor.add_node(node7, 278.42698599924, 106.40785018724)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "gallery.ves")
+
+_editor.add_node(node8, 275.3955788444, 199.33069615755)
+
+var node9 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node9, 499.14848254496, 199.45581639818)
+
+var node10 = ::archgraph::nodes::translate_scope::TranslateScope()
+node10.query_param("t").value.set(0, 0, 1)
+
+_editor.add_node(node10, -107.93864869677, 325.59245388567)
+
+var node11 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node11, -247.04594871928, 137.5776994506)
+
+var node12 = ::blueprint::nodes::number::Number()
+
+node12.value = 0.7
+
+_editor.add_node(node12, -389.7957407366, 65.451492332499)
+
+Blueprint.connect(node3, "depth", node11, "a")
+Blueprint.connect(node12, "v", node11, "b")
+Blueprint.connect(node11, "v", node4, "size")
+Blueprint.connect(node0, "var", node10, "geo")
+Blueprint.connect(node10, "geo", node2, "parent")
+Blueprint.connect(node4, "size", node2, "size0")
+Blueprint.connect(node5, "size", node2, "size1")
+Blueprint.connect(node4, "size", node2, "size2")
+Blueprint.connect(node2, "child1", node8, "facade")
+Blueprint.connect(node2, "child2", node7, "geo")
+Blueprint.connect(node2, "child0", node6, "geo")
+Blueprint.connect(node6, "geo", node9, "in0")
+Blueprint.connect(node8, "geo", node9, "in1")
+Blueprint.connect(node7, "geo", node9, "in2")
+Blueprint.connect(node9, "list", node1, "var")

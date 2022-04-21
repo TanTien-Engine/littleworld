@@ -1,0 +1,33 @@
+var node0 = ::blueprint::nodes::combine::Combine()
+
+_editor.add_node(node0, -252.86716343645, 67.089779523474)
+
+var node1 = ::blueprint::nodes::number::Number()
+
+node1.value = 0.85508626699448
+
+_editor.add_node(node1, -392.70492474579, 17.416073258832)
+
+var node2 = ::blueprint::nodes::number3::Number3()
+
+node2.value.set(0.85, 0, 0)
+
+_editor.add_node(node2, -251.84910412787, -127.20147072671)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "grey"
+node3.var_type = "num3"
+
+_editor.add_node(node3, -117.3744544897, 107.71573555488)
+
+var node4 = ::blueprint::nodes::output::Output()
+
+node4.var_name = "red"
+node4.var_type = "num3"
+
+_editor.add_node(node4, -113.12834611409, -97.333969197029)
+
+Blueprint.connect(node2, "v3", node4, "var")
+Blueprint.connect(node1, "v", node0, "xyz")
+Blueprint.connect(node0, "xyz", node3, "var")

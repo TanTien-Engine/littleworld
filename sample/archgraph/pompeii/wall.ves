@@ -1,0 +1,41 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "geo"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -111.96827624613, 40.852686374129)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = "geometry"
+
+_editor.add_node(node1, 275.83377685547, 24.41466064453)
+
+var node2 = ::blueprint::nodes::input::Input()
+
+node2.var_name = "color"
+node2.var_type = "num3"
+
+_editor.add_node(node2, -349.26652892562, -27.548879323911)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "wall_material.ves")
+
+_editor.add_node(node3, 86.945007324219, 14.703254699707)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../../tantien/assets/blueprints/tools/opt_value.ves")
+
+_editor.add_node(node4, -159, -49)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "wall_color.ves")
+
+_editor.add_node(node5, -400, -115)
+
+Blueprint.connect(node2, "var", node4, "val")
+Blueprint.connect(node5, "grey", node4, "default")
+Blueprint.connect(node0, "var", node3, "geo")
+Blueprint.connect(node4, "val", node3, "color")
+Blueprint.connect(node3, "geo", node1, "var")

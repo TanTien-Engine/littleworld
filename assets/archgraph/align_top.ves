@@ -1,0 +1,28 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "pos"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -382.9979194046, -80.56775721614)
+
+var node1 = ::archgraph::nodes::translate_scope::TranslateScope()
+node1.query_param("t").value.set(0, 0, 0)
+
+_editor.add_node(node1, -248.66278172012, -144.35749437468)
+
+var node2 = ::blueprint::nodes::number::Number()
+
+node2.value = -1
+
+_editor.add_node(node2, -380.52879175031, -150.89226383137)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "pos"
+node3.var_type = "geometry"
+
+_editor.add_node(node3, -111.63111562177, -86.903709979097)
+
+Blueprint.connect(node0, "var", node1, "geo")
+Blueprint.connect(node2, "v", node1, "y")
+Blueprint.connect(node1, "geo", node3, "var")

@@ -1,0 +1,67 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -348.49065969686, 112.35399027516)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 372.88342567441, -29.211434151098)
+
+var node2 = ::archgraph::nodes::split::Split()
+node2.query_param("axis").value = "hori"
+node2.query_param("repeat").value = true
+
+_editor.add_node(node2, -124.46055597295, 18.680793661635)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "gazebo_props.ves")
+
+_editor.add_node(node3, -531.43801652893, 14.479338842975)
+
+var node4 = ::archgraph::nodes::split_size::SplitSize()
+node4.query_param("size").value = 0
+node4.query_param("mode").value = "floating"
+
+_editor.add_node(node4, -340.50609065284, -61.824326444263)
+
+var node5 = ::archgraph::nodes::split_size::SplitSize()
+node5.query_param("size").value = 0
+node5.query_param("mode").value = "absolute"
+
+_editor.add_node(node5, -341.87177605684, 28.682332936927)
+
+var node6 = ::archgraph::nodes::mesh_file::MeshFile()
+node6.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/specific/pompeii/gazebo/gazebo_support_triangle.hd.obj")
+
+_editor.add_node(node6, -83.513148009016, 246.89331329827)
+
+var node7 = ::archgraph::nodes::insert::Insert()
+
+_editor.add_node(node7, 241, -38)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "wood_tex.ves")
+
+_editor.add_node(node8, -131.13148009016, 179.64613072878)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node9, 120.56198347107, 202.79864763336)
+
+Blueprint.connect(node6, "geo", node9, "geo")
+Blueprint.connect(node8, "tex", node9, "texture")
+Blueprint.connect(node3, "tri_width", node5, "size")
+Blueprint.connect(node3, "tri_space", node4, "size")
+Blueprint.connect(node0, "var", node2, "parent")
+Blueprint.connect(node4, "size", node2, "size0")
+Blueprint.connect(node5, "size", node2, "size1")
+Blueprint.connect(node4, "size", node2, "size2")
+Blueprint.connect(node9, "geo", node7, "geo")
+Blueprint.connect(node2, "child1", node7, "pos")
+Blueprint.connect(node7, "geo", node1, "var")
