@@ -38,7 +38,7 @@ _editor.add_node(node5, -81.240063123467, 5.4859303876388)
 
 var node6 = ::archgraph::nodes::rand_number::RandNumber()
 node6.query_param("min").value = 0.6
-node6.query_param("max").value = 1.0
+node6.query_param("max").value = 1
 
 _editor.add_node(node6, -219.9364259081, -91.950075010893)
 
@@ -49,6 +49,19 @@ node7.var_type = "num"
 
 _editor.add_node(node7, -89.164047103641, -63.285037263545)
 
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "wall_props.ves")
+
+_editor.add_node(node8, -293.12708629261, -221.71898581765)
+
+var node9 = ::blueprint::nodes::output::Output()
+
+node9.var_name = "margin_width"
+node9.var_type = "num"
+
+_editor.add_node(node9, -100.39983021129, -210.80989768289)
+
+Blueprint.connect(node8, "depth", node9, "var")
 Blueprint.connect(node6, "val", node7, "var")
 Blueprint.connect(node0, "val", node2, "var")
 Blueprint.connect(node2, "var", node4, "var")

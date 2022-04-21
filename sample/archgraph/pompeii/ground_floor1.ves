@@ -1,0 +1,116 @@
+var node0 = ::blueprint::nodes::output::Output()
+
+node0.var_name = "geo"
+node0.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node0, 356.82678715628, 217.20671366773)
+
+var node1 = ::archgraph::nodes::split::Split()
+node1.query_param("axis").value = "hori"
+node1.query_param("repeat").value = false
+
+_editor.add_node(node1, -457.92369092933, -12.796079610853)
+
+var node2 = ::archgraph::nodes::split_size::SplitSize()
+node2.query_param("size").value = 2
+node2.query_param("mode").value = "floating"
+
+_editor.add_node(node2, -611.53550001363, 72.598696477247)
+
+var node3 = ::archgraph::nodes::split_size::SplitSize()
+node3.query_param("size").value = 3
+node3.query_param("mode").value = "floating"
+
+_editor.add_node(node3, -613.55185244083, -14.740816365233)
+
+var node4 = ::archgraph::nodes::split_size::SplitSize()
+node4.query_param("size").value = 2
+node4.query_param("mode").value = "floating"
+
+_editor.add_node(node4, -611.85679787483, -99.88858451392)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "tile_shop.ves")
+
+_editor.add_node(node5, -249.98652734633, 17.061919600017)
+
+var node6 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node6, -25.358329079532, 16.435464411907)
+
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "painted_wall.ves")
+node7.set_prop_value("ground", true)
+
+_editor.add_node(node7, -248.99521126183, 104.76959491475)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "tile_door.ves")
+
+_editor.add_node(node8, -249.43918098843, -69.0672504832)
+
+var node9 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node9, 210.88957546595, 192.08320689715)
+
+var node10 = ::blueprint::nodes::compare::Compare()
+
+node10.cmp = "greater"
+
+_editor.add_node(node10, 73.303782516769, 367.03994084463)
+
+var node11 = ::blueprint::nodes::subgraph::Subgraph()
+node11.load_from_file(_editor, "shop_props.ves")
+
+_editor.add_node(node11, -246.34247838323, 366.82018955073)
+
+var node12 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node12, -60.316940615832, 313.31907645015)
+
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "door_width.ves")
+
+_editor.add_node(node13, -380.57792640513, 269.66700405668)
+
+var node14 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node14, -196.11737043213, 249.09597429042)
+
+var node15 = ::blueprint::nodes::integer::Integer()
+
+node15.value = 2
+
+_editor.add_node(node15, -333.27890311433, 193.92395371859)
+
+var node16 = ::blueprint::nodes::input::Input()
+
+node16.var_name = "facade"
+node16.var_type = "geometry"
+
+_editor.add_node(node16, -632.72565995011, 438.9438295723)
+
+var node17 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node17, -68.744034373455, 413.43278582253)
+
+Blueprint.connect(node16, "var", node17, "geo")
+Blueprint.connect(node13, "door_w", node14, "a")
+Blueprint.connect(node15, "v", node14, "b")
+Blueprint.connect(node11, "width", node12, "a")
+Blueprint.connect(node14, "v", node12, "b")
+Blueprint.connect(node17, "sx", node10, "a")
+Blueprint.connect(node12, "v", node10, "b")
+Blueprint.connect(node16, "var", node1, "parent")
+Blueprint.connect(node2, "size", node1, "size0")
+Blueprint.connect(node3, "size", node1, "size1")
+Blueprint.connect(node4, "size", node1, "size2")
+Blueprint.connect(node1, "child2", node8, "facade")
+Blueprint.connect(node1, "child0", node7, "geo")
+Blueprint.connect(node1, "child1", node5, "facade")
+Blueprint.connect(node7, "geo", node6, "in0")
+Blueprint.connect(node5, "geo", node6, "in1")
+Blueprint.connect(node8, "geo", node6, "in2")
+Blueprint.connect(node10, "out", node9, "cond")
+Blueprint.connect(node6, "list", node9, "true")
+Blueprint.connect(node9, "result", node0, "var")

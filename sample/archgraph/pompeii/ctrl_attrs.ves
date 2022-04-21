@@ -1,0 +1,28 @@
+var node0 = ::archgraph::nodes::rand_number::RandNumber()
+node0.query_param("min").value = 2.5
+node0.query_param("max").value = 3.5
+
+_editor.add_node(node0, -374.14619300051, 235.1605185278)
+
+var node1 = ::archgraph::nodes::rand_number::RandNumber()
+node1.query_param("min").value = 1.1
+node1.query_param("max").value = 1.4
+
+_editor.add_node(node1, -378.77360916061, 127.29561858927)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "door_width"
+node2.var_type = "num"
+
+_editor.add_node(node2, -237.82984369451, 263.48798439719)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "door_height"
+node3.var_type = "num"
+
+_editor.add_node(node3, -238.73893252286, 155.3061578924)
+
+Blueprint.connect(node1, "val", node3, "var")
+Blueprint.connect(node0, "val", node2, "var")

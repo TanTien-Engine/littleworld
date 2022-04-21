@@ -1,0 +1,14 @@
+var node0 = ::archgraph::nodes::rand_number::RandNumber()
+node0.query_param("min").value = 0.25
+node0.query_param("max").value = 0.75
+
+_editor.add_node(node0, -134, 87.5)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "val"
+node1.var_type = "num"
+
+_editor.add_node(node1, 10, 118.5)
+
+Blueprint.connect(node0, "val", node1, "var")
