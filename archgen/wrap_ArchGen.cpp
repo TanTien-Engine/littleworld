@@ -150,6 +150,16 @@ void w_ScopeTools_get_scope_size()
 	tt::return_list(std::vector<float>{ s.x, s.y, s.z });
 }
 
+void w_ScopeTools_get_scope_pos()
+{
+	sm::mat4* scope = (sm::mat4*)ves_toforeign(1);
+
+	sm::vec3 s, r, t;
+	scope->Decompose(t, r, s);
+
+	tt::return_list(std::vector<float>{ t.y, t.y + s.y });
+}
+
 void w_ScopeTools_comp_edges()
 {
 	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
@@ -311,6 +321,7 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 	if (strcmp(signature, "static ScopeTools.face_mapping(_,_)") == 0) return w_ScopeTools_face_mapping;
 	if (strcmp(signature, "static ScopeTools.calc_insert_mat(_,_,_)") == 0) return w_ScopeTools_calc_insert_mat;
 	if (strcmp(signature, "static ScopeTools.get_scope_size(_)") == 0) return w_ScopeTools_get_scope_size;
+	if (strcmp(signature, "static ScopeTools.get_scope_pos(_)") == 0) return w_ScopeTools_get_scope_pos;
 	if (strcmp(signature, "static ScopeTools.comp_edges(_)") == 0) return w_ScopeTools_comp_edges;
 	if (strcmp(signature, "static ScopeTools.comp_face_edges(_)") == 0) return w_ScopeTools_comp_face_edges;
 	if (strcmp(signature, "static ScopeTools.comp_roof_edges(_,_)") == 0) return w_ScopeTools_comp_roof_edges;

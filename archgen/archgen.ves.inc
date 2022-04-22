@@ -19,6 +19,7 @@ foreign class ScopeTools
 	foreign static face_mapping(poly, face)
 	foreign static calc_insert_mat(aabb, geo_mat, scope_mat)
 	foreign static get_scope_size(scope)
+	foreign static get_scope_pos(scope)
 
 	foreign static comp_edges(poly)
 	foreign static comp_face_edges(poly)
