@@ -1,0 +1,30 @@
+var node0 = ::blueprint::nodes::output::Output()
+
+node0.var_name = "ground_floor_height"
+node0.var_type = "num"
+
+_editor.add_node(node0, 243.20177297692, 168.25078473759)
+
+var node1 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node1, 112.34016767074, 145.82041419398)
+
+var node2 = ::blueprint::nodes::global_get::GlobalGet()
+node2.query_param("key").value = "ground_floor_height"
+
+_editor.add_node(node2, -160.38352033919, 163.50460237091)
+
+var node3 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node3, -23.594050230885, 165.42565366152)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "floor_props_func.ves")
+
+_editor.add_node(node4, -352, 82.5)
+
+Blueprint.connect(node2, "val", node3, "in")
+Blueprint.connect(node3, "out", node1, "cond")
+Blueprint.connect(node4, "ground_floor_height", node1, "true")
+Blueprint.connect(node2, "val", node1, "false")
+Blueprint.connect(node1, "result", node0, "var")

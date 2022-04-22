@@ -53,13 +53,11 @@ _editor.add_node(node8, -580.15169728844, -182.75367119732)
 
 var node9 = ::blueprint::nodes::subgraph::Subgraph()
 node9.load_from_file(_editor, "painted_wall.ves")
-node9.set_prop_value("ground", true)
 
 _editor.add_node(node9, -212.99607751487, 36.668712411599)
 
 var node10 = ::blueprint::nodes::subgraph::Subgraph()
 node10.load_from_file(_editor, "painted_wall.ves")
-node10.set_prop_value("ground", true)
 
 _editor.add_node(node10, -216.82645850501, -54.647890851685)
 
@@ -107,7 +105,6 @@ _editor.add_node(node18, 32.235433517647, -289.64588136292)
 
 var node19 = ::blueprint::nodes::subgraph::Subgraph()
 node19.load_from_file(_editor, "painted_wall.ves")
-node19.set_prop_value("ground", false)
 
 _editor.add_node(node19, 361.22417705966, -221.96885340909)
 

@@ -2,12 +2,12 @@ var node0 = ::rendergraph::nodes::pass::Pass()
 
 node0.once = true
 
-_editor.add_node(node0, 54.87554246397, -61.070325975589)
+_editor.add_node(node0, 40.532259901303, -171.71850574473)
 
 var node1 = ::blueprint::nodes::subgraph::Subgraph()
 node1.load_from_file(_editor, "building_props_func.ves")
 
-_editor.add_node(node1, -303, 177)
+_editor.add_node(node1, -331.09917355372, 55.512396694215)
 
 var node2 = ::blueprint::nodes::global_set::GlobalSet()
 node2.query_param("key").value = "door_width"
@@ -44,19 +44,29 @@ var node8 = ::blueprint::nodes::input::Input()
 node8.var_name = "window_type"
 node8.var_type = "int"
 
-_editor.add_node(node8, -503.43009934913, 236.71369946787)
+_editor.add_node(node8, -531.52927290285, 115.22609616208)
 
 var node9 = ::blueprint::nodes::input::Input()
 
 node9.var_name = "window_opening"
 node9.var_type = "int"
 
-_editor.add_node(node9, -502.91689717571, 170.51630353945)
+_editor.add_node(node9, -531.01607072943, 49.028700233665)
 
 var node10 = ::blueprint::nodes::global_set::GlobalSet()
 node10.query_param("key").value = "building_rand"
 
 _editor.add_node(node10, -104.68390324618, -62.671767121594)
+
+var node11 = ::blueprint::nodes::global_set::GlobalSet()
+node11.query_param("key").value = "shop_width"
+
+_editor.add_node(node11, -104.41347363636, -132.75372454546)
+
+var node12 = ::blueprint::nodes::global_set::GlobalSet()
+node12.query_param("key").value = "shop_height"
+
+_editor.add_node(node12, -105.06935770849, -197.5746093689)
 
 Blueprint.connect(node8, "var", node1, "window_type")
 Blueprint.connect(node9, "var", node1, "window_opening")
@@ -74,4 +84,8 @@ Blueprint.connect(node6, "next", node7, "prev")
 Blueprint.connect(node1, "window_opening", node7, "val")
 Blueprint.connect(node7, "next", node10, "prev")
 Blueprint.connect(node1, "rand", node10, "val")
-Blueprint.connect(node10, "next", node0, "do")
+Blueprint.connect(node10, "next", node11, "prev")
+Blueprint.connect(node1, "shope_width", node11, "val")
+Blueprint.connect(node11, "next", node12, "prev")
+Blueprint.connect(node1, "shope_height", node12, "val")
+Blueprint.connect(node12, "next", node0, "do")

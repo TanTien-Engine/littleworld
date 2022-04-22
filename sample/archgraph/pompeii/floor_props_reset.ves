@@ -1,0 +1,19 @@
+var node0 = ::rendergraph::nodes::pass::Pass()
+
+node0.once = true
+
+_editor.add_node(node0, -30.467740098697, 114.28149425527)
+
+var node1 = ::blueprint::nodes::global_set::GlobalSet()
+node1.query_param("key").value = "ground_floor_height"
+
+_editor.add_node(node1, -220, 359)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "floor_props_func.ves")
+
+_editor.add_node(node2, -428, 351.5)
+
+Blueprint.connect(node2, "next", node1, "prev")
+Blueprint.connect(node2, "ground_floor_height", node1, "val")
+Blueprint.connect(node1, "next", node0, "do")

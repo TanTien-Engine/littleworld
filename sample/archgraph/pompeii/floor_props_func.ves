@@ -1,0 +1,25 @@
+var node0 = ::archgraph::nodes::rand_number::RandNumber()
+node0.query_param("min").value = 0.4
+node0.query_param("max").value = 0.6
+
+_editor.add_node(node0, -277.68939360156, -36.997257580389)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "building_props.ves")
+
+_editor.add_node(node1, -323.48911823642, 141.91285179362)
+
+var node2 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node2, -135.66040297579, 25.459067925755)
+
+var node3 = ::blueprint::nodes::output::Output()
+
+node3.var_name = "ground_floor_height"
+node3.var_type = "num"
+
+_editor.add_node(node3, 17, 38.5)
+
+Blueprint.connect(node1, "shop_height", node2, "a")
+Blueprint.connect(node0, "val", node2, "b")
+Blueprint.connect(node2, "v", node3, "var")

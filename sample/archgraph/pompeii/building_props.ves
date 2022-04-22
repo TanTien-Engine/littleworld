@@ -143,6 +143,48 @@ var node28 = ::blueprint::nodes::is_null::IsNull()
 
 _editor.add_node(node28, -2.5953665840894, -377.65704120476)
 
+var node29 = ::blueprint::nodes::output::Output()
+
+node29.var_name = "shop_width"
+node29.var_type = "num"
+
+_editor.add_node(node29, 263.58332482692, -471.82110266241)
+
+var node30 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node30, 132.72171952074, -494.25147320602)
+
+var node31 = ::blueprint::nodes::global_get::GlobalGet()
+node31.query_param("key").value = "shop_width"
+
+_editor.add_node(node31, -140.00196848919, -476.56728502909)
+
+var node32 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node32, -3.212498380885, -474.64623373848)
+
+var node33 = ::blueprint::nodes::output::Output()
+
+node33.var_name = "shop_height"
+node33.var_type = "num"
+
+_editor.add_node(node33, 274.91383503797, -559.64625121784)
+
+var node34 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node34, 144.05222973179, -582.07662176145)
+
+var node35 = ::blueprint::nodes::global_get::GlobalGet()
+node35.query_param("key").value = "shop_height"
+
+_editor.add_node(node35, -128.67145827814, -564.39243358452)
+
+var node36 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node36, 8.118011830166, -562.47138229391)
+
+Blueprint.connect(node35, "val", node36, "in")
+Blueprint.connect(node31, "val", node32, "in")
 Blueprint.connect(node27, "val", node28, "in")
 Blueprint.connect(node23, "val", node24, "in")
 Blueprint.connect(node19, "val", node20, "in")
@@ -150,6 +192,14 @@ Blueprint.connect(node15, "val", node16, "in")
 Blueprint.connect(node11, "val", node12, "in")
 Blueprint.connect(node7, "val", node8, "in")
 Blueprint.connect(node3, "val", node4, "in")
+Blueprint.connect(node36, "out", node34, "cond")
+Blueprint.connect(node0, "shope_height", node34, "true")
+Blueprint.connect(node35, "val", node34, "false")
+Blueprint.connect(node34, "result", node33, "var")
+Blueprint.connect(node32, "out", node30, "cond")
+Blueprint.connect(node0, "shope_width", node30, "true")
+Blueprint.connect(node31, "val", node30, "false")
+Blueprint.connect(node30, "result", node29, "var")
 Blueprint.connect(node28, "out", node26, "cond")
 Blueprint.connect(node0, "rand", node26, "true")
 Blueprint.connect(node27, "val", node26, "false")

@@ -254,6 +254,34 @@ node43.var_type = "num"
 
 _editor.add_node(node43, -924.55981445312, 573.46142578125)
 
+var node44 = ::archgraph::nodes::rand_number::RandNumber()
+node44.query_param("min").value = 2.8
+node44.query_param("max").value = 4.0
+
+_editor.add_node(node44, -733.15485566016, 17.773997115334)
+
+var node45 = ::archgraph::nodes::rand_number::RandNumber()
+node45.query_param("min").value = 2.8
+node45.query_param("max").value = 3.7
+
+_editor.add_node(node45, -732.82359413431, -89.264456542206)
+
+var node46 = ::blueprint::nodes::output::Output()
+
+node46.var_name = "shope_width"
+node46.var_type = "num"
+
+_editor.add_node(node46, -599.31784519714, 48.580801827694)
+
+var node47 = ::blueprint::nodes::output::Output()
+
+node47.var_name = "shope_height"
+node47.var_type = "num"
+
+_editor.add_node(node47, -595.26825633954, -57.948132115106)
+
+Blueprint.connect(node45, "val", node47, "var")
+Blueprint.connect(node44, "val", node46, "var")
 Blueprint.connect(node42, "val", node43, "var")
 Blueprint.connect(node36, "b", node35, "cond")
 Blueprint.connect(node37, "v", node35, "val")
