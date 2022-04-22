@@ -40,7 +40,7 @@ node6.load_from_file(_editor, "door_props.ves")
 _editor.add_node(node6, -1144.1643982746, -6.1018798137178)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
-node7.load_from_file(_editor, "ctrl_attrs.ves")
+node7.load_from_file(_editor, "building_props.ves")
 
 _editor.add_node(node7, -1011.6529439777, 120.20779388044)
 

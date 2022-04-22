@@ -1,0 +1,63 @@
+var node0 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
+node0.query_param("size").value.set(1, 1, 1)
+
+_editor.add_node(node0, -294.55292489196, 126.89059174428)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+
+_editor.add_node(node1, 291.1085397592, 201.3137404956)
+
+var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
+node2.query_param("axes").value = "xy"
+node2.query_param("scale").value.set(1, 1)
+node2.query_param("scale2").value.set(1, 1)
+node2.query_param("offset").value.set(0, 0)
+node2.query_param("uw_factor").value = 1
+node2.query_param("gpu").value = false
+
+_editor.add_node(node2, -93.716697178419, -30.32718913607)
+
+var node3 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node3, 95.00141279095, 240.87063579372)
+
+var node4 = ::archgraph::nodes::setup_projection::SetupProjection()
+node4.query_param("axes").value = "yx"
+node4.query_param("scale").value.set(1, 1)
+node4.query_param("scale2").value.set(1, 1)
+node4.query_param("offset").value.set(0, 0)
+node4.query_param("uw_factor").value = 1
+node4.query_param("gpu").value = false
+
+_editor.add_node(node4, -94.200709713974, 222.25490087479)
+
+var node5 = ::blueprint::nodes::property::Property()
+
+node5.var_name = "hori"
+node5.var_type = "bool"
+
+_editor.add_node(node5, -98.55194908262, 383.34905919675)
+
+var node6 = ::blueprint::nodes::input::Input()
+
+node6.var_name = "texture"
+node6.var_type = "texture"
+
+_editor.add_node(node6, 96.635810852051, 159.38946533203)
+
+var node7 = ::blueprint::nodes::output::Output()
+
+node7.var_name = "geo"
+node7.var_type = "array"
+
+_editor.add_node(node7, 474.5126531932, 210.69317248636)
+
+Blueprint.connect(node0, "geo", node4, "geo")
+Blueprint.connect(node0, "geo", node2, "geo")
+Blueprint.connect(node5, "var", node3, "cond")
+Blueprint.connect(node4, "geo", node3, "true")
+Blueprint.connect(node2, "geo", node3, "false")
+Blueprint.connect(node3, "result", node1, "geo")
+Blueprint.connect(node6, "var", node1, "texture")
+Blueprint.connect(node1, "geo", node7, "var")

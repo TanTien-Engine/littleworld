@@ -326,7 +326,7 @@ var node60 = ::blueprint::nodes::a_n_d::AND()
 _editor.add_node(node60, -553.1286640586, -913.71231571582)
 
 var node61 = ::blueprint::nodes::subgraph::Subgraph()
-node61.load_from_file(_editor, "ctrl_attrs.ves")
+node61.load_from_file(_editor, "building_props.ves")
 
 _editor.add_node(node61, -1493.6010742188, -110.34269714355)
 

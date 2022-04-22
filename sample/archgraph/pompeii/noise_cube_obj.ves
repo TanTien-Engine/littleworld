@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "rand"
 node0.var_type = "num"
 
-_editor.add_node(node0, 748.6522531476, 210.728806218)
+_editor.add_node(node0, 738.7348977757, 281.80318638329)
 
 var node1 = ::blueprint::nodes::merge::Merge()
 
@@ -36,9 +36,15 @@ node6.init_filepath("../../../../procedural/city/examples/Example_Pompeii__2019_
 
 _editor.add_node(node6, 604.70264176298, 27.444759995126)
 
+var node7 = ::archgraph::nodes::rand_number::RandNumber()
+node7.query_param("min").value = 0
+node7.query_param("max").value = 1
+
+_editor.add_node(node7, 742.61607676104, 199.1543455518)
+
 Blueprint.connect(node4, "geo", node1, "in0")
 Blueprint.connect(node5, "geo", node1, "in1")
 Blueprint.connect(node6, "geo", node1, "in2")
-Blueprint.connect(node0, "var", node3, "rand")
+Blueprint.connect(node7, "val", node3, "rand")
 Blueprint.connect(node1, "list", node3, "items")
 Blueprint.connect(node3, "tex", node2, "var")

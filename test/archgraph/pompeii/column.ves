@@ -5,9 +5,9 @@ _editor.add_node(node0, 230.57040258512, 152.8759767508)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(12.45670081304, 8.3922026003458, 8.0576455815082)
-node1.cam.yaw = -140.6
-node1.cam.pitch = -37.4
+node1.cam.position.set(10.833922803616, 5.1704989931608, 6.3973910931573)
+node1.cam.yaw = -141.8
+node1.cam.pitch = -29.4
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -39,10 +39,16 @@ var node6 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node6, 35.045370483399, 243.40215454102)
 
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
+
+_editor.add_node(node7, -15.1, 344.4)
+
 Blueprint.connect(node5, "curr_item", node4, "facade")
 Blueprint.connect(node2, "geo", node3, "geo")
 Blueprint.connect(node3, "side", node5, "items")
 Blueprint.connect(node4, "geo", node5, "eval")
 Blueprint.connect(node5, "result", node6, "in0")
+Blueprint.connect(node7, "next", node0, "prev")
 Blueprint.connect(node6, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")

@@ -5,9 +5,9 @@ _editor.add_node(node0, 371.99407378832, -7.2401634932001)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(6.7405811442964, 2.4413962162665, 7.0941727843655)
-node1.cam.yaw = -124.4
-node1.cam.pitch = -21.2
+node1.cam.position.set(2.6420845450779, 1.2430271764315, 8.8454432843991)
+node1.cam.yaw = -84.6
+node1.cam.pitch = 2.7999999999999
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -15,7 +15,7 @@ node1.speed = 0.22097560763359
 _editor.add_node(node1, 126.67388029004, -255.87482418239)
 
 var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
-node2.query_param("size").value.set(6, 2, 3)
+node2.query_param("size").value.set(6, 2.5, 3)
 
 _editor.add_node(node2, -315.84228400027, 48.553267523508)
 
@@ -34,13 +34,13 @@ node4.on_param_dirty()
 _editor.add_node(node4, -157.56143010953, 134.59748837318)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/ground_floor.ves")
+node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/upper_floor.ves")
 
-_editor.add_node(node5, 87.618869121642, 150.44755675926)
+_editor.add_node(node5, 88.618869121642, 151.44755675926)
 
 var node6 = ::blueprint::nodes::integer::Integer()
 
-node6.value = 9
+node6.value = 8
 
 _editor.add_node(node6, -149.42455277876, -143.53728526722)
 
@@ -49,14 +49,14 @@ var node7 = ::blueprint::nodes::for_each_f::ForEachF()
 _editor.add_node(node7, 76.918158649753, 31.119749181817)
 
 var node8 = ::blueprint::nodes::subgraph::Subgraph()
-node8.load_from_file(_editor, "../../../sample/archgraph/pompeii/ground_floor.ves")
+node8.load_from_file(_editor, "../../../sample/archgraph/pompeii/upper_floor.ves")
 
 _editor.add_node(node8, 78.013921056066, -71.996361401047)
 
 var node9 = ::blueprint::nodes::subgraph::Subgraph()
 node9.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
 
-_editor.add_node(node9, 91.566741943361, 242.65797424316)
+_editor.add_node(node9, 87.60276538783, 246.95576975741)
 
 Blueprint.connect(node7, "curr_item", node8, "facade")
 Blueprint.connect(node6, "v", node8, "type")

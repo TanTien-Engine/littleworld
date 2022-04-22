@@ -1,0 +1,26 @@
+var node0 = ::rendergraph::nodes::pass::Pass()
+
+node0.once = true
+
+_editor.add_node(node0, 322.97921092924, 201.873952489)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "wall_props_func.ves")
+
+_editor.add_node(node1, -24, 237)
+
+var node2 = ::blueprint::nodes::global_set::GlobalSet()
+node2.query_param("key").value = "wall_depth"
+
+_editor.add_node(node2, 185.87752727273, 282.89973305785)
+
+var node3 = ::blueprint::nodes::global_set::GlobalSet()
+node3.query_param("key").value = "wall_paint_height"
+
+_editor.add_node(node3, 183.56418181818, 217.1107785124)
+
+Blueprint.connect(node1, "next", node2, "prev")
+Blueprint.connect(node1, "depth", node2, "val")
+Blueprint.connect(node2, "next", node3, "prev")
+Blueprint.connect(node1, "paint_height", node3, "val")
+Blueprint.connect(node3, "next", node0, "do")

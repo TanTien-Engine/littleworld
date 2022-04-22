@@ -1,76 +1,76 @@
-var node0 = ::blueprint::nodes::input::Input()
+var node0 = ::blueprint::nodes::merge::Merge()
 
-node0.var_name = "rand"
-node0.var_type = "num"
+_editor.add_node(node0, 681.2632171076, 64.951235351559)
 
-_editor.add_node(node0, 748.6522531476, 210.728806218)
+var node1 = ::blueprint::nodes::output::Output()
 
-var node1 = ::blueprint::nodes::merge::Merge()
+node1.var_name = "tex"
+node1.var_type = "texture"
 
-_editor.add_node(node1, 681.2632171076, 64.951235351559)
+_editor.add_node(node1, 1072.2453741168, 177.64598113326)
 
-var node2 = ::blueprint::nodes::output::Output()
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "rand_select.ves")
 
-node2.var_name = "tex"
-node2.var_type = "texture"
+_editor.add_node(node2, 888.92777260925, 168.43013138122)
 
-_editor.add_node(node2, 1147.884880744, 191.19335545455)
+var node3 = ::rendergraph::nodes::texture::Texture()
+node3.query_param("unif_name").value = "u_tex"
+node3.gamma_correction = false
+node3.mipmap = false
+node3.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.1.jpg")
+node3.set_sampler("linear_repeat")
 
-var node3 = ::blueprint::nodes::subgraph::Subgraph()
-node3.load_from_file(_editor, "rand_select.ves")
-
-_editor.add_node(node3, 949.326483125, 181.41303177246)
+_editor.add_node(node3, 183.80367395396, 225.23566499414)
 
 var node4 = ::rendergraph::nodes::texture::Texture()
 node4.query_param("unif_name").value = "u_tex"
 node4.gamma_correction = false
 node4.mipmap = false
-node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.1.jpg")
+node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.2.jpg")
 node4.set_sampler("linear_repeat")
 
-_editor.add_node(node4, 183.80367395396, 225.23566499414)
+_editor.add_node(node4, 404.27178955078, 225.23565673828)
 
 var node5 = ::rendergraph::nodes::texture::Texture()
 node5.query_param("unif_name").value = "u_tex"
 node5.gamma_correction = false
 node5.mipmap = false
-node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.2.jpg")
+node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.3.jpg")
 node5.set_sampler("linear_repeat")
 
-_editor.add_node(node5, 404.27178955078, 225.23565673828)
+_editor.add_node(node5, 173.42870250265, 38.486205875698)
 
 var node6 = ::rendergraph::nodes::texture::Texture()
 node6.query_param("unif_name").value = "u_tex"
 node6.gamma_correction = false
 node6.mipmap = false
-node6.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.3.jpg")
+node6.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.5.jpg")
 node6.set_sampler("linear_repeat")
 
-_editor.add_node(node6, 173.42870250265, 38.486205875698)
+_editor.add_node(node6, 173.42870952795, -153.45073760361)
 
 var node7 = ::rendergraph::nodes::texture::Texture()
 node7.query_param("unif_name").value = "u_tex"
 node7.gamma_correction = false
 node7.mipmap = false
-node7.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.5.jpg")
+node7.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.6.jpg")
 node7.set_sampler("linear_repeat")
 
-_editor.add_node(node7, 173.42870952795, -153.45073760361)
+_editor.add_node(node7, 406.86553093695, -145.66950899275)
 
-var node8 = ::rendergraph::nodes::texture::Texture()
-node8.query_param("unif_name").value = "u_tex"
-node8.gamma_correction = false
-node8.mipmap = false
-node8.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/woodwork/DoorBeam.6.jpg")
-node8.set_sampler("linear_repeat")
+var node8 = ::blueprint::nodes::input::Input()
 
-_editor.add_node(node8, 406.86553093695, -145.66950899275)
+node8.var_name = "rand"
+node8.var_type = "num"
 
-Blueprint.connect(node4, "tex", node1, "in0")
-Blueprint.connect(node5, "tex", node1, "in1")
-Blueprint.connect(node6, "tex", node1, "in2")
-Blueprint.connect(node7, "tex", node1, "in3")
-Blueprint.connect(node8, "tex", node1, "in4")
-Blueprint.connect(node0, "var", node3, "rand")
-Blueprint.connect(node1, "list", node3, "items")
-Blueprint.connect(node3, "tex", node2, "var")
+_editor.add_node(node8, 677.4119140625, 183.6169921875)
+
+Blueprint.connect(node3, "tex", node0, "in0")
+Blueprint.connect(node4, "tex", node0, "in1")
+Blueprint.connect(node5, "tex", node0, "in2")
+Blueprint.connect(node6, "tex", node0, "in3")
+Blueprint.connect(node7, "tex", node0, "in4")
+Blueprint.connect(node0, "list", node2, "items")
+Blueprint.connect(node8, "var", node2, "rand")
+Blueprint.connect(node2, "tex", node1, "var")

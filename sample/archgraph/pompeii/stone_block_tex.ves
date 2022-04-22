@@ -1,86 +1,86 @@
-var node0 = ::blueprint::nodes::input::Input()
+var node0 = ::blueprint::nodes::merge::Merge()
 
-node0.var_name = "rand"
-node0.var_type = "num"
+_editor.add_node(node0, 744.01159892578, 73.27343535156)
 
-_editor.add_node(node0, 748.6522531476, 210.728806218)
+var node1 = ::blueprint::nodes::output::Output()
 
-var node1 = ::blueprint::nodes::merge::Merge()
+node1.var_name = "tex"
+node1.var_type = "texture"
 
-_editor.add_node(node1, 744.01159892578, 73.27343535156)
+_editor.add_node(node1, 1147.884880744, 191.19335545455)
 
-var node2 = ::blueprint::nodes::output::Output()
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "rand_select.ves")
 
-node2.var_name = "tex"
-node2.var_type = "texture"
+_editor.add_node(node2, 950.8291127268, 181.41303177246)
 
-_editor.add_node(node2, 1147.884880744, 191.19335545455)
+var node3 = ::rendergraph::nodes::texture::Texture()
+node3.query_param("unif_name").value = "u_tex"
+node3.gamma_correction = false
+node3.mipmap = false
+node3.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.1.c.jpg")
+node3.set_sampler("linear_repeat")
 
-var node3 = ::blueprint::nodes::subgraph::Subgraph()
-node3.load_from_file(_editor, "rand_select.ves")
-
-_editor.add_node(node3, 949.326483125, 181.41303177246)
+_editor.add_node(node3, -236.96328735352, 399.57391357422)
 
 var node4 = ::rendergraph::nodes::texture::Texture()
 node4.query_param("unif_name").value = "u_tex"
 node4.gamma_correction = false
 node4.mipmap = false
-node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.1.c.jpg")
+node4.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.2.c.jpg")
 node4.set_sampler("linear_repeat")
 
-_editor.add_node(node4, -236.96328735352, 399.57391357422)
+_editor.add_node(node4, -5.6354837158203, 398.10979345703)
 
 var node5 = ::rendergraph::nodes::texture::Texture()
 node5.query_param("unif_name").value = "u_tex"
 node5.gamma_correction = false
 node5.mipmap = false
-node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.2.c.jpg")
+node5.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.3.c.jpg")
 node5.set_sampler("linear_repeat")
 
-_editor.add_node(node5, -5.6354837158203, 398.10979345703)
+_editor.add_node(node5, 234.47693378906, 398.10979902344)
 
 var node6 = ::rendergraph::nodes::texture::Texture()
 node6.query_param("unif_name").value = "u_tex"
 node6.gamma_correction = false
 node6.mipmap = false
-node6.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.3.c.jpg")
+node6.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.4.c.jpg")
 node6.set_sampler("linear_repeat")
 
-_editor.add_node(node6, 234.47693378906, 398.10979902344)
+_editor.add_node(node6, -226.25546354143, -262.76717470881)
 
 var node7 = ::rendergraph::nodes::texture::Texture()
 node7.query_param("unif_name").value = "u_tex"
 node7.gamma_correction = false
 node7.mipmap = false
-node7.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.4.c.jpg")
+node7.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.5.c.jpg")
 node7.set_sampler("linear_repeat")
 
-_editor.add_node(node7, -226.25546354143, -262.76717470881)
+_editor.add_node(node7, 16.613146982012, -262.76718139648)
 
 var node8 = ::rendergraph::nodes::texture::Texture()
 node8.query_param("unif_name").value = "u_tex"
 node8.gamma_correction = false
 node8.mipmap = false
-node8.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.5.c.jpg")
+node8.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.6.c.jpg")
 node8.set_sampler("linear_repeat")
 
-_editor.add_node(node8, 16.613146982012, -262.76718139648)
+_editor.add_node(node8, 242.97612333895, -267.48306029525)
 
-var node9 = ::rendergraph::nodes::texture::Texture()
-node9.query_param("unif_name").value = "u_tex"
-node9.gamma_correction = false
-node9.mipmap = false
-node9.init_texture("../../../../procedural/city/examples/Example_Pompeii__2019_1/assets/general/stonework/StoneBlock.6.c.jpg")
-node9.set_sampler("linear_repeat")
+var node9 = ::blueprint::nodes::input::Input()
 
-_editor.add_node(node9, 242.97612333895, -267.48306029525)
+node9.var_name = "rand"
+node9.var_type = "num"
 
-Blueprint.connect(node4, "tex", node1, "in0")
-Blueprint.connect(node5, "tex", node1, "in1")
-Blueprint.connect(node6, "tex", node1, "in2")
-Blueprint.connect(node7, "tex", node1, "in3")
-Blueprint.connect(node8, "tex", node1, "in4")
-Blueprint.connect(node9, "tex", node1, "in5")
-Blueprint.connect(node0, "var", node3, "rand")
-Blueprint.connect(node1, "list", node3, "items")
-Blueprint.connect(node3, "tex", node2, "var")
+_editor.add_node(node9, 743.06862792969, 200.11414794922)
+
+Blueprint.connect(node3, "tex", node0, "in0")
+Blueprint.connect(node4, "tex", node0, "in1")
+Blueprint.connect(node5, "tex", node0, "in2")
+Blueprint.connect(node6, "tex", node0, "in3")
+Blueprint.connect(node7, "tex", node0, "in4")
+Blueprint.connect(node8, "tex", node0, "in5")
+Blueprint.connect(node0, "list", node2, "items")
+Blueprint.connect(node9, "var", node2, "rand")
+Blueprint.connect(node2, "tex", node1, "var")

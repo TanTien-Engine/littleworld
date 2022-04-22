@@ -76,7 +76,7 @@ node12.var_name = "width"
 _editor.add_node(node12, -492.37571745177, -40.199163670071)
 
 var node13 = ::archgraph::nodes::split_size::SplitSize()
-node13.query_param("size").value = 2.0
+node13.query_param("size").value = 2
 node13.query_param("mode").value = "floating"
 
 _editor.add_node(node13, 121.40725439316, 163.02403163086)
@@ -114,18 +114,11 @@ node19.set_prop_value("ground", false)
 
 _editor.add_node(node19, 492.50366507943, 9.1922437768134)
 
-var node20 = ::blueprint::nodes::input::Input()
+var node20 = ::archgraph::nodes::split_size::SplitSize()
+node20.query_param("size").value = 1
+node20.query_param("mode").value = "floating"
 
-node20.var_name = "win_type"
-node20.var_type = "int"
-
-_editor.add_node(node20, 311.93138236054, -22.717078847335)
-
-var node21 = ::archgraph::nodes::split_size::SplitSize()
-node21.query_param("size").value = 1.0
-node21.query_param("mode").value = "floating"
-
-_editor.add_node(node21, 124.42128455845, -17.16733217079)
+_editor.add_node(node20, 124.42128455845, -17.16733217079)
 
 Blueprint.connect(node4, "large_height", node11, "var")
 Blueprint.connect(node11, "var", node15, "var")
@@ -140,11 +133,10 @@ Blueprint.connect(node3, "size", node2, "size2")
 Blueprint.connect(node2, "child1", node9, "parent")
 Blueprint.connect(node13, "size", node9, "size0")
 Blueprint.connect(node14, "size", node9, "size1")
-Blueprint.connect(node21, "size", node9, "size2")
+Blueprint.connect(node20, "size", node9, "size2")
 Blueprint.connect(node9, "child2", node19, "geo")
 Blueprint.connect(node9, "child0", node18, "geo")
 Blueprint.connect(node9, "child1", node16, "facade")
-Blueprint.connect(node20, "var", node16, "win_type")
 Blueprint.connect(node18, "geo", node17, "in0")
 Blueprint.connect(node16, "geo", node17, "in1")
 Blueprint.connect(node19, "geo", node17, "in2")

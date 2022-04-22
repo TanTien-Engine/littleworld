@@ -1,101 +1,155 @@
-var node0 = ::archgraph::nodes::rand_number::RandNumber()
-node0.query_param("min").value = 0.4
-node0.query_param("max").value = 0.85
+var node0 = ::blueprint::nodes::output::Output()
 
-_editor.add_node(node0, -6.1461930005129, -93.839481472195)
+node0.var_name = "small_width"
+node0.var_type = "num"
+
+_editor.add_node(node0, 401.78879231297, 169.19178722398)
 
 var node1 = ::blueprint::nodes::output::Output()
 
-node1.var_name = "small_width"
+node1.var_name = "small_height"
 node1.var_type = "num"
 
-_editor.add_node(node1, 129.11383398272, -63.825976984381)
+_editor.add_node(node1, 405.41494356123, 72.920273726363)
 
-var node2 = ::archgraph::nodes::rand_number::RandNumber()
-node2.query_param("min").value = 0.7
-node2.query_param("max").value = 1
+var node2 = ::blueprint::nodes::output::Output()
 
-_editor.add_node(node2, -6.8266748186947, -207.6242905631)
+node2.var_name = "large_width"
+node2.var_type = "num"
+
+_editor.add_node(node2, 407.40379678437, -16.876233876942)
 
 var node3 = ::blueprint::nodes::output::Output()
 
-node3.var_name = "small_height"
+node3.var_name = "large_height"
 node3.var_type = "num"
 
-_editor.add_node(node3, 128.43335216454, -177.61078607529)
+_editor.add_node(node3, 403.88033975958, -103.43790247198)
 
-var node4 = ::archgraph::nodes::rand_number::RandNumber()
-node4.query_param("min").value = 1
-node4.query_param("max").value = 1.5
+var node4 = ::blueprint::nodes::output::Output()
 
-_editor.add_node(node4, -290.42459845506, -95.817492381286)
+node4.var_name = "frame_width"
+node4.var_type = "num"
+
+_editor.add_node(node4, 404.92338936438, -192.89550155965)
 
 var node5 = ::blueprint::nodes::output::Output()
 
-node5.var_name = "large_width"
+node5.var_name = "small_tile_width"
 node5.var_type = "num"
 
-_editor.add_node(node5, -155.16457147183, -65.803987893472)
+_editor.add_node(node5, 404.62202386179, -282.72592788914)
 
-var node6 = ::archgraph::nodes::rand_number::RandNumber()
-node6.query_param("min").value = 0.8
-node6.query_param("max").value = 1.1
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "win_props_func.ves")
 
-_editor.add_node(node6, -291.10508027324, -209.60230147219)
+_editor.add_node(node6, -191.73415426123, -59.212895440712)
 
-var node7 = ::blueprint::nodes::output::Output()
+var node7 = ::blueprint::nodes::branch_f::BranchF()
 
-node7.var_name = "large_height"
-node7.var_type = "num"
+_editor.add_node(node7, 270.92718700678, 146.76141668037)
 
-_editor.add_node(node7, -155.84505329001, -179.58879698438)
+var node8 = ::blueprint::nodes::global_get::GlobalGet()
+node8.query_param("key").value = "win_small_width"
 
-var node8 = ::blueprint::nodes::number::Number()
+_editor.add_node(node8, -1.796501003144, 164.4456048573)
 
-node8.value = 0.08
+var node9 = ::blueprint::nodes::is_null::IsNull()
 
-_editor.add_node(node8, -288.13906860352, -322.34155273438)
+_editor.add_node(node9, 134.99296910516, 166.36665614791)
 
-var node9 = ::blueprint::nodes::output::Output()
+var node10 = ::blueprint::nodes::branch_f::BranchF()
 
-node9.var_name = "frame_width"
-node9.var_type = "num"
+_editor.add_node(node10, 272.64198700678, 53.52071668037)
 
-_editor.add_node(node9, -157.13903808594, -312.34153747559)
+var node11 = ::blueprint::nodes::global_get::GlobalGet()
+node11.query_param("key").value = "win_small_height"
 
-var node10 = ::blueprint::nodes::add::Add()
+_editor.add_node(node11, -0.081701003144032, 71.2049048573)
 
-_editor.add_node(node10, 193.73877443791, -477.56532403386)
+var node12 = ::blueprint::nodes::is_null::IsNull()
 
-var node11 = ::blueprint::nodes::subgraph::Subgraph()
-node11.load_from_file(_editor, "door_props.ves")
+_editor.add_node(node12, 136.70776910516, 73.12595614791)
 
-_editor.add_node(node11, -128.57527851933, -460.28510782541)
+var node13 = ::blueprint::nodes::branch_f::BranchF()
 
-var node12 = ::blueprint::nodes::multiply::Multiply()
+_editor.add_node(node13, 276.40066469273, -35.908584596865)
 
-_editor.add_node(node12, 56.248167698586, -527.90342507194)
+var node14 = ::blueprint::nodes::global_get::GlobalGet()
+node14.query_param("key").value = "win_large_width"
 
-var node13 = ::blueprint::nodes::integer::Integer()
+_editor.add_node(node14, 3.6769766828064, -18.224396419935)
 
-node13.value = 2
+var node15 = ::blueprint::nodes::is_null::IsNull()
 
-_editor.add_node(node13, -78.237180106538, -564.71787262536)
+_editor.add_node(node15, 140.46644679111, -16.303345129325)
 
-var node14 = ::blueprint::nodes::output::Output()
+var node16 = ::blueprint::nodes::branch_f::BranchF()
 
-node14.var_name = "small_tile_width"
-node14.var_type = "num"
+_editor.add_node(node16, 270.24446634562, -125.37552674563)
 
-_editor.add_node(node14, 329.72676141454, -468.54955678663)
+var node17 = ::blueprint::nodes::global_get::GlobalGet()
+node17.query_param("key").value = "win_large_height"
 
-Blueprint.connect(node11, "margin_width", node12, "a")
-Blueprint.connect(node13, "v", node12, "b")
-Blueprint.connect(node8, "v", node9, "var")
-Blueprint.connect(node6, "val", node7, "var")
-Blueprint.connect(node4, "val", node5, "var")
-Blueprint.connect(node2, "val", node3, "var")
-Blueprint.connect(node0, "val", node10, "a")
-Blueprint.connect(node12, "v", node10, "b")
-Blueprint.connect(node10, "v", node14, "var")
-Blueprint.connect(node0, "val", node1, "var")
+_editor.add_node(node17, -2.4792216643011, -107.6913385687)
+
+var node18 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node18, 134.310248444, -105.77028727809)
+
+var node19 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node19, 272.98137543653, -213.06598129108)
+
+var node20 = ::blueprint::nodes::global_get::GlobalGet()
+node20.query_param("key").value = "win_frame_width"
+
+_editor.add_node(node20, 0.25768742660794, -195.38179311415)
+
+var node21 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node21, 137.04715753491, -193.46074182354)
+
+var node22 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node22, 271.99866933722, -300.97485363587)
+
+var node23 = ::blueprint::nodes::global_get::GlobalGet()
+node23.query_param("key").value = "win_small_tile_width"
+
+_editor.add_node(node23, -0.72501867270219, -283.29066545894)
+
+var node24 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node24, 136.0644514356, -281.36961416833)
+
+Blueprint.connect(node23, "val", node24, "in")
+Blueprint.connect(node20, "val", node21, "in")
+Blueprint.connect(node17, "val", node18, "in")
+Blueprint.connect(node14, "val", node15, "in")
+Blueprint.connect(node11, "val", node12, "in")
+Blueprint.connect(node8, "val", node9, "in")
+Blueprint.connect(node24, "out", node22, "cond")
+Blueprint.connect(node6, "small_tile_width", node22, "true")
+Blueprint.connect(node23, "val", node22, "false")
+Blueprint.connect(node22, "result", node5, "var")
+Blueprint.connect(node21, "out", node19, "cond")
+Blueprint.connect(node6, "frame_width", node19, "true")
+Blueprint.connect(node20, "val", node19, "false")
+Blueprint.connect(node19, "result", node4, "var")
+Blueprint.connect(node18, "out", node16, "cond")
+Blueprint.connect(node6, "large_height", node16, "true")
+Blueprint.connect(node17, "val", node16, "false")
+Blueprint.connect(node16, "result", node3, "var")
+Blueprint.connect(node15, "out", node13, "cond")
+Blueprint.connect(node6, "large_width", node13, "true")
+Blueprint.connect(node14, "val", node13, "false")
+Blueprint.connect(node13, "result", node2, "var")
+Blueprint.connect(node12, "out", node10, "cond")
+Blueprint.connect(node6, "small_height", node10, "true")
+Blueprint.connect(node11, "val", node10, "false")
+Blueprint.connect(node10, "result", node1, "var")
+Blueprint.connect(node9, "out", node7, "cond")
+Blueprint.connect(node6, "small_width", node7, "true")
+Blueprint.connect(node8, "val", node7, "false")
+Blueprint.connect(node7, "result", node0, "var")

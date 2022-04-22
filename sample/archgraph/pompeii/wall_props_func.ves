@@ -1,0 +1,28 @@
+var node0 = ::blueprint::nodes::output::Output()
+
+node0.var_name = "depth"
+node0.var_type = "num"
+
+_editor.add_node(node0, 130.9, 41.3)
+
+var node1 = ::archgraph::nodes::rand_number::RandNumber()
+node1.query_param("min").value = 1.2
+node1.query_param("max").value = 1.8
+
+_editor.add_node(node1, -6.1461930005129, -93.839481472195)
+
+var node2 = ::blueprint::nodes::output::Output()
+
+node2.var_name = "paint_height"
+node2.var_type = "num"
+
+_editor.add_node(node2, 129.11383398272, -63.825976984381)
+
+var node3 = ::archgraph::nodes::rand_number::RandNumber()
+node3.query_param("min").value = 0.35
+node3.query_param("max").value = 0.55
+
+_editor.add_node(node3, -4.8230804443359, 11.946936035156)
+
+Blueprint.connect(node3, "val", node0, "var")
+Blueprint.connect(node1, "val", node2, "var")

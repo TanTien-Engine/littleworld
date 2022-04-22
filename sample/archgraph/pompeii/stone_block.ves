@@ -5,53 +5,46 @@ node0.var_type = "geometry"
 
 _editor.add_node(node0, -130.4872163179, 114.7102197582)
 
-var node1 = ::blueprint::nodes::number::Number()
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "stone_block_tex.ves")
 
-node1.value = 0
+_editor.add_node(node1, -183.1847811188, 36.2931909477)
 
-_editor.add_node(node1, -376.61955268886, 27.99291671303)
+var node2 = ::blueprint::nodes::output::Output()
 
-var node2 = ::blueprint::nodes::subgraph::Subgraph()
-node2.load_from_file(_editor, "stone_block_tex.ves")
+node2.var_name = "geo"
+node2.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node2, -183.1847811188, 36.2931909477)
+_editor.add_node(node2, 400.86284952472, 99.5634959826)
 
-var node3 = ::blueprint::nodes::output::Output()
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "wall_object.ves")
+node3.set_prop_value("hori", true)
 
-node3.var_name = "geo"
-node3.var_type = [ "geometry", "array" ]
+_editor.add_node(node3, 55.982689802373, 92.096323222035)
 
-_editor.add_node(node3, 400.86284952472, 99.5634959826)
+var node4 = ::blueprint::nodes::branch_f::BranchF()
 
-var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "wall_object.ves")
-node4.set_prop_value("hori", true)
+_editor.add_node(node4, 256.28550048415, 81.986760690461)
 
-_editor.add_node(node4, 55.982689802373, 92.096323222035)
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "wall_object.ves")
+node5.set_prop_value("hori", false)
 
-var node5 = ::blueprint::nodes::branch_f::BranchF()
+_editor.add_node(node5, 58.475905429721, -15.559071218236)
 
-_editor.add_node(node5, 256.28550048415, 81.986760690461)
+var node6 = ::blueprint::nodes::property::Property()
 
-var node6 = ::blueprint::nodes::subgraph::Subgraph()
-node6.load_from_file(_editor, "wall_object.ves")
-node6.set_prop_value("hori", false)
+node6.var_name = "hori"
+node6.var_type = "bool"
 
-_editor.add_node(node6, 58.475905429721, -15.559071218236)
+_editor.add_node(node6, 102.10390625, 184.50080566406)
 
-var node7 = ::blueprint::nodes::property::Property()
-
-node7.var_name = "hori"
-node7.var_type = "bool"
-
-_editor.add_node(node7, 102.10390625, 184.50080566406)
-
-Blueprint.connect(node1, "v", node2, "rand")
-Blueprint.connect(node0, "var", node6, "facade")
-Blueprint.connect(node2, "tex", node6, "texture")
-Blueprint.connect(node0, "var", node4, "facade")
-Blueprint.connect(node2, "tex", node4, "texture")
-Blueprint.connect(node7, "var", node5, "cond")
-Blueprint.connect(node4, "geo", node5, "true")
-Blueprint.connect(node6, "geo", node5, "false")
-Blueprint.connect(node5, "result", node3, "var")
+Blueprint.connect(node0, "var", node5, "facade")
+Blueprint.connect(node1, "tex", node5, "texture")
+Blueprint.connect(node0, "var", node3, "facade")
+Blueprint.connect(node1, "tex", node3, "texture")
+Blueprint.connect(node6, "var", node4, "cond")
+Blueprint.connect(node3, "geo", node4, "true")
+Blueprint.connect(node5, "geo", node4, "false")
+Blueprint.connect(node4, "result", node2, "var")

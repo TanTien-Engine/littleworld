@@ -1,84 +1,60 @@
-var node0 = ::blueprint::nodes::input::Input()
+var node0 = ::blueprint::nodes::multiply::Multiply()
 
-node0.var_name = "rand"
-node0.var_type = "num"
+_editor.add_node(node0, 395.0552718341, 96.87084565143)
 
-_editor.add_node(node0, -379.29501362149, 18.973732101636)
+var node1 = ::blueprint::nodes::fetch::Fetch()
 
-var node1 = ::blueprint::nodes::multiply::Multiply()
+_editor.add_node(node1, 572.39979938076, 140.0087466527)
 
-_editor.add_node(node1, 395.0552718341, 96.87084565143)
+var node2 = ::blueprint::nodes::count::Count()
 
-var node2 = ::blueprint::nodes::fetch::Fetch()
+_editor.add_node(node2, 246.83270404822, 113.19479647259)
 
-_editor.add_node(node2, 599.03732414, 149.57093502781)
+var node3 = ::blueprint::nodes::output::Output()
 
-var node3 = ::blueprint::nodes::count::Count()
+node3.var_name = "tex"
+node3.var_type = "texture"
 
-_editor.add_node(node3, 246.83270404822, 113.19479647259)
+_editor.add_node(node3, 745.17569830656, 169.89035114489)
 
-var node4 = ::blueprint::nodes::output::Output()
+var node4 = ::blueprint::nodes::input::Input()
 
-node4.var_name = "tex"
-node4.var_type = "texture"
+node4.var_name = "items"
+node4.var_type = "array"
 
-_editor.add_node(node4, 771.8132230658, 179.45253952)
+_editor.add_node(node4, 112.11005074509, 156.55841861284)
 
-var node5 = ::blueprint::nodes::compare::Compare()
+var node5 = ::archgraph::nodes::rand_number::RandNumber()
+node5.query_param("min").value = 0
+node5.query_param("max").value = 1
 
-node5.cmp = "greater_equal"
+_editor.add_node(node5, -126.29797676997, -9.8077531622789)
 
-_editor.add_node(node5, 61.264814870409, -31.424045089004)
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "../../../../tantien/assets/blueprints/tools/opt_value.ves")
 
-var node6 = ::blueprint::nodes::branch_f::BranchF()
+_editor.add_node(node6, 63.221347078453, 50.898662789658)
 
-_editor.add_node(node6, 244.58562532741, 45.210059444086)
+var node7 = ::blueprint::nodes::input::Input()
 
-var node7 = ::blueprint::nodes::number::Number()
+node7.var_name = "rand"
+node7.var_type = "num"
 
-node7.value = 0
+_editor.add_node(node7, -127.93657860301, 75.961457055464)
 
-_editor.add_node(node7, 59.010839239309, -108.80947734596)
+var node8 = ::blueprint::nodes::clamp::Clamp()
 
-var node8 = ::blueprint::nodes::number::Number()
+node8.min = 0
+node8.max = 1
 
-node8.value = 1
+_editor.add_node(node8, 249.15512960614, 42.357194959787)
 
-_editor.add_node(node8, -74.728011458192, -67.305928264554)
-
-var node9 = ::blueprint::nodes::branch_f::BranchF()
-
-_editor.add_node(node9, -80.599416672591, 33.370121444086)
-
-var node10 = ::blueprint::nodes::is_null::IsNull()
-
-_editor.add_node(node10, -227.46921501128, 68.779745219576)
-
-var node11 = ::blueprint::nodes::number::Number()
-
-node11.value = 0
-
-_editor.add_node(node11, -227.46921501128, 11.779745219576)
-
-var node12 = ::blueprint::nodes::input::Input()
-
-node12.var_name = "items"
-node12.var_type = "array"
-
-_editor.add_node(node12, 101.18183545925, 177.73183572916)
-
-Blueprint.connect(node12, "var", node3, "var")
-Blueprint.connect(node0, "var", node10, "in")
-Blueprint.connect(node10, "out", node9, "cond")
-Blueprint.connect(node11, "v", node9, "true")
-Blueprint.connect(node0, "var", node9, "false")
-Blueprint.connect(node9, "result", node5, "a")
-Blueprint.connect(node8, "v", node5, "b")
-Blueprint.connect(node5, "out", node6, "cond")
-Blueprint.connect(node7, "v", node6, "true")
-Blueprint.connect(node9, "result", node6, "false")
-Blueprint.connect(node6, "result", node1, "a")
-Blueprint.connect(node3, "num", node1, "b")
-Blueprint.connect(node12, "var", node2, "items")
-Blueprint.connect(node1, "v", node2, "index")
-Blueprint.connect(node2, "item", node4, "var")
+Blueprint.connect(node7, "var", node6, "val")
+Blueprint.connect(node5, "val", node6, "default")
+Blueprint.connect(node6, "val", node8, "v")
+Blueprint.connect(node4, "var", node2, "var")
+Blueprint.connect(node2, "num", node0, "a")
+Blueprint.connect(node8, "v", node0, "b")
+Blueprint.connect(node4, "var", node1, "items")
+Blueprint.connect(node0, "v", node1, "index")
+Blueprint.connect(node1, "item", node3, "var")

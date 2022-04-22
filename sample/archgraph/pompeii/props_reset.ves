@@ -1,0 +1,24 @@
+var node0 = ::blueprint::nodes::subgraph::Subgraph()
+node0.load_from_file(_editor, "wall_props_reset.ves")
+
+_editor.add_node(node0, -142, 67.5)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "win_props_reset.ves")
+
+_editor.add_node(node1, 89, 66.5)
+
+var node2 = ::rendergraph::nodes::pass::Pass()
+
+node2.once = true
+
+_editor.add_node(node2, 278, 66.5)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "building_props_reset.ves")
+
+_editor.add_node(node3, -384, 45)
+
+Blueprint.connect(node3, "next", node0, "prev")
+Blueprint.connect(node0, "next", node1, "prev")
+Blueprint.connect(node1, "next", node2, "do")

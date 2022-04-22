@@ -23,37 +23,36 @@ node3.load_from_file(_editor, "wall_tex.ves")
 
 _editor.add_node(node3, -138.69618662942, -106.29046422845)
 
-var node4 = ::blueprint::nodes::number::Number()
+var node4 = ::blueprint::nodes::input::Input()
 
-node4.value = 1
+node4.var_name = "geo"
+node4.var_type = "geometry"
 
-_editor.add_node(node4, -326.72030549415, -116.43804905419)
+_editor.add_node(node4, -493.96827624613, 176.85268637413)
 
-var node5 = ::blueprint::nodes::input::Input()
+var node5 = ::blueprint::nodes::output::Output()
 
 node5.var_name = "geo"
 node5.var_type = "geometry"
 
-_editor.add_node(node5, -493.96827624613, 176.85268637413)
+_editor.add_node(node5, 322.83377685547, 36.41466064453)
 
-var node6 = ::blueprint::nodes::output::Output()
+var node6 = ::blueprint::nodes::input::Input()
 
-node6.var_name = "geo"
-node6.var_type = "geometry"
+node6.var_name = "color"
+node6.var_type = "num3"
 
-_editor.add_node(node6, 322.83377685547, 36.41466064453)
+_editor.add_node(node6, -491.26652892562, 112.45112067609)
 
-var node7 = ::blueprint::nodes::input::Input()
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "building_props.ves")
 
-node7.var_name = "color"
-node7.var_type = "num3"
+_editor.add_node(node7, -386.61381983596, -49.801300071756)
 
-_editor.add_node(node7, -491.26652892562, 112.45112067609)
-
-Blueprint.connect(node5, "var", node0, "geo")
-Blueprint.connect(node7, "var", node0, "color")
+Blueprint.connect(node7, "building_rand", node3, "rand")
+Blueprint.connect(node4, "var", node0, "geo")
+Blueprint.connect(node6, "var", node0, "color")
 Blueprint.connect(node0, "geo", node2, "geo")
-Blueprint.connect(node4, "v", node3, "rand")
 Blueprint.connect(node2, "geo", node1, "geo")
 Blueprint.connect(node3, "tex", node1, "texture")
-Blueprint.connect(node1, "geo", node6, "var")
+Blueprint.connect(node1, "geo", node5, "var")

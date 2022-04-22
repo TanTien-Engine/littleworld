@@ -43,34 +43,34 @@ node4.set_sampler("linear_repeat")
 
 _editor.add_node(node4, 376.10536792773, 323.19249392773)
 
-var node5 = ::blueprint::nodes::input::Input()
+var node5 = ::blueprint::nodes::merge::Merge()
 
-node5.var_name = "rand"
-node5.var_type = "num"
+_editor.add_node(node5, 751.46652289272, 165.45983039288)
 
-_editor.add_node(node5, 748.6522531476, 210.728806218)
+var node6 = ::blueprint::nodes::output::Output()
 
-var node6 = ::blueprint::nodes::merge::Merge()
+node6.var_name = "tex"
+node6.var_type = "texture"
 
-_editor.add_node(node6, 745.68139892578, 97.69123535156)
+_editor.add_node(node6, 1143.7868000118, 168.6539114275)
 
-var node7 = ::blueprint::nodes::output::Output()
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "rand_select.ves")
 
-node7.var_name = "tex"
-node7.var_type = "texture"
+_editor.add_node(node7, 945.22840239281, 158.87358774541)
 
-_editor.add_node(node7, 1147.884880744, 191.19335545455)
+var node8 = ::blueprint::nodes::input::Input()
 
-var node8 = ::blueprint::nodes::subgraph::Subgraph()
-node8.load_from_file(_editor, "rand_select.ves")
+node8.var_name = "rand"
+node8.var_type = "num"
 
-_editor.add_node(node8, 949.326483125, 181.41303177246)
+_editor.add_node(node8, 756.85442055947, 56.623579041031)
 
-Blueprint.connect(node0, "tex", node6, "in0")
-Blueprint.connect(node1, "tex", node6, "in1")
-Blueprint.connect(node2, "tex", node6, "in2")
-Blueprint.connect(node3, "tex", node6, "in3")
-Blueprint.connect(node4, "tex", node6, "in4")
-Blueprint.connect(node5, "var", node8, "rand")
-Blueprint.connect(node6, "list", node8, "items")
-Blueprint.connect(node8, "tex", node7, "var")
+Blueprint.connect(node0, "tex", node5, "in0")
+Blueprint.connect(node1, "tex", node5, "in1")
+Blueprint.connect(node2, "tex", node5, "in2")
+Blueprint.connect(node3, "tex", node5, "in3")
+Blueprint.connect(node4, "tex", node5, "in4")
+Blueprint.connect(node5, "list", node7, "items")
+Blueprint.connect(node8, "var", node7, "rand")
+Blueprint.connect(node7, "tex", node6, "var")

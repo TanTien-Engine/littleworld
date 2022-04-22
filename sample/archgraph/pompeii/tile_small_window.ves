@@ -96,7 +96,7 @@ _editor.add_node(node15, -8.0104536576695, 95.632829145952)
 var node16 = ::blueprint::nodes::subgraph::Subgraph()
 node16.load_from_file(_editor, "subtile_window.ves")
 
-_editor.add_node(node16, 490.70734621409, 114.93473065224)
+_editor.add_node(node16, 466.16189166864, 144.02563974315)
 
 var node17 = ::blueprint::nodes::merge::Merge()
 
@@ -106,20 +106,13 @@ var node18 = ::blueprint::nodes::subgraph::Subgraph()
 node18.load_from_file(_editor, "painted_wall.ves")
 node18.set_prop_value("ground", false)
 
-_editor.add_node(node18, 489.40776162582, 221.44832240413)
+_editor.add_node(node18, 464.86230708037, 229.63014058595)
 
 var node19 = ::blueprint::nodes::subgraph::Subgraph()
 node19.load_from_file(_editor, "painted_wall.ves")
 node19.set_prop_value("ground", false)
 
-_editor.add_node(node19, 492.50366507943, 9.1922437768134)
-
-var node20 = ::blueprint::nodes::input::Input()
-
-node20.var_name = "win_type"
-node20.var_type = "int"
-
-_editor.add_node(node20, 311.93138236054, -22.717078847335)
+_editor.add_node(node19, 468.86730144307, 55.55588014045)
 
 Blueprint.connect(node4, "small_height", node11, "var")
 Blueprint.connect(node11, "var", node15, "var")
@@ -138,7 +131,6 @@ Blueprint.connect(node13, "size", node9, "size2")
 Blueprint.connect(node9, "child2", node19, "geo")
 Blueprint.connect(node9, "child0", node18, "geo")
 Blueprint.connect(node9, "child1", node16, "facade")
-Blueprint.connect(node20, "var", node16, "win_type")
 Blueprint.connect(node18, "geo", node17, "in0")
 Blueprint.connect(node16, "geo", node17, "in1")
 Blueprint.connect(node19, "geo", node17, "in2")

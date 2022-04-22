@@ -1,28 +1,55 @@
-var node0 = ::blueprint::nodes::number::Number()
+var node0 = ::blueprint::nodes::output::Output()
 
-node0.value = 0.35
+node0.var_name = "depth"
+node0.var_type = "num"
 
-_editor.add_node(node0, -17.661734910973, 10.852493276683)
+_editor.add_node(node0, 372, 223.5)
 
 var node1 = ::blueprint::nodes::output::Output()
 
-node1.var_name = "depth"
+node1.var_name = "paint_height"
 node1.var_type = "num"
 
-_editor.add_node(node1, 121, 21.5)
+_editor.add_node(node1, 370.11383398272, 125.17402301562)
 
-var node2 = ::archgraph::nodes::rand_number::RandNumber()
-node2.query_param("min").value = 1.2
-node2.query_param("max").value = 1.8
+var node2 = ::blueprint::nodes::branch_f::BranchF()
 
-_editor.add_node(node2, -6.1461930005129, -93.839481472195)
+_editor.add_node(node2, 229.92718700678, 201.76141668037)
 
-var node3 = ::blueprint::nodes::output::Output()
+var node3 = ::blueprint::nodes::global_get::GlobalGet()
+node3.query_param("key").value = "wall_depth"
 
-node3.var_name = "paint_height"
-node3.var_type = "num"
+_editor.add_node(node3, -42.796501003144, 219.4456048573)
 
-_editor.add_node(node3, 129.11383398272, -63.825976984381)
+var node4 = ::blueprint::nodes::is_null::IsNull()
 
-Blueprint.connect(node2, "val", node3, "var")
-Blueprint.connect(node0, "v", node1, "var")
+_editor.add_node(node4, 93.99296910516, 221.36665614791)
+
+var node5 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node5, 231.64198700678, 108.52071668037)
+
+var node6 = ::blueprint::nodes::global_get::GlobalGet()
+node6.query_param("key").value = "wall_paint_height"
+
+_editor.add_node(node6, -41.081701003144, 126.2049048573)
+
+var node7 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node7, 95.70776910516, 128.12595614791)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "wall_props_func.ves")
+
+_editor.add_node(node8, -261, 178)
+
+Blueprint.connect(node6, "val", node7, "in")
+Blueprint.connect(node7, "out", node5, "cond")
+Blueprint.connect(node8, "paint_height", node5, "true")
+Blueprint.connect(node6, "val", node5, "false")
+Blueprint.connect(node5, "result", node1, "var")
+Blueprint.connect(node3, "val", node4, "in")
+Blueprint.connect(node4, "out", node2, "cond")
+Blueprint.connect(node8, "depth", node2, "true")
+Blueprint.connect(node3, "val", node2, "false")
+Blueprint.connect(node2, "result", node0, "var")

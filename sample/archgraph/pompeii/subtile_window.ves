@@ -10,7 +10,7 @@ var node1 = ::blueprint::nodes::output::Output()
 node1.var_name = "geo"
 node1.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node1, 474.13737256364, 270.85086494545)
+_editor.add_node(node1, 379.92249653058, 252.66904676363)
 
 var node2 = ::archgraph::nodes::split::Split()
 node2.query_param("axis").value = "vert"
@@ -21,7 +21,7 @@ _editor.add_node(node2, -171.29716976591, 190.53165921481)
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
 node3.load_from_file(_editor, "win_mid.ves")
 
-_editor.add_node(node3, 153.3064790489, 217.99241920238)
+_editor.add_node(node3, 30.165983181131, 222.12465060734)
 
 var node4 = ::archgraph::nodes::split_size::SplitSize()
 node4.query_param("size").value = 0.08
@@ -37,41 +37,31 @@ _editor.add_node(node5, -344.07806471616, 97.557977760456)
 
 var node6 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node6, 341, 242)
+_editor.add_node(node6, 246.78512396694, 223.81818181818)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
 node7.load_from_file(_editor, "win_sill.ves")
 
-_editor.add_node(node7, 160.28850488355, 337.9128474831)
+_editor.add_node(node7, 32.18933132983, 308.98722764839)
 
 var node8 = ::blueprint::nodes::subgraph::Subgraph()
 node8.load_from_file(_editor, "win_top.ves")
 
-_editor.add_node(node8, 154.04034285112, 99.597904884571)
+_editor.add_node(node8, 27.594061859384, 131.82930984325)
 
-var node9 = ::blueprint::nodes::input::Input()
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "win_props.ves")
 
-node9.var_name = "win_type"
-node9.var_type = "int"
+_editor.add_node(node9, -531.70780402183, 245.3224221723)
 
-_editor.add_node(node9, -40.554019581188, 250.29498845881)
-
-var node10 = ::blueprint::nodes::subgraph::Subgraph()
-node10.load_from_file(_editor, "win_props.ves")
-
-_editor.add_node(node10, -531.70780402183, 245.3224221723)
-
-Blueprint.connect(node10, "frame_width", node4, "size")
+Blueprint.connect(node9, "frame_width", node4, "size")
 Blueprint.connect(node0, "var", node2, "parent")
 Blueprint.connect(node4, "size", node2, "size0")
 Blueprint.connect(node5, "size", node2, "size1")
 Blueprint.connect(node4, "size", node2, "size2")
 Blueprint.connect(node2, "child2", node8, "facade")
-Blueprint.connect(node9, "var", node8, "win_type")
 Blueprint.connect(node2, "child0", node7, "facade")
-Blueprint.connect(node9, "var", node7, "win_type")
 Blueprint.connect(node2, "child1", node3, "facade")
-Blueprint.connect(node9, "var", node3, "win_type")
 Blueprint.connect(node7, "geo", node6, "in0")
 Blueprint.connect(node3, "geo", node6, "in1")
 Blueprint.connect(node8, "geo", node6, "in2")

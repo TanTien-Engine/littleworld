@@ -14,109 +14,87 @@ node2.query_param("scale").value.set(1, 1)
 node2.query_param("scale2").value.set(1, 1)
 node2.query_param("offset").value.set(0, 0)
 node2.query_param("uw_factor").value = 1
-node2.query_param("gpu").value = true
+node2.query_param("gpu").value = false
 
 _editor.add_node(node2, -59.097282892975, -36.026160618099)
 
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
 node3.load_from_file(_editor, "wood_tex.ves")
 
-_editor.add_node(node3, -99.067841796875, -184.32571533203)
+_editor.add_node(node3, -106.3405690696, -201.59844260476)
 
-var node4 = ::blueprint::nodes::number::Number()
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
 
-node4.value = 0
+_editor.add_node(node4, 164.61251142, 99.55753622)
 
-_editor.add_node(node4, -287.36092356555, -194.55454274878)
+var node5 = ::archgraph::nodes::setup_projection::SetupProjection()
+node5.query_param("axes").value = "yx"
+node5.query_param("scale").value.set(1, 1)
+node5.query_param("scale2").value.set(1, 1)
+node5.query_param("offset").value.set(0, 0)
+node5.query_param("uw_factor").value = 1
+node5.query_param("gpu").value = false
 
-var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
+_editor.add_node(node5, -58.922334115951, 170.71089283364)
 
-_editor.add_node(node5, 164.61251142, 99.55753622)
+var node6 = ::blueprint::nodes::branch_f::BranchF()
 
-var node6 = ::archgraph::nodes::setup_projection::SetupProjection()
-node6.query_param("axes").value = "yx"
-node6.query_param("scale").value.set(1, 1)
-node6.query_param("scale2").value.set(1, 1)
-node6.query_param("offset").value.set(0, 0)
-node6.query_param("uw_factor").value = 1
-node6.query_param("gpu").value = true
+_editor.add_node(node6, 389.49445551092, 66.332777543504)
 
-_editor.add_node(node6, -58.922334115951, 170.71089283364)
+var node7 = ::blueprint::nodes::input::Input()
 
-var node7 = ::blueprint::nodes::branch_f::BranchF()
+node7.var_name = "facade"
+node7.var_type = "geometry"
 
-_editor.add_node(node7, 389.49445551092, 66.332777543504)
+_editor.add_node(node7, 166.34483539968, -132.81338863575)
 
-var node8 = ::blueprint::nodes::number::Number()
+var node8 = ::archgraph::nodes::insert::Insert()
 
-node8.value = 0.35
+_editor.add_node(node8, 660.59431444508, -18.364684137677)
 
-_editor.add_node(node8, -207.92791748047, 387.33099365234)
+var node9 = ::blueprint::nodes::output::Output()
 
-var node9 = ::blueprint::nodes::store::Store()
+node9.var_name = "geo"
+node9.var_type = "geometry"
 
-node9.var_name = "wall_depth"
+_editor.add_node(node9, 805.82705221277, -7.7265580522021)
 
-_editor.add_node(node9, -72.517943079617, 388.24007346413)
+var node10 = ::blueprint::nodes::property::Property()
 
-var node10 = ::blueprint::nodes::input::Input()
+node10.var_name = "hori"
+node10.var_type = "bool"
 
-node10.var_name = "facade"
-node10.var_type = "geometry"
+_editor.add_node(node10, 217.66248321533, 189.70577448065)
 
-_editor.add_node(node10, 154.63203539968, -132.81338863575)
+var node11 = ::archgraph::nodes::scale_scope::ScaleScope()
+node11.query_param("s").value.set(1, 1, 0.35)
+node11.query_param("anchor").value = "left"
 
-var node11 = ::archgraph::nodes::insert::Insert()
+_editor.add_node(node11, 303.64983759685, -202.59556780282)
 
-_editor.add_node(node11, 660.59431444508, -18.364684137677)
+var node12 = ::blueprint::nodes::subgraph::Subgraph()
+node12.load_from_file(_editor, "../../../assets/archgraph/align_front.ves")
 
-var node12 = ::blueprint::nodes::output::Output()
+_editor.add_node(node12, 487.95572645454, -132.81210631799)
 
-node12.var_name = "geo"
-node12.var_type = "geometry"
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "wall_props.ves")
 
-_editor.add_node(node12, 805.82705221277, -7.7265580522021)
+_editor.add_node(node13, 124.37093456738, -220.47129092738)
 
-var node13 = ::blueprint::nodes::load::Load()
-
-node13.var_name = "wall_depth"
-
-_editor.add_node(node13, 154.23626222185, -195.24805379927)
-
-var node14 = ::blueprint::nodes::property::Property()
-
-node14.var_name = "hori"
-node14.var_type = "bool"
-
-_editor.add_node(node14, 217.66248321533, 189.70577448065)
-
-var node15 = ::archgraph::nodes::scale_scope::ScaleScope()
-node15.query_param("s").value.set(1, 1, 0.35)
-node15.query_param("anchor").value = "left"
-
-_editor.add_node(node15, 291.93703759685, -195.27506780282)
-
-var node16 = ::blueprint::nodes::subgraph::Subgraph()
-node16.load_from_file(_editor, "../../../assets/archgraph/align_front.ves")
-
-_editor.add_node(node16, 487.95572645454, -132.81210631799)
-
-Blueprint.connect(node8, "v", node9, "var")
-Blueprint.connect(node9, "var", node13, "var")
-Blueprint.connect(node10, "var", node15, "geo")
-Blueprint.connect(node13, "var", node15, "z")
-Blueprint.connect(node15, "geo", node16, "pos")
-Blueprint.connect(node4, "v", node3, "rand")
-Blueprint.connect(node0, "geo", node6, "geo")
-Blueprint.connect(node6, "geo", node5, "geo")
-Blueprint.connect(node3, "tex", node5, "texture")
+Blueprint.connect(node7, "var", node11, "geo")
+Blueprint.connect(node13, "depth", node11, "z")
+Blueprint.connect(node11, "geo", node12, "pos")
+Blueprint.connect(node0, "geo", node5, "geo")
+Blueprint.connect(node5, "geo", node4, "geo")
+Blueprint.connect(node3, "tex", node4, "texture")
 Blueprint.connect(node0, "geo", node2, "geo")
 Blueprint.connect(node2, "geo", node1, "geo")
 Blueprint.connect(node3, "tex", node1, "texture")
-Blueprint.connect(node14, "var", node7, "cond")
-Blueprint.connect(node5, "geo", node7, "true")
-Blueprint.connect(node1, "geo", node7, "false")
-Blueprint.connect(node7, "result", node11, "geo")
-Blueprint.connect(node16, "pos", node11, "pos")
-Blueprint.connect(node11, "geo", node12, "var")
+Blueprint.connect(node10, "var", node6, "cond")
+Blueprint.connect(node4, "geo", node6, "true")
+Blueprint.connect(node1, "geo", node6, "false")
+Blueprint.connect(node6, "result", node8, "geo")
+Blueprint.connect(node12, "pos", node8, "pos")
+Blueprint.connect(node8, "geo", node9, "var")

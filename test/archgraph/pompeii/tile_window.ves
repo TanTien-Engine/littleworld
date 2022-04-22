@@ -60,26 +60,24 @@ node9.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_small_wind
 
 _editor.add_node(node9, 33.235595703125, 101.516015625)
 
-var node10 = ::blueprint::nodes::integer::Integer()
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_large_window.ves")
 
-node10.value = 2
-
-_editor.add_node(node10, -186, -52)
+_editor.add_node(node10, 32, -19.570247933884)
 
 var node11 = ::blueprint::nodes::subgraph::Subgraph()
-node11.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_large_window.ves")
+node11.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
 
-_editor.add_node(node11, 32, -8)
+_editor.add_node(node11, 172, 181)
 
 Blueprint.connect(node3, "geo", node5, "geo")
 Blueprint.connect(node5, "side", node6, "parent")
 Blueprint.connect(node7, "size", node6, "size0")
 Blueprint.connect(node8, "size", node6, "size1")
-Blueprint.connect(node6, "child0", node11, "facade")
-Blueprint.connect(node10, "v", node11, "win_type")
-Blueprint.connect(node11, "geo", node2, "in0")
+Blueprint.connect(node6, "child0", node10, "facade")
+Blueprint.connect(node10, "geo", node2, "in0")
 Blueprint.connect(node6, "child0", node9, "facade")
-Blueprint.connect(node10, "v", node9, "win_type")
 Blueprint.connect(node3, "geo", node4, "geo")
+Blueprint.connect(node11, "next", node0, "prev")
 Blueprint.connect(node2, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")

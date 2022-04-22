@@ -1,0 +1,410 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -824.53258138983, 570.8428520299)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 731.93193050337, -324.25559213622)
+
+var node2 = ::blueprint::nodes::input::Input()
+
+node2.var_name = "type"
+node2.var_type = "int"
+
+_editor.add_node(node2, -822.33847124853, 647.26517604872)
+
+var node3 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node3, 323.26921449117, 229.96443334333)
+
+var node4 = ::blueprint::nodes::compare::Compare()
+
+node4.cmp = "equal"
+
+_editor.add_node(node4, 147.80579339418, 274.89526773889)
+
+var node5 = ::blueprint::nodes::integer::Integer()
+
+node5.value = 1
+
+_editor.add_node(node5, 8.8384228097087, 251.41158244666)
+
+var node6 = ::blueprint::nodes::store::Store()
+
+node6.var_name = "type"
+
+_editor.add_node(node6, -672.88418506723, 647.65282243221)
+
+var node7 = ::blueprint::nodes::load::Load()
+
+node7.var_name = "type"
+
+_editor.add_node(node7, 10.838422809709, 305.41158244666)
+
+var node8 = ::blueprint::nodes::store::Store()
+
+node8.var_name = "facade"
+
+_editor.add_node(node8, -674.88418506723, 569.6528224322)
+
+var node9 = ::archgraph::nodes::switch::Switch()
+
+_editor.add_node(node9, 586.03673423946, -446.6693754707)
+
+var node10 = ::blueprint::nodes::load::Load()
+
+node10.var_name = "facade"
+
+_editor.add_node(node10, -77.150973546351, 169.52908585668)
+
+var node11 = ::archgraph::nodes::scope_size::ScopeSize()
+
+_editor.add_node(node11, -812.92064746963, 474.76731217831)
+
+var node12 = ::blueprint::nodes::store::Store()
+
+node12.var_name = "sx"
+
+_editor.add_node(node12, -676.52063526263, 496.76731217831)
+
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "win_props.ves")
+
+_editor.add_node(node13, -983.84142879973, 284.12890071771)
+
+var node14 = ::blueprint::nodes::null::Null()
+
+_editor.add_node(node14, 320.38460221069, 285.14308488504)
+
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "upper_floor1.ves")
+
+_editor.add_node(node15, 123.69036110467, 174.39929269007)
+
+var node16 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node16, 332.18581449117, 29.198533343328)
+
+var node17 = ::blueprint::nodes::compare::Compare()
+
+node17.cmp = "equal"
+
+_editor.add_node(node17, 156.72239339418, 74.129367738888)
+
+var node18 = ::blueprint::nodes::integer::Integer()
+
+node18.value = 2
+
+_editor.add_node(node18, 17.755022809709, 50.645682446658)
+
+var node19 = ::blueprint::nodes::load::Load()
+
+node19.var_name = "type"
+
+_editor.add_node(node19, 19.755022809709, 104.64568244666)
+
+var node20 = ::blueprint::nodes::load::Load()
+
+node20.var_name = "facade"
+
+_editor.add_node(node20, -68.234373546351, -31.236814143322)
+
+var node21 = ::blueprint::nodes::subgraph::Subgraph()
+node21.load_from_file(_editor, "upper_floor2.ves")
+
+_editor.add_node(node21, 123.52258494329, -36.067801289942)
+
+var node22 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node22, 342.55936821018, -321.91229310295)
+
+var node23 = ::blueprint::nodes::compare::Compare()
+
+node23.cmp = "equal"
+
+_editor.add_node(node23, -3.3172760273113, -146.98145870739)
+
+var node24 = ::blueprint::nodes::integer::Integer()
+
+node24.value = 3
+
+_editor.add_node(node24, -142.28464661176, -170.46514399962)
+
+var node25 = ::blueprint::nodes::load::Load()
+
+node25.var_name = "type"
+
+_editor.add_node(node25, -140.28464661176, -116.46514399962)
+
+var node26 = ::blueprint::nodes::load::Load()
+
+node26.var_name = "facade"
+
+_editor.add_node(node26, -76.373216521561, -454.57904554828)
+
+var node27 = ::blueprint::nodes::subgraph::Subgraph()
+node27.load_from_file(_editor, "upper_floor3.ves")
+
+_editor.add_node(node27, 116.97684701311, -448.23303707728)
+
+var node28 = ::blueprint::nodes::a_n_d::AND()
+
+_editor.add_node(node28, 153.74000437688, -200.97622207338)
+
+var node29 = ::blueprint::nodes::multiply::Multiply()
+
+_editor.add_node(node29, -788.11375803813, 213.75078665181)
+
+var node30 = ::blueprint::nodes::integer::Integer()
+
+node30.value = 2
+
+_editor.add_node(node30, -933.40937349253, 157.86786849087)
+
+var node31 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node31, -662.68765601243, 193.88131308077)
+
+var node32 = ::blueprint::nodes::number::Number()
+
+node32.value = 0.5
+
+_editor.add_node(node32, -786.87194533223, 139.24022864163)
+
+var node33 = ::blueprint::nodes::store::Store()
+
+node33.var_name = "gazebo_need"
+
+_editor.add_node(node33, -534.15693512653, 193.88132750391)
+
+var node34 = ::blueprint::nodes::store::Store()
+
+node34.var_name = "sy"
+
+_editor.add_node(node34, -676.12640058373, 432.086042349)
+
+var node35 = ::blueprint::nodes::load::Load()
+
+node35.var_name = "gazebo_need"
+
+_editor.add_node(node35, -268.77363668457, -274.9856293296)
+
+var node36 = ::blueprint::nodes::load::Load()
+
+node36.var_name = "sx"
+
+_editor.add_node(node36, -269.87363668457, -226.5856293296)
+
+var node37 = ::blueprint::nodes::compare::Compare()
+
+node37.cmp = "greater"
+
+_editor.add_node(node37, -122.47363668457, -263.98560491554)
+
+var node38 = ::blueprint::nodes::load::Load()
+
+node38.var_name = "sy"
+
+_editor.add_node(node38, -264.37361227051, -343.18564153663)
+
+var node39 = ::blueprint::nodes::compare::Compare()
+
+node39.cmp = "greater"
+
+_editor.add_node(node39, -123.69540668457, -371.89252491558)
+
+var node40 = ::blueprint::nodes::number::Number()
+
+node40.value = 2.2
+
+_editor.add_node(node40, -262.29547506348, -396.09256292338)
+
+var node41 = ::blueprint::nodes::a_n_d::AND()
+
+_editor.add_node(node41, 14.904561557619, -302.59255071632)
+
+var node42 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node42, 295.79232830117, -611.56149972667)
+
+var node43 = ::blueprint::nodes::compare::Compare()
+
+node43.cmp = "equal"
+
+_editor.add_node(node43, 134.32890720418, -566.63066533111)
+
+var node44 = ::blueprint::nodes::integer::Integer()
+
+node44.value = 8
+
+_editor.add_node(node44, -4.638463380291, -590.11435062334)
+
+var node45 = ::blueprint::nodes::load::Load()
+
+node45.var_name = "type"
+
+_editor.add_node(node45, -2.638463380291, -536.11435062334)
+
+var node46 = ::blueprint::nodes::load::Load()
+
+node46.var_name = "facade"
+
+_editor.add_node(node46, -128.02785973635, -668.69684721332)
+
+var node47 = ::blueprint::nodes::subgraph::Subgraph()
+node47.load_from_file(_editor, "upper_floor8.ves")
+
+_editor.add_node(node47, 81.019521401145, -684.57556374289)
+
+var node48 = ::blueprint::nodes::null::Null()
+
+_editor.add_node(node48, 380.55183572443, -461.92203086382)
+
+var node49 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node49, 291.52902830117, -856.84079972667)
+
+var node50 = ::blueprint::nodes::compare::Compare()
+
+node50.cmp = "equal"
+
+_editor.add_node(node50, 130.06560720418, -811.90996533111)
+
+var node51 = ::blueprint::nodes::integer::Integer()
+
+node51.value = 9
+
+_editor.add_node(node51, -8.901763380291, -835.39365062334)
+
+var node52 = ::blueprint::nodes::load::Load()
+
+node52.var_name = "type"
+
+_editor.add_node(node52, -6.901763380291, -781.39365062334)
+
+var node53 = ::blueprint::nodes::load::Load()
+
+node53.var_name = "facade"
+
+_editor.add_node(node53, -113.29115973635, -920.97614721332)
+
+var node54 = ::blueprint::nodes::subgraph::Subgraph()
+node54.load_from_file(_editor, "upper_floor9.ves")
+
+_editor.add_node(node54, 80.677411790994, -915.31951967979)
+
+var node55 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node55, 281.41909756777, -1022.6234649478)
+
+var node56 = ::blueprint::nodes::compare::Compare()
+
+node56.cmp = "equal"
+
+_editor.add_node(node56, 128.6793644807, -1024.3900193112)
+
+var node57 = ::blueprint::nodes::integer::Integer()
+
+node57.value = 10
+
+_editor.add_node(node57, -10.288006103773, -1047.8737046035)
+
+var node58 = ::blueprint::nodes::load::Load()
+
+node58.var_name = "type"
+
+_editor.add_node(node58, -8.288006103773, -993.87370460347)
+
+var node59 = ::blueprint::nodes::load::Load()
+
+node59.var_name = "facade"
+
+_editor.add_node(node59, -114.67740245983, -1133.4562011934)
+
+var node60 = ::blueprint::nodes::subgraph::Subgraph()
+node60.load_from_file(_editor, "wall.ves")
+
+_editor.add_node(node60, 73.884069098555, -1142.8317406244)
+
+Blueprint.connect(node13, "large_width", node29, "a")
+Blueprint.connect(node30, "v", node29, "b")
+Blueprint.connect(node29, "v", node31, "a")
+Blueprint.connect(node32, "v", node31, "b")
+Blueprint.connect(node31, "v", node33, "var")
+Blueprint.connect(node33, "var", node35, "var")
+Blueprint.connect(node2, "var", node6, "var")
+Blueprint.connect(node6, "var", node58, "var")
+Blueprint.connect(node58, "var", node56, "a")
+Blueprint.connect(node57, "v", node56, "b")
+Blueprint.connect(node6, "var", node52, "var")
+Blueprint.connect(node52, "var", node50, "a")
+Blueprint.connect(node51, "v", node50, "b")
+Blueprint.connect(node6, "var", node45, "var")
+Blueprint.connect(node45, "var", node43, "a")
+Blueprint.connect(node44, "v", node43, "b")
+Blueprint.connect(node6, "var", node25, "var")
+Blueprint.connect(node25, "var", node23, "a")
+Blueprint.connect(node24, "v", node23, "b")
+Blueprint.connect(node6, "var", node19, "var")
+Blueprint.connect(node19, "var", node17, "a")
+Blueprint.connect(node18, "v", node17, "b")
+Blueprint.connect(node6, "var", node7, "var")
+Blueprint.connect(node7, "var", node4, "a")
+Blueprint.connect(node5, "v", node4, "b")
+Blueprint.connect(node0, "var", node11, "geo")
+Blueprint.connect(node11, "sy", node34, "var")
+Blueprint.connect(node34, "var", node38, "var")
+Blueprint.connect(node38, "var", node39, "a")
+Blueprint.connect(node40, "v", node39, "b")
+Blueprint.connect(node11, "sx", node12, "var")
+Blueprint.connect(node12, "var", node36, "var")
+Blueprint.connect(node36, "var", node37, "a")
+Blueprint.connect(node35, "var", node37, "b")
+Blueprint.connect(node37, "out", node41, "a")
+Blueprint.connect(node39, "out", node41, "b")
+Blueprint.connect(node23, "out", node28, "a")
+Blueprint.connect(node41, "out", node28, "b")
+Blueprint.connect(node0, "var", node8, "var")
+Blueprint.connect(node8, "var", node59, "var")
+Blueprint.connect(node59, "var", node60, "geo")
+Blueprint.connect(node56, "out", node55, "cond")
+Blueprint.connect(node60, "geo", node55, "val")
+Blueprint.connect(node8, "var", node53, "var")
+Blueprint.connect(node53, "var", node54, "facade")
+Blueprint.connect(node50, "out", node49, "cond")
+Blueprint.connect(node54, "geo", node49, "val")
+Blueprint.connect(node8, "var", node46, "var")
+Blueprint.connect(node46, "var", node47, "facade")
+Blueprint.connect(node43, "out", node42, "cond")
+Blueprint.connect(node47, "geo", node42, "val")
+Blueprint.connect(node8, "var", node26, "var")
+Blueprint.connect(node26, "var", node27, "facade")
+Blueprint.connect(node28, "out", node22, "cond")
+Blueprint.connect(node27, "geo", node22, "val")
+Blueprint.connect(node8, "var", node20, "var")
+Blueprint.connect(node20, "var", node21, "facade")
+Blueprint.connect(node17, "out", node16, "cond")
+Blueprint.connect(node21, "geo", node16, "val")
+Blueprint.connect(node8, "var", node10, "var")
+Blueprint.connect(node10, "var", node15, "facade")
+Blueprint.connect(node4, "out", node3, "cond")
+Blueprint.connect(node15, "geo", node3, "val")
+Blueprint.connect(node21, "geo", node9, "default")
+Blueprint.connect(node14, "null", node9, "case0")
+Blueprint.connect(node3, "val", node9, "case1")
+Blueprint.connect(node16, "val", node9, "case2")
+Blueprint.connect(node22, "val", node9, "case3")
+Blueprint.connect(node48, "null", node9, "case4")
+Blueprint.connect(node48, "null", node9, "case5")
+Blueprint.connect(node48, "null", node9, "case6")
+Blueprint.connect(node48, "null", node9, "case7")
+Blueprint.connect(node42, "val", node9, "case8")
+Blueprint.connect(node49, "val", node9, "case9")
+Blueprint.connect(node55, "val", node9, "case10")
+Blueprint.connect(node9, "out", node1, "var")

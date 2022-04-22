@@ -1,51 +1,68 @@
 var node0 = ::blueprint::nodes::subgraph::Subgraph()
 node0.load_from_file(_editor, "wood.ves")
+node0.set_prop_value("hori", false)
 
-_editor.add_node(node0, -43, 89)
+_editor.add_node(node0, -41.497370398197, 78.481592787378)
 
 var node1 = ::blueprint::nodes::input::Input()
 
 node1.var_name = "facade"
 node1.var_type = "geometry"
 
-_editor.add_node(node1, -271.7698, -52.7539)
+_editor.add_node(node1, -389.72622374155, -42.986807588279)
 
 var node2 = ::blueprint::nodes::output::Output()
 
 node2.var_name = "geo"
 node2.var_type = "geometry"
 
-_editor.add_node(node2, 357.59867314758, 119.88945991699)
+_editor.add_node(node2, 509.41685496576, 110.79855082608)
 
 var node3 = ::blueprint::nodes::switch_f::SwitchF()
 
-_editor.add_node(node3, 221.8439906952, 63.763002515861)
+_editor.add_node(node3, 373.66217251338, 54.672093424952)
 
-var node4 = ::blueprint::nodes::input::Input()
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "stone_block.ves")
+node4.set_prop_value("hori", false)
 
-node4.var_name = "win_type"
-node4.var_type = "int"
-
-_editor.add_node(node4, 13.32471191102, 185.66410325499)
+_editor.add_node(node4, -41.163024902344, -9.9890899658203)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "stone_block.ves")
+node5.load_from_file(_editor, "wall_solid.ves")
 
-_editor.add_node(node5, -41.163024902344, -9.9890899658203)
+_editor.add_node(node5, -39.373176523118, -109.1688791414)
 
 var node6 = ::blueprint::nodes::subgraph::Subgraph()
-node6.load_from_file(_editor, "wall_solid.ves")
+node6.load_from_file(_editor, "building_props.ves")
 
-_editor.add_node(node6, -39.373176523118, -109.1688791414)
+_editor.add_node(node6, -44.937881080229, 225.70982358215)
 
-Blueprint.connect(node1, "var", node6, "facade")
-Blueprint.connect(node1, "var", node5, "facade")
-Blueprint.connect(node1, "var", node0, "facade")
-Blueprint.connect(node4, "var", node3, "type")
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "corner_stones.ves")
+
+_editor.add_node(node7, -40.133081609553, -193.77972550826)
+
+var node8 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node8, 143.50329034979, -151.96155062589)
+
+var node9 = ::archgraph::nodes::translate_scope::TranslateScope()
+node9.query_param("t").value.set(0, 0, 0.015)
+
+_editor.add_node(node9, -259.99798790339, -92.853203937582)
+
+Blueprint.connect(node1, "var", node9, "geo")
+Blueprint.connect(node9, "geo", node7, "facade")
+Blueprint.connect(node7, "geo", node8, "in1")
+Blueprint.connect(node9, "geo", node5, "facade")
+Blueprint.connect(node9, "geo", node4, "facade")
+Blueprint.connect(node9, "geo", node0, "facade")
+Blueprint.connect(node6, "window_type", node3, "type")
 Blueprint.connect(node0, "geo", node3, "default")
 Blueprint.connect(node0, "geo", node3, "case0")
-Blueprint.connect(node5, "geo", node3, "case1")
-Blueprint.connect(node6, "geo", node3, "case2")
-Blueprint.connect(node5, "geo", node3, "case3")
-Blueprint.connect(node5, "geo", node3, "case4")
+Blueprint.connect(node4, "geo", node3, "case1")
+Blueprint.connect(node5, "geo", node3, "case2")
+Blueprint.connect(node4, "geo", node3, "case3")
+Blueprint.connect(node4, "geo", node3, "case4")
 Blueprint.connect(node3, "result", node2, "var")

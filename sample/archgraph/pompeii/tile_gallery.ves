@@ -33,13 +33,13 @@ var node5 = ::archgraph::nodes::split_size::SplitSize()
 node5.query_param("size").value = 0
 node5.query_param("mode").value = "absolute"
 
-_editor.add_node(node5, -298.26002705357, -1.5217526132774)
+_editor.add_node(node5, -691.89639068993, 134.84188375036)
 
 var node6 = ::archgraph::nodes::rand_number::RandNumber()
 node6.query_param("min").value = 0.3
 node6.query_param("max").value = 0.5
 
-_editor.add_node(node6, -438.75589211662, -12.791474512159)
+_editor.add_node(node6, -832.39225575298, 123.57216185148)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
 node7.load_from_file(_editor, "wall.ves")
@@ -50,10 +50,24 @@ var node8 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node8, 235.92482793107, 105.16496200046)
 
+var node9 = ::blueprint::nodes::store::Store()
+
+node9.var_name = "size"
+
+_editor.add_node(node9, -561.15552312678, 146.56699440696)
+
+var node10 = ::blueprint::nodes::load::Load()
+
+node10.var_name = "size"
+
+_editor.add_node(node10, -297.51914839311, 22.021562056108)
+
 Blueprint.connect(node6, "val", node5, "size")
+Blueprint.connect(node5, "size", node9, "var")
+Blueprint.connect(node9, "var", node10, "var")
 Blueprint.connect(node0, "var", node3, "parent")
 Blueprint.connect(node4, "size", node3, "size0")
-Blueprint.connect(node5, "size", node3, "size1")
+Blueprint.connect(node10, "var", node3, "size1")
 Blueprint.connect(node3, "child1", node7, "geo")
 Blueprint.connect(node3, "child0", node2, "facade")
 Blueprint.connect(node2, "geo", node8, "in0")

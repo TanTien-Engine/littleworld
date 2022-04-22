@@ -1,22 +1,22 @@
 var node0 = ::blueprint::nodes::subgraph::Subgraph()
 node0.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
 
-_editor.add_node(node0, 424.89326066175, -45.359379447547)
+_editor.add_node(node0, 407.61302024101, 47.052341063348)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(-2.955587198268, 7.42941695983, 8.6820783683703)
-node1.cam.yaw = -39.5
-node1.cam.pitch = -37.9
+node1.cam.position.set(12.932018698836, 4.2610281307269, 6.410741697867)
+node1.cam.yaw = -145.9
+node1.cam.pitch = -32.9
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
 
-_editor.add_node(node1, 230.10105068463, -203.83578983318)
+_editor.add_node(node1, 202.33132867111, -100.05171770696)
 
 var node2 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node2, 214.07044387988, -12.07241908613)
+_editor.add_node(node2, 211.06518467627, 43.524876180587)
 
 var node3 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
 node3.query_param("size").value.set(10, 2.5, 5)
@@ -28,51 +28,70 @@ node4.query_param("selector").value = "face6"
 
 node4.on_param_dirty()
 
-_editor.add_node(node4, -472.76215388214, 59.066432756)
+_editor.add_node(node4, -467.80347619619, 44.190399698149)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
 node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/subtile_window.ves")
 
-_editor.add_node(node5, 14.555221637866, -9.5341848234413)
+_editor.add_node(node5, 18.687453042825, 54.102178812923)
 
-var node6 = ::blueprint::nodes::integer::Integer()
+var node6 = ::archgraph::nodes::comp::Comp()
+node6.query_param("selector").value = "side"
 
-node6.value = 2
+node6.on_param_dirty()
 
-_editor.add_node(node6, -183.98422238918, -75.9211119459)
+_editor.add_node(node6, -470.03531179564, 186.77911344853)
 
-var node7 = ::archgraph::nodes::comp::Comp()
-node7.query_param("selector").value = "side"
+var node7 = ::archgraph::nodes::split::Split()
+node7.query_param("axis").value = "hori"
+node7.query_param("repeat").value = true
 
-node7.on_param_dirty()
+_editor.add_node(node7, -174.46506386176, -1.0927873779114)
 
-_editor.add_node(node7, -470.03531179564, 186.77911344853)
+var node8 = ::archgraph::nodes::split_size::SplitSize()
+node8.query_param("size").value = 1
+node8.query_param("mode").value = "floating"
 
-var node8 = ::archgraph::nodes::split::Split()
-node8.query_param("axis").value = "hori"
-node8.query_param("repeat").value = true
-
-_editor.add_node(node8, -186.03531179564, 54.279113448535)
+_editor.add_node(node8, -327.16131179564, 26.352113448535)
 
 var node9 = ::archgraph::nodes::split_size::SplitSize()
 node9.query_param("size").value = 1
 node9.query_param("mode").value = "floating"
 
-_editor.add_node(node9, -327.16131179564, 26.352113448535)
+_editor.add_node(node9, -331.01598140909, -65.532024449464)
 
-var node10 = ::archgraph::nodes::split_size::SplitSize()
-node10.query_param("size").value = 1
-node10.query_param("mode").value = "floating"
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "../../../sample/archgraph/pompeii/building_props_reset.ves")
 
-_editor.add_node(node10, -331.01598140909, -65.532024449464)
+_editor.add_node(node10, -117.5105587671, 330.97121098286)
 
-Blueprint.connect(node3, "geo", node7, "geo")
-Blueprint.connect(node7, "side", node8, "parent")
-Blueprint.connect(node9, "size", node8, "size0")
-Blueprint.connect(node10, "size", node8, "size1")
-Blueprint.connect(node8, "child0", node5, "facade")
-Blueprint.connect(node6, "v", node5, "win_type")
+var node11 = ::blueprint::nodes::integer::Integer()
+
+node11.value = 1
+
+_editor.add_node(node11, -312.20494398938, 359.33827688494)
+
+var node12 = ::blueprint::nodes::integer::Integer()
+
+node12.value = 1
+
+_editor.add_node(node12, -312.82584890306, 292.89968474406)
+
+var node13 = ::blueprint::nodes::subgraph::Subgraph()
+node13.load_from_file(_editor, "../../../sample/archgraph/pompeii/wall_props_reset.ves")
+
+_editor.add_node(node13, 125.75479816952, 351.40191926781)
+
+Blueprint.connect(node11, "v", node10, "window_type")
+Blueprint.connect(node12, "v", node10, "window_opening")
+Blueprint.connect(node10, "next", node13, "prev")
+Blueprint.connect(node3, "geo", node6, "geo")
+Blueprint.connect(node6, "side", node7, "parent")
+Blueprint.connect(node8, "size", node7, "size0")
+Blueprint.connect(node9, "size", node7, "size1")
+Blueprint.connect(node7, "child0", node5, "facade")
 Blueprint.connect(node5, "geo", node2, "in0")
 Blueprint.connect(node3, "geo", node4, "geo")
+Blueprint.connect(node13, "next", node0, "prev")
 Blueprint.connect(node2, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")
