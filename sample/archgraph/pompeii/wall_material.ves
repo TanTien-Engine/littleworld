@@ -1,58 +1,134 @@
 var node0 = ::blueprint::nodes::subgraph::Subgraph()
 node0.load_from_file(_editor, "../../../assets/archgraph/color.ves")
 
-_editor.add_node(node0, -303.56363636364, 153.90909090909)
+_editor.add_node(node0, -493.56363636364, 145.90909090909)
 
 var node1 = ::blueprint::nodes::subgraph::Subgraph()
 node1.load_from_file(_editor, "../../../assets/archgraph/texture.ves")
 
-_editor.add_node(node1, 132.904, 27.053)
+_editor.add_node(node1, 216.37507438017, 147.71415702479)
 
 var node2 = ::archgraph::nodes::setup_projection::SetupProjection()
 node2.query_param("axes").value = "xy"
 node2.query_param("scale").value.set(1, 1)
-node2.query_param("scale2").value.set(1, 1)
+node2.query_param("scale2").value.set(1.5, 1.5)
 node2.query_param("offset").value.set(0, 0)
 node2.query_param("uw_factor").value = 1
 node2.query_param("gpu").value = true
 
-_editor.add_node(node2, -104.126, 65.153)
+_editor.add_node(node2, -192.71059858, -192.55982238)
 
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
 node3.load_from_file(_editor, "wall_tex.ves")
 
-_editor.add_node(node3, -138.69618662942, -106.29046422845)
+_editor.add_node(node3, -573.80338662942, -20.14176422845)
 
 var node4 = ::blueprint::nodes::input::Input()
 
 node4.var_name = "geo"
 node4.var_type = "geometry"
 
-_editor.add_node(node4, -493.96827624613, 176.85268637413)
+_editor.add_node(node4, -683.96827624613, 168.85268637413)
 
 var node5 = ::blueprint::nodes::output::Output()
 
 node5.var_name = "geo"
 node5.var_type = "geometry"
 
-_editor.add_node(node5, 322.83377685547, 36.41466064453)
+_editor.add_node(node5, 993.9774132191, 91.477387917258)
 
 var node6 = ::blueprint::nodes::input::Input()
 
 node6.var_name = "color"
 node6.var_type = "num3"
 
-_editor.add_node(node6, -491.26652892562, 112.45112067609)
+_editor.add_node(node6, -681.26652892562, 104.45112067609)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
 node7.load_from_file(_editor, "building_props.ves")
 
-_editor.add_node(node7, -386.61381983596, -49.801300071756)
+_editor.add_node(node7, -845.92101983596, -90.15260007176)
 
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "dirtmap_tex.ves")
+
+_editor.add_node(node8, 500.35333530394, 22.11580052904)
+
+var node9 = ::blueprint::nodes::subgraph::Subgraph()
+node9.load_from_file(_editor, "../../../assets/archgraph/dirt_tex.ves")
+
+_editor.add_node(node9, 784.82094715465, 67.800263338956)
+
+var node10 = ::archgraph::nodes::scope_pos::ScopePos()
+
+_editor.add_node(node10, -185.38682189941, 371.63520874023)
+
+var node11 = ::blueprint::nodes::mod::Mod()
+
+_editor.add_node(node11, -49.100065057928, 330.99683626033)
+
+var node12 = ::blueprint::nodes::number::Number()
+
+node12.value = 1
+
+_editor.add_node(node12, -189.59592935862, 303.72410091684)
+
+var node13 = ::blueprint::nodes::store::Store()
+
+node13.var_name = "colormap"
+
+_editor.add_node(node13, -389.27649998883, -30.60097003645)
+
+var node14 = ::blueprint::nodes::load::Load()
+
+node14.var_name = "colormap"
+
+_editor.add_node(node14, 38.915801084822, 69.545250712795)
+
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "../../../assets/archgraph/bump_tex.ves")
+
+_editor.add_node(node15, 462.21752457573, 145.73676313181)
+
+var node16 = ::blueprint::nodes::property::Property()
+
+node16.var_name = "hori"
+node16.var_type = "bool"
+
+_editor.add_node(node16, -197.21573975389, 228.39490529616)
+
+var node17 = ::archgraph::nodes::setup_projection::SetupProjection()
+node17.query_param("axes").value = "yx"
+node17.query_param("scale").value.set(1, 1)
+node17.query_param("scale2").value.set(1.5, 1.5)
+node17.query_param("offset").value.set(0, 0)
+node17.query_param("uw_factor").value = 1
+node17.query_param("gpu").value = true
+
+_editor.add_node(node17, -187.85129858, 60.300348140003)
+
+var node18 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node18, -20.656616210937, 148.67456054687)
+
+Blueprint.connect(node7, "building_rand", node8, "rand")
 Blueprint.connect(node7, "building_rand", node3, "rand")
+Blueprint.connect(node3, "tex", node13, "var")
+Blueprint.connect(node13, "var", node14, "var")
+Blueprint.connect(node4, "var", node10, "geo")
+Blueprint.connect(node10, "btm", node11, "x")
+Blueprint.connect(node12, "v", node11, "y")
 Blueprint.connect(node4, "var", node0, "geo")
 Blueprint.connect(node6, "var", node0, "color")
+Blueprint.connect(node0, "geo", node17, "geo")
 Blueprint.connect(node0, "geo", node2, "geo")
-Blueprint.connect(node2, "geo", node1, "geo")
-Blueprint.connect(node3, "tex", node1, "texture")
-Blueprint.connect(node1, "geo", node5, "var")
+Blueprint.connect(node16, "var", node18, "cond")
+Blueprint.connect(node17, "geo", node18, "true")
+Blueprint.connect(node2, "geo", node18, "false")
+Blueprint.connect(node18, "result", node1, "geo")
+Blueprint.connect(node14, "var", node1, "texture")
+Blueprint.connect(node1, "geo", node15, "geo")
+Blueprint.connect(node14, "var", node15, "bump_tex")
+Blueprint.connect(node15, "geo", node9, "geo")
+Blueprint.connect(node8, "tex", node9, "dirt_tex")
+Blueprint.connect(node9, "geo", node5, "var")

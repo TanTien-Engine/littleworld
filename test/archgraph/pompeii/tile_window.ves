@@ -5,9 +5,9 @@ _editor.add_node(node0, 415.87748305093, 86.872025511131)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(12.4622640737, 4.0429528799264, 7.7524878388078)
-node1.cam.yaw = -139.3
-node1.cam.pitch = -26.7
+node1.cam.position.set(15.109081787115, 6.0846532526474, 9.2679408070937)
+node1.cam.yaw = -140.4
+node1.cam.pitch = -25.8
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
@@ -19,65 +19,44 @@ var node2 = ::blueprint::nodes::merge::Merge()
 _editor.add_node(node2, 225.3401658934, 107.38663425722)
 
 var node3 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
-node3.query_param("size").value.set(10, 2.5, 5)
+node3.query_param("size").value.set(10, 3.8, 5)
 
-_editor.add_node(node3, -627.07561529692, 126.40879601105)
+_editor.add_node(node3, -431.73376706251, -21.600219766563)
 
 var node4 = ::archgraph::nodes::comp::Comp()
 node4.query_param("selector").value = "face6"
 
 node4.on_param_dirty()
 
-_editor.add_node(node4, -472.76215388214, 59.066432756)
+_editor.add_node(node4, -222.649456662, -140.1822524431)
 
 var node5 = ::archgraph::nodes::comp::Comp()
 node5.query_param("selector").value = "side"
 
 node5.on_param_dirty()
 
-_editor.add_node(node5, -470.03531179564, 186.77911344853)
+_editor.add_node(node5, -228.71299774605, 25.62208865514)
 
-var node6 = ::archgraph::nodes::split::Split()
-node6.query_param("axis").value = "hori"
-node6.query_param("repeat").value = true
+var node6 = ::blueprint::nodes::subgraph::Subgraph()
+node6.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_small_window.ves")
 
-_editor.add_node(node6, -181.03531179564, 57.279113448535)
+_editor.add_node(node6, 33.235595703125, 101.516015625)
 
-var node7 = ::archgraph::nodes::split_size::SplitSize()
-node7.query_param("size").value = 2
-node7.query_param("mode").value = "floating"
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_large_window.ves")
 
-_editor.add_node(node7, -327.16131179564, 26.352113448535)
+_editor.add_node(node7, 31.248685199098, -9.8031555221634)
 
-var node8 = ::archgraph::nodes::split_size::SplitSize()
-node8.query_param("size").value = 1
-node8.query_param("mode").value = "floating"
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
 
-_editor.add_node(node8, -331.01598140909, -65.532024449464)
-
-var node9 = ::blueprint::nodes::subgraph::Subgraph()
-node9.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_small_window.ves")
-
-_editor.add_node(node9, 33.235595703125, 101.516015625)
-
-var node10 = ::blueprint::nodes::subgraph::Subgraph()
-node10.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_large_window.ves")
-
-_editor.add_node(node10, 32, -19.570247933884)
-
-var node11 = ::blueprint::nodes::subgraph::Subgraph()
-node11.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
-
-_editor.add_node(node11, 172, 181)
+_editor.add_node(node8, 172, 181)
 
 Blueprint.connect(node3, "geo", node5, "geo")
-Blueprint.connect(node5, "side", node6, "parent")
-Blueprint.connect(node7, "size", node6, "size0")
-Blueprint.connect(node8, "size", node6, "size1")
-Blueprint.connect(node6, "child0", node10, "facade")
-Blueprint.connect(node10, "geo", node2, "in0")
-Blueprint.connect(node6, "child0", node9, "facade")
+Blueprint.connect(node5, "side", node7, "facade")
+Blueprint.connect(node5, "side", node6, "facade")
+Blueprint.connect(node6, "geo", node2, "in0")
 Blueprint.connect(node3, "geo", node4, "geo")
-Blueprint.connect(node11, "next", node0, "prev")
+Blueprint.connect(node8, "next", node0, "prev")
 Blueprint.connect(node2, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")

@@ -123,12 +123,37 @@ var node24 = ::blueprint::nodes::is_null::IsNull()
 
 _editor.add_node(node24, 136.0644514356, -281.36961416833)
 
+var node25 = ::blueprint::nodes::output::Output()
+
+node25.var_name = "vert_pos"
+node25.var_type = "num"
+
+_editor.add_node(node25, 414.24525526675, -371.80241631889)
+
+var node26 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node26, 281.62190074218, -390.05134206562)
+
+var node27 = ::blueprint::nodes::global_get::GlobalGet()
+node27.query_param("key").value = "win_vert_pos"
+
+_editor.add_node(node27, 8.8982127322565, -372.36715388869)
+
+var node28 = ::blueprint::nodes::is_null::IsNull()
+
+_editor.add_node(node28, 145.68768284056, -370.44610259808)
+
+Blueprint.connect(node27, "val", node28, "in")
 Blueprint.connect(node23, "val", node24, "in")
 Blueprint.connect(node20, "val", node21, "in")
 Blueprint.connect(node17, "val", node18, "in")
 Blueprint.connect(node14, "val", node15, "in")
 Blueprint.connect(node11, "val", node12, "in")
 Blueprint.connect(node8, "val", node9, "in")
+Blueprint.connect(node28, "out", node26, "cond")
+Blueprint.connect(node6, "vert_pos", node26, "true")
+Blueprint.connect(node27, "val", node26, "false")
+Blueprint.connect(node26, "result", node25, "var")
 Blueprint.connect(node24, "out", node22, "cond")
 Blueprint.connect(node6, "small_tile_width", node22, "true")
 Blueprint.connect(node23, "val", node22, "false")

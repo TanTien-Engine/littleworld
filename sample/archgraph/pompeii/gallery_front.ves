@@ -52,6 +52,7 @@ _editor.add_node(node8, -8.4730081869055, 67.598148256896)
 
 var node9 = ::blueprint::nodes::subgraph::Subgraph()
 node9.load_from_file(_editor, "wall_material.ves")
+node9.set_prop_value("hori", true)
 
 _editor.add_node(node9, 426.07709135166, 75.332699243229)
 
@@ -142,7 +143,7 @@ node25.var_name = "width"
 _editor.add_node(node25, 179.36749305066, -825.16089014738)
 
 var node26 = ::archgraph::nodes::translate_scope::TranslateScope()
-node26.query_param("t").value.set(0, 0, -0.209375)
+node26.query_param("t").value.set(0, 0, -0.15295949593186)
 
 _editor.add_node(node26, 396.94486204102, -345.74644359863)
 

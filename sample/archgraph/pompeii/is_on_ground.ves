@@ -1,0 +1,34 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "pos"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -420.4350624016, 200.8514289747)
+
+var node1 = ::archgraph::nodes::scope_pos::ScopePos()
+
+_editor.add_node(node1, -285.00754461023, 199.64742013429)
+
+var node2 = ::blueprint::nodes::compare::Compare()
+
+node2.cmp = "less"
+
+_editor.add_node(node2, -150.9263481131, 173.21517302306)
+
+var node3 = ::blueprint::nodes::number::Number()
+
+node3.value = 0.5
+
+_editor.add_node(node3, -278.83614110944, 130.37160988209)
+
+var node4 = ::blueprint::nodes::output::Output()
+
+node4.var_name = "b"
+node4.var_type = "bool"
+
+_editor.add_node(node4, -14.970999748522, 191.52408547692)
+
+Blueprint.connect(node0, "var", node1, "geo")
+Blueprint.connect(node1, "btm", node2, "a")
+Blueprint.connect(node3, "v", node2, "b")
+Blueprint.connect(node2, "out", node4, "var")

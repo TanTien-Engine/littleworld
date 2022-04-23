@@ -89,6 +89,20 @@ node14.var_type = "num"
 
 _editor.add_node(node14, 329.72676141454, -468.54955678663)
 
+var node15 = ::archgraph::nodes::rand_number::RandNumber()
+node15.query_param("min").value = 0.45
+node15.query_param("max").value = 0.7
+
+_editor.add_node(node15, 186.80573699949, -313.1883114722)
+
+var node16 = ::blueprint::nodes::output::Output()
+
+node16.var_name = "vert_pos"
+node16.var_type = "num"
+
+_editor.add_node(node16, 322.06576398272, -283.17480698438)
+
+Blueprint.connect(node15, "val", node16, "var")
 Blueprint.connect(node11, "margin_width", node12, "a")
 Blueprint.connect(node13, "v", node12, "b")
 Blueprint.connect(node8, "v", node9, "var")

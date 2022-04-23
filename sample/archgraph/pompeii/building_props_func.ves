@@ -2,27 +2,27 @@ var node0 = ::archgraph::nodes::rand_number::RandNumber()
 node0.query_param("min").value = 2.5
 node0.query_param("max").value = 3.5
 
-_editor.add_node(node0, -735.97940111471, 241.84722025583)
+_editor.add_node(node0, -735.97940111471, 144.84125224809)
 
 var node1 = ::archgraph::nodes::rand_number::RandNumber()
 node1.query_param("min").value = 1.1
 node1.query_param("max").value = 1.4
 
-_editor.add_node(node1, -735.64813958886, 134.80876659829)
+_editor.add_node(node1, -738.50125629497, 254.63966825491)
 
 var node2 = ::blueprint::nodes::output::Output()
 
 node2.var_name = "door_width"
 node2.var_type = "num"
 
-_editor.add_node(node2, -602.14239065169, 272.65402496819)
+_editor.add_node(node2, -602.14239065169, 282.33402496819)
 
 var node3 = ::blueprint::nodes::output::Output()
 
 node3.var_name = "door_height"
 node3.var_type = "num"
 
-_editor.add_node(node3, -598.09280179409, 166.12509102539)
+_editor.add_node(node3, -598.09280179409, 175.80509102539)
 
 var node4 = ::blueprint::nodes::boolean::Boolean()
 
@@ -256,7 +256,7 @@ _editor.add_node(node43, -924.55981445312, 573.46142578125)
 
 var node44 = ::archgraph::nodes::rand_number::RandNumber()
 node44.query_param("min").value = 2.8
-node44.query_param("max").value = 4.0
+node44.query_param("max").value = 4
 
 _editor.add_node(node44, -733.15485566016, 17.773997115334)
 
@@ -314,5 +314,5 @@ Blueprint.connect(node13, "out", node41, "default")
 Blueprint.connect(node41, "val", node11, "var")
 Blueprint.connect(node6, "v", node7, "var")
 Blueprint.connect(node4, "v", node5, "var")
-Blueprint.connect(node1, "val", node3, "var")
-Blueprint.connect(node0, "val", node2, "var")
+Blueprint.connect(node1, "val", node2, "var")
+Blueprint.connect(node0, "val", node3, "var")

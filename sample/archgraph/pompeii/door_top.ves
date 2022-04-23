@@ -3,37 +3,74 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -322.3380676608, 267.6027437756)
+_editor.add_node(node0, -960.27195195832, 650.41266113097)
 
 var node1 = ::blueprint::nodes::output::Output()
 
 node1.var_name = "geo"
 node1.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node1, 218.24796677686, 184.55707702479)
+_editor.add_node(node1, 228.24796677686, 568.19344066115)
 
 var node2 = ::blueprint::nodes::subgraph::Subgraph()
 node2.load_from_file(_editor, "door_beam.ves")
 
-_editor.add_node(node2, -115.00154876709, 298.61096191406)
+_editor.add_node(node2, -745.41477190759, 753.32170571571)
 
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
 node3.load_from_file(_editor, "door_cornice.ves")
 
-_editor.add_node(node3, -112.80154418945, 212.81097106934)
+_editor.add_node(node3, -750.07427146218, 661.90188016025)
 
 var node4 = ::blueprint::nodes::subgraph::Subgraph()
 node4.load_from_file(_editor, "canopy.ves")
 
-_editor.add_node(node4, -112.590428376, 113.13969824925)
+_editor.add_node(node4, -752.590428376, 574.04878915834)
 
 var node5 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node5, 81.624436938073, 164.37937284107)
+_editor.add_node(node5, -545.64829033466, 599.83391829562)
+
+var node6 = ::archgraph::nodes::switch::Switch()
+
+_editor.add_node(node6, 99.713634144176, 540.59244606712)
+
+var node7 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node7, -60.616945755383, 575.30319440857)
+
+var node8 = ::blueprint::nodes::subgraph::Subgraph()
+node8.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node8.set_prop_value("p", 0.6)
+
+_editor.add_node(node8, -269.70785345913, 567.0387966692)
+
+var node9 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node9, -62.409755672738, 479.1385663094)
+
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node10.set_prop_value("p", 0.1)
+
+_editor.add_node(node10, -271.50066337649, 470.87416857003)
+
+var node11 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node11, -543.1535505815, 701.82455444336)
 
 Blueprint.connect(node0, "var", node4, "facade")
 Blueprint.connect(node0, "var", node3, "facade")
 Blueprint.connect(node3, "geo", node5, "in0")
 Blueprint.connect(node4, "geo", node5, "in1")
-Blueprint.connect(node5, "list", node1, "var")
+Blueprint.connect(node10, "b", node9, "cond")
+Blueprint.connect(node5, "list", node9, "val")
 Blueprint.connect(node0, "var", node2, "facade")
+Blueprint.connect(node2, "geo", node11, "in0")
+Blueprint.connect(node4, "geo", node11, "in1")
+Blueprint.connect(node8, "b", node7, "cond")
+Blueprint.connect(node11, "list", node7, "val")
+Blueprint.connect(node3, "geo", node6, "default")
+Blueprint.connect(node7, "val", node6, "case0")
+Blueprint.connect(node9, "val", node6, "case1")
+Blueprint.connect(node6, "out", node1, "var")

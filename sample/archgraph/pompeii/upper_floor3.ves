@@ -18,7 +18,7 @@ node2.query_param("mode").value = "floating"
 _editor.add_node(node2, -1271.9567263711, 164.76159965977)
 
 var node3 = ::archgraph::nodes::split_size::SplitSize()
-node3.query_param("size").value = 1
+node3.query_param("size").value = 0
 node3.query_param("mode").value = "floating"
 
 _editor.add_node(node3, -670.4902447783, 75.65610529463)
@@ -75,7 +75,7 @@ node13.query_param("repeat").value = false
 _editor.add_node(node13, -534.73305103673, -263.99381098069)
 
 var node14 = ::archgraph::nodes::split_size::SplitSize()
-node14.query_param("size").value = 1
+node14.query_param("size").value = 0
 node14.query_param("mode").value = "floating"
 
 _editor.add_node(node14, -677.99457407307, -270.02121184107)
@@ -122,7 +122,7 @@ node22.query_param("repeat").value = false
 _editor.add_node(node22, -331.30162867971, 478.84777379675)
 
 var node23 = ::archgraph::nodes::split_size::SplitSize()
-node23.query_param("size").value = 1
+node23.query_param("size").value = 0
 node23.query_param("mode").value = "floating"
 
 _editor.add_node(node23, -482.08381287307, 476.62202582893)
@@ -169,7 +169,7 @@ var node31 = ::blueprint::nodes::input::Input()
 node31.var_name = "facade"
 node31.var_type = "geometry"
 
-_editor.add_node(node31, -1100.6255320794, 494.77863886379)
+_editor.add_node(node31, -1098.3715876767, 493.27600926199)
 
 var node32 = ::blueprint::nodes::store::Store()
 

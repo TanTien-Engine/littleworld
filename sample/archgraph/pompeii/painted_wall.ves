@@ -75,34 +75,21 @@ node13.load_from_file(_editor, "wall.ves")
 
 _editor.add_node(node13, -52.425806118043, -339.13378560216)
 
-var node14 = ::archgraph::nodes::scope_pos::ScopePos()
+var node14 = ::blueprint::nodes::for_each_f::ForEachF()
 
-_editor.add_node(node14, -23.549993896484, 44.12525634766)
+_editor.add_node(node14, 433.07448730469, -94.690991210938)
 
-var node15 = ::blueprint::nodes::compare::Compare()
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "is_on_ground.ves")
 
-node15.cmp = "less"
+_editor.add_node(node15, 63.460555972953, -19.509015777611)
 
-_editor.add_node(node15, 110.53120260065, 17.69300923643)
-
-var node16 = ::blueprint::nodes::number::Number()
-
-node16.value = 0.5
-
-_editor.add_node(node16, -17.378590395691, -25.150553904541)
-
-var node17 = ::blueprint::nodes::for_each_f::ForEachF()
-
-_editor.add_node(node17, 433.07448730469, -94.690991210938)
-
-Blueprint.connect(node17, "curr_item", node14, "geo")
-Blueprint.connect(node14, "btm", node15, "a")
-Blueprint.connect(node16, "v", node15, "b")
-Blueprint.connect(node17, "curr_item", node13, "geo")
+Blueprint.connect(node14, "curr_item", node15, "pos")
+Blueprint.connect(node14, "curr_item", node13, "geo")
 Blueprint.connect(node4, "paint_height", node10, "var")
 Blueprint.connect(node10, "var", node11, "var")
 Blueprint.connect(node11, "var", node5, "size")
-Blueprint.connect(node17, "curr_item", node3, "parent")
+Blueprint.connect(node14, "curr_item", node3, "parent")
 Blueprint.connect(node5, "size", node3, "size0")
 Blueprint.connect(node6, "size", node3, "size1")
 Blueprint.connect(node3, "child1", node8, "geo")
@@ -110,9 +97,9 @@ Blueprint.connect(node3, "child0", node2, "geo")
 Blueprint.connect(node9, "red", node2, "color")
 Blueprint.connect(node2, "geo", node7, "in0")
 Blueprint.connect(node8, "geo", node7, "in1")
-Blueprint.connect(node15, "out", node12, "cond")
+Blueprint.connect(node15, "b", node12, "cond")
 Blueprint.connect(node7, "list", node12, "true")
 Blueprint.connect(node13, "geo", node12, "false")
-Blueprint.connect(node0, "var", node17, "items")
-Blueprint.connect(node12, "result", node17, "eval")
-Blueprint.connect(node17, "result", node1, "var")
+Blueprint.connect(node0, "var", node14, "items")
+Blueprint.connect(node12, "result", node14, "eval")
+Blueprint.connect(node14, "result", node1, "var")

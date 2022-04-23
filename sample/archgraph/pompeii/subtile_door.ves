@@ -10,7 +10,7 @@ var node1 = ::blueprint::nodes::output::Output()
 node1.var_name = "geo"
 node1.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node1, 748.84204231815, 158.80570143569)
+_editor.add_node(node1, 749.96113322724, 166.96842870842)
 
 var node2 = ::archgraph::nodes::split::Split()
 node2.query_param("axis").value = "vert"
@@ -38,16 +38,16 @@ _editor.add_node(node5, -447.8987815163, 418.80597339977)
 var node6 = ::blueprint::nodes::subgraph::Subgraph()
 node6.load_from_file(_editor, "door.ves")
 
-_editor.add_node(node6, 235.15755172195, 129.68208418414)
+_editor.add_node(node6, 399.71803256343, 146.36878591216)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
 node7.load_from_file(_editor, "door_top.ves")
 
-_editor.add_node(node7, 265.96240203943, -181.36852687379)
+_editor.add_node(node7, 236.95413757662, -178.97183265892)
 
 var node8 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node8, 605.58007579698, 125.43255438111)
+_editor.add_node(node8, 616.37916670607, 126.33528165384)
 
 var node9 = ::archgraph::nodes::split::Split()
 node9.query_param("axis").value = "hori"
@@ -94,30 +94,35 @@ _editor.add_node(node15, -116.59414098185, 98.039904535862)
 var node16 = ::blueprint::nodes::subgraph::Subgraph()
 node16.load_from_file(_editor, "door_frame.ves")
 
-_editor.add_node(node16, 240.76667966503, 312.83895758502)
+_editor.add_node(node16, 236.25879085962, 340.63760521838)
 
 var node17 = ::blueprint::nodes::subgraph::Subgraph()
 node17.load_from_file(_editor, "door_stone.ves")
 
-_editor.add_node(node17, 238.77678222656, 219.99978271484)
+_editor.add_node(node17, 234.26889342115, 247.7984303482)
 
 var node18 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node18, 433.41485369964, 214.93376626259)
+_editor.add_node(node18, 443.18194611136, 295.32444995906)
 
 var node19 = ::blueprint::nodes::subgraph::Subgraph()
 node19.load_from_file(_editor, "door_frame.ves")
 
-_editor.add_node(node19, 234.94255478307, 39.061418454274)
+_editor.add_node(node19, 234.03346387398, 1.7886911815465)
 
 var node20 = ::blueprint::nodes::subgraph::Subgraph()
 node20.load_from_file(_editor, "door_stone.ves")
 
-_editor.add_node(node20, 237.11074165556, -47.454011424906)
+_editor.add_node(node20, 236.20165074647, -84.726738697633)
 
 var node21 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node21, 439.94497459302, 56.079111525886)
+_editor.add_node(node21, 448.80297609565, -48.060633027082)
+
+var node22 = ::archgraph::nodes::translate_scope::TranslateScope()
+node22.query_param("t").value.set(0, 0, -0.12)
+
+_editor.add_node(node22, 203.04847226619, 125.83322813061)
 
 Blueprint.connect(node5, "frame_height", node11, "var")
 Blueprint.connect(node11, "var", node13, "var")
@@ -132,6 +137,8 @@ Blueprint.connect(node2, "child0", node9, "parent")
 Blueprint.connect(node15, "size", node9, "size0")
 Blueprint.connect(node14, "size", node9, "size1")
 Blueprint.connect(node15, "size", node9, "size2")
+Blueprint.connect(node9, "child1", node22, "geo")
+Blueprint.connect(node22, "geo", node6, "facade")
 Blueprint.connect(node9, "child2", node20, "facade")
 Blueprint.connect(node9, "child2", node19, "facade")
 Blueprint.connect(node19, "geo", node21, "in0")
@@ -140,7 +147,6 @@ Blueprint.connect(node9, "child0", node17, "facade")
 Blueprint.connect(node9, "child0", node16, "facade")
 Blueprint.connect(node16, "geo", node18, "in0")
 Blueprint.connect(node17, "geo", node18, "in1")
-Blueprint.connect(node9, "child1", node6, "facade")
 Blueprint.connect(node2, "child1", node7, "facade")
 Blueprint.connect(node18, "list", node8, "in0")
 Blueprint.connect(node6, "geo", node8, "in1")

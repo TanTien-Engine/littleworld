@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -451.6763676608, 157.7130437756)
+_editor.add_node(node0, -504.40364038807, 273.16758923015)
 
 var node1 = ::blueprint::nodes::output::Output()
 
@@ -61,12 +61,26 @@ node10.value = 11
 
 _editor.add_node(node10, -418.29138183594, -236.2834777832)
 
+var node11 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node11, -156.51211365884, 231.3742358787)
+
+var node12 = ::blueprint::nodes::property::Property()
+
+node12.var_name = "no_height"
+node12.var_type = "bool"
+
+_editor.add_node(node12, -307.84468400756, 269.31562222692)
+
 Blueprint.connect(node6, "width", node7, "x")
 Blueprint.connect(node8, "brick_length", node7, "y")
 Blueprint.connect(node7, "xy", node9, "a")
 Blueprint.connect(node10, "v", node9, "b")
 Blueprint.connect(node0, "var", node2, "geo")
-Blueprint.connect(node2, "geo", node5, "geo")
+Blueprint.connect(node12, "var", node11, "cond")
+Blueprint.connect(node0, "var", node11, "true")
+Blueprint.connect(node2, "geo", node11, "false")
+Blueprint.connect(node11, "result", node5, "geo")
 Blueprint.connect(node9, "v", node5, "scale")
 Blueprint.connect(node5, "geo", node4, "geo")
 Blueprint.connect(node3, "tex", node4, "texture")

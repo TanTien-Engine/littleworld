@@ -15,37 +15,36 @@ _editor.add_node(node1, 508.99838, 106.59592)
 var node2 = ::blueprint::nodes::subgraph::Subgraph()
 node2.load_from_file(_editor, "gallery_front.ves")
 
-_editor.add_node(node2, 164.99618835449, 135.96100158691)
+_editor.add_node(node2, 172.50933636351, 152.48992720674)
 
 var node3 = ::archgraph::nodes::translate_scope::TranslateScope()
 node3.query_param("t").value.set(0, 0, -1.5)
 
-_editor.add_node(node3, -27.503810119629, -10.339031982422)
+_editor.add_node(node3, -13.228828902499, -5.0798283761109)
 
-var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "wood.ves")
-node4.set_prop_value("hori", false)
+var node4 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node4, 166.0962097168, 38.061009216309)
+_editor.add_node(node4, 364.09618682861, 83.16099243164)
 
-var node5 = ::blueprint::nodes::merge::Merge()
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "gallery_props.ves")
 
-_editor.add_node(node5, 364.09618682861, 83.16099243164)
+_editor.add_node(node5, -334.78688570018, 7.1030744528255)
 
-var node6 = ::blueprint::nodes::subgraph::Subgraph()
-node6.load_from_file(_editor, "gallery_props.ves")
+var node6 = ::blueprint::nodes::negate::Negate()
 
-_editor.add_node(node6, -334.78688570018, 7.1030744528255)
+_editor.add_node(node6, -158.89476229856, -11.891680839418)
 
-var node7 = ::blueprint::nodes::negate::Negate()
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "ground_floor9.ves")
 
-_editor.add_node(node7, -158.89476229856, -11.891680839418)
+_editor.add_node(node7, 170.69962662626, 58.23673173889)
 
-Blueprint.connect(node6, "depth", node7, "v")
+Blueprint.connect(node5, "depth", node6, "v")
 Blueprint.connect(node0, "var", node3, "geo")
-Blueprint.connect(node7, "v", node3, "z")
-Blueprint.connect(node3, "geo", node4, "facade")
+Blueprint.connect(node6, "v", node3, "z")
+Blueprint.connect(node3, "geo", node7, "facade")
 Blueprint.connect(node0, "var", node2, "facade")
-Blueprint.connect(node2, "geo", node5, "in0")
-Blueprint.connect(node4, "geo", node5, "in1")
-Blueprint.connect(node5, "list", node1, "var")
+Blueprint.connect(node2, "geo", node4, "in0")
+Blueprint.connect(node7, "geo", node4, "in1")
+Blueprint.connect(node4, "list", node1, "var")
