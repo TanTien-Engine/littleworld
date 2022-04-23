@@ -5,7 +5,7 @@ import "blueprint.blueprint" for Blueprint
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.utility" for Utility
 
-class FlipNormals is Node
+class FlipScopeNormal is Node
 {
 	init()
 	{
@@ -48,12 +48,11 @@ class FlipNormals is Node
 			for (var poly in geo.mesh.polys) 
 			{ 
 				var faces = poly.get_faces()
-				for (var face in faces) {
+				if (!faces.isEmpty) 
+				{
+					var face = faces.front().clone()
 					face.flip_normal()
-				}
-
-				if (!faces.isEmpty) {
-					geo.scope = Utility.calc_scope_mat(poly, faces.front())
+					geo.scope = Utility.calc_scope_mat(poly, face)
 				}
 			}
 		}

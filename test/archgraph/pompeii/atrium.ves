@@ -97,7 +97,7 @@ var node16 = ::blueprint::nodes::negate::Negate()
 
 _editor.add_node(node16, -694.97923583984, 285.78957519531)
 
-var node17 = ::archgraph::nodes::flip_normals::FlipNormals()
+var node17 = ::archgraph::nodes::flip_scope_normal::FlipScopeNormal()
 
 _editor.add_node(node17, -81.616038147686, 470.7283384934)
 
