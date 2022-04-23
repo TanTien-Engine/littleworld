@@ -32,10 +32,12 @@ class Offset is Node
 
 	calc_value(idx)
 	{
-		var v_geo = Blueprint.calc_input_value(this, 0)
-		if (!v_geo or !v_geo.value) {
+		var in_geo = Blueprint.calc_input_value(this, 0)
+		if (!in_geo or !in_geo.value) {
 			return nil
 		}
+
+		var out_geo = Utility.clone_geo(in_geo)
 
 		var distance = this.query_param("distance").value
 		var v_dist = Blueprint.calc_input_value(this, 1)
@@ -43,29 +45,29 @@ class Offset is Node
 			distance = v_dist.value
 		}
 		if (distance < 0.01 and distance > -0.01) {
-			return v_geo
+			return out_geo
 		}
 
 		if (idx == 0)
 		{
-			return this.geo_offset_geo(v_geo, distance)
+			return this.geo_offset_geo(out_geo, distance)
 		}
 		else if (idx == 1)
 		{
 			if (distance > 0) {
-				return v_geo
+				return out_geo
 			} else {
-				return this.geo_offset_geo(v_geo, distance)
+				return this.geo_offset_geo(out_geo, distance)
 			}
 		}
 		else if (idx == 2)
 		{
-			var poly = v_geo.value.mesh.polys.front()
+			var poly = out_geo.value.mesh.polys.front()
 			var new_poly = GroundEditor.offset(poly, -distance)
 			if (distance > 0) {
-				return this.geo_border_geo(new_poly, v_geo.value.mesh.polys.front())
+				return this.geo_border_geo(new_poly, out_geo.value.mesh.polys.front())
 			} else {
-				return this.geo_border_geo(v_geo.value.mesh.polys.front(), new_poly)
+				return this.geo_border_geo(out_geo.value.mesh.polys.front(), new_poly)
 			}
 		}
 
