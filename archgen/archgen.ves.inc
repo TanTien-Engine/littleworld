@@ -43,4 +43,10 @@ foreign class GroundEditor
 	foreign static offset(poly, distance)
 }
 
+foreign class SpatialMath
+{
+	foreign static calc_face_area(poly)
+	foreign static is_rectangular(poly)
+}
+
 );

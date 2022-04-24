@@ -1,0 +1,36 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_BOOLEAN
+import "blueprint.blueprint" for Blueprint
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgen" for SpatialMath
+
+class IsRectangular is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+		this.exports = [
+			Pin(this, "b", VAR_TYPE_BOOLEAN),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo or v_geo.value.mesh.polys.isEmpty) {
+			return nil
+		}
+
+		var poly = v_geo.value.mesh.polys.front()
+		var is_rect = SpatialMath.is_rectangular(poly)
+
+		return Variant(is_rect)
+	}
+}

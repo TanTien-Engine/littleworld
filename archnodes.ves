@@ -6,4 +6,5 @@ SplitSize, Split, Comp, CompRoof, Scale, Rotate, Translate, ScaleScope, RotateSc
 SetupProjection,
 MeshFile, Insert, RandSelect, RandNumber,
 Switch, Case, CityImporter,
+CalcArea, IsRectangular,
 ]

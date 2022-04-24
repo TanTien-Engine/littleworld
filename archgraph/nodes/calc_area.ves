@@ -1,0 +1,36 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_NUMBER
+import "blueprint.blueprint" for Blueprint
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgen" for SpatialMath
+
+class CalcArea is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "geo", VAR_TYPE_GEOMETRY),
+		]
+		this.exports = [
+			Pin(this, "area", VAR_TYPE_NUMBER),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo or v_geo.value.mesh.polys.isEmpty) {
+			return nil
+		}
+
+		var poly = v_geo.value.mesh.polys.front()
+		var area = SpatialMath.calc_face_area(poly)
+
+		return Variant(area)
+	}
+}

@@ -6,8 +6,10 @@
 #include "modules/render/Render.h"
 #include "modules/script/TransHelper.h"
 
+#include <geoshape/Polyline2D.h>
 #include <polymesh3/Polytope.h>
 #include <unirender/VertexArray.h>
+#include <sm/SM_Calc.h>
 
 #include <string.h>
 
@@ -306,6 +308,46 @@ void w_GroundEditor_offset()
 	return_polytope(archgen::PolytopeTools::Offset(*poly, dist));
 }
 
+void w_SpatialMath_calc_face_area()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+
+	auto& faces = poly->Faces();
+	if (faces.empty()) {
+		ves_set_number(0, 0);
+		return;
+	}
+
+	auto& pts = poly->Points();
+
+	auto face = faces.front();
+	auto& border = face->border;
+
+	std::vector<sm::vec3> polygon;
+	polygon.reserve(border.size());
+	for (auto& i : border) {
+		polygon.push_back(pts[i]->pos);
+	}
+
+	float area = sm::get_polygon_area(polygon);
+	ves_set_number(0, area);
+}
+
+void w_SpatialMath_is_rectangular()
+{
+	auto poly = ((tt::Proxy<pm3::Polytope>*)ves_toforeign(1))->obj;
+
+	auto& faces = poly->Faces();
+	if (faces.empty()) {
+		ves_set_boolean(0, false);
+		return;
+	}
+
+	auto face = faces.front();
+	bool is_rect = face->border.size() == 4;
+
+	ves_set_boolean(0, is_rect);
+}
 }
 
 namespace archgen
@@ -334,6 +376,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 
 	if (strcmp(signature, "static GroundEditor.offset(_,_)") == 0) return w_GroundEditor_offset;
 
+	if (strcmp(signature, "static SpatialMath.calc_face_area(_)") == 0) return w_SpatialMath_calc_face_area;
+	if (strcmp(signature, "static SpatialMath.is_rectangular(_)") == 0) return w_SpatialMath_is_rectangular;
 	return nullptr;
 }
 
