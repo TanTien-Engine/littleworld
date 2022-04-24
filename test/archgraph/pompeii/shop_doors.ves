@@ -60,7 +60,7 @@ node9.value = 1
 _editor.add_node(node9, -216.53659057617, -61.387603759767)
 
 var node10 = ::blueprint::nodes::subgraph::Subgraph()
-node10.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
+node10.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset_once.ves")
 
 _editor.add_node(node10, 119.97441888088, 223.2185339007)
 

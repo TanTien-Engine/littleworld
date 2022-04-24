@@ -40,7 +40,7 @@ var node6 = ::blueprint::nodes::merge::Merge()
 _editor.add_node(node6, 35.045370483399, 243.40215454102)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
-node7.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
+node7.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset_once.ves")
 
 _editor.add_node(node7, -15.1, 344.4)
 

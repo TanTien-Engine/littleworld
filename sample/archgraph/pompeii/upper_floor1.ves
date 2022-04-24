@@ -3,14 +3,14 @@ var node0 = ::blueprint::nodes::input::Input()
 node0.var_name = "facade"
 node0.var_type = "geometry"
 
-_editor.add_node(node0, -551.34715856989, 238.96638013924)
+_editor.add_node(node0, 542.5619323392, 189.14819832106)
 
 var node1 = ::blueprint::nodes::output::Output()
 
 node1.var_name = "geo"
 node1.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node1, 688.48928909091, 128.65046545455)
+_editor.add_node(node1, 822.22332365139, 169.22146470324)
 
 var node2 = ::archgraph::nodes::scope_size::ScopeSize()
 
@@ -35,7 +35,7 @@ var node6 = ::blueprint::nodes::integer::Integer()
 
 node6.value = 3
 
-_editor.add_node(node6, -352.78653056314, -53.188077461464)
+_editor.add_node(node6, -352.78653056314, -62.188077461464)
 
 var node7 = ::blueprint::nodes::branch_f::BranchF()
 
@@ -84,9 +84,11 @@ var node15 = ::blueprint::nodes::merge::Merge()
 
 _editor.add_node(node15, 366, -191.5)
 
-Blueprint.connect(node4, "large_width", node5, "a")
-Blueprint.connect(node6, "v", node5, "b")
-Blueprint.connect(node0, "var", node8, "parent")
+var node16 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node16, 687.1241529541, 139.47155087126)
+
+Blueprint.connect(node16, "curr_item", node8, "parent")
 Blueprint.connect(node9, "size", node8, "size0")
 Blueprint.connect(node10, "size", node8, "size1")
 Blueprint.connect(node11, "size", node8, "size2")
@@ -96,9 +98,13 @@ Blueprint.connect(node8, "child0", node12, "facade")
 Blueprint.connect(node12, "geo", node15, "in0")
 Blueprint.connect(node13, "geo", node15, "in1")
 Blueprint.connect(node14, "geo", node15, "in2")
-Blueprint.connect(node0, "var", node2, "geo")
+Blueprint.connect(node4, "large_width", node5, "a")
+Blueprint.connect(node6, "v", node5, "b")
+Blueprint.connect(node16, "curr_item", node2, "geo")
 Blueprint.connect(node2, "sx", node3, "a")
 Blueprint.connect(node5, "v", node3, "b")
 Blueprint.connect(node3, "out", node7, "cond")
 Blueprint.connect(node15, "list", node7, "true")
-Blueprint.connect(node7, "result", node1, "var")
+Blueprint.connect(node0, "var", node16, "items")
+Blueprint.connect(node7, "result", node16, "eval")
+Blueprint.connect(node16, "result", node1, "var")

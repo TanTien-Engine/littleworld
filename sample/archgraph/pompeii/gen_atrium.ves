@@ -1,0 +1,151 @@
+var node0 = ::archgraph::nodes::offset::Offset()
+node0.query_param("distance").value = 1
+
+_editor.add_node(node0, -546.54627980223, 318.09253345642)
+
+var node1 = ::archgraph::nodes::extrude::Extrude()
+node1.query_param("distance").value = 2.5
+
+_editor.add_node(node1, -395.13646977722, 345.1681112526)
+
+var node2 = ::archgraph::nodes::extrude_roof::ExtrudeRoof()
+node2.query_param("distance").value = 0.73508852720261
+node2.query_param("type").value = "shed"
+node2.query_param("idx").value = 0
+
+_editor.add_node(node2, -64.882149331502, 205.16188906576)
+
+var node3 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node3, 627.19664699763, 93.290618910068)
+
+var node4 = ::archgraph::nodes::comp::Comp()
+node4.query_param("selector").value = "side"
+
+node4.on_param_dirty()
+
+_editor.add_node(node4, -241.54850319602, 447.06078968395)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "column_facade.ves")
+
+_editor.add_node(node5, 65.429349771193, 350.8189543064)
+
+var node6 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node6, 50.999491289635, 439.27924692464)
+
+var node7 = ::archgraph::nodes::comp::Comp()
+node7.query_param("selector").value = "face6"
+
+node7.on_param_dirty()
+
+_editor.add_node(node7, -243.93489059878, 289.876356821)
+
+var node8 = ::blueprint::nodes::number::Number()
+
+node8.value = 2.5
+
+_editor.add_node(node8, -865.34495960584, 116.20649857955)
+
+var node9 = ::blueprint::nodes::store::Store()
+
+node9.var_name = "height"
+
+_editor.add_node(node9, -732.34495960583, 116.20649857955)
+
+var node10 = ::blueprint::nodes::load::Load()
+
+node10.var_name = "height"
+
+_editor.add_node(node10, -549.74132324218, 237.441953125)
+
+var node11 = ::blueprint::nodes::subgraph::Subgraph()
+node11.load_from_file(_editor, "garden.ves")
+node11.set_prop_value("d", 0.38407850265503)
+
+_editor.add_node(node11, 219.53599302686, -57.855259697025)
+
+var node12 = ::blueprint::nodes::number::Number()
+
+node12.value = 1
+
+_editor.add_node(node12, -834.67924804688, 279.18953857422)
+
+var node13 = ::blueprint::nodes::negate::Negate()
+
+_editor.add_node(node13, -694.97923583984, 285.78957519531)
+
+var node14 = ::archgraph::nodes::flip_scope_normal::FlipScopeNormal()
+
+_editor.add_node(node14, -81.616038147686, 456.18288394795)
+
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "ground.ves")
+
+_editor.add_node(node15, 164.14975674716, -171.28043235085)
+
+var node16 = ::archgraph::nodes::comp::Comp()
+node16.query_param("selector").value = "normal_y"
+
+node16.on_param_dirty()
+
+_editor.add_node(node16, 83.737763460016, 196.91957891337)
+
+var node17 = ::blueprint::nodes::subgraph::Subgraph()
+node17.load_from_file(_editor, "painted_wall.ves")
+
+_editor.add_node(node17, 276.64571370269, 236.90745234012)
+
+var node18 = ::blueprint::nodes::subgraph::Subgraph()
+node18.load_from_file(_editor, "roof_covering.ves")
+node18.set_prop_value("no_height", true)
+
+_editor.add_node(node18, 308.80201481591, 112.71473845175)
+
+var node19 = ::blueprint::nodes::subgraph::Subgraph()
+node19.load_from_file(_editor, "ground_floor9.ves")
+
+_editor.add_node(node19, -8.5021874999998, 534.85772827148)
+
+var node20 = ::blueprint::nodes::input::Input()
+
+node20.var_name = "lot"
+node20.var_type = "geometry"
+
+_editor.add_node(node20, -722.96317360618, 383.55589710582)
+
+var node21 = ::blueprint::nodes::output::Output()
+
+node21.var_name = "geos"
+node21.var_type = "array"
+
+_editor.add_node(node21, 780.8642578125, 155.96447753906)
+
+Blueprint.connect(node12, "v", node13, "v")
+Blueprint.connect(node20, "var", node0, "geo")
+Blueprint.connect(node13, "v", node0, "dist")
+Blueprint.connect(node0, "border", node15, "facade")
+Blueprint.connect(node0, "inside", node11, "facade")
+Blueprint.connect(node8, "v", node9, "var")
+Blueprint.connect(node9, "var", node10, "var")
+Blueprint.connect(node0, "border", node1, "geo")
+Blueprint.connect(node10, "var", node1, "dist")
+Blueprint.connect(node1, "geo", node7, "geo")
+Blueprint.connect(node7, "top", node2, "geo")
+Blueprint.connect(node2, "geo", node16, "geo")
+Blueprint.connect(node16, "horizontal", node18, "facade")
+Blueprint.connect(node16, "vertical", node17, "geo")
+Blueprint.connect(node1, "geo", node4, "geo")
+Blueprint.connect(node4, "border", node19, "facade")
+Blueprint.connect(node4, "inside", node14, "geo")
+Blueprint.connect(node6, "curr_item", node5, "facade")
+Blueprint.connect(node14, "geo", node6, "items")
+Blueprint.connect(node5, "geo", node6, "eval")
+Blueprint.connect(node6, "result", node3, "in0")
+Blueprint.connect(node17, "geo", node3, "in1")
+Blueprint.connect(node11, "geo", node3, "in2")
+Blueprint.connect(node19, "geo", node3, "in3")
+Blueprint.connect(node15, "geo", node3, "in4")
+Blueprint.connect(node18, "geo", node3, "in5")
+Blueprint.connect(node3, "list", node21, "var")

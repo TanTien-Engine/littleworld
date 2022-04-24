@@ -1,0 +1,12 @@
+var node0 = ::rendergraph::nodes::pass::Pass()
+
+node0.once = true
+
+_editor.add_node(node0, 278, 66.5)
+
+var node1 = ::blueprint::nodes::subgraph::Subgraph()
+node1.load_from_file(_editor, "props_reset.ves")
+
+_editor.add_node(node1, 92, 64)
+
+Blueprint.connect(node1, "next", node0, "do")

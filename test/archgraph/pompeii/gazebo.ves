@@ -34,7 +34,7 @@ node4.on_param_dirty()
 _editor.add_node(node4, -626.03409317899, 66.65839404902)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
-node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
+node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset_once.ves")
 
 _editor.add_node(node5, 164, 8)
 

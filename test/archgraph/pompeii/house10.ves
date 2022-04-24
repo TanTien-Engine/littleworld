@@ -1,21 +1,21 @@
 var node0 = ::blueprint::nodes::subgraph::Subgraph()
 node0.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
 
-_editor.add_node(node0, 402.15873159175, -99.00221506755)
+_editor.add_node(node0, 749.20982099821, -83.31401070992)
 
 var node1 = ::blueprint::nodes::camera3d::Camera3d()
 
-node1.cam.position.set(8.7976518972096, 2.2950871318873, 5.7076406630456)
-node1.cam.yaw = -138.6
-node1.cam.pitch = 7.1
+node1.cam.position.set(9.9795566204595, 7.6640908760236, 9.0890156860773)
+node1.cam.yaw = -133.5
+node1.cam.pitch = -31.8
 node1.cam.zoom = 45
 node1.cam.update_vectors()
 node1.speed = 0.22097560763359
 
-_editor.add_node(node1, 212.55841850464, -218.80294775318)
+_editor.add_node(node1, 535.8581931102, -207.11474339555)
 
 var node2 = ::archgraph::nodes::primitive_cube::PrimitiveCube()
-node2.query_param("size").value.set(5, 6, 2.5)
+node2.query_param("size").value.set(6, 5, 5)
 
 _editor.add_node(node2, -783.76398743582, -76.753486113539)
 
@@ -31,18 +31,18 @@ node4.query_param("selector").value = "face6"
 
 node4.on_param_dirty()
 
-_editor.add_node(node4, -554.03409317899, 107.65839404902)
+_editor.add_node(node4, -627.03409317899, 58.65839404902)
 
 var node5 = ::blueprint::nodes::subgraph::Subgraph()
 node5.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset_once.ves")
 
-_editor.add_node(node5, 164, 8)
+_editor.add_node(node5, 489.05108940646, -26.311795642374)
 
 var node6 = ::archgraph::nodes::split::Split()
 node6.query_param("axis").value = "vert"
 node6.query_param("repeat").value = false
 
-_editor.add_node(node6, -462.07438016529, -164.88429752066)
+_editor.add_node(node6, -463.07438016529, -161.88429752066)
 
 var node7 = ::blueprint::nodes::subgraph::Subgraph()
 node7.load_from_file(_editor, "../../../sample/archgraph/pompeii/floor_props.ves")
@@ -63,32 +63,38 @@ _editor.add_node(node9, -629.8682483011, -306.46933159947)
 
 var node10 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node10, -21.656955515502, -126.90175194744)
+_editor.add_node(node10, 200.29796559644, -164.38334473482)
 
 var node11 = ::archgraph::nodes::split::Split()
 node11.query_param("axis").value = "vert"
 node11.query_param("repeat").value = true
 
-_editor.add_node(node11, -272.9103874132, -238.16806417762)
+_editor.add_node(node11, -313.48138666189, -238.91937897852)
 
 var node12 = ::archgraph::nodes::split_size::SplitSize()
 node12.query_param("size").value = 2.5
 node12.query_param("mode").value = "floating"
 
-_editor.add_node(node12, -423.92464453327, -290.76009764983)
+_editor.add_node(node12, -464.49564378196, -291.51141245073)
 
 var node13 = ::blueprint::nodes::subgraph::Subgraph()
-node13.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_small_window.ves")
+node13.load_from_file(_editor, "../../../sample/archgraph/pompeii/flat_roof.ves")
 
-_editor.add_node(node13, -75.314563135022, -256.95094009273)
+_editor.add_node(node13, -30.457694313743, -22.592842102051)
 
 var node14 = ::blueprint::nodes::subgraph::Subgraph()
-node14.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_large_window.ves")
+node14.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_shop.ves")
 
-_editor.add_node(node14, -240.06319646662, -92.121117453835)
+_editor.add_node(node14, -31, -114)
+
+var node15 = ::blueprint::nodes::subgraph::Subgraph()
+node15.load_from_file(_editor, "../../../sample/archgraph/pompeii/wall.ves")
+
+_editor.add_node(node15, -33, -209)
 
 Blueprint.connect(node7, "ground_floor_height", node8, "size")
 Blueprint.connect(node2, "geo", node4, "geo")
+Blueprint.connect(node4, "top", node13, "top")
 Blueprint.connect(node2, "geo", node3, "geo")
 Blueprint.connect(node3, "side", node6, "parent")
 Blueprint.connect(node8, "size", node6, "size0")
@@ -96,9 +102,10 @@ Blueprint.connect(node9, "size", node6, "size1")
 Blueprint.connect(node6, "child0", node14, "facade")
 Blueprint.connect(node6, "child1", node11, "parent")
 Blueprint.connect(node12, "size", node11, "size0")
-Blueprint.connect(node11, "child0", node13, "facade")
+Blueprint.connect(node11, "child0", node15, "geo")
 Blueprint.connect(node14, "geo", node10, "in0")
-Blueprint.connect(node13, "geo", node10, "in1")
+Blueprint.connect(node15, "geo", node10, "in1")
+Blueprint.connect(node13, "geo", node10, "in2")
 Blueprint.connect(node5, "next", node0, "prev")
 Blueprint.connect(node10, "list", node0, "geos")
 Blueprint.connect(node1, "this", node0, "view_cam")

@@ -60,10 +60,10 @@ _editor.add_node(node10, -615.10527077478, -153.09255039591)
 
 var node11 = ::blueprint::nodes::merge::Merge()
 
-_editor.add_node(node11, 889.13172802679, -215.19745585556)
+_editor.add_node(node11, 886.13172802679, -236.19745585556)
 
 var node12 = ::citygraph::nodes::street::streets::Streets()
-node12.query_param("num").value = 7
+node12.query_param("num").value = 2
 node12.query_param("seed").value = 1
 node12.query_param("ortho").value = true
 node12.query_param("type").value = "default"
@@ -82,10 +82,10 @@ _editor.add_node(node14, -468.01176891708, 121.85191013601)
 
 var node15 = ::citygraph::nodes::building::parcels::Parcels()
 node15.query_param("type").value = "obb"
-node15.query_param("max_len").value = 0.050375126302242
+node15.query_param("max_len").value = 0.20000000298023
 node15.query_param("seed").value = 0
 
-_editor.add_node(node15, 116.67002491759, -212.65661004868)
+_editor.add_node(node15, 119.40207873905, -212.65661004868)
 
 var node16 = ::citygraph::nodes::block::offset::Offset()
 node16.query_param("distance").value = 0.0027669635601342
@@ -93,10 +93,10 @@ node16.query_param("distance").value = 0.0027669635601342
 _editor.add_node(node16, 256.16342479774, -197.91526178207)
 
 var node17 = ::citygraph::nodes::building::extrude::Extrude()
-node17.query_param("distance").value = 0.06954088062048
+node17.query_param("distance").value = 0.10000000149012
 node17.query_param("roof").value = false
 
-_editor.add_node(node17, 420.4793112506, -277.05611465135)
+_editor.add_node(node17, 403.44955918448, -271.88173448606)
 
 var node18 = ::blueprint::nodes::random::Random()
 node18.query_param("seed").value = 0
@@ -264,44 +264,63 @@ var node45 = ::blueprint::nodes::load::Load()
 
 node45.var_name = "lots"
 
-_editor.add_node(node45, 746.15604248047, -305.31128540039)
+_editor.add_node(node45, 745.32959619948, -297.04682259047)
 
-var node46 = ::citygraph::nodes::render::draw_map3d::DrawMap3d()
+var node46 = ::archgraph::nodes::city_importer::CityImporter()
 
-_editor.add_node(node46, 1032.1239785439, -183.70248841845)
+_editor.add_node(node46, 965.26321486796, -423.0159195829)
 
-var node47 = ::archgraph::nodes::city_importer::CityImporter()
+var node47 = ::blueprint::nodes::camera3d::Camera3d()
 
-_editor.add_node(node47, 951.6268512316, -352.10682867381)
+node47.cam.position.set(56.297536078131, 31.389248244738, 50.891027917361)
+node47.cam.yaw = -516.5
+node47.cam.pitch = -46.8
+node47.cam.zoom = 45
+node47.cam.update_vectors()
+node47.speed = 0.5
 
-var node48 = ::blueprint::nodes::subgraph::Subgraph()
-node48.load_from_file(_editor, "../../../assets/archgraph/draw.ves")
+_editor.add_node(node47, 1588.8693414096, -483.11928899772)
 
-_editor.add_node(node48, 1460.9425489189, -454.20435639689)
+var node48 = ::archgraph::nodes::comp::Comp()
+node48.query_param("selector").value = "face6"
 
-var node49 = ::blueprint::nodes::camera3d::Camera3d()
+node48.on_param_dirty()
 
-node49.cam.position.set(0.60153990104836, 0.30737741860869, 0.68720288474112)
-node49.cam.yaw = -134.7
-node49.cam.pitch = -35.3
-node49.cam.zoom = 45
-node49.cam.update_vectors()
-node49.speed = 0.14351850748062
+_editor.add_node(node48, 1187.4769463342, -334.2091607616)
 
-_editor.add_node(node49, 969.33791779853, -593.40089271331)
+var node49 = ::blueprint::nodes::for_each_f::ForEachF()
 
-var node50 = ::archgraph::nodes::comp::Comp()
-node50.query_param("selector").value = "side"
+_editor.add_node(node49, 1182.1474993222, -199.95435557103)
 
-node50.on_param_dirty()
+var node50 = ::blueprint::nodes::subgraph::Subgraph()
+node50.load_from_file(_editor, "../../../sample/archgraph/pompeii/street_ground.ves")
 
-_editor.add_node(node50, 1162.2505049914, -358.57222513361)
+_editor.add_node(node50, 1384.8566864524, -174.52866063341)
 
-var node51 = ::blueprint::nodes::for_each_f::ForEachF()
+var node51 = ::blueprint::nodes::subgraph::Subgraph()
+node51.load_from_file(_editor, "../../../assets/archgraph/draw_best.ves")
 
-_editor.add_node(node51, 1171.0665821809, -253.89847021452)
+_editor.add_node(node51, 1814.6445167096, -338.10164845325)
 
-Blueprint.connect(node51, "curr_item", node50, "geo")
+var node52 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node52, 1389.9359711651, -483.28500803677)
+
+var node53 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node53, 1607.399269981, -321.2531410865)
+
+var node54 = ::blueprint::nodes::merge::Merge()
+
+_editor.add_node(node54, 801.70400390625, -456.51031327681)
+
+var node55 = ::blueprint::nodes::subgraph::Subgraph()
+node55.load_from_file(_editor, "../../../sample/archgraph/pompeii/gen_building.ves")
+
+_editor.add_node(node55, 1338.5991436919, -613.42726828835)
+
+Blueprint.connect(node52, "curr_item", node55, "lot")
+Blueprint.connect(node49, "curr_item", node48, "geo")
 Blueprint.connect(node19, "v", node18, "max")
 Blueprint.connect(node18, "val", node20, "val")
 Blueprint.connect(node0, "uv", node4, "st")
@@ -337,17 +356,24 @@ Blueprint.connect(node21, "blocks", node15, "blocks")
 Blueprint.connect(node15, "blocks", node16, "blocks")
 Blueprint.connect(node16, "blocks", node41, "var")
 Blueprint.connect(node41, "var", node45, "var")
-Blueprint.connect(node45, "var", node47, "city")
-Blueprint.connect(node47, "lots", node51, "items")
-Blueprint.connect(node50, "side", node51, "eval")
-Blueprint.connect(node51, "result", node48, "geos")
-Blueprint.connect(node49, "this", node48, "view_cam")
 Blueprint.connect(node16, "blocks", node17, "blocks")
 Blueprint.connect(node20, "pin", node17, "dist")
 Blueprint.connect(node17, "boxes", node42, "var")
 Blueprint.connect(node42, "var", node43, "var")
 Blueprint.connect(node12, "streets", node36, "var")
 Blueprint.connect(node36, "var", node37, "var")
+Blueprint.connect(node45, "var", node54, "in0")
+Blueprint.connect(node37, "var", node54, "in1")
+Blueprint.connect(node54, "list", node46, "city")
+Blueprint.connect(node46, "lots", node52, "items")
+Blueprint.connect(node55, "geo", node52, "eval")
+Blueprint.connect(node46, "roads", node49, "items")
+Blueprint.connect(node48, "top", node49, "eval")
+Blueprint.connect(node49, "result", node50, "geo")
+Blueprint.connect(node50, "geo", node53, "in0")
+Blueprint.connect(node52, "result", node53, "in1")
+Blueprint.connect(node53, "list", node51, "geos")
+Blueprint.connect(node47, "this", node51, "view_cam")
 Blueprint.connect(node30, "var", node11, "in0")
 Blueprint.connect(node35, "var", node11, "in1")
 Blueprint.connect(node37, "var", node11, "in2")

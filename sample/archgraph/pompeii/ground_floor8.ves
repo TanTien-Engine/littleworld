@@ -1,0 +1,40 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "facade"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -351.45234264202, 28.355561206103)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 220.84841756574, 148.39201316304)
+
+var node2 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node2, 67.285499624343, 129.53155522164)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node3.set_prop_value("p", 0.6)
+
+_editor.add_node(node3, -148.20661157025, 164.4196093163)
+
+var node4 = ::blueprint::nodes::subgraph::Subgraph()
+node4.load_from_file(_editor, "tile_door.ves")
+
+_editor.add_node(node4, -146.9812310016, 71.347478572808)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "painted_wall.ves")
+
+_editor.add_node(node5, -146.22992622037, -15.053718303219)
+
+Blueprint.connect(node0, "var", node5, "geo")
+Blueprint.connect(node0, "var", node4, "facade")
+Blueprint.connect(node3, "b", node2, "cond")
+Blueprint.connect(node4, "geo", node2, "true")
+Blueprint.connect(node5, "geo", node2, "false")
+Blueprint.connect(node2, "result", node1, "var")

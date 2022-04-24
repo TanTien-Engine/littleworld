@@ -1,0 +1,134 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "lot"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -641.24484315428, 295.12415624743)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "geo"
+node1.var_type = [ "geometry", "array" ]
+
+_editor.add_node(node1, 1031.0189206612, -46.23842603306)
+
+var node2 = ::archgraph::nodes::comp::Comp()
+node2.query_param("selector").value = "face6"
+
+node2.on_param_dirty()
+
+_editor.add_node(node2, -325.96843238191, 139.50181218317)
+
+var node3 = ::blueprint::nodes::subgraph::Subgraph()
+node3.load_from_file(_editor, "buidling_type.ves")
+
+_editor.add_node(node3, -450.96376454556, 300.93275668407)
+
+var node4 = ::archgraph::nodes::extrude::Extrude()
+node4.query_param("distance").value = 0
+
+_editor.add_node(node4, -88.293698302279, -21.177234830212)
+
+var node5 = ::blueprint::nodes::subgraph::Subgraph()
+node5.load_from_file(_editor, "calc_eave_height.ves")
+
+_editor.add_node(node5, -302.18974914714, -73.959957201522)
+
+var node6 = ::archgraph::nodes::comp::Comp()
+node6.query_param("selector").value = "side"
+
+node6.on_param_dirty()
+
+_editor.add_node(node6, 87.579883426261, -125.86783051215)
+
+var node7 = ::blueprint::nodes::subgraph::Subgraph()
+node7.load_from_file(_editor, "painted_wall.ves")
+
+_editor.add_node(node7, 374.90917182838, -223.41435229956)
+
+var node8 = ::blueprint::nodes::store::Store()
+
+node8.var_name = "type"
+
+_editor.add_node(node8, -266.58102865045, 292.0539051834)
+
+var node9 = ::blueprint::nodes::load::Load()
+
+node9.var_name = "type"
+
+_editor.add_node(node9, -519.41071777507, -83.15216912289)
+
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "meadow.ves")
+
+_editor.add_node(node10, 158.10391898971, 143.31073907471)
+
+var node11 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node11, 888.7300680086, -64.81661669746)
+
+var node12 = ::archgraph::nodes::is_rectangular::IsRectangular()
+
+_editor.add_node(node12, 93.723283005723, 239.95586790446)
+
+var node13 = ::blueprint::nodes::compare::Compare()
+
+node13.cmp = "equal"
+
+_editor.add_node(node13, -317.83001708984, -217.14999389648)
+
+var node14 = ::blueprint::nodes::integer::Integer()
+
+node14.value = 0
+
+_editor.add_node(node14, -447.83001708984, -231.14999389648)
+
+var node15 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node15, -181.83000183105, -227.14999389648)
+
+var node16 = ::blueprint::nodes::load::Load()
+
+node16.var_name = "type"
+
+_editor.add_node(node16, 493.1508251208, -8.0759748038819)
+
+var node17 = ::blueprint::nodes::switch_f::SwitchF()
+
+_editor.add_node(node17, 699.12631500057, -127.38804707322)
+
+var node18 = ::blueprint::nodes::subgraph::Subgraph()
+node18.load_from_file(_editor, "gen_atrium.ves")
+
+_editor.add_node(node18, 208.80654202026, 24.46372716797)
+
+var node19 = ::blueprint::nodes::subgraph::Subgraph()
+node19.load_from_file(_editor, "gen_house.ves")
+
+_editor.add_node(node19, 269.36798095703, -377.955078125)
+
+Blueprint.connect(node0, "var", node3, "geo")
+Blueprint.connect(node3, "type", node8, "var")
+Blueprint.connect(node8, "var", node16, "var")
+Blueprint.connect(node8, "var", node9, "var")
+Blueprint.connect(node9, "var", node13, "a")
+Blueprint.connect(node14, "v", node13, "b")
+Blueprint.connect(node9, "var", node5, "type")
+Blueprint.connect(node0, "var", node2, "geo")
+Blueprint.connect(node2, "top", node18, "lot")
+Blueprint.connect(node2, "top", node12, "geo")
+Blueprint.connect(node2, "top", node10, "facade")
+Blueprint.connect(node2, "top", node4, "geo")
+Blueprint.connect(node5, "height", node4, "dist")
+Blueprint.connect(node4, "geo", node19, "box")
+Blueprint.connect(node16, "var", node17, "type")
+Blueprint.connect(node18, "geos", node17, "case0")
+Blueprint.connect(node19, "geos", node17, "case1")
+Blueprint.connect(node12, "b", node11, "cond")
+Blueprint.connect(node17, "result", node11, "true")
+Blueprint.connect(node10, "geo", node11, "false")
+Blueprint.connect(node11, "result", node1, "var")
+Blueprint.connect(node4, "geo", node6, "geo")
+Blueprint.connect(node6, "side", node7, "geo")
+Blueprint.connect(node13, "out", node15, "cond")
+Blueprint.connect(node7, "geo", node15, "true")

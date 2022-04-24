@@ -1,8 +1,8 @@
 var node0 = ::rendergraph::nodes::pass::Pass()
 
-node0.once = true
+node0.once = false
 
-_editor.add_node(node0, -30.467740098697, 114.28149425527)
+_editor.add_node(node0, -66.467740098697, 356.28149425527)
 
 var node1 = ::blueprint::nodes::global_set::GlobalSet()
 node1.query_param("key").value = "ground_floor_height"

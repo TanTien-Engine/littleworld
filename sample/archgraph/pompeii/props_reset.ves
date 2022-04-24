@@ -8,23 +8,23 @@ node1.load_from_file(_editor, "win_props_reset.ves")
 
 _editor.add_node(node1, 89, 66.5)
 
-var node2 = ::rendergraph::nodes::pass::Pass()
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "building_props_reset.ves")
 
-node2.once = true
-
-_editor.add_node(node2, 278, 66.5)
+_editor.add_node(node2, -375, 160)
 
 var node3 = ::blueprint::nodes::subgraph::Subgraph()
-node3.load_from_file(_editor, "building_props_reset.ves")
+node3.load_from_file(_editor, "floor_props_reset.ves")
 
-_editor.add_node(node3, -375, 160)
+_editor.add_node(node3, -375, 70.5)
 
-var node4 = ::blueprint::nodes::subgraph::Subgraph()
-node4.load_from_file(_editor, "floor_props_reset.ves")
+var node4 = ::rendergraph::nodes::pass::Pass()
 
-_editor.add_node(node4, -375, 70.5)
+node4.once = false
 
-Blueprint.connect(node3, "next", node4, "prev")
-Blueprint.connect(node4, "next", node0, "prev")
+_editor.add_node(node4, 282, 69.5)
+
+Blueprint.connect(node1, "next", node4, "do")
+Blueprint.connect(node2, "next", node3, "prev")
+Blueprint.connect(node3, "next", node0, "prev")
 Blueprint.connect(node0, "next", node1, "prev")
-Blueprint.connect(node1, "next", node2, "do")

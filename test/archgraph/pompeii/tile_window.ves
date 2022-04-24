@@ -48,7 +48,7 @@ node7.load_from_file(_editor, "../../../sample/archgraph/pompeii/tile_large_wind
 _editor.add_node(node7, 31.248685199098, -9.8031555221634)
 
 var node8 = ::blueprint::nodes::subgraph::Subgraph()
-node8.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset.ves")
+node8.load_from_file(_editor, "../../../sample/archgraph/pompeii/props_reset_once.ves")
 
 _editor.add_node(node8, 172, 181)
 

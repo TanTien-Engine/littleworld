@@ -1,0 +1,256 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "geo"
+node0.var_type = "geometry"
+
+_editor.add_node(node0, -1447.0160876608, -439.9474662244)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "type"
+node1.var_type = "num"
+
+_editor.add_node(node1, 135.26614859504, -286.3908568595)
+
+var node2 = ::archgraph::nodes::calc_area::CalcArea()
+
+_editor.add_node(node2, -1310.57802, -429.05021)
+
+var node3 = ::archgraph::nodes::switch::Switch()
+
+_editor.add_node(node3, -9.9314937504272, -345.79915989345)
+
+var node4 = ::blueprint::nodes::store::Store()
+
+node4.var_name = "area"
+
+_editor.add_node(node4, -1175.57802, -439.05021)
+
+var node5 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node5, -169, -31.5)
+
+var node6 = ::blueprint::nodes::load::Load()
+
+node6.var_name = "area"
+
+_editor.add_node(node6, -444.53732668534, 20.685506454477)
+
+var node7 = ::blueprint::nodes::compare::Compare()
+
+node7.cmp = "greater"
+
+_editor.add_node(node7, -303.53732668534, -16.314493545523)
+
+var node8 = ::blueprint::nodes::number::Number()
+
+node8.value = 250
+
+_editor.add_node(node8, -448.53732668534, -36.314493545523)
+
+var node9 = ::blueprint::nodes::integer::Integer()
+
+node9.value = 0
+
+_editor.add_node(node9, -303.40086785064, -97.370637684586)
+
+var node10 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node10, -451.56501418805, -177.88280575718)
+
+var node11 = ::blueprint::nodes::load::Load()
+
+node11.var_name = "area"
+
+_editor.add_node(node11, -727.10234087339, -125.69729930271)
+
+var node12 = ::blueprint::nodes::compare::Compare()
+
+node12.cmp = "greater"
+
+_editor.add_node(node12, -586.10234087339, -162.69729930271)
+
+var node13 = ::blueprint::nodes::number::Number()
+
+node13.value = 200
+
+_editor.add_node(node13, -731.10234087339, -182.69729930271)
+
+var node14 = ::blueprint::nodes::integer::Integer()
+
+node14.value = 0
+
+_editor.add_node(node14, -585.96588203869, -243.75344344177)
+
+var node15 = ::blueprint::nodes::a_n_d::AND()
+
+_editor.add_node(node15, -315.25095280419, -205.45649454416)
+
+var node16 = ::blueprint::nodes::subgraph::Subgraph()
+node16.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node16.set_prop_value("p", 0.75)
+
+_editor.add_node(node16, -519.03750188452, -330.15247088068)
+
+var node17 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node17, -178.76055597295, -225.17486851991)
+
+var node18 = ::blueprint::nodes::integer::Integer()
+
+node18.value = 0
+
+_editor.add_node(node18, -314.6640534254, -278.27315458917)
+
+var node19 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node19, -447.0104687335, -463.804623939)
+
+var node20 = ::blueprint::nodes::load::Load()
+
+node20.var_name = "area"
+
+_editor.add_node(node20, -722.54779541884, -411.61911748453)
+
+var node21 = ::blueprint::nodes::compare::Compare()
+
+node21.cmp = "greater"
+
+_editor.add_node(node21, -581.54779541884, -448.61911748453)
+
+var node22 = ::blueprint::nodes::number::Number()
+
+node22.value = 150
+
+_editor.add_node(node22, -726.54779541884, -468.61911748453)
+
+var node23 = ::blueprint::nodes::integer::Integer()
+
+node23.value = 0
+
+_editor.add_node(node23, -581.41133658414, -529.67526162359)
+
+var node24 = ::blueprint::nodes::a_n_d::AND()
+
+_editor.add_node(node24, -310.69640734964, -491.37831272598)
+
+var node25 = ::blueprint::nodes::subgraph::Subgraph()
+node25.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node25.set_prop_value("p", 0.5)
+
+_editor.add_node(node25, -514.48295642997, -616.0742890625)
+
+var node26 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node26, -174.2060105184, -511.09668670173)
+
+var node27 = ::blueprint::nodes::integer::Integer()
+
+node27.value = 0
+
+_editor.add_node(node27, -310.10950797085, -564.19497277099)
+
+var node28 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node28, -193.058898, -745.196867)
+
+var node29 = ::blueprint::nodes::load::Load()
+
+node29.var_name = "area"
+
+_editor.add_node(node29, -468.59622468534, -693.01136054552)
+
+var node30 = ::blueprint::nodes::compare::Compare()
+
+node30.cmp = "greater"
+
+_editor.add_node(node30, -327.59622468534, -730.01136054552)
+
+var node31 = ::blueprint::nodes::number::Number()
+
+node31.value = 50
+
+_editor.add_node(node31, -472.59622468534, -750.01136054552)
+
+var node32 = ::blueprint::nodes::integer::Integer()
+
+node32.value = 1
+
+_editor.add_node(node32, -327.45976585064, -811.06750468459)
+
+var node33 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node33, -199.96491534854, -911.34228056465)
+
+var node34 = ::blueprint::nodes::load::Load()
+
+node34.var_name = "area"
+
+_editor.add_node(node34, -475.50224203388, -859.15677411017)
+
+var node35 = ::blueprint::nodes::compare::Compare()
+
+node35.cmp = "greater"
+
+_editor.add_node(node35, -334.50224203388, -896.15677411017)
+
+var node36 = ::blueprint::nodes::number::Number()
+
+node36.value = 20
+
+_editor.add_node(node36, -479.50224203388, -916.15677411017)
+
+var node37 = ::blueprint::nodes::integer::Integer()
+
+node37.value = 2
+
+_editor.add_node(node37, -334.36578319918, -977.21291824924)
+
+var node38 = ::blueprint::nodes::integer::Integer()
+
+node38.value = 3
+
+_editor.add_node(node38, -156.83176422119, 89.965972900391)
+
+Blueprint.connect(node0, "var", node2, "geo")
+Blueprint.connect(node2, "area", node35, "a")
+Blueprint.connect(node36, "v", node35, "b")
+Blueprint.connect(node35, "out", node33, "cond")
+Blueprint.connect(node37, "v", node33, "val")
+Blueprint.connect(node2, "area", node30, "a")
+Blueprint.connect(node31, "v", node30, "b")
+Blueprint.connect(node30, "out", node28, "cond")
+Blueprint.connect(node32, "v", node28, "val")
+Blueprint.connect(node2, "area", node21, "a")
+Blueprint.connect(node22, "v", node21, "b")
+Blueprint.connect(node21, "out", node19, "cond")
+Blueprint.connect(node23, "v", node19, "val")
+Blueprint.connect(node19, "val", node24, "a")
+Blueprint.connect(node25, "b", node24, "b")
+Blueprint.connect(node24, "out", node26, "cond")
+Blueprint.connect(node27, "v", node26, "val")
+Blueprint.connect(node2, "area", node12, "a")
+Blueprint.connect(node13, "v", node12, "b")
+Blueprint.connect(node12, "out", node10, "cond")
+Blueprint.connect(node14, "v", node10, "val")
+Blueprint.connect(node10, "val", node15, "a")
+Blueprint.connect(node16, "b", node15, "b")
+Blueprint.connect(node15, "out", node17, "cond")
+Blueprint.connect(node18, "v", node17, "val")
+Blueprint.connect(node2, "area", node7, "a")
+Blueprint.connect(node8, "v", node7, "b")
+Blueprint.connect(node7, "out", node5, "cond")
+Blueprint.connect(node9, "v", node5, "val")
+Blueprint.connect(node38, "v", node3, "default")
+Blueprint.connect(node5, "val", node3, "case0")
+Blueprint.connect(node17, "val", node3, "case1")
+Blueprint.connect(node26, "val", node3, "case2")
+Blueprint.connect(node28, "val", node3, "case3")
+Blueprint.connect(node33, "val", node3, "case4")
+Blueprint.connect(node3, "out", node1, "var")
+Blueprint.connect(node2, "area", node4, "var")
+Blueprint.connect(node4, "var", node34, "var")
+Blueprint.connect(node4, "var", node29, "var")
+Blueprint.connect(node4, "var", node20, "var")
+Blueprint.connect(node4, "var", node11, "var")
+Blueprint.connect(node4, "var", node6, "var")

@@ -3,7 +3,7 @@ var node0 = ::blueprint::nodes::output::Output()
 node0.var_name = "geo"
 node0.var_type = [ "geometry", "array" ]
 
-_editor.add_node(node0, 356.82678715628, 217.20671366773)
+_editor.add_node(node0, 531.78546484223, 299.8513417669)
 
 var node1 = ::archgraph::nodes::split::Split()
 node1.query_param("axis").value = "hori"
@@ -50,7 +50,7 @@ _editor.add_node(node8, -249.43918098843, -69.0672504832)
 
 var node9 = ::blueprint::nodes::branch_f::BranchF()
 
-_editor.add_node(node9, 210.88957546595, 192.08320689715)
+_editor.add_node(node9, 265.8482531519, 218.36419863269)
 
 var node10 = ::blueprint::nodes::compare::Compare()
 
@@ -87,20 +87,30 @@ var node16 = ::blueprint::nodes::input::Input()
 node16.var_name = "facade"
 node16.var_type = "geometry"
 
-_editor.add_node(node16, -632.72565995011, 438.9438295723)
+_editor.add_node(node16, 266.61574500857, 295.70573039875)
 
 var node17 = ::archgraph::nodes::scope_size::ScopeSize()
 
-_editor.add_node(node17, -68.744034373455, 413.43278582253)
+_editor.add_node(node17, -59.653125282546, 395.25096764071)
 
-Blueprint.connect(node16, "var", node17, "geo")
+var node18 = ::blueprint::nodes::for_each_f::ForEachF()
+
+_editor.add_node(node18, 397.40936581917, 271.96706027157)
+
+var node19 = ::blueprint::nodes::subgraph::Subgraph()
+node19.load_from_file(_editor, "ground_floor2.ves")
+
+_editor.add_node(node19, -8.1845710515106, -94.458352610862)
+
+Blueprint.connect(node18, "curr_item", node19, "facade")
+Blueprint.connect(node18, "curr_item", node17, "geo")
 Blueprint.connect(node13, "door_w", node14, "a")
 Blueprint.connect(node15, "v", node14, "b")
 Blueprint.connect(node11, "width", node12, "a")
 Blueprint.connect(node14, "v", node12, "b")
 Blueprint.connect(node17, "sx", node10, "a")
 Blueprint.connect(node12, "v", node10, "b")
-Blueprint.connect(node16, "var", node1, "parent")
+Blueprint.connect(node18, "curr_item", node1, "parent")
 Blueprint.connect(node2, "size", node1, "size0")
 Blueprint.connect(node3, "size", node1, "size1")
 Blueprint.connect(node4, "size", node1, "size2")
@@ -112,4 +122,7 @@ Blueprint.connect(node5, "geo", node6, "in1")
 Blueprint.connect(node8, "geo", node6, "in2")
 Blueprint.connect(node10, "out", node9, "cond")
 Blueprint.connect(node6, "list", node9, "true")
-Blueprint.connect(node9, "result", node0, "var")
+Blueprint.connect(node19, "geo", node9, "false")
+Blueprint.connect(node16, "var", node18, "items")
+Blueprint.connect(node9, "result", node18, "eval")
+Blueprint.connect(node18, "result", node0, "var")

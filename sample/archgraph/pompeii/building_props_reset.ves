@@ -1,6 +1,6 @@
 var node0 = ::rendergraph::nodes::pass::Pass()
 
-node0.once = true
+node0.once = false
 
 _editor.add_node(node0, 40.532259901303, -171.71850574473)
 

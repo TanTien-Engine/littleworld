@@ -1,0 +1,246 @@
+var node0 = ::blueprint::nodes::input::Input()
+
+node0.var_name = "type"
+node0.var_type = "int"
+
+_editor.add_node(node0, -224.05398180725, 670.0164754981)
+
+var node1 = ::blueprint::nodes::output::Output()
+
+node1.var_name = "height"
+node1.var_type = "num"
+
+_editor.add_node(node1, 189.54244928625, 327.05634861007)
+
+var node2 = ::blueprint::nodes::subgraph::Subgraph()
+node2.load_from_file(_editor, "floor_props.ves")
+
+_editor.add_node(node2, -1127.6990777461, 724.09005770098)
+
+var node3 = ::blueprint::nodes::store::Store()
+
+node3.var_name = "ground_floor_height"
+
+_editor.add_node(node3, -933.49400214317, 716.84400659763)
+
+var node4 = ::blueprint::nodes::switch_f::SwitchF()
+
+_editor.add_node(node4, 21.558045826413, 275.60240808345)
+
+var node5 = ::blueprint::nodes::load::Load()
+
+node5.var_name = "ground_floor_height"
+
+_editor.add_node(node5, -376.10948244205, 174.10410075542)
+
+var node6 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node6, -234.78718377736, 148.48425494738)
+
+var node7 = ::archgraph::nodes::rand_number::RandNumber()
+node7.query_param("min").value = 0
+node7.query_param("max").value = 1.5
+
+_editor.add_node(node7, -375.28303515221, 93.938799393078)
+
+var node8 = ::archgraph::nodes::switch::Switch()
+
+_editor.add_node(node8, -216.00451623807, -258.80021794252)
+
+var node9 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node9, -364.15091294686, -262.86484066885)
+
+var node10 = ::blueprint::nodes::subgraph::Subgraph()
+node10.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node10.set_prop_value("p", 0.1)
+
+_editor.add_node(node10, -552.46000433814, -229.3791858964)
+
+var node11 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node11, -358.20211619014, -403.94379567561)
+
+var node12 = ::blueprint::nodes::subgraph::Subgraph()
+node12.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node12.set_prop_value("p", 0.8)
+
+_editor.add_node(node12, -553.02037578849, -372.28279156246)
+
+var node13 = ::blueprint::nodes::load::Load()
+
+node13.var_name = "ground_floor_height"
+
+_editor.add_node(node13, -502.69315153913, -296.13904687372)
+
+var node14 = ::blueprint::nodes::load::Load()
+
+node14.var_name = "ground_floor_height"
+
+_editor.add_node(node14, -647.06830740073, -444.90865775698)
+
+var node15 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node15, -505.74600873604, -470.52850356502)
+
+var node16 = ::archgraph::nodes::rand_number::RandNumber()
+node16.query_param("min").value = 2.5
+node16.query_param("max").value = 3.5
+
+_editor.add_node(node16, -646.24186011089, -525.07395911932)
+
+var node17 = ::blueprint::nodes::load::Load()
+
+node17.var_name = "ground_floor_height"
+
+_editor.add_node(node17, -516.81983135488, -46.471883799292)
+
+var node18 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node18, -375.49753269019, -72.091729607332)
+
+var node19 = ::archgraph::nodes::rand_number::RandNumber()
+node19.query_param("min").value = 4
+node19.query_param("max").value = 6
+
+_editor.add_node(node19, -515.99338406504, -126.63718516163)
+
+var node20 = ::archgraph::nodes::switch::Switch()
+
+_editor.add_node(node20, -216.97348423807, -860.87766864252)
+
+var node21 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node21, -365.11988094686, -864.94229136885)
+
+var node22 = ::blueprint::nodes::subgraph::Subgraph()
+node22.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node22.set_prop_value("p", 0.3)
+
+_editor.add_node(node22, -553.42897233814, -831.4566365964)
+
+var node23 = ::archgraph::nodes::case::Case()
+
+_editor.add_node(node23, -359.17108419014, -1006.0212463756)
+
+var node24 = ::blueprint::nodes::subgraph::Subgraph()
+node24.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node24.set_prop_value("p", 0.65)
+
+_editor.add_node(node24, -553.98934378849, -974.36024226246)
+
+var node25 = ::blueprint::nodes::load::Load()
+
+node25.var_name = "ground_floor_height"
+
+_editor.add_node(node25, -503.66211953913, -898.21649757372)
+
+var node26 = ::blueprint::nodes::load::Load()
+
+node26.var_name = "ground_floor_height"
+
+_editor.add_node(node26, -648.03727540073, -1046.986108457)
+
+var node27 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node27, -506.71497673604, -1072.605954265)
+
+var node28 = ::archgraph::nodes::rand_number::RandNumber()
+node28.query_param("min").value = 2
+node28.query_param("max").value = 3
+
+_editor.add_node(node28, -647.21082811089, -1127.1514098193)
+
+var node29 = ::blueprint::nodes::load::Load()
+
+node29.var_name = "ground_floor_height"
+
+_editor.add_node(node29, -517.78879935488, -648.5493344993)
+
+var node30 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node30, -376.46650069019, -674.16918030733)
+
+var node31 = ::archgraph::nodes::rand_number::RandNumber()
+node31.query_param("min").value = 4
+node31.query_param("max").value = 5
+
+_editor.add_node(node31, -516.96235206504, -728.71463586163)
+
+var node32 = ::blueprint::nodes::branch_f::BranchF()
+
+_editor.add_node(node32, -217.67778975741, 460.48900852309)
+
+var node33 = ::blueprint::nodes::subgraph::Subgraph()
+node33.load_from_file(_editor, "../../../assets/archgraph/probability.ves")
+node33.set_prop_value("p", 0.6)
+
+_editor.add_node(node33, -417.81099991087, 521.89233516724)
+
+var node34 = ::blueprint::nodes::load::Load()
+
+node34.var_name = "ground_floor_height"
+
+_editor.add_node(node34, -363.36885509419, 458.28198129637)
+
+var node35 = ::blueprint::nodes::load::Load()
+
+node35.var_name = "ground_floor_height"
+
+_editor.add_node(node35, -502.10537884205, 422.27000665542)
+
+var node36 = ::blueprint::nodes::add::Add()
+
+_editor.add_node(node36, -360.78308017736, 396.65016084738)
+
+var node37 = ::archgraph::nodes::rand_number::RandNumber()
+node37.query_param("min").value = 1.5
+node37.query_param("max").value = 2.5
+
+_editor.add_node(node37, -501.27893155221, 342.10470529308)
+
+Blueprint.connect(node2, "ground_floor_height", node3, "var")
+Blueprint.connect(node3, "var", node35, "var")
+Blueprint.connect(node35, "var", node36, "a")
+Blueprint.connect(node37, "val", node36, "b")
+Blueprint.connect(node3, "var", node34, "var")
+Blueprint.connect(node33, "b", node32, "cond")
+Blueprint.connect(node34, "var", node32, "true")
+Blueprint.connect(node36, "v", node32, "false")
+Blueprint.connect(node3, "var", node29, "var")
+Blueprint.connect(node29, "var", node30, "a")
+Blueprint.connect(node31, "val", node30, "b")
+Blueprint.connect(node3, "var", node26, "var")
+Blueprint.connect(node26, "var", node27, "a")
+Blueprint.connect(node28, "val", node27, "b")
+Blueprint.connect(node24, "b", node23, "cond")
+Blueprint.connect(node27, "v", node23, "val")
+Blueprint.connect(node3, "var", node25, "var")
+Blueprint.connect(node22, "b", node21, "cond")
+Blueprint.connect(node25, "var", node21, "val")
+Blueprint.connect(node30, "v", node20, "default")
+Blueprint.connect(node21, "val", node20, "case0")
+Blueprint.connect(node23, "val", node20, "case1")
+Blueprint.connect(node3, "var", node17, "var")
+Blueprint.connect(node17, "var", node18, "a")
+Blueprint.connect(node19, "val", node18, "b")
+Blueprint.connect(node3, "var", node14, "var")
+Blueprint.connect(node14, "var", node15, "a")
+Blueprint.connect(node16, "val", node15, "b")
+Blueprint.connect(node12, "b", node11, "cond")
+Blueprint.connect(node15, "v", node11, "val")
+Blueprint.connect(node3, "var", node13, "var")
+Blueprint.connect(node10, "b", node9, "cond")
+Blueprint.connect(node13, "var", node9, "val")
+Blueprint.connect(node18, "v", node8, "default")
+Blueprint.connect(node9, "val", node8, "case0")
+Blueprint.connect(node11, "val", node8, "case1")
+Blueprint.connect(node3, "var", node5, "var")
+Blueprint.connect(node5, "var", node6, "a")
+Blueprint.connect(node7, "val", node6, "b")
+Blueprint.connect(node0, "var", node4, "type")
+Blueprint.connect(node32, "result", node4, "default")
+Blueprint.connect(node6, "v", node4, "case0")
+Blueprint.connect(node8, "out", node4, "case1")
+Blueprint.connect(node20, "out", node4, "case2")
+Blueprint.connect(node4, "result", node1, "var")
