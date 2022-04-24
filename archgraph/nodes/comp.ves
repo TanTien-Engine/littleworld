@@ -33,22 +33,11 @@ class Comp is Node
 		this.params.add(NodeParam("selector", "face6", { "combo" : [ "face6", "normal_y", "side", "edges", "face_edges" ] }))
 
 		this.layout()
-
-		this.children = nil
-	}
-
-	on_pin_dirty(pin)
-	{
-		super.on_pin_dirty(pin)
-		
-		this.children = nil
 	}
 
 	on_param_dirty()
 	{
 		super.on_param_dirty()
-
-		this.children = nil
 
 		for (var p in this.exports) {
 			while (!p.conns.isEmpty) {
@@ -102,15 +91,12 @@ class Comp is Node
 
 	calc_value(idx)
 	{
-		if (!this.children) {
-			this.build_children()
-		}
-
-		if (!this.children) {
+		var children = this.build_children()
+		if (!children) {
 			return nil
 		}
 
-		var geos = this.children[idx]
+		var geos = children[idx]
 		if (geos.count == 1) {
 			return geos[0]
 		} else {
@@ -122,16 +108,16 @@ class Comp is Node
 	{
 		var v_geo = Blueprint.calc_input_value(this, 0)
 		if (!v_geo or !v_geo.value) {
-			return
+			return nil
 		}
 
-		this.children = []
+		var ret = []
 
 		var selector = this.query_param("selector").value
 		if (selector == "face6") 
 		{
 			for (var i in 0..6) {
-				this.children.add([])
+				ret.add([])
 			}
 
 			var normals = []
@@ -170,7 +156,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0 .. faces6.count) {
 					if (!faces6[i].isEmpty) {
-						this.create_face_children(i, points, faces6[i])
+						this.create_face_children(ret[i], points, faces6[i])
 					}
 				}
 			}
@@ -178,7 +164,7 @@ class Comp is Node
 		else if (selector == "normal_y")
 		{
 			for (var i in 0..4) {
-				this.children.add([])
+				ret.add([])
 			}
 
 			for (var poly in v_geo.value.mesh.polys) 
@@ -208,7 +194,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0 .. faces4.count) {
 					if (!faces4[i].isEmpty) {
-						this.create_face_children(i, points, faces4[i])
+						this.create_face_children(ret[i], points, faces4[i])
 					}
 				}
 			}
@@ -216,7 +202,7 @@ class Comp is Node
 		else if (selector == "side")
 		{
 			for (var i in 0..3) {
-				this.children.add([])
+				ret.add([])
 			}
 
 			for (var poly in v_geo.value.mesh.polys) 
@@ -243,7 +229,7 @@ class Comp is Node
 				var points = poly.get_points()
 				for (var i in 0 .. faces3.count) {
 					if (!faces3[i].isEmpty) {
-						this.create_face_children(i, points, faces3[i])
+						this.create_face_children(ret[i], points, faces3[i])
 					}
 				}
 			}
@@ -261,7 +247,7 @@ class Comp is Node
 				}
 			}
 
-			this.children.add(children)
+			ret.add(children)
 		}
 		else if (selector == "face_edges")
 		{
@@ -276,8 +262,10 @@ class Comp is Node
 				}
 			}
 
-			this.children.add(children)
+			ret.add(children)
 		}
+
+		return ret
 	}
 
 	calc_normal_y_angle(face)
@@ -301,7 +289,7 @@ class Comp is Node
 		return children
 	}
 
-	create_face_children(idx, _points, faces)
+	create_face_children(children, _points, faces)
 	{
 		for (var _face in faces) 
 		{
@@ -343,7 +331,7 @@ class Comp is Node
 			geo.scope = Utility.calc_scope_mat(poly, face)
 
 			var v_geo = Variant(VAR_TYPE_GEOMETRY, geo)
-			this.children[idx].add(v_geo)
+			children.add(v_geo)
 		}
 	}
 }

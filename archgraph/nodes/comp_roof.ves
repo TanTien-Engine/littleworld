@@ -26,31 +26,14 @@ class CompRoof is Node
 		this.layout()
 	}
 
-	on_pin_dirty(pin)
-	{
-		super.on_pin_dirty(pin)
-		
-		this.children = nil
-	}
-
-	on_param_dirty()
-	{
-		super.on_param_dirty()
-
-		this.children = nil
-	}
-
 	calc_value(idx)
 	{
-		if (!this.children) {
-			this.build_children()
-		}
-
-		if (!this.children) {
+		var children = this.build_children()
+		if (!children) {
 			return nil
 		}
 
-		var geos = this.children[idx]
+		var geos = children[idx]
 		if (geos.count == 1) {
 			return geos[0]
 		} else {
@@ -62,19 +45,19 @@ class CompRoof is Node
 	{
 		var v_roof = Blueprint.calc_input_value(this, 0)
 		if (!v_roof or !v_roof.value) {
-			return
+			return nil
 		}
 
 		var v_base = Blueprint.calc_input_value(this, 1)
 		if (!v_base or !v_base.value) {
-			return
+			return nil
 		}
 
 		var roof = v_roof.value.mesh.polys.front()
 		var base = v_base.value.mesh.polys.front()
 		var mats = ScopeTools.comp_roof_edges(roof, base)
 
-		this.children = []
+		var ret = []
 		for (var i in 0..4) 
 		{
 			var children = []
@@ -86,7 +69,8 @@ class CompRoof is Node
 				children.add(Variant(VAR_TYPE_GEOMETRY, geo))
 			}
 
-			this.children.add(children)
+			ret.add(children)
 		}
+		return ret
 	}
 }
