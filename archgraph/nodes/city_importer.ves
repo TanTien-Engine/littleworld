@@ -6,6 +6,7 @@ import "blueprint.variant_helper" for VariantHelper
 import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK
 import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
+import "archgen" for SpatialMath
 import "citygen" for GeometryTools
 
 class CityImporter is Node
@@ -74,6 +75,7 @@ class CityImporter is Node
 
 	build_lot_geo(lot, geos)
 	{
+		SpatialMath.simplify_poly2d(lot.poly, 0.001)
 		var polytope = GeometryTools.polygon_extrude_face(lot.poly, -0.01)
 
 		var geo = Geometry([ polytope ])

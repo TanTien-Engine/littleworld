@@ -47,6 +47,8 @@ foreign class SpatialMath
 {
 	foreign static calc_face_area(poly)
 	foreign static is_rectangular(poly)
+
+	foreign static simplify_poly2d(poly, precision)
 }
 
 );

@@ -10,6 +10,7 @@
 #include <polymesh3/Polytope.h>
 #include <unirender/VertexArray.h>
 #include <sm/SM_Calc.h>
+#include <SM_DouglasPeucker.h>
 
 #include <string.h>
 
@@ -348,6 +349,15 @@ void w_SpatialMath_is_rectangular()
 
 	ves_set_boolean(0, is_rect);
 }
+
+void w_SpatialMath_simplify_poly2d()
+{
+	auto polyline = ((tt::Proxy<gs::Polyline2D>*)ves_toforeign(1))->obj;
+	float dist = ves_tonumber(2);
+	auto verts = sm::douglas_peucker(polyline->GetVertices(), dist);
+	polyline->SetVertices(verts);
+}
+
 }
 
 namespace archgen
@@ -378,6 +388,8 @@ VesselForeignMethodFn ArchGenBindMethod(const char* signature)
 
 	if (strcmp(signature, "static SpatialMath.calc_face_area(_)") == 0) return w_SpatialMath_calc_face_area;
 	if (strcmp(signature, "static SpatialMath.is_rectangular(_)") == 0) return w_SpatialMath_is_rectangular;
+	if (strcmp(signature, "static SpatialMath.simplify_poly2d(_,_)") == 0) return w_SpatialMath_simplify_poly2d;
+
 	return nullptr;
 }
 
