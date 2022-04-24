@@ -8,6 +8,7 @@ import "archgraph.variant" for VAR_TYPE_GEOMETRY
 import "archgraph.geometry" for Geometry
 import "archgen" for SpatialMath
 import "citygen" for GeometryTools
+import "maths" for Matrix44
 
 class CityImporter is Node
 {
@@ -24,6 +25,10 @@ class CityImporter is Node
 		]
 
 		this.layout()
+
+		var s = 105.0
+		this.scale_mat = Matrix44.init()
+		this.scale_mat.scale(s, s, s)
 	}
 
 	calc_value(idx)
@@ -65,7 +70,9 @@ class CityImporter is Node
 			var polygon = GeometryTools.polyline_expand(road, 0.01)
 			if (polygon)
 			{
-				var polytope = GeometryTools.polygon_extrude_face(polygon, 0.002)
+				var polytope = GeometryTools.polygon_extrude_face(polygon, 0.001)
+				polytope.transform(this.scale_mat)
+
 
 				var geo = Geometry([ polytope ])
 				geos.add(Variant(VAR_TYPE_GEOMETRY, geo))
@@ -76,7 +83,8 @@ class CityImporter is Node
 	build_lot_geo(lot, geos)
 	{
 		SpatialMath.simplify_poly2d(lot.poly, 0.001)
-		var polytope = GeometryTools.polygon_extrude_face(lot.poly, -0.01)
+		var polytope = GeometryTools.polygon_extrude_face(lot.poly, 0.001)
+		polytope.transform(this.scale_mat)
 
 		var geo = Geometry([ polytope ])
 		geos.add(Variant(VAR_TYPE_GEOMETRY, geo))
