@@ -31,6 +31,11 @@ class Archeditor is Editor
 		for (var node in ARCH_NODES) {
 			super.add_popup_node(node)
 		}
+
+		import "citynodes" for CITY_NODES
+		for (var node in CITY_NODES) {
+			super.add_popup_node(node)
+		}
 	}
 
 	draw_preview()

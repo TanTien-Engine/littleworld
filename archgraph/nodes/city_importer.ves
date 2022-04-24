@@ -1,0 +1,82 @@
+import "blueprint.node" for Node
+import "blueprint.pin" for Pin
+import "blueprint.variant" for Variant, VAR_TYPE_ARRAY
+import "blueprint.blueprint" for Blueprint
+import "blueprint.variant_helper" for VariantHelper
+import "citygraph.variant" for VAR_TYPE_STREETS, VAR_TYPE_BLOCK
+import "archgraph.variant" for VAR_TYPE_GEOMETRY
+import "archgraph.geometry" for Geometry
+import "citygen" for GeometryTools
+
+class CityImporter is Node
+{
+	init()
+	{
+		super.init()
+
+		this.imports = [
+			Pin(this, "city", [ VAR_TYPE_STREETS, VAR_TYPE_BLOCK, VAR_TYPE_ARRAY ]),
+		]
+		this.exports = [
+			Pin(this, "roads", VAR_TYPE_ARRAY),
+			Pin(this, "lots",  VAR_TYPE_ARRAY),
+		]
+
+		this.layout()
+	}
+
+	calc_value(idx)
+	{
+		var v_geo = Blueprint.calc_input_value(this, 0)
+		if (!v_geo) {
+			return nil
+		}
+
+		var geos = []
+
+		if (idx == 0)
+		{
+			var in_roads = VariantHelper.flatten_values(v_geo, VAR_TYPE_STREETS)
+			for (var road in in_roads)
+			{
+				var major = road.streets.get_major_paths()
+				this.build_road_geo(major, geos)
+
+				var minor = road.streets.get_minor_paths()
+				this.build_road_geo(minor, geos)				
+			}
+		}
+		else if (idx == 1)
+		{
+			var in_lots = VariantHelper.flatten_values(v_geo, VAR_TYPE_BLOCK)
+			for (var lot in in_lots) {
+				this.build_lot_geo(lot, geos)
+			}
+		}
+
+		return Variant(VAR_TYPE_ARRAY, geos)
+	}
+
+	build_road_geo(roads, geos)
+	{
+		for (var road in roads)
+		{
+			var polygon = GeometryTools.polyline_expand(road, 0.01)
+			if (polygon)
+			{
+				var polytope = GeometryTools.polygon_extrude_face(polygon, 0.002)
+
+				var geo = Geometry([ polytope ])
+				geos.add(Variant(VAR_TYPE_GEOMETRY, geo))
+			}			
+		}
+	}
+
+	build_lot_geo(lot, geos)
+	{
+		var polytope = GeometryTools.polygon_extrude_face(lot.poly, -0.01)
+
+		var geo = Geometry([ polytope ])
+		geos.add(Variant(VAR_TYPE_GEOMETRY, geo))
+	}
+}
